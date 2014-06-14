@@ -31,11 +31,13 @@ namespace ZedSharp.UnitTests
         {
             String ns = null;
             String s = "";
+            Exception ne = null;
+            Exception e = new Exception();
             AssertIsNone(Unsure.Of(ns));
             AssertIsSome(Unsure.Of(s));
             AssertIsNone(Unsure.None<String>());
-            AssertIsNone(Unsure.Error<String>(null));
-            AssertIsError(Unsure.Error<String>(new Exception()));
+            AssertIsNone(Unsure.Error<String>(ne));
+            AssertIsError(Unsure.Error<String>(e));
         }
 
         [TestMethod]

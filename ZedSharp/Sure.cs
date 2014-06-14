@@ -56,5 +56,25 @@ namespace ZedSharp
         {
             return Unsure.If(Value, f);
         }
+        
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode() ^ (int)0x06c6c6c6;
+        }
+
+        public override bool Equals(object other)
+        {
+            if (other == null || !(other is Sure<A>))
+                return false;
+
+            var that = (Unsure<A>) other;
+ 
+            return Object.Equals(this.Value, that.Value);
+        }
     }
 }

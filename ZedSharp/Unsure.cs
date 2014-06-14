@@ -132,6 +132,11 @@ namespace ZedSharp
     /// <typeparam name="A"></typeparam>
     public struct Unsure<A>
     {
+        public static implicit operator Unsure<A>(A val)
+        {
+            return Unsure.Of(val);
+        }
+
         internal Unsure(A val) : this()
         {
             Value = val;
@@ -152,6 +157,8 @@ namespace ZedSharp
         public bool HasValue { get; private set; }
         internal Exception Error { get; set; }
         public bool HasError { get; private set; }
+
+        public Type InnerType { get { return typeof(A); } }
 
         public Unsure<B> Map<B>(Func<A, B> f)
         {
@@ -211,6 +218,32 @@ namespace ZedSharp
         public A[] ToArray()
         {
             return HasValue ? new A[] { Value } : new A[0];
+        }
+
+        public override string ToString()
+        {
+            return HasValue ? Value.ToString() :
+                HasError ? Error.ToString() :
+                "None";
+        }
+
+        public override int GetHashCode()
+        {
+            return HasValue ? Value.GetHashCode() ^ (int)0x0a5a5a5a :
+               HasError ? Error.GetHashCode() ^ (int)0x05a5a5a5 :
+               1;
+        }
+
+        public override bool Equals(object other)
+        {
+            if (other == null || !(other is Unsure<A>))
+                return false;
+
+            var that = (Unsure<A>) other;
+ 
+            return (this.HasValue && that.HasValue && Object.Equals(this.Value, that.Value))
+                || (this.HasError && that.HasError && Object.Equals(this.Error, that.Error))
+                || (!this.HasValue && !that.HasValue && !this.HasError && !that.HasError);
         }
     }
 }
