@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Match.cs" />
     <Compile Include="Sure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Unsure.cs" />
