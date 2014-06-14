@@ -123,6 +123,26 @@ namespace ZedSharp
 
             return Unsure.Of(list).Cast<IEnumerable<A>>();
         }
+
+        public static Unsure<IEnumerable<A>> NonEmpty<A>(Unsure<IEnumerable<A>> unsure)
+        {
+            return unsure.Filter(x => x.Any());
+        }
+
+        public static Unsure<List<A>> NonEmpty<A>(Unsure<List<A>> unsure)
+        {
+            return unsure.Filter(x => x.Count > 0);
+        }
+
+        public static Unsure<String> NonEmpy(Unsure<String> unsure)
+        {
+            return unsure.Filter(x => ! String.IsNullOrEmpty(x));
+        }
+
+        public static Unsure<String> NonWhitespace(Unsure<String> unsure)
+        {
+            return unsure.Filter(x => ! String.IsNullOrWhiteSpace(x));
+        }
     }
     
     /// <summary>
@@ -174,6 +194,13 @@ namespace ZedSharp
         public Unsure<A> Filter(Func<A, bool> f)
         {
             return HasValue ? Unsure.If(Value, f) : this;
+        }
+
+        public Unsure<C> Join<B, C>(Unsure<B> that, Func<A, B, C> f)
+        {
+            var val = Value;
+            return HasValue ? that.Map(x => f(val, x)) :
+                HasError ? Unsure.Error<C>(Error) : Unsure.None<C>();
         }
 
         public Unsure<B> Cast<B>()
