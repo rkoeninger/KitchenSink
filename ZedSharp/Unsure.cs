@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace ZedSharp
 {
@@ -74,6 +73,11 @@ namespace ZedSharp
             return Double.TryParse(s, out d) ? Unsure.Of(d) : Unsure.None<Double>();
         }
 
+        public static Unsure<XDocument> ToXml(this String s)
+        {
+            return Try(() => XDocument.Parse(s));
+        }
+
         public static Unsure<A> Get<A>(this IList<A> list, int index)
         {
             return Try(() => list[index]);
@@ -143,6 +147,16 @@ namespace ZedSharp
         {
             return unsure.Filter(x => ! String.IsNullOrWhiteSpace(x));
         }
+
+        public static Unsure<int> NonNegative(Unsure<int> unsure)
+        {
+            return unsure.Filter(x => x >= 0);
+        }
+
+        public static Unsure<int> Positive(Unsure<int> unsure)
+        {
+            return unsure.Filter(x => x > 0);
+        }
     }
     
     /// <summary>
@@ -209,6 +223,11 @@ namespace ZedSharp
             return Unsure.Try(() => (B) (Object) val);
         }
 
+        public Unsure<B> As<B>() where B : class
+        {
+            return HasError ? Unsure.Error<B>(Error) : Unsure.Of(Value as B);
+        }
+
         public Sure<A> OrElse(Sure<A> sure)
         {
             return HasValue ? Sure.Of(Value) : sure;
@@ -233,6 +252,14 @@ namespace ZedSharp
         {
             if (HasError)
                 throw Error;
+
+            return this;
+        }
+        
+        public Unsure<A> ForEach(Action<A> f)
+        {
+            if (HasValue)
+                f(Value);
 
             return this;
         }
