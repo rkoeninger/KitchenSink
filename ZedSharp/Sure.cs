@@ -46,11 +46,6 @@ namespace ZedSharp
 
         public A Value { get; private set; }
 
-        public Unsure<A> AsUnsure()
-        {
-            return Unsure.Of(Value);
-        }
-
         public Unsure<B> Map<B>(Func<A, B> f)
         {
             var val = Value;

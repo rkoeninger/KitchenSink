@@ -8,6 +8,11 @@ namespace ZedSharp
 {
     public static class Unsure
     {
+        public static Unsure<A> Of<A>(Sure<A> sure)
+        {
+            return Of(sure.Value);
+        }
+
         public static Unsure<A> Of<A>(Nullable<A> nullable) where A : struct
         {
             return nullable.HasValue ? new Unsure<A>(nullable.Value) : new Unsure<A>();
@@ -119,7 +124,7 @@ namespace ZedSharp
             return Unsure.Of(list).Cast<IEnumerable<A>>();
         }
     }
-
+    
     /// <summary>
     /// A null-encapsulating wrapper.
     /// An Unsure might not have a value, not a reference to an Unsure can not be null.
@@ -144,9 +149,9 @@ namespace ZedSharp
         }
 
         internal A Value { get; set; }
-        public bool HasValue { get; set; }
+        public bool HasValue { get; private set; }
         internal Exception Error { get; set; }
-        internal bool HasError { get; set; }
+        public bool HasError { get; private set; }
 
         public Unsure<B> Map<B>(Func<A, B> f)
         {
@@ -183,6 +188,11 @@ namespace ZedSharp
         public Unsure<A> Or(Exception e)
         {
             return HasValue ? this : Unsure.Error<A>(e);
+        }
+
+        public Unsure<Exception> UnsureError()
+        {
+            return HasError ? Unsure.Of(Error) : Unsure.None<Exception>();
         }
 
         public Unsure<A> Throw()
