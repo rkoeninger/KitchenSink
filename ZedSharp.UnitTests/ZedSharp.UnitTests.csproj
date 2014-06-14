@@ -53,6 +53,7 @@
     <Compile Include="MatchTests.cs" />
     <Compile Include="SureUnsureTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CollectionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZedSharp\ZedSharp.csproj">
