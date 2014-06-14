@@ -54,9 +54,9 @@ namespace ZedSharp
             return new Matcher<A, B, C>(Key, Result, State == State.Uncomplete && Key is C ? State.Run : State);
         }
 
-        public B OrElse(B defaultValue)
+        public Unsure<B> End()
         {
-            return State == State.Complete ? Result : defaultValue;
+            return State == State.Complete ? Unsure.Of(Result) : Unsure.None<B>();
         }
     }
 
@@ -78,6 +78,39 @@ namespace ZedSharp
             return State == State.Run
                 ? new Matcher<A, B>(Key, f((C) (Object) Key), State.Complete)
                 : new Matcher<A, B>(Key, Result, State);
+        }
+    }
+
+    public static class MatcherExtensions
+    {
+        public static Matcher<A, B, A> Case<A, B>(this Matcher<A, B> matcher, A val)
+        {
+            return matcher.Case(key => Object.Equals(key, val));
+        }
+
+        public static Matcher<A, B, A> Case<A, B>(this Matcher<A, B> matcher, bool cond)
+        {
+            return matcher.Case(_ => cond);
+        }
+
+        public static Matcher<A, B, A> Case<A, B>(this Matcher<A, B> matcher, Func<bool> f)
+        {
+            return matcher.Case(_ => f());
+        }
+
+        public static Matcher<A, B, A> Case<A, B>(this Matcher<A, B> matcher, Type type)
+        {
+            return matcher.Case(key => type.IsInstanceOfType(key));
+        }
+
+        public static Matcher<A, B> Then<A, B, C>(this Matcher<A, B, C> matcher, B val)
+        {
+            return matcher.Then(_ => val);
+        }
+
+        public static Matcher<A, B> Then<A, B, C>(this Matcher<A, B, C> matcher, Func<B> f)
+        {
+            return matcher.Then(_ => f());
         }
     }
 }
