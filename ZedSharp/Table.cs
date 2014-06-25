@@ -17,7 +17,7 @@ namespace ZedSharp
         }
     }
 
-    public class Table<A>
+    public class Table<A> : IEnumerable<Row<A>>
     {
         internal Table(Col<A> a) : this(a, new List<Row<A>>())
         {
@@ -31,9 +31,19 @@ namespace ZedSharp
         
         public Col<A> Column1 { get; private set; }
         private List<Row<A>> Rows { get; set; }
+
+        public IEnumerator<Row<A, B, C>> GetEnumerator()
+        {
+            return Rows.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 
-    public class Table<A, B>
+    public class Table<A, B> : IEnumerable<Row<A, B>>
     {
         internal Table(Col<A> a, Col<B> b) : this(a, b, new List<Row<A, B>>())
         {
@@ -49,9 +59,19 @@ namespace ZedSharp
         public Col<A> Column1 { get; private set; }
         public Col<B> Column2 { get; private set; }
         private List<Row<A, B>> Rows { get; set; }
+
+        public IEnumerator<Row<A, B, C>> GetEnumerator()
+        {
+            return Rows.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 
-    public class Table<A, B, C>
+    public class Table<A, B, C> : IEnumerable<Row<A, B, C>>
     {
         internal Table(Col<A> a, Col<B> b, Col<C> c) : this(a, b, c, new List<Row<A, B, C>>())
         {
@@ -69,6 +89,16 @@ namespace ZedSharp
         public Col<B> Column2 { get; private set; }
         public Col<C> Column3 { get; private set; }
         private List<Row<A, B, C>> Rows { get; set; }
+
+        public IEnumerator<Row<A, B, C>> GetEnumerator()
+        {
+            return Rows.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
         public Table<D> Select<D>(Col<D> col)
         {
