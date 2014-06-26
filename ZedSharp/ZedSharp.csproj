@@ -48,7 +48,6 @@
     </Compile>
     <Compile Include="Sure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TableX.cs" />
     <Compile Include="Table.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
