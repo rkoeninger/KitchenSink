@@ -172,3 +172,5 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+ZedSharp/Natural.cs
+ZedSharp/Table.cs

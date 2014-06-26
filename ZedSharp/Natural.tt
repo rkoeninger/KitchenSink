@@ -1,0 +1,33 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+
+namespace ZedSharp
+{
+
+    public interface Natural {}
+
+    public class Zero : Natural
+    {
+        public static readonly Zero It = new Zero();
+        public static implicit operator int(Zero x) { return 0; }
+    }
+
+    public class Nat1 : Zero
+    {
+        public new static readonly Nat1 It = new Nat1();
+        public static implicit operator int(Nat1 x) { return 1; }
+    }<#foreach (int n in Enumerable.Range(2, 32)) { #>
+
+
+    public class Nat<# Write(n.ToString()); #> : Nat<# Write((n - 1).ToString()); #>
+
+    {
+        public new static readonly Nat<# Write(n.ToString()); #> It = new Nat<# Write(n.ToString()); #>();
+        public static implicit operator int(Nat<# Write(n.ToString()); #> x) { return <# Write(n.ToString()); #>; }
+    }<#} #>
+
+}
