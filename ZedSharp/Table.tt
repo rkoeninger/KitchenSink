@@ -16,9 +16,14 @@ using System.Linq;
 
 namespace ZedSharp
 {
-
 	public class Table
 	{
+        <# foreach (int arity in Enumerable.Range(1, arityMax)) { #>public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(params Row<<#= typeArgLists[arity] #>>[] rows)
+        {
+            return new Table<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "new Col<" + x + ">(\"\")")) #>, rows);
+        }
+
+        <# } #>
 	}
 <# foreach (int arity in Enumerable.Range(1, arityMax)) { 
         var className = "Table<" + typeArgLists[arity] + ">";
@@ -99,12 +104,26 @@ namespace ZedSharp
             return Name + " " + typeof(A).Name;
         }
     }
-<# foreach (int arity in Enumerable.Range(1, arityMax)) {
-        var typeArgCsv = typeArgLists[arity]; #>
 
-	public class Row<<#= typeArgCsv #>>
+    public class Row
+    {
+<# foreach (int arity in Enumerable.Range(1, arityMax)) {
+        var typeArgCsv = typeArgLists[arity];
+        var className = "Row<" + typeArgCsv + ">"; #>
+        public static <#= className #> Of<<#= typeArgCsv #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => x + " " + x.ToLower())) #>)
+        {
+            return new <#= className #>(<#= String.Join(", ", alphabet.Take(arity).Select(x => x.ToLower())) #>);
+        }
+
+<# } #>
+    }
+<# foreach (int arity in Enumerable.Range(1, arityMax)) {
+        var typeArgCsv = typeArgLists[arity];
+        var className = "Row<" + typeArgCsv + ">"; #>
+
+	public class <#= className #>
 	{
-		public Row(<#= String.Join(", ", alphabet.Take(arity).Select(x => x + " " + x.ToLower())) #>)
+		internal Row(<#= String.Join(", ", alphabet.Take(arity).Select(x => x + " " + x.ToLower())) #>)
         {
         <# foreach (int item in Enumerable.Range(1, arity)) { #>    Item<#= item #> = <#= alphabet[item - 1].ToLower() #>;
         <# } #>}
