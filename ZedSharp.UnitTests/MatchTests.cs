@@ -14,6 +14,7 @@ namespace ZedSharp.UnitTests
         public void Tests()
         {
             Assert.IsFalse(Match.On("").Return<int>().End().HasValue);
+            Assert.IsTrue(Match.On("").Return<int>().Case("").Then(0).End().HasValue);
         }
     }
 }

@@ -13,18 +13,49 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace ZedSharp
 {
 	public class Table
 	{
-        <# foreach (int arity in Enumerable.Range(1, arityMax)) { #>public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(params Row<<#= typeArgLists[arity] #>>[] rows)
+        private static IEnumerable<A[]> Partition<A>(int size, IEnumerable<A> source)
+        {
+            while (source.Any())
+            {
+                yield return source.Take(size).ToArray();
+                source = source.Skip(size);
+            }
+        }
+        <# foreach (int arity in Enumerable.Range(1, arityMax)) { #>
+
+        public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(params Row<<#= typeArgLists[arity] #>>[] rows)
         {
             return new Table<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "new Col<" + x + ">(\"\")")) #>, rows);
         }
 
-        <# } #>
-	}
+        public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "String colName" + x)) #>, params Row<<#= typeArgLists[arity] #>>[] rows)
+        {
+            return new Table<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "new Col<" + x + ">(colName" + x + ")")) #>, rows);
+        }
+
+        public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(params object[] values)
+        {
+            if (values.Length % <#= arity #> != 0)
+                throw new ArgumentException("Number of values must be a multiple of <#= arity #>");
+
+            return new Table<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "new Col<" + x + ">(\"\")")) #>, Partition(<#= arity #>, values).Select(xs => Row.Of(<#= String.Join(", ", alphabet.Take(arity).Select((t, i) => "(" + t + ") xs[" + i + "]")) #>)));
+        }
+
+        public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "String colName" + x)) #>, params object[] values)
+        {
+            if (values.Length % <#= arity #> != 0)
+                throw new ArgumentException("Number of values must be a multiple of <#= arity #>");
+
+            return new Table<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "new Col<" + x + ">(colName" + x + ")")) #>, Partition(<#= arity #>, values).Select(xs => Row.Of(<#= String.Join(", ", alphabet.Take(arity).Select((t, i) => "(" + t + ") xs[" + i + "]")) #>)));
+        }
+<# } #>
+    }
 <# foreach (int arity in Enumerable.Range(1, arityMax)) { 
         var className = "Table<" + typeArgLists[arity] + ">";
 #>
@@ -64,7 +95,24 @@ namespace ZedSharp
         {
             return new Table<<#= typeArgPrimeLists[selectArity] #>>(<#= String.Join(", ", alphabetPrime.Take(selectArity).Select(x => "new Col<" + x + ">(\"\")")) #>, Rows.Select(r => f(<#= String.Join(", ", Enumerable.Range(1, arity).Select(x => "r.Item" + x)) #>)));
         }
-        <# } #>}
+<# } #>
+    
+        private bool hashComputed = false;
+        private int hash = 0;
+
+        public override int GetHashCode()
+        {
+            hash = String.Join("", Rows).GetHashCode();
+            hashComputed = true;
+            return hash;
+        }
+
+        public override bool Equals(Object obj)
+        {
+            var that = obj as <#= className #>;
+            return (that != null) && Rows.SequenceEqual(that.Rows);
+        }
+    }
 <# } #>
 
     /// <summary>A typed table column</summary>
@@ -130,6 +178,27 @@ namespace ZedSharp
 
         <# foreach (int item in Enumerable.Range(1, arity)) { #>public <#= alphabet[item - 1] #> Item<#= item #> { get; private set; }
         <# } #>
+
+        public override bool Equals(Object obj)
+        {
+            var that = obj as <#= className #>;
+            return (that != null) && <#= String.Join(" && ", Enumerable.Range(1, arity).Select(x => "Equals(Item" + x + ", that.Item" + x + ")")) #>;
+        }
+
+        private bool hashComputed = false;
+        private int hash = 0;
+
+        public override int GetHashCode()
+        {
+            hash = ("" + <#= String.Join(" + ", Enumerable.Range(1, arity).Select(x => "Item" + x)) #>).GetHashCode();
+            hashComputed = true;
+            return hash;
+        }
+
+        public override String ToString()
+        {
+            return "(" + <#= String.Join(" + \", \" + ", Enumerable.Range(1, arity).Select(x => "Item" + x)) #> + ")";
+        }
     }
 <# } #>
 }
