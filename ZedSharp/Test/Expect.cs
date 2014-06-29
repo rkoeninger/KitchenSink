@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace ZedSharp.Test
 {
-    public static class Attempt
+    public static class Expect
     {
         /// <summary>
         /// Catches exception thrown by <code>f</code> and returns it.
@@ -15,7 +15,7 @@ namespace ZedSharp.Test
         /// <param name="f"></param>
         /// <param name="toThrow"></param>
         /// <returns></returns>
-        public static Exception Catch(Action f, Exception toThrow = null)
+        public static Exception Error(Action f, Exception toThrow = null)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace ZedSharp.Test
         /// <param name="source"></param>
         public static void CompileFail(String source, params String[] assemblies)
         {
-            Catch(() => Compile(source, assemblies), new AssertFailedException("Compile should have failed"));
+            Error(() => Compile(source, assemblies), new AssertFailedException("Compile should have failed"));
         }
     }
 }

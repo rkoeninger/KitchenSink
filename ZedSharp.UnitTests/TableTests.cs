@@ -63,10 +63,10 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(w.GetHashCode(), v.GetHashCode());
             Assert.AreEqual(u.GetHashCode(), w.GetHashCode());
             
-            Attempt.Catch(() => Table.Of<string, int>("asd", 1, 3, "wer"));
-            Attempt.Catch(() => Table.Of<string, int>("col1", "col2", "asd", 1, 3, "wer"));
+            Expect.Error(() => Table.Of<string, int>("asd", 1, 3, "wer"));
+            Expect.Error(() => Table.Of<string, int>("col1", "col2", "asd", 1, 3, "wer"));
 
-            Attempt.CompileFail(Common.Wrap(@"Table.Of(Row.Of(""asc"", 1), Row.Of(2, ""wer""))"), Common.ZedDll);
+            Expect.CompileFail(Common.Wrap(@"Table.Of(Row.Of(""asc"", 1), Row.Of(2, ""wer""))"), Common.ZedDll);
         }
 
         [TestMethod]
