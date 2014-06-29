@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ZedSharp.Test;
 
@@ -67,9 +66,7 @@ namespace ZedSharp.UnitTests
             Attempt.Catch(() => Table.Of<string, int>("asd", 1, 3, "wer"));
             Attempt.Catch(() => Table.Of<string, int>("col1", "col2", "asd", 1, 3, "wer"));
 
-            Attempt.CompileFail(
-                Wrap(@"Table.Of(Row.Of(""asc"", 1), Row.Of(2, ""wer""))"),
-                Path.GetFileName(typeof(Table).Assembly.CodeBase));
+            Attempt.CompileFail(Common.Wrap(@"Table.Of(Row.Of(""asc"", 1), Row.Of(2, ""wer""))"), Common.ZedDll);
         }
 
         [TestMethod]
@@ -85,23 +82,6 @@ namespace ZedSharp.UnitTests
                 Row.Of(1, "ABC"),
                 Row.Of(2, "DEF"));
             Assert.AreEqual(u, t.Where((x, y) => x < 3));
-        }
-
-        static String Wrap(String source)
-        {
-            return @"
-                using ZedSharp;
-                
-                namespace XXXXX
-                {
-                    class YYYYY
-                    {
-                        static void ZZZZZ()
-                        {
-                            " + source + @";
-                        }
-                    }
-                }";
         }
     }
 }
