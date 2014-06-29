@@ -8,23 +8,6 @@ namespace ZedSharp.UnitTests
     [TestClass]
     public class TableTests
     {
-        static String Wrap(String source)
-        {
-            return @"
-                using ZedSharp;
-                
-                namespace XXXXX
-                {
-                    class YYYYY
-                    {
-                        static void ZZZZZ()
-                        {
-                            " + source + @";
-                        }
-                    }
-                }";
-        }
-
         [TestMethod]
         public void OfAndEqualsMethods()
         {
@@ -80,7 +63,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(u.GetHashCode(), v.GetHashCode());
             Assert.AreEqual(w.GetHashCode(), v.GetHashCode());
             Assert.AreEqual(u.GetHashCode(), w.GetHashCode());
-
+            
             Attempt.Catch(() => Table.Of<string, int>("asd", 1, 3, "wer"));
             Attempt.Catch(() => Table.Of<string, int>("col1", "col2", "asd", 1, 3, "wer"));
 
@@ -102,6 +85,23 @@ namespace ZedSharp.UnitTests
                 Row.Of(1, "ABC"),
                 Row.Of(2, "DEF"));
             Assert.AreEqual(u, t.Where((x, y) => x < 3));
+        }
+
+        static String Wrap(String source)
+        {
+            return @"
+                using ZedSharp;
+                
+                namespace XXXXX
+                {
+                    class YYYYY
+                    {
+                        static void ZZZZZ()
+                        {
+                            " + source + @";
+                        }
+                    }
+                }";
         }
     }
 }

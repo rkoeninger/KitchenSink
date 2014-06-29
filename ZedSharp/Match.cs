@@ -29,6 +29,35 @@ namespace ZedSharp
         {
             return new Matcher<A,B>(Key, default(B), State.Uncomplete);
         }
+
+        public Matcher2<A, A> Case(Func<A, bool> f)
+        {
+            return new Matcher2<A, A>(Key, f(Key) ? State.Complete : State.Uncomplete);
+        }
+
+        public Matcher2<A, C> Case<C>()
+        {
+            return new Matcher2<A, C>(Key, Key is C ? State.Complete : State.Uncomplete);
+        }
+    }
+
+    public struct Matcher2<A, C>
+    {
+        internal Matcher2(A key, State state) : this()
+        {
+            Key = key;
+            State = state;
+        }
+        
+        internal A Key { get; private set; }
+        internal State State { get; private set; }
+        
+        public Matcher<A, B> Then<B>(Func<C, B> f)
+        {
+            return State == State.Run
+                ? new Matcher<A, B>(Key, f((C) (Object) Key), State.Complete)
+                : new Matcher<A, B>(Key, default(B), State);
+        }
     }
 
     public struct Matcher<A, B>
@@ -109,6 +138,36 @@ namespace ZedSharp
         }
 
         public static Matcher<A, B> Then<A, B, C>(this Matcher<A, B, C> matcher, Func<B> f)
+        {
+            return matcher.Then(_ => f());
+        }
+
+        public static Matcher2<A, A> Case<A>(this Matcher<A> matcher, A val)
+        {
+            return matcher.Case(key => Object.Equals(key, val));
+        }
+
+        public static Matcher2<A, A> Case<A>(this Matcher<A> matcher, bool cond)
+        {
+            return matcher.Case(_ => cond);
+        }
+
+        public static Matcher2<A, A> Case<A>(this Matcher<A> matcher, Func<bool> f)
+        {
+            return matcher.Case(_ => f());
+        }
+
+        public static Matcher2<A, A> Case<A>(this Matcher<A> matcher, Type type)
+        {
+            return matcher.Case(key => type.IsInstanceOfType(key));
+        }
+
+        public static Matcher<A, B> Then<A, B, C>(this Matcher2<A, C> matcher, B val)
+        {
+            return matcher.Then(_ => val);
+        }
+
+        public static Matcher<A, B> Then<A, B, C>(this Matcher2<A, C> matcher, Func<B> f)
         {
             return matcher.Then(_ => f());
         }

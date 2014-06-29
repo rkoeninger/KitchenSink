@@ -11,10 +11,12 @@ namespace ZedSharp.UnitTests
     public class MatchTests
     {
         [TestMethod]
-        public void Tests()
+        public void ValueMatching()
         {
             Assert.IsFalse(Match.On("").Return<int>().End().HasValue);
             Assert.IsTrue(Match.On("").Return<int>().Case("").Then(0).End().HasValue);
+            Assert.IsTrue(Match.On("").Case("").Then(0).End().HasValue);
+            Assert.IsFalse(Match.On("").Case("x").Then(0).End().HasValue);
         }
     }
 }
