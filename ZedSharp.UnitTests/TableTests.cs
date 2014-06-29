@@ -1,11 +1,30 @@
 ﻿using System;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ZedSharp.Test;
 
 namespace ZedSharp.UnitTests
 {
     [TestClass]
     public class TableTests
     {
+        static String Wrap(String source)
+        {
+            return @"
+                using ZedSharp;
+                
+                namespace XXXXX
+                {
+                    class YYYYY
+                    {
+                        static void ZZZZZ()
+                        {
+                            " + source + @";
+                        }
+                    }
+                }";
+        }
+
         [TestMethod]
         public void OfAndEqualsMethods()
         {
@@ -61,6 +80,13 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(u.GetHashCode(), v.GetHashCode());
             Assert.AreEqual(w.GetHashCode(), v.GetHashCode());
             Assert.AreEqual(u.GetHashCode(), w.GetHashCode());
+
+            Attempt.Catch(() => Table.Of<string, int>("asd", 1, 3, "wer"));
+            Attempt.Catch(() => Table.Of<string, int>("col1", "col2", "asd", 1, 3, "wer"));
+
+            Attempt.CompileFail(
+                Wrap(@"Table.Of(Row.Of(""asc"", 1), Row.Of(2, ""wer""))"),
+                Path.GetFileName(typeof(Table).Assembly.CodeBase));
         }
 
         [TestMethod]
