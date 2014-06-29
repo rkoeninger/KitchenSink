@@ -54,7 +54,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Table.tt</DependentUpon>
     </Compile>
-    <Compile Include="Test\Attempt.cs" />
+    <Compile Include="Test\Expect.cs" />
     <Compile Include="Unsure.cs" />
   </ItemGroup>
   <ItemGroup>
