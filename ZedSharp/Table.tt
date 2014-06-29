@@ -102,6 +102,9 @@ namespace ZedSharp
 
         public override int GetHashCode()
         {
+            if (hashComputed)
+                return hash;
+
             hash = String.Join("", Rows).GetHashCode();
             hashComputed = true;
             return hash;
@@ -190,6 +193,9 @@ namespace ZedSharp
 
         public override int GetHashCode()
         {
+            if (hashComputed)
+                return hash;
+
             hash = ("" + <#= String.Join(" + ", Enumerable.Range(1, arity).Select(x => "Item" + x)) #>).GetHashCode();
             hashComputed = true;
             return hash;
