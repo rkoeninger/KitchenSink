@@ -112,6 +112,9 @@ namespace ZedSharp
 
         public override bool Equals(Object obj)
         {
+            if (ReferenceEquals(obj, this))
+                return true;
+
             var that = obj as <#= className #>;
             return (that != null) && Rows.SequenceEqual(that.Rows);
         }
@@ -146,6 +149,9 @@ namespace ZedSharp
 
         public override bool Equals(Object obj)
         {
+            if (ReferenceEquals(obj, this))
+                return true;
+
             var that = obj as Col<A>;
             return that != null && that.Name == this.Name;
         }
@@ -184,6 +190,9 @@ namespace ZedSharp
 
         public override bool Equals(Object obj)
         {
+            if (ReferenceEquals(obj, this))
+                return true;
+
             var that = obj as <#= className #>;
             return (that != null) && <#= String.Join(" && ", Enumerable.Range(1, arity).Select(x => "Equals(Item" + x + ", that.Item" + x + ")")) #>;
         }

@@ -65,6 +65,9 @@ namespace ZedSharp
 
         public override bool Equals(object other)
         {
+            if (ReferenceEquals(other, this))
+                return true;
+
             if (other == null || !(other is Sure<A>))
                 return false;
 
