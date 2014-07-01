@@ -8,79 +8,60 @@ namespace ZedSharp
 {
     public static class Match
     {
-        public static Matcher<A> On<A>(A key)
+        public static MatchInitial<A> On<A>(A key)
         {
-            return new Matcher<A>(key);
+            return new MatchInitial<A>(key);
         }
     }
 
     internal enum State { Uncomplete, Complete, Run }
 
-    public struct Matcher<A>
+    public struct MatchInitial<A>
     {
-        internal Matcher(A key) : this()
+        internal MatchInitial(A key) : this()
         {
             Key = key;
         }
 
         internal A Key { get; private set; }
 
-        public Matcher<A, B> Return<B>()
+        public MatchTerminal<A, B> Return<B>()
         {
-            return new Matcher<A,B>(Key, default(B), State.Uncomplete);
+            return new MatchTerminal<A,B>(Key, default(B), State.Uncomplete);
         }
 
-        public Matcher2<A, A> Case(Func<A, bool> f)
+        public MatchConsequent<A, A> Case(Func<A, bool> f)
         {
-            return new Matcher2<A, A>(Key, f(Key) ? State.Complete : State.Uncomplete);
+            return new MatchConsequent<A, A>(Key, f(Key) ? State.Complete : State.Uncomplete);
         }
 
-        public Matcher2<A, C> Case<C>()
+        public MatchConsequent<A, C> Case<C>()
         {
-            return new Matcher2<A, C>(Key, Key is C ? State.Complete : State.Uncomplete);
+            return new MatchConsequent<A, C>(Key, Key is C ? State.Complete : State.Uncomplete);
         }
     }
 
-    public struct Matcher2<A, C>
+    public struct MatchTerminal<A, B>
     {
-        internal Matcher2(A key, State state) : this()
-        {
-            Key = key;
-            State = state;
-        }
-        
-        internal A Key { get; private set; }
-        internal State State { get; private set; }
-        
-        public Matcher<A, B> Then<B>(Func<C, B> f)
-        {
-            return State == State.Run
-                ? new Matcher<A, B>(Key, f((C) (Object) Key), State.Complete)
-                : new Matcher<A, B>(Key, default(B), State);
-        }
-    }
-
-    public struct Matcher<A, B>
-    {
-        internal Matcher(A key, B result, State state) : this()
+        internal MatchTerminal(A key, B result, State state) : this()
         {
             Key = key;
             Result = result;
             State = state;
         }
-        
+
         internal A Key { get; private set; }
         internal B Result { get; private set; }
         internal State State { get; private set; }
 
-        public Matcher<A, B, A> Case(Func<A, bool> f)
+        public MatchConsequent<A, B, A> Case(Func<A, bool> f)
         {
-            return new Matcher<A, B, A>(Key, Result, State == State.Uncomplete && f(Key) ? State.Run : State);
+            return new MatchConsequent<A, B, A>(Key, Result, State == State.Uncomplete && f(Key) ? State.Run : State);
         }
 
-        public Matcher<A, B, C> Case<C>()
+        public MatchConsequent<A, B, C> Case<C>()
         {
-            return new Matcher<A, B, C>(Key, Result, State == State.Uncomplete && Key is C ? State.Run : State);
+            return new MatchConsequent<A, B, C>(Key, Result, State == State.Uncomplete && Key is C ? State.Run : State);
         }
 
         public Unsure<B> End()
@@ -89,9 +70,28 @@ namespace ZedSharp
         }
     }
 
-    public struct Matcher<A, B, C>
+    public struct MatchConsequent<A, C>
     {
-        internal Matcher(A key, B result, State state) : this()
+        internal MatchConsequent(A key, State state) : this()
+        {
+            Key = key;
+            State = state;
+        }
+        
+        internal A Key { get; private set; }
+        internal State State { get; private set; }
+        
+        public MatchTerminal<A, B> Then<B>(Func<C, B> f)
+        {
+            return State == State.Run
+                ? new MatchTerminal<A, B>(Key, f((C) (Object) Key), State.Complete)
+                : new MatchTerminal<A, B>(Key, default(B), State);
+        }
+    }
+
+    public struct MatchConsequent<A, B, C>
+    {
+        internal MatchConsequent(A key, B result, State state) : this()
         {
             Key = key;
             Result = result;
@@ -102,72 +102,81 @@ namespace ZedSharp
         internal B Result { get; private set; }
         internal State State { get; private set; }
 
-        public Matcher<A, B> Then(Func<C, B> f)
+        public MatchTerminal<A, B> Then(Func<C, B> f)
         {
             return State == State.Run
-                ? new Matcher<A, B>(Key, f((C) (Object) Key), State.Complete)
-                : new Matcher<A, B>(Key, Result, State);
+                ? new MatchTerminal<A, B>(Key, f((C)(Object)Key), State.Complete)
+                : new MatchTerminal<A, B>(Key, Result, State);
         }
     }
 
-    public static class MatcherExtensions
+    public static class MatchTerminal2Exts
     {
-        public static Matcher<A, B, A> Case<A, B>(this Matcher<A, B> matcher, A val)
+        public static MatchConsequent<A, B, A> Case<A, B>(this MatchTerminal<A, B> matcher, A val)
         {
             return matcher.Case(key => Object.Equals(key, val));
         }
 
-        public static Matcher<A, B, A> Case<A, B>(this Matcher<A, B> matcher, bool cond)
+        public static MatchConsequent<A, B, A> Case<A, B>(this MatchTerminal<A, B> matcher, bool cond)
         {
             return matcher.Case(_ => cond);
         }
 
-        public static Matcher<A, B, A> Case<A, B>(this Matcher<A, B> matcher, Func<bool> f)
+        public static MatchConsequent<A, B, A> Case<A, B>(this MatchTerminal<A, B> matcher, Func<bool> f)
         {
             return matcher.Case(_ => f());
         }
 
-        public static Matcher<A, B, A> Case<A, B>(this Matcher<A, B> matcher, Type type)
+        public static MatchConsequent<A, B, A> Case<A, B>(this MatchTerminal<A, B> matcher, Type type)
         {
             return matcher.Case(key => type.IsInstanceOfType(key));
         }
+    }
 
-        public static Matcher<A, B> Then<A, B, C>(this Matcher<A, B, C> matcher, B val)
+    public static class MatchConsequent3Exts
+    {
+        public static MatchTerminal<A, B> Then<A, B, C>(this MatchConsequent<A, B, C> matcher, B val)
         {
             return matcher.Then(_ => val);
         }
 
-        public static Matcher<A, B> Then<A, B, C>(this Matcher<A, B, C> matcher, Func<B> f)
+        public static MatchTerminal<A, B> Then<A, B, C>(this MatchConsequent<A, B, C> matcher, Func<B> f)
         {
             return matcher.Then(_ => f());
         }
+    }
 
-        public static Matcher2<A, A> Case<A>(this Matcher<A> matcher, A val)
+    public static class MatchInitialExts
+    {
+        public static MatchConsequent<A, A> Case<A>(this MatchInitial<A> matcher, A val)
         {
             return matcher.Case(key => Object.Equals(key, val));
         }
 
-        public static Matcher2<A, A> Case<A>(this Matcher<A> matcher, bool cond)
+        public static MatchConsequent<A, A> Case<A>(this MatchInitial<A> matcher, bool cond)
         {
             return matcher.Case(_ => cond);
         }
 
-        public static Matcher2<A, A> Case<A>(this Matcher<A> matcher, Func<bool> f)
+        public static MatchConsequent<A, A> Case<A>(this MatchInitial<A> matcher, Func<bool> f)
         {
             return matcher.Case(_ => f());
         }
 
-        public static Matcher2<A, A> Case<A>(this Matcher<A> matcher, Type type)
+        public static MatchConsequent<A, A> Case<A>(this MatchInitial<A> matcher, Type type)
         {
             return matcher.Case(key => type.IsInstanceOfType(key));
         }
+    }
 
-        public static Matcher<A, B> Then<A, B, C>(this Matcher2<A, C> matcher, B val)
+    public static class MatchConsequent2Exts
+    {
+        public static MatchTerminal<A, B> Then<A, B, C>(this MatchConsequent<A, C> matcher, B val)
         {
             return matcher.Then(_ => val);
         }
 
-        public static Matcher<A, B> Then<A, B, C>(this Matcher2<A, C> matcher, Func<B> f)
+        public static MatchTerminal<A, B> Then<A, B, C>(this MatchConsequent<A, C> matcher, Func<B> f)
         {
             return matcher.Then(_ => f());
         }
