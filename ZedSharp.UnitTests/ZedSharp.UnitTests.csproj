@@ -52,11 +52,10 @@
   <ItemGroup>
     <Compile Include="Common.cs" />
     <Compile Include="MatchTests.cs" />
-    <Compile Include="SureUnsureTests.cs" />
+    <Compile Include="AssuranceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CollectionTests.cs" />
     <Compile Include="TableTests.cs" />
-    <Compile Include="ValidationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZedSharp\ZedSharp.csproj">
