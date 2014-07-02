@@ -56,6 +56,7 @@
     </Compile>
     <Compile Include="Test\Expect.cs" />
     <Compile Include="Unsure.cs" />
+    <Compile Include="Validation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Natural.tt">
