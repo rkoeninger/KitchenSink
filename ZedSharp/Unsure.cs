@@ -217,15 +217,11 @@ namespace ZedSharp
                 HasError ? Unsure.Error<C>(Error) : Unsure.None<C>();
         }
 
+        /// <summary>Attempts cast, returning Some or None.</summary>
         public Unsure<B> Cast<B>()
         {
             var val = Value;
-            return Unsure.Try(() => (B) (Object) val);
-        }
-
-        public Unsure<B> As<B>() where B : class
-        {
-            return HasError ? Unsure.Error<B>(Error) : Unsure.Of(Value as B);
+            return Unsure.Try(() => (B) (Object) val).DropError();
         }
 
         public Sure<A> OrElse(Sure<A> sure)
@@ -233,9 +229,14 @@ namespace ZedSharp
             return HasValue ? Sure.Of(Value) : sure;
         }
 
-        public Unsure<A> Or(Unsure<A> sure)
+        public Unsure<A> Or(Unsure<A> unsure)
         {
-            return HasValue ? this : sure;
+            return HasValue ? this : unsure;
+        }
+
+        public Unsure<A> OrReverse(Unsure<A> unsure)
+        {
+            return HasValue ? unsure : this;
         }
 
         public Unsure<A> Or(Exception e)
@@ -246,6 +247,11 @@ namespace ZedSharp
         public Unsure<Exception> UnsureError()
         {
             return HasError ? Unsure.Of(Error) : Unsure.None<Exception>();
+        }
+
+        public Unsure<A> DropError()
+        {
+            return HasError ? Unsure.None<A>() : this;
         }
 
         public Unsure<A> Throw()
