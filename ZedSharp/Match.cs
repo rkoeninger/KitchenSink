@@ -15,7 +15,7 @@ namespace ZedSharp
         }
     }
 
-    internal enum State { Uncomplete, Complete, Run }
+    internal enum MatcherState { Uncomplete, Complete, Run }
 
     public struct MatcherInitial<A>
     {
@@ -30,9 +30,9 @@ namespace ZedSharp
         /// Specifies return type for Match.
         /// After this, call Case or End.
         /// </summary>
-        public MatcherBranch<A, B> Return<B>()
+        public Matcher<A, B> Return<B>()
         {
-            return new MatcherBranch<A,B>(Key, default(B), State.Uncomplete);
+            return new Matcher<A,B>(Key, default(B), MatcherState.Uncomplete);
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace ZedSharp
         /// </summary>
         public MatcherConsequent<A, A> Case(Func<A, bool> f)
         {
-            return new MatcherConsequent<A, A>(Key, f(Key) ? State.Complete : State.Uncomplete);
+            return new MatcherConsequent<A, A>(Key, f(Key) ? MatcherState.Complete : MatcherState.Uncomplete);
         }
 
         /// <summary>
@@ -52,13 +52,13 @@ namespace ZedSharp
         /// </summary>
         public MatcherConsequent<A, C> Case<C>()
         {
-            return new MatcherConsequent<A, C>(Key, Key is C ? State.Complete : State.Uncomplete);
+            return new MatcherConsequent<A, C>(Key, Key is C ? MatcherState.Complete : MatcherState.Uncomplete);
         }
     }
 
-    public struct MatcherBranch<A, B>
+    public struct Matcher<A, B>
     {
-        internal MatcherBranch(A key, B result, State state) : this()
+        internal Matcher(A key, B result, MatcherState state) : this()
         {
             Key = key;
             Result = result;
@@ -67,7 +67,9 @@ namespace ZedSharp
 
         internal A Key { get; private set; }
         internal B Result { get; private set; }
-        internal State State { get; private set; }
+        internal MatcherState State { get; private set; }
+
+        public bool IsComplete { get { return State == MatcherState.Complete; } }
 
         /// <summary>
         /// Specifies a condition for the following consequent.
@@ -76,7 +78,7 @@ namespace ZedSharp
         /// </summary>
         public MatcherConsequent<A, B, A> Case(Func<A, bool> f)
         {
-            return new MatcherConsequent<A, B, A>(Key, Result, State == State.Uncomplete && f(Key) ? State.Run : State);
+            return new MatcherConsequent<A, B, A>(Key, Result, State == MatcherState.Uncomplete && f(Key) ? MatcherState.Run : State);
         }
 
         /// <summary>
@@ -86,16 +88,16 @@ namespace ZedSharp
         /// </summary>
         public MatcherConsequent<A, B, C> Case<C>()
         {
-            return new MatcherConsequent<A, B, C>(Key, Result, State == State.Uncomplete && Key is C ? State.Run : State);
+            return new MatcherConsequent<A, B, C>(Key, Result, State == MatcherState.Uncomplete && Key is C ? MatcherState.Run : State);
         }
 
         /// <summary>Gets the result of the Match as an Unsure. Won't have a value if no cases were matched.</summary>
         public Unsure<B> End()
         {
-            return State == State.Complete ? Unsure.Of(Result) : Unsure.None<B>();
+            return State == MatcherState.Complete ? Unsure.Of(Result) : Unsure.None<B>();
         }
 
-        public static implicit operator Unsure<B>(MatcherBranch<A, B> matcher)
+        public static implicit operator Unsure<B>(Matcher<A, B> matcher)
         {
             return matcher.End();
         }
@@ -103,31 +105,31 @@ namespace ZedSharp
 
     public struct MatcherConsequent<A, C>
     {
-        internal MatcherConsequent(A key, State state) : this()
+        internal MatcherConsequent(A key, MatcherState state) : this()
         {
             Key = key;
             State = state;
         }
         
         internal A Key { get; private set; }
-        internal State State { get; private set; }
+        internal MatcherState State { get; private set; }
 
         /// <summary>
         /// Specifies consequence if previous Case was the first true Case in this Match.
         /// Also infers return type of Match.
         /// After this, call Case or End.
         /// </summary>
-        public MatcherBranch<A, B> Then<B>(Func<C, B> f)
+        public Matcher<A, B> Then<B>(Func<C, B> f)
         {
-            return State == State.Run
-                ? new MatcherBranch<A, B>(Key, f((C) (Object) Key), State.Complete)
-                : new MatcherBranch<A, B>(Key, default(B), State);
+            return State == MatcherState.Run
+                ? new Matcher<A, B>(Key, f((C) (Object) Key), MatcherState.Complete)
+                : new Matcher<A, B>(Key, default(B), State);
         }
     }
 
     public struct MatcherConsequent<A, B, C>
     {
-        internal MatcherConsequent(A key, B result, State state) : this()
+        internal MatcherConsequent(A key, B result, MatcherState state) : this()
         {
             Key = key;
             Result = result;
@@ -136,17 +138,17 @@ namespace ZedSharp
 
         internal A Key { get; private set; }
         internal B Result { get; private set; }
-        internal State State { get; private set; }
+        internal MatcherState State { get; private set; }
 
         /// <summary>
         /// Specifies consequence if previous Case was the first true Case in this Match.
         /// After this, call Case or End.
         /// </summary>
-        public MatcherBranch<A, B> Then(Func<C, B> f)
+        public Matcher<A, B> Then(Func<C, B> f)
         {
-            return State == State.Run
-                ? new MatcherBranch<A, B>(Key, f((C)(Object)Key), State.Complete)
-                : new MatcherBranch<A, B>(Key, Result, State);
+            return State == MatcherState.Run
+                ? new Matcher<A, B>(Key, f((C)(Object)Key), MatcherState.Complete)
+                : new Matcher<A, B>(Key, Result, State);
         }
     }
 
@@ -219,7 +221,7 @@ namespace ZedSharp
         /// Condition will only be evaluated if no previous Case condition was evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public static MatcherConsequent<A, B, A> Case<A, B>(this MatcherBranch<A, B> matcher, A val)
+        public static MatcherConsequent<A, B, A> Case<A, B>(this Matcher<A, B> matcher, A val)
         {
             return matcher.Case(key => Object.Equals(key, val));
         }
@@ -229,7 +231,7 @@ namespace ZedSharp
         /// Condition will only be evaluated if no previous Case condition was evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public static MatcherConsequent<A, B, A> Case<A, B>(this MatcherBranch<A, B> matcher, bool cond)
+        public static MatcherConsequent<A, B, A> Case<A, B>(this Matcher<A, B> matcher, bool cond)
         {
             return matcher.Case(_ => cond);
         }
@@ -239,7 +241,7 @@ namespace ZedSharp
         /// Condition will only be evaluated if no previous Case condition was evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public static MatcherConsequent<A, B, A> Case<A, B>(this MatcherBranch<A, B> matcher, Func<bool> f)
+        public static MatcherConsequent<A, B, A> Case<A, B>(this Matcher<A, B> matcher, Func<bool> f)
         {
             return matcher.Case(_ => f());
         }
@@ -249,7 +251,7 @@ namespace ZedSharp
         /// Condition will only be evaluated if no previous Case condition was evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public static MatcherConsequent<A, B, A> Case<A, B>(this MatcherBranch<A, B> matcher, Type type)
+        public static MatcherConsequent<A, B, A> Case<A, B>(this Matcher<A, B> matcher, Type type)
         {
             return matcher.Case(key => type.IsInstanceOfType(key));
         }
@@ -259,7 +261,7 @@ namespace ZedSharp
         /// Condition will only be evaluated if no previous Case condition was evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public static MatcherConsequent<String, B, String> Case<B>(this MatcherBranch<String, B> matcher, Regex regex)
+        public static MatcherConsequent<String, B, String> Case<B>(this Matcher<String, B> matcher, Regex regex)
         {
             return matcher.Case(key => regex.IsMatch(key));
         }
@@ -268,7 +270,7 @@ namespace ZedSharp
         /// Specifies the following consequent is to be evaluated if no previous Case condition evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public static MatcherConsequent<A, B, A> Else<A, B>(this MatcherBranch<A, B> matcher)
+        public static MatcherConsequent<A, B, A> Else<A, B>(this Matcher<A, B> matcher)
         {
             return matcher.Case(_ => true);
         }
@@ -281,7 +283,7 @@ namespace ZedSharp
         /// Also infers return type of Match.
         /// After this, call Case or End.
         /// </summary>
-        public static MatcherBranch<A, B> Then<A, B, C>(this MatcherConsequent<A, C> matcher, B val)
+        public static Matcher<A, B> Then<A, B, C>(this MatcherConsequent<A, C> matcher, B val)
         {
             return matcher.Then(_ => val);
         }
@@ -291,7 +293,7 @@ namespace ZedSharp
         /// Also infers return type of Match.
         /// After this, call Case or End.
         /// </summary>
-        public static MatcherBranch<A, B> Then<A, B, C>(this MatcherConsequent<A, C> matcher, Func<B> f)
+        public static Matcher<A, B> Then<A, B, C>(this MatcherConsequent<A, C> matcher, Func<B> f)
         {
             return matcher.Then(_ => f());
         }
@@ -303,7 +305,7 @@ namespace ZedSharp
         /// Specifies consequence if previous Case was the first true Case in this Match.
         /// After this, call Case or End.
         /// </summary>
-        public static MatcherBranch<A, B> Then<A, B, C>(this MatcherConsequent<A, B, C> matcher, B val)
+        public static Matcher<A, B> Then<A, B, C>(this MatcherConsequent<A, B, C> matcher, B val)
         {
             return matcher.Then(_ => val);
         }
@@ -312,7 +314,7 @@ namespace ZedSharp
         /// Specifies consequence if previous Case was the first true Case in this Match.
         /// After this, call Case or End.
         /// </summary>
-        public static MatcherBranch<A, B> Then<A, B, C>(this MatcherConsequent<A, B, C> matcher, Func<B> f)
+        public static Matcher<A, B> Then<A, B, C>(this MatcherConsequent<A, B, C> matcher, Func<B> f)
         {
             return matcher.Then(_ => f());
         }

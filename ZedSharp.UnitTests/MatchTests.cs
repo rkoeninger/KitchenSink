@@ -21,6 +21,12 @@ namespace ZedSharp.UnitTests
             Unsure<int> ui = Match.On("").Case("").Then(0);
             Assert.IsTrue(ui.HasValue);
 
+            var m1 = Match.On("abc").Case("def").Then(0).Case("ghi").Then(1);
+            Assert.IsFalse(m1.IsComplete);
+            var res1 = m1.Case("abc").Then(2).Case("jkl").Then(3).End();
+            Assert.IsFalse(m1.IsComplete);
+            Assert.AreEqual(Unsure.Of(2), res1);
+
             // Result type is inferred from first Then() to be an Int32 so false, a Boolean, in the second Then() is invalid
             Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Then(0).Case(""y"").Then(false).End()"), Common.ZedDll);
         }
