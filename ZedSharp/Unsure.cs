@@ -130,32 +130,32 @@ namespace ZedSharp
 
         public static Unsure<IEnumerable<A>> NonEmpty<A>(Unsure<IEnumerable<A>> unsure)
         {
-            return unsure.Filter(x => x.Any());
+            return unsure.Where(x => x.Any());
         }
 
         public static Unsure<List<A>> NonEmpty<A>(Unsure<List<A>> unsure)
         {
-            return unsure.Filter(x => x.Count > 0);
+            return unsure.Where(x => x.Count > 0);
         }
 
         public static Unsure<String> NonEmpy(Unsure<String> unsure)
         {
-            return unsure.Filter(x => ! String.IsNullOrEmpty(x));
+            return unsure.Where(x => ! String.IsNullOrEmpty(x));
         }
 
         public static Unsure<String> NonWhitespace(Unsure<String> unsure)
         {
-            return unsure.Filter(x => ! String.IsNullOrWhiteSpace(x));
+            return unsure.Where(x => ! String.IsNullOrWhiteSpace(x));
         }
 
         public static Unsure<int> NonNegative(Unsure<int> unsure)
         {
-            return unsure.Filter(x => x >= 0);
+            return unsure.Where(x => x >= 0);
         }
 
         public static Unsure<int> Positive(Unsure<int> unsure)
         {
-            return unsure.Filter(x => x > 0);
+            return unsure.Where(x => x > 0);
         }
     }
     
@@ -194,18 +194,18 @@ namespace ZedSharp
 
         public Type InnerType { get { return typeof(A); } }
 
-        public Unsure<B> Map<B>(Func<A, B> f)
+        public Unsure<B> Select<B>(Func<A, B> f)
         {
             var val = Value;
             return HasValue ? Unsure.Try(() => f(val)) : HasError ? Unsure.Error<B>(Error) : Unsure.None<B>();
         }
 
-        public Unsure<B> FlatMap<B>(Func<A, Unsure<B>> f)
+        public Unsure<B> SelectMany<B>(Func<A, Unsure<B>> f)
         {
-            return Map(f).Flatten();
+            return Select(f).Flatten();
         }
 
-        public Unsure<A> Filter(Func<A, bool> f)
+        public Unsure<A> Where(Func<A, bool> f)
         {
             return HasValue ? Unsure.If(Value, f) : this;
         }
@@ -213,7 +213,7 @@ namespace ZedSharp
         public Unsure<C> Join<B, C>(Unsure<B> that, Func<A, B, C> f)
         {
             var val = Value;
-            return HasValue ? that.Map(x => f(val, x)) :
+            return HasValue ? that.Select(x => f(val, x)) :
                 HasError ? Unsure.Error<C>(Error) : Unsure.None<C>();
         }
 

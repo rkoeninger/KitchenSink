@@ -42,13 +42,13 @@ namespace ZedSharp
 
         public A Value { get; private set; }
 
-        public Unsure<B> Map<B>(Func<A, B> f)
+        public Unsure<B> Select<B>(Func<A, B> f)
         {
             var val = Value;
             return Unsure.Try(() => f(val));
         }
 
-        public Unsure<A> Filter(Func<A, bool> f)
+        public Unsure<A> Where(Func<A, bool> f)
         {
             return Unsure.If(Value, f);
         }
