@@ -89,10 +89,15 @@ namespace ZedSharp
             return new MatcherConsequent<A, B, C>(Key, Result, State == State.Uncomplete && Key is C ? State.Run : State);
         }
 
-        /// <summary>Gets the result of the Match as an Unsure. Won't have a value if none were matched.</summary>
+        /// <summary>Gets the result of the Match as an Unsure. Won't have a value if no cases were matched.</summary>
         public Unsure<B> End()
         {
             return State == State.Complete ? Unsure.Of(Result) : Unsure.None<B>();
+        }
+
+        public static implicit operator Unsure<B>(MatcherBranch<A, B> matcher)
+        {
+            return matcher.End();
         }
     }
 
