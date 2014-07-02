@@ -6,21 +6,21 @@ using System.Threading.Tasks;
 
 namespace ZedSharp
 {
-    public static class Validation
+    public static class Ensure
     {
-        public static Validation<A> Of<A>(A value)
+        public static Ensure<A> Of<A>(A value)
         {
-            return new Validation<A>(value);
+            return new Ensure<A>(value);
         }
     }
 
-    public struct Validation<A>
+    public struct Ensure<A>
     {
-        internal Validation(A value) : this(value, Enumerable.Empty<Exception>())
+        internal Ensure(A value) : this(value, Enumerable.Empty<Exception>())
         {
         }
 
-        private Validation(A value, IEnumerable<Exception> errors) : this()
+        private Ensure(A value, IEnumerable<Exception> errors) : this()
         {
             Value = value;
             ErrorList = errors.ToList();
@@ -34,21 +34,21 @@ namespace ZedSharp
             get { return ErrorList; }
         }
 
-        public Validation<A> Check(Func<A, bool> f, String message = null)
+        public Ensure<A> Check(Func<A, bool> f, String message = null)
         {
-            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Concat(new[] { new ApplicationException(message ?? "") }));
+            return new Ensure<A>(Value, f(Value) ? ErrorList : ErrorList.Concat(new[] { new ApplicationException(message ?? "") }));
         }
 
-        public Validation<A> Check(Action<A> f)
+        public Ensure<A> Check(Action<A> f)
         {
             try
             {
                 f(Value);
-                return new Validation<A>(Value, ErrorList);
+                return new Ensure<A>(Value, ErrorList);
             }
             catch (Exception exc)
             {
-                return new Validation<A>(Value, ErrorList.Concat(new[] { exc }));
+                return new Ensure<A>(Value, ErrorList.Concat(new[] { exc }));
             }
         }
 

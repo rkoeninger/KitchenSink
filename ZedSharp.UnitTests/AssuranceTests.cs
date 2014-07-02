@@ -7,7 +7,7 @@ using ZedSharp.Test;
 namespace ZedSharp.UnitTests
 {
     [TestClass]
-    public class SureUnsureTests
+    public class AssuranceTests
     {
         [TestMethod]
         public void SureThrowsOnNull()
@@ -79,6 +79,16 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(5, new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(x => x.ToInt()).WhereSure().Count());
             AssertIsNone(new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(x => x.ToInt()).Sequence());
             AssertIsSome(new [] {"9", "3", "2", "1", "6", "3", "5", "3"}.Select(x => x.ToInt()).Sequence());
+        }
+
+        [TestMethod]
+        public void ValidationTests()
+        {
+            var v = Ensure.Of("abcdefg")
+                .Check(x => x.StartsWith("abc"))
+                .Check(x => x.EndsWith("abc"))
+                .Check(x => { if (x.Length < 10) throw new Exception("asdfasdfa"); });
+            Assert.AreEqual(2, v.Errors.Count());
         }
 
         public void AssertIsSome<A>(Unsure<A> unsure)
