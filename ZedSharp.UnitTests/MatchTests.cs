@@ -29,6 +29,10 @@ namespace ZedSharp.UnitTests
 
             // Result type is inferred from first Then() to be an Int32 so false, a Boolean, in the second Then() is invalid
             Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Then(0).Case(""y"").Then(false).End()"), Common.ZedDll);
+
+            // Can't call Case or Then twice in a row
+            Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Case(""z"").Then(0).End()"), Common.ZedDll);
+            Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Then(1).Then(0).End()"), Common.ZedDll);
         }
     }
 }
