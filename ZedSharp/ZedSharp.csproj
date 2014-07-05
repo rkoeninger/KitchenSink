@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Lens.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Match.cs" />
