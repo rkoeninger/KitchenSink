@@ -46,14 +46,24 @@ namespace ZedSharp
 
         public static Unsure<A> If<A>(A val, Func<A, bool> f)
         {
+            return If(val, f, x => x);
+        }
+
+        public static Unsure<B> If<A, B>(A val, Func<A, bool> f, Func<A, B> convert)
+        {
             try
             {
-                return f(val) ? Of(val) : None<A>();
+                return f(val) ? Of(convert(val)) : None<B>();
             }
             catch (Exception e)
             {
-                return Error<A>(e);
+                return Error<B>(e);
             }
+        }
+
+        public static Lazy<Unsure<B>> LazyIf<A, B>(A val, Func<A, bool> f, Func<A, B> selector)
+        {
+            return new Lazy<Unsure<B>>(() => Unsure.If(val, f, selector));
         }
 
         public static Unsure<A> Flatten<A>(this Unsure<Unsure<A>> unsure)
@@ -227,6 +237,16 @@ namespace ZedSharp
         public Sure<A> OrElse(Sure<A> sure)
         {
             return HasValue ? Sure.Of(Value) : sure;
+        }
+
+        public Unsure<A> OrEval(Func<A> f)
+        {
+            return HasValue ? this : Unsure.Try(f);
+        }
+
+        public Unsure<A> OrEval(Func<Unsure<A>> f)
+        {
+            return HasValue ? this : Unsure.Try(f).Flatten();
         }
 
         public Unsure<A> Or(Unsure<A> unsure)

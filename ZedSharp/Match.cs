@@ -15,8 +15,6 @@ namespace ZedSharp
         }
     }
 
-    internal enum MatcherState { Uncomplete, Complete, Run }
-
     public struct MatcherInitial<A>
     {
         internal MatcherInitial(A key) : this()
@@ -24,7 +22,7 @@ namespace ZedSharp
             Key = key;
         }
 
-        internal A Key { get; private set; }
+        private A Key { get; set; }
 
         /// <summary>
         /// Specifies return type for Match.
@@ -32,7 +30,7 @@ namespace ZedSharp
         /// </summary>
         public Matcher<A, B> Return<B>()
         {
-            return new Matcher<A,B>(Key, default(B), MatcherState.Uncomplete);
+            return new Matcher<A,B>(Key);
         }
 
         /// <summary>
@@ -42,7 +40,7 @@ namespace ZedSharp
         /// </summary>
         public MatcherConsequent<A, A> Case(Func<A, bool> f)
         {
-            return new MatcherConsequent<A, A>(Key, f(Key) ? MatcherState.Complete : MatcherState.Uncomplete);
+            return new MatcherConsequent<A, A>(Key, f);
         }
 
         /// <summary>
@@ -52,24 +50,40 @@ namespace ZedSharp
         /// </summary>
         public MatcherConsequent<A, C> Case<C>()
         {
-            return new MatcherConsequent<A, C>(Key, Key is C ? MatcherState.Complete : MatcherState.Uncomplete);
+            return new MatcherConsequent<A, C>(Key, x => x is C);
         }
     }
 
     public struct Matcher<A, B>
     {
-        internal Matcher(A key, B result, MatcherState state) : this()
+        internal Matcher(A key) : this()
         {
             Key = key;
-            Result = result;
-            State = state;
+            Previous = null;
+            Predicate = null;
+            Selector = null;
         }
 
-        internal A Key { get; private set; }
-        internal B Result { get; private set; }
-        internal MatcherState State { get; private set; }
+        internal Matcher(A key, Func<A, bool> predicate, Func<A, B> selector) : this()
+        {
+            Key = key;
+            Previous = null;
+            Predicate = predicate;
+            Selector = selector;
+        }
 
-        public bool IsComplete { get { return State == MatcherState.Complete; } }
+        internal Matcher(A key, Matcher<A, B> previous, Func<A, bool> predicate, Func<A, B> selector) : this()
+        {
+            Key = key;
+            Previous = Ref.Of(previous);
+            Predicate = predicate;
+            Selector = selector;
+        }
+
+        private A Key { get; set; }
+        private Ref<Matcher<A, B>> Previous { get; set; }
+        private Func<A, bool> Predicate { get; set; }
+        private Func<A, B> Selector { get; set; }
 
         /// <summary>
         /// Specifies a condition for the following consequent.
@@ -78,7 +92,7 @@ namespace ZedSharp
         /// </summary>
         public MatcherConsequent<A, B, A> Case(Func<A, bool> f)
         {
-            return new MatcherConsequent<A, B, A>(Key, Result, State == MatcherState.Uncomplete && f(Key) ? MatcherState.Run : State);
+            return new MatcherConsequent<A, B, A>(Key, this, f);
         }
 
         /// <summary>
@@ -88,13 +102,16 @@ namespace ZedSharp
         /// </summary>
         public MatcherConsequent<A, B, C> Case<C>()
         {
-            return new MatcherConsequent<A, B, C>(Key, Result, State == MatcherState.Uncomplete && Key is C ? MatcherState.Run : State);
+            return new MatcherConsequent<A, B, C>(Key, this, x => x is C);
         }
 
         /// <summary>Gets the result of the Match as an Unsure. Won't have a value if no cases were matched.</summary>
         public Unsure<B> End()
         {
-            return State == MatcherState.Complete ? Unsure.Of(Result) : Unsure.None<B>();
+            var me = this;
+            var previousResult = Previous.ToUnsure().SelectMany(x => x.End());
+            Func<Unsure<B>> thisResult = () => Unsure.If(me.Key, me.Predicate, me.Selector);
+            return previousResult.OrEval(thisResult);
         }
 
         public static implicit operator Unsure<B>(Matcher<A, B> matcher)
@@ -105,14 +122,14 @@ namespace ZedSharp
 
     public struct MatcherConsequent<A, C>
     {
-        internal MatcherConsequent(A key, MatcherState state) : this()
+        internal MatcherConsequent(A key, Func<A, bool> predicate) : this()
         {
             Key = key;
-            State = state;
+            Predicate = predicate;
         }
         
-        internal A Key { get; private set; }
-        internal MatcherState State { get; private set; }
+        private A Key { get; set; }
+        private Func<A, bool> Predicate { get; set; }
 
         /// <summary>
         /// Specifies consequence if previous Case was the first true Case in this Match.
@@ -121,24 +138,22 @@ namespace ZedSharp
         /// </summary>
         public Matcher<A, B> Then<B>(Func<C, B> f)
         {
-            return State == MatcherState.Run
-                ? new Matcher<A, B>(Key, f((C) (Object) Key), MatcherState.Complete)
-                : new Matcher<A, B>(Key, default(B), State);
+            return new Matcher<A, B>(Key, Predicate, x => f((C) (Object) x));
         }
     }
 
     public struct MatcherConsequent<A, B, C>
     {
-        internal MatcherConsequent(A key, B result, MatcherState state) : this()
+        internal MatcherConsequent(A key, Matcher<A, B> previous, Func<A, bool> predicate) : this()
         {
             Key = key;
-            Result = result;
-            State = state;
+            Previous = previous;
+            Predicate = predicate;
         }
 
-        internal A Key { get; private set; }
-        internal B Result { get; private set; }
-        internal MatcherState State { get; private set; }
+        private A Key { get; set; }
+        private Matcher<A, B> Previous { get; set; }
+        private Func<A, bool> Predicate { get; set; }
 
         /// <summary>
         /// Specifies consequence if previous Case was the first true Case in this Match.
@@ -146,9 +161,7 @@ namespace ZedSharp
         /// </summary>
         public Matcher<A, B> Then(Func<C, B> f)
         {
-            return State == MatcherState.Run
-                ? new Matcher<A, B>(Key, f((C)(Object)Key), MatcherState.Complete)
-                : new Matcher<A, B>(Key, Result, State);
+            return new Matcher<A, B>(Key, Previous, Predicate, x => f((C) (Object) x));
         }
     }
 
