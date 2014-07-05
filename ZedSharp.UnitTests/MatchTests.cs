@@ -31,6 +31,26 @@ namespace ZedSharp.UnitTests
             // Can't call Case or Then twice in a row
             Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Case(""z"").Then(0).End()"), Common.ZedDll);
             Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Then(1).Then(0).End()"), Common.ZedDll);
+
+            var l = new List<String>();
+
+            var res2 = Match.On(4)
+                .Case(Track<int, bool>(l, "case1", x => x == 1)).Then(Track<int, string>(l, "then1", _ => "one"))
+                .Case(Track<int, bool>(l, "case2", x => x == 2)).Then(Track<int, string>(l, "then2", _ => "two"))
+                .Case(Track<int, bool>(l, "case3", x => x == 3)).Then(Track<int, string>(l, "then3", _ => "three"))
+                .Case(Track<int, bool>(l, "case4", x => x == 4)).Then(Track<int, string>(l, "then4", _ => "four"))
+                .Case(Track<int, bool>(l, "case5", x => x == 5)).Then(Track<int, string>(l, "then5", _ => "five"))
+                .End();
+            Assert.AreEqual(Unsure.Of("four"), res2);
+            Assert.IsTrue(l.SequenceEqual(new [] {"case1", "case2", "case3", "case4", "then4"}));
+        }
+
+        private Func<A, B> Track<A, B>(List<String> l, String msg, Func<A, B> f)
+        {
+            return x => {
+                l.Add(msg);
+                return f(x);
+            };
         }
     }
 }
