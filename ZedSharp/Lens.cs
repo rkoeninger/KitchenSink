@@ -8,6 +8,11 @@ namespace ZedSharp
         {
             return new Lens<A, B>(getter, setter);
         }
+
+        public static LensBuilder<A> From<A>()
+        {
+            return new LensBuilder<A>();
+        }
     }
 
     public struct Lens<A, B>
@@ -27,6 +32,14 @@ namespace ZedSharp
             return new Lens<A, C>(
                 a => other.Get(me.Get(a)),
                 (a, c) => me.Set(a, other.Set(me.Get(a), c)));
+        }
+    }
+
+    public struct LensBuilder<A>
+    {
+        public Lens<A, B> Of<B>(Func<A, B> getter, Func<A, B, A> setter)
+        {
+            return new Lens<A, B>(getter, setter);
         }
     }
 }
