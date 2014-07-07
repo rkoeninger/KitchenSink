@@ -337,7 +337,7 @@ namespace ZedSharp
         }
     }
 
-    public static class MatcherRegexExtensions
+    public static class MatcherStringExtensions
     {
         /// <summary>
         /// Specifies a condition for the following consequent.
@@ -357,6 +357,22 @@ namespace ZedSharp
         public static MatcherPredicate<String, String> Case(this MatcherInitial<String> matcher, Regex regex)
         {
             return matcher.Case(key => regex.IsMatch(key));
+        }
+
+        /// <summary>
+        /// Does case-insensitive equality comparison with the key.
+        /// </summary>
+        public static MatcherPredicate<String, B, String> CaseInsenstive<B>(this Matcher<String, B> matcher, String s)
+        {
+            return matcher.Case(key => String.Equals(key, s, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        /// <summary>
+        /// Does case-insensitive equality comparison with the key.
+        /// </summary>
+        public static MatcherPredicate<String, String> CaseInsensitive(this MatcherInitial<String> matcher, String s)
+        {
+            return matcher.Case(key => String.Equals(key, s, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 
