@@ -43,6 +43,8 @@ namespace ZedSharp.UnitTests
                 .End();
             Assert.AreEqual(Unsure.Of("four"), res2);
             Assert.IsTrue(l.SequenceEqual(new [] {"case1", "case2", "case3", "case4", "then4"}));
+
+            Assert.AreEqual(Unsure.Of(31), Match.On("abc").Case("def").Then(23).Else().Then(31));
         }
 
         private Func<A, B> Track<A, B>(List<String> l, String msg, Func<A, B> f)
