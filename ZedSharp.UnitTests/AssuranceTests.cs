@@ -85,9 +85,9 @@ namespace ZedSharp.UnitTests
         public void ValidationTests()
         {
             var v = Ensure.Of("abcdefg")
-                .Check(x => x.StartsWith("abc"))
-                .Check(x => x.EndsWith("abc"))
-                .Check(x => { if (x.Length < 10) throw new Exception("asdfasdfa"); });
+                .Is(x => x.StartsWith("abc"))
+                .Is(x => x.EndsWith("abc"))
+                .Is(x => { if (x.Length < 10) throw new Exception("asdfasdfa"); });
             Assert.AreEqual(2, v.Errors.Count());
         }
 

@@ -34,12 +34,17 @@ namespace ZedSharp
             get { return ErrorList; }
         }
 
-        public Ensure<A> Check(Func<A, bool> f, String message = null)
+        public bool HasErrors
+        {
+            get { return ErrorList.Count > 0; }
+        }
+
+        public Ensure<A> Is(Func<A, bool> f, String message = null)
         {
             return new Ensure<A>(Value, f(Value) ? ErrorList : ErrorList.Concat(new[] { new ApplicationException(message ?? "") }));
         }
 
-        public Ensure<A> Check(Action<A> f)
+        public Ensure<A> Is(Action<A> f)
         {
             try
             {
@@ -54,8 +59,7 @@ namespace ZedSharp
 
         public Unsure<A> ToUnsure()
         {
-            var errors = ErrorList;
-            return Unsure.If(Value, _ => errors.Count == 0);
+            return HasErrors ? Unsure.None<A>() : Unsure.Of(Value);
         }
     }
 }
