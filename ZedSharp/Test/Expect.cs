@@ -6,22 +6,34 @@ using System.Collections.Generic;
 
 namespace ZedSharp.Test
 {
+    /// <summary>
+    /// Expect contains methods that are used to assert failures,
+    /// like exception throwing and failed compiliation/type-checking.
+    /// 
+    /// It is a companion to Assert.
+    /// </summary>
     public static class Expect
     {
         /// <summary>
         /// Catches exception thrown by <code>f</code> and returns it.
         /// Throws exception if none thrown by <code>f</code>.
         /// </summary>
-        /// <param name="f"></param>
-        /// <param name="toThrow"></param>
-        /// <returns></returns>
         public static Exception Error(Action f, Exception toThrow = null)
+        {
+            return Error<Exception>(f, toThrow);
+        }
+
+        /// <summary>
+        /// Catches exception thrown by <code>f</code> and returns it.
+        /// Throws exception if none thrown by <code>f</code>.
+        /// </summary>
+        public static E Error<E>(Action f, Exception toThrow = null) where E : Exception
         {
             try
             {
                 f();
             }
-            catch (Exception e)
+            catch (E e)
             {
                 return e;
             }
@@ -30,7 +42,6 @@ namespace ZedSharp.Test
         }
 
         /// <summary>Throws exception if code can't compile.</summary>
-        /// <param name="source"></param>
         public static void Compile(String source, params String[] assemblies)
         {
             var options = new Dictionary<String, String>();
