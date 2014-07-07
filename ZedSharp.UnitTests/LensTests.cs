@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ZedSharp.Test;
 
 namespace ZedSharp.UnitTests
 {
@@ -22,6 +23,27 @@ namespace ZedSharp.UnitTests
 
             Assert.AreEqual("Anytown", addr_ct.Get(person));
             Assert.AreEqual("Someville", addr_ct.Set(person, "Someville").Address.City);
+        }
+
+        [TestMethod]
+        public void LensGeneration()
+        {
+            var fn = Lens.Gen<Person, String>("FirstName");
+            var ln = Lens.Gen<Person, String>("LastName");
+            var addr = Lens.Gen<Person, Address>("Address");
+            var st = Lens.Gen<Address, String>("Street");
+            var ct = Lens.Gen<Address, String>("City");
+
+            var address = new Address("123 Fake Street", "Anytown");
+            var person = new Person("John", "Doe", address);
+
+            Assert.AreEqual("Anytown", ct.Get(address));
+            Assert.AreEqual("Doe", ln.Get(person));
+            Assert.AreEqual("Someville", ct.Set(address, "Someville").City);
+            Assert.AreEqual("John", fn.Set(person, "John").FirstName);
+
+            Expect.Error(() => Lens.Gen<Person, DateTime>("Birthday"));
+            Expect.Error(() => Lens.Gen<Address, int>("Street"));
         }
     }
 
