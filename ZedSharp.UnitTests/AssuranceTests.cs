@@ -16,6 +16,7 @@ namespace ZedSharp.UnitTests
             Expect.Error(() => { RequiresSureString(null); });
             Expect.Error(() => { String ns = null; RequiresSureString(ns); });
 
+            Assert.IsNotNull(default(Sure<String>).Value);
             Assert.IsNotNull(new Sure<String>().Value);
 
             Expect.CompileFail(Common.Wrap(@"Action<Sure<String>> a = x => {}; String s; a(s)"), Common.ZedDll);
