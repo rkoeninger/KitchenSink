@@ -57,9 +57,9 @@ namespace ZedSharp
             }
         }
 
-        public Unsure<A> ToUnsure()
+        public Maybe<A> ToMaybe()
         {
-            return HasErrors ? Unsure.None<A>() : Unsure.Of(Value);
+            return HasErrors ? Maybe.None<A>() : Maybe.Of(Value);
         }
     }
 }

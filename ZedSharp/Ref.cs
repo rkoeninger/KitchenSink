@@ -13,9 +13,9 @@ namespace ZedSharp
             return new Ref<A>(val);
         }
 
-        public static Unsure<A> ToUnsure<A>(this Ref<A> r)
+        public static Maybe<A> ToMaybe<A>(this Ref<A> r)
         {
-            return r == null ? Unsure.None<A>() : Unsure.Of(r.Value);
+            return r == null ? Maybe.None<A>() : Maybe.Of(r.Value);
         }
     }
 

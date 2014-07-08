@@ -10,17 +10,17 @@ namespace ZedSharp.UnitTests
     public class AssuranceTests
     {
         [TestMethod]
-        public void UnsureWrappers()
+        public void MaybeWrappers()
         {
             String ns = null;
             String s = "";
-            AssertIsNone(Unsure.Of(ns));
-            AssertIsSome(Unsure.Of(s));
-            AssertIsNone(Unsure.None<String>());
+            AssertIsNone(Maybe.Of(ns));
+            AssertIsSome(Maybe.Of(s));
+            AssertIsNone(Maybe.None<String>());
         }
 
         [TestMethod]
-        public void UnsureParsing()
+        public void MaybeParsing()
         {
             AssertIsSome("123".ToInt());
             AssertIsNone("!@#".ToInt());
@@ -31,35 +31,35 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
-        public void UnsureJoining()
+        public void MaybeJoining()
         {
-            Assert.AreEqual(Unsure.Of(3), Unsure.Of(1).Join(Unsure.Of(2), (x, y) => x + y));
-            Assert.AreEqual(Unsure.None<int>(), Unsure.None<int>().Join(Unsure.Of(2), (x, y) => x + y));
-            Assert.AreEqual(Unsure.None<int>(), Unsure.Of(1).Join(Unsure.None<int>(), (x, y) => x + y));
-            Assert.AreEqual(Unsure.None<int>(), Unsure.None<int>().Join(Unsure.None<int>(), (x, y) => x + y));
+            Assert.AreEqual(Maybe.Of(3), Maybe.Of(1).Join(Maybe.Of(2), (x, y) => x + y));
+            Assert.AreEqual(Maybe.None<int>(), Maybe.None<int>().Join(Maybe.Of(2), (x, y) => x + y));
+            Assert.AreEqual(Maybe.None<int>(), Maybe.Of(1).Join(Maybe.None<int>(), (x, y) => x + y));
+            Assert.AreEqual(Maybe.None<int>(), Maybe.None<int>().Join(Maybe.None<int>(), (x, y) => x + y));
         }
 
         [TestMethod]
-        public void UnsureCasting()
+        public void MaybeCasting()
         {
-            Assert.IsTrue(Unsure.Of("").Cast<string>().HasValue);
-            Assert.IsTrue(Unsure.Of("").Cast<object>().HasValue);
-            Assert.IsFalse(Unsure.Of("").Cast<int>().HasValue);
+            Assert.IsTrue(Maybe.Of("").Cast<string>().HasValue);
+            Assert.IsTrue(Maybe.Of("").Cast<object>().HasValue);
+            Assert.IsFalse(Maybe.Of("").Cast<int>().HasValue);
         }
 
         [TestMethod]
-        public void UnsureEnumerableExtensions()
+        public void MaybeEnumerableExtensions()
         {
-            AssertIsSome(new [] {0}.UnsureFirst());
-            AssertIsNone(new int[0].UnsureFirst());
-            AssertIsSome(new [] {0}.UnsureLast());
-            AssertIsNone(new int[0].UnsureLast());
-            AssertIsSome(new [] {0}.UnsureSingle());
-            AssertIsNone(new int[0].UnsureSingle());
-            AssertIsSome(new [] {0,0,0,0}.UnsureElementAt(2));
-            AssertIsNone(new[] { 0, 0, 0, 0 }.UnsureElementAt(5));
-            AssertIsNone(new[] { 0, 0, 0, 0 }.UnsureElementAt(-1));
-            Assert.AreEqual(5, new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(x => x.ToInt()).WhereSure().Count());
+            AssertIsSome(new [] {0}.MaybeFirst());
+            AssertIsNone(new int[0].MaybeFirst());
+            AssertIsSome(new [] {0}.MaybeLast());
+            AssertIsNone(new int[0].MaybeLast());
+            AssertIsSome(new [] {0}.MaybeSingle());
+            AssertIsNone(new int[0].MaybeSingle());
+            AssertIsSome(new [] {0,0,0,0}.MaybeElementAt(2));
+            AssertIsNone(new[] { 0, 0, 0, 0 }.MaybeElementAt(5));
+            AssertIsNone(new[] { 0, 0, 0, 0 }.MaybeElementAt(-1));
+            Assert.AreEqual(5, new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(x => x.ToInt()).WhereSome().Count());
             AssertIsNone(new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(x => x.ToInt()).Sequence());
             AssertIsSome(new [] {"9", "3", "2", "1", "6", "3", "5", "3"}.Select(x => x.ToInt()).Sequence());
         }
@@ -74,14 +74,14 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(2, v.Errors.Count());
         }
 
-        public void AssertIsSome<A>(Unsure<A> unsure)
+        public void AssertIsSome<A>(Maybe<A> maybe)
         {
-            Assert.IsTrue(unsure.HasValue);
+            Assert.IsTrue(maybe.HasValue);
         }
 
-        public void AssertIsNone<A>(Unsure<A> unsure)
+        public void AssertIsNone<A>(Maybe<A> maybe)
         {
-            Assert.IsFalse(unsure.HasValue);
+            Assert.IsFalse(maybe.HasValue);
         }
     }
 }

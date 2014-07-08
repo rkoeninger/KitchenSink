@@ -18,12 +18,12 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(Match.On("").Return<int>().Case("").Then(0).End().HasValue);
             Assert.IsTrue(Match.On("").Case("").Then(0).End().HasValue);
             Assert.IsFalse(Match.On("").Case("x").Then(0).End().HasValue);
-            Unsure<int> ui = Match.On("").Case("").Then(0);
+            Maybe<int> ui = Match.On("").Case("").Then(0);
             Assert.IsTrue(ui.HasValue);
 
             var m1 = Match.On("abc").Case("def").Then(0).Case("ghi").Then(1);
             var res1 = m1.Case("abc").Then(2).Case("jkl").Then(3).End();
-            Assert.AreEqual(Unsure.Of(2), res1);
+            Assert.AreEqual(Maybe.Of(2), res1);
 
             // Result type is inferred from first Then() to be an Int32 so false, a Boolean, in the second Then() is invalid
             Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Then(0).Case(""y"").Then(false).End()"), Common.ZedDll);
@@ -41,10 +41,10 @@ namespace ZedSharp.UnitTests
                 .Case(Track<int, bool>(l, "case4", x => x == 4)).Then(Track<int, string>(l, "then4", _ => "four"))
                 .Case(Track<int, bool>(l, "case5", x => x == 5)).Then(Track<int, string>(l, "then5", _ => "five"))
                 .End();
-            Assert.AreEqual(Unsure.Of("four"), res2);
+            Assert.AreEqual(Maybe.Of("four"), res2);
             Assert.IsTrue(l.SequenceEqual(new [] {"case1", "case2", "case3", "case4", "then4"}));
 
-            Assert.AreEqual(Unsure.Of(31), Match.On("abc").Case("def").Then(23).Else().Then(31));
+            Assert.AreEqual(Maybe.Of(31), Match.On("abc").Case("def").Then(23).Else().Then(31));
         }
 
         private Func<A, B> Track<A, B>(List<String> l, String msg, Func<A, B> f)

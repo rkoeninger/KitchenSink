@@ -106,16 +106,16 @@ namespace ZedSharp
             return new MatcherPredicate<A, B, C>(Key, this, x => x is C);
         }
 
-        /// <summary>Gets the result of the Match as an Unsure. Won't have a value if no cases were matched.</summary>
-        public Unsure<B> End()
+        /// <summary>Gets the result of the Match as an Maybe. Won't have a value if no cases were matched.</summary>
+        public Maybe<B> End()
         {
             var me = this;
-            var previousResult = Previous.ToUnsure().SelectMany(x => x.End());
-            Func<Unsure<B>> thisResult = () => Unsure.If(me.Key, me.Predicate, me.Selector);
+            var previousResult = Previous.ToMaybe().SelectMany(x => x.End());
+            Func<Maybe<B>> thisResult = () => Maybe.If(me.Key, me.Predicate, me.Selector);
             return previousResult.OrEval(thisResult);
         }
 
-        public static implicit operator Unsure<B>(Matcher<A, B> matcher)
+        public static implicit operator Maybe<B>(Matcher<A, B> matcher)
         {
             return matcher.End();
         }
@@ -199,15 +199,15 @@ namespace ZedSharp
         private Matcher<A, B> Previous { get; set; }
         private Func<A, B> Selector { get; set; }
         
-        /// <summary>Gets the result of the Match as an Unsure. Won't have a value if no cases were matched.</summary>
-        public Unsure<B> End()
+        /// <summary>Gets the result of the Match as an Maybe. Won't have a value if no cases were matched.</summary>
+        public Maybe<B> End()
         {
             var me = this;
             var previousResult = Previous.End();
-            return previousResult.Or(Unsure.Try(() => me.Selector(me.Key)));
+            return previousResult.Or(Maybe.Try(() => me.Selector(me.Key)));
         }
 
-        public static implicit operator Unsure<B>(MatcherDefault<A, B> matcher)
+        public static implicit operator Maybe<B>(MatcherDefault<A, B> matcher)
         {
             return matcher.End();
         }
