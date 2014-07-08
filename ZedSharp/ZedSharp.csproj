@@ -61,8 +61,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Tuples.tt</DependentUpon>
     </Compile>
-    <Compile Include="Unsure.cs" />
-    <Compile Include="Ensure.cs" />
+    <Compile Include="Maybe.cs" />
+    <Compile Include="Validation.cs" />
     <Compile Include="Z.cs" />
   </ItemGroup>
   <ItemGroup>
