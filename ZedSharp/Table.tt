@@ -9,7 +9,7 @@
 <# var arityMax = 16; #>
 <# var typeArgLists = Enumerable.Range(0, arityMax + 1).Select(a => String.Join(", ", alphabet.Take(a))).ToArray(); #>
 <# var typeArgPrimeLists = Enumerable.Range(0, arityMax + 1).Select(a => String.Join(", ", alphabetPrime.Take(a))).ToArray(); #>
-<# var colArgLists = Enumerable.Range(0, arityMax + 1).Select(a => String.Join(", ", alphabet.Take(a).Select(x => "Col<" + x + "> " + x.ToLower()))).ToArray(); #>
+<# var colArgLists = Enumerable.Range(0, arityMax + 1).Select(a => String.Join(", ", alphabet.Take(a).Select(x => "Col<" + x + "> column" + (x[0] + 1 - 'A')))).ToArray(); #>
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,11 +63,11 @@ namespace ZedSharp
     /// <summary><#= arity #>-column table</summary>
 	public class <#= className #> : IEnumerable<Row<<#= typeArgLists[arity] #>>>
 	{
-        public Table(<#= colArgLists[arity] #>) : this(<#= typeArgLists[arity].ToLower() #>, new List<Row<<#= typeArgLists[arity] #>>>()) {}
+        public Table(<#= colArgLists[arity] #>) : this(<#= String.Join(", ", Enumerable.Range(1, arity).Select(x => "column" + x)) #>, new List<Row<<#= typeArgLists[arity] #>>>()) {}
 
         public Table(<#= colArgLists[arity] #>, IEnumerable<Row<<#= typeArgLists[arity] #>>> rows)
         {
-            <# foreach (int c in Enumerable.Range(1, arity)) { #>Column<#= c #> = <#= alphabet[c - 1].ToLower() #>;
+            <# foreach (int c in Enumerable.Range(1, arity)) { #>Column<#= c #> = <#= ("column" + c) #>;
             <# } #>Rows = rows.ToList();
         }
 
@@ -214,6 +214,31 @@ namespace ZedSharp
         {
             return "(" + <#= String.Join(" + \", \" + ", Enumerable.Range(1, arity).Select(x => "Item" + x)) #> + ")";
         }
+    }
+<# } #>
+
+    public static class Projection
+    {
+        public static Projection<A, A2> Of<A, A2>(Col<A> column1, Func<A, A2> selector)
+        {
+            return new Projection<A, A2>(column1, selector);
+        }
+    }
+    
+<# foreach (int arity in Enumerable.Range(1, arityMax)) {
+        var typeArgCsv = typeArgLists[arity]; #>
+    public struct Projection<<#= typeArgCsv #>, A2>
+    {
+        internal Projection(<#= colArgLists[arity] #>, Func<<#= typeArgCsv #>, A2> selector) : this()
+        {
+            <# foreach (int c in Enumerable.Range(1, arity)) { #>Column<#= c #> = <#= ("column" + c) #>;
+            <# } #>
+            Selector = selector;
+        }
+
+        <# foreach (int c in Enumerable.Range(1, arity)) { #>public Col<<#= alphabet[c - 1] #>> Column<#= c #> { get; private set; }
+        <# } #>
+        public Func<<#= typeArgCsv #>, A2> Selector { get; private set; }
     }
 <# } #>
 }
