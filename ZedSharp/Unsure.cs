@@ -7,11 +7,6 @@ namespace ZedSharp
 {
     public static class Unsure
     {
-        public static Unsure<A> Of<A>(Sure<A> sure)
-        {
-            return Of(sure.Value);
-        }
-
         public static Unsure<A> Of<A>(Nullable<A> nullable) where A : struct
         {
             return nullable.HasValue ? new Unsure<A>(nullable.Value) : new Unsure<A>();
@@ -209,9 +204,9 @@ namespace ZedSharp
             return Unsure.Try(() => (B) (Object) val);
         }
 
-        public Sure<A> OrElse(Sure<A> sure)
+        public A OrElse(A other)
         {
-            return HasValue ? Sure.Of(Value) : sure;
+            return HasValue ? Value : other;
         }
 
         public Unsure<A> OrEval(Func<A> f)
@@ -234,20 +229,20 @@ namespace ZedSharp
             return HasValue ? unsure : this;
         }
 
-        public Sure<A> OrThrow(String message)
+        public A OrThrow(String message)
         {
             if (! HasValue)
                 throw new Exception(message);
 
-            return Sure.Of(Value);
+            return Value;
         }
 
-        public Sure<A> OrThrow(Exception e)
+        public A OrThrow(Exception e)
         {
             if (!HasValue)
                 throw e;
 
-            return Sure.Of(Value);
+            return Value;
         }
         
         public Unsure<A> ForEach(Action<A> f)

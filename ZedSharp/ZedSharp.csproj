@@ -49,7 +49,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Natural.tt</DependentUpon>
     </Compile>
-    <Compile Include="Sure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Table.cs">
       <AutoGen>True</AutoGen>

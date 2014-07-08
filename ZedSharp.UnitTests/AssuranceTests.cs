@@ -10,22 +10,6 @@ namespace ZedSharp.UnitTests
     public class AssuranceTests
     {
         [TestMethod]
-        public void SureThrowsOnNull()
-        {
-            RequiresSureString("");
-            Expect.Error(() => { RequiresSureString(null); });
-            Expect.Error(() => { String ns = null; RequiresSureString(ns); });
-
-            Assert.IsNotNull(default(Sure<String>).Value);
-            Assert.IsNotNull(new Sure<String>().Value);
-
-            Expect.CompileFail(Common.Wrap(@"Action<Sure<String>> a = x => {}; String s; a(s)"), Common.ZedDll);
-            Expect.CompileFail(Common.Wrap(@"Action<Sure<String>> a = x => {}; Sure<String> ss; a(ss)"), Common.ZedDll);
-        }
-
-        public static void RequiresSureString(Sure<String> ss) {}
-
-        [TestMethod]
         public void UnsureWrappers()
         {
             String ns = null;
