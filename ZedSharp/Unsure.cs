@@ -281,6 +281,14 @@ namespace ZedSharp
 
             return this;
         }
+
+        public Sure<A> OrThrow(String message)
+        {
+            if (! HasValue)
+                throw new Exception(message);
+
+            return Sure.Of(Value);
+        }
         
         public Unsure<A> ForEach(Action<A> f)
         {
