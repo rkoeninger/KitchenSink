@@ -10,10 +10,10 @@ namespace ZedSharp
 {
     public static class Tuples
     {
-        <#  foreach (var arity in Enumerable.Range(1, 6)) {
-                var letters = Enumerable.Range(0, arity).Select(x => (char) (x + 'A'));
-                var typeArgsCsv = String.Join(", ", letters);
-                var tDotItemCsv = String.Join(", ", Enumerable.Range(0, arity).Select(x => "t.Item" + (x + 1))); #>
+        <# foreach (var arity in Enumerable.Range(1, 6)) {
+        var letters = Enumerable.Range(0, arity).Select(x => (char) (x + 'A'));
+        var typeArgsCsv = String.Join(", ", letters);
+        var tDotItemCsv = String.Join(", ", Enumerable.Range(0, arity).Select(x => "t.Item" + (x + 1))); #>
 
         public static Tuple<<#= typeArgsCsv #>, A2> AppendRight<<#= typeArgsCsv #>, A2>(this Tuple<<#= typeArgsCsv #>> t, A2 x)
         {
@@ -24,6 +24,13 @@ namespace ZedSharp
         {
             return new Tuple<A2, <#= typeArgsCsv #>>(x, <#= tDotItemCsv #>);
         }
-        <#  } #>
+<# foreach (var index in Enumerable.Range(1, arity)) { #>
+        
+        public static <#= ((char) (index - 1 + 'A')) #> Get<<#= typeArgsCsv #>>(this Tuple<<#= typeArgsCsv #>> t, Nat<#= index #> n)
+        {
+            return t.Item<#= index #>;
+        }
+            <# } #>
+        <# } #>
     }
 }

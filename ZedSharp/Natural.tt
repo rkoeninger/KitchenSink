@@ -4,30 +4,80 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
+<# var maxN = 32; #>
 
 namespace ZedSharp
 {
 
-    public interface Natural {}
-
-    public class Zero : Natural
+    public interface Natural
     {
-        public static readonly Zero It = new Zero();
-        public static implicit operator int(Zero x) { return 0; }
+        int Value { get; }
     }
 
-    public class Nat1 : Zero
+    public class Nat0 : Natural
     {
-        public new static readonly Nat1 It = new Nat1();
-        public static implicit operator int(Nat1 x) { return 1; }
-    }<#foreach (int n in Enumerable.Range(2, 32)) { #>
+        public static readonly Nat0 It = new Nat0();
+
+        public static implicit operator int(Nat0 x)
+        {
+            return 0;
+        }
+
+        public int Value
+        {
+            get { return 0; }
+        }
+
+        public Nat1 Succ
+        {
+            get { return Nat1.It; }
+        }
+    }<#foreach (int n in Enumerable.Range(1, maxN - 1)) { #>
 
 
-    public class Nat<# Write(n.ToString()); #> : Nat<# Write((n - 1).ToString()); #>
-
+    public class Nat<#= n #> : Natural
     {
-        public new static readonly Nat<# Write(n.ToString()); #> It = new Nat<# Write(n.ToString()); #>();
-        public static implicit operator int(Nat<# Write(n.ToString()); #> x) { return <# Write(n.ToString()); #>; }
+        public static readonly Nat<#= n #> It = new Nat<#= n #>();
+
+        public static implicit operator int(Nat<#= n #> x)
+        {
+            return <#= n #>;
+        }
+
+        public int Value
+        {
+            get { return <#= n #>; }
+        }
+
+        public Nat<#= (n - 1) #> Pred
+        {
+            get { return Nat<#= (n - 1) #>.It; }
+        }
+
+        public Nat<#= (n + 1) #> Succ
+        {
+            get { return Nat<#= (n + 1) #>.It; }
+        }
     }<#} #>
 
+
+    public class Nat<#= maxN #> : Natural
+    {
+        public static readonly Nat<#= maxN #> It = new Nat<#= maxN #>();
+
+        public static implicit operator int(Nat<#= maxN #> x)
+        {
+            return <#= maxN #>;
+        }
+
+        public int Value
+        {
+            get { return <#= maxN #>; }
+        }
+
+        public Nat<#= (maxN - 1) #> Pred
+        {
+            get { return Nat<#= (maxN - 1) #>.It; }
+        }
+    }
 }
