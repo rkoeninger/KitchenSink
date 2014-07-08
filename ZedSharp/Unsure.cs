@@ -22,11 +22,6 @@ namespace ZedSharp
             return new Unsure<A>(val);
         }
 
-        public static Unsure<A> Error<A>(Exception e)
-        {
-            return new Unsure<A>(e);
-        }
-
         public static Unsure<A> None<A>()
         {
             return new Unsure<A>();
@@ -38,27 +33,20 @@ namespace ZedSharp
             {
                 return Of(f());
             }
-            catch (Exception e)
+            catch
             {
-                return Error<A>(e);
+                return None<A>();
             }
         }
 
         public static Unsure<A> If<A>(A val, Func<A, bool> f)
         {
-            return If(val, f, x => x);
+            return If(val, f, Z.Id);
         }
 
         public static Unsure<B> If<A, B>(A val, Func<A, bool> f, Func<A, B> convert)
         {
-            try
-            {
-                return f(val) ? Of(convert(val)) : None<B>();
-            }
-            catch (Exception e)
-            {
-                return Error<B>(e);
-            }
+            return f(val) ? Of(convert(val)) : None<B>();
         }
 
         public static Lazy<Unsure<B>> LazyIf<A, B>(A val, Func<A, bool> f, Func<A, B> selector)
@@ -185,29 +173,17 @@ namespace ZedSharp
         {
             Value = val;
             HasValue = val != null;
-            Error = null;
-            HasError = false;
-        }
-
-        internal Unsure(Exception e) : this()
-        {
-            Value = default(A);
-            HasValue = false;
-            Error = e;
-            HasError = e != null;
         }
 
         internal A Value { get; set; }
         public bool HasValue { get; private set; }
-        internal Exception Error { get; set; }
-        public bool HasError { get; private set; }
 
         public Type InnerType { get { return typeof(A); } }
 
         public Unsure<B> Select<B>(Func<A, B> f)
         {
             var val = Value;
-            return HasValue ? Unsure.Try(() => f(val)) : HasError ? Unsure.Error<B>(Error) : Unsure.None<B>();
+            return HasValue ? Unsure.Try(() => f(val)) : Unsure.None<B>();
         }
 
         public Unsure<B> SelectMany<B>(Func<A, Unsure<B>> f)
@@ -223,15 +199,14 @@ namespace ZedSharp
         public Unsure<C> Join<B, C>(Unsure<B> that, Func<A, B, C> f)
         {
             var val = Value;
-            return HasValue ? that.Select(x => f(val, x)) :
-                HasError ? Unsure.Error<C>(Error) : Unsure.None<C>();
+            return HasValue ? that.Select(x => f(val, x)) : Unsure.None<C>();
         }
 
         /// <summary>Attempts cast, returning Some or None.</summary>
         public Unsure<B> Cast<B>()
         {
             var val = Value;
-            return Unsure.Try(() => (B) (Object) val).DropError();
+            return Unsure.Try(() => (B) (Object) val);
         }
 
         public Sure<A> OrElse(Sure<A> sure)
@@ -259,33 +234,18 @@ namespace ZedSharp
             return HasValue ? unsure : this;
         }
 
-        public Unsure<A> Or(Exception e)
-        {
-            return HasValue ? this : Unsure.Error<A>(e);
-        }
-
-        public Unsure<Exception> UnsureError()
-        {
-            return HasError ? Unsure.Of(Error) : Unsure.None<Exception>();
-        }
-
-        public Unsure<A> DropError()
-        {
-            return HasError ? Unsure.None<A>() : this;
-        }
-
-        public Unsure<A> Throw()
-        {
-            if (HasError)
-                throw Error;
-
-            return this;
-        }
-
         public Sure<A> OrThrow(String message)
         {
             if (! HasValue)
                 throw new Exception(message);
+
+            return Sure.Of(Value);
+        }
+
+        public Sure<A> OrThrow(Exception e)
+        {
+            if (!HasValue)
+                throw e;
 
             return Sure.Of(Value);
         }
@@ -300,26 +260,22 @@ namespace ZedSharp
 
         public List<A> ToList()
         {
-            return HasValue ? new List<A>() { Value } : new List<A>();
+            return HasValue ? Z.List(Value) : new List<A>();
         }
 
         public A[] ToArray()
         {
-            return HasValue ? new A[] { Value } : new A[0];
+            return HasValue ? Z.Array(Value) : new A[0];
         }
 
         public override string ToString()
         {
-            return HasValue ? Value.ToString() :
-                HasError ? Error.ToString() :
-                "None";
+            return HasValue ? Value.ToString() : "None";
         }
 
         public override int GetHashCode()
         {
-            return HasValue ? Value.GetHashCode() ^ (int)0x0a5a5a5a :
-               HasError ? Error.GetHashCode() ^ (int)0x05a5a5a5 :
-               1;
+            return HasValue ? Value.GetHashCode() ^ (int)0x0a5a5a5a : 1;
         }
 
         public override bool Equals(object other)
@@ -333,8 +289,7 @@ namespace ZedSharp
             var that = (Unsure<A>) other;
  
             return (this.HasValue && that.HasValue && Object.Equals(this.Value, that.Value))
-                || (this.HasError && that.HasError && Object.Equals(this.Error, that.Error))
-                || (!this.HasValue && !that.HasValue && !this.HasError && !that.HasError);
+                || (!this.HasValue && !that.HasValue);
         }
     }
 }

@@ -31,6 +31,16 @@ namespace ZedSharp
             return seq.OrderByDescending(Id, comp);
         }
 
+        public static A[] Array<A>(params A[] vals)
+        {
+            return vals;
+        }
+
+        public static List<A> List<A>(params A[] vals)
+        {
+            return new List<A>(vals);
+        }
+
         public static A Id<A>(A x)
         {
             return x;
