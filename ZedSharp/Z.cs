@@ -1,18 +1,104 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZedSharp
 {
     public static class Z
     {
-        public static readonly Func<String, String, bool> EqualsIC = (x, y) => String.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
-
         public static bool EqualsIgnoreCase(this String x, String y)
         {
-            return EqualsIC(x, y);
+            return String.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq) where A : IComparable
+        {
+            return seq.OrderBy(Id);
+        }
+
+        public static IEnumerable<A> SortDesc<A>(this IEnumerable<A> seq) where A : IComparable
+        {
+            return seq.OrderByDescending(Id);
+        }
+
+        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, IComparer<A> comp)
+        {
+            return seq.OrderBy(Id, comp);
+        }
+
+        public static IEnumerable<A> SortDesc<A>(this IEnumerable<A> seq, IComparer<A> comp)
+        {
+            return seq.OrderByDescending(Id, comp);
+        }
+
+        public static A Id<A>(A x)
+        {
+            return x;
+        }
+
+        public static Func<Object, A> Const<A>(A x)
+        {
+            return _ => x;
+        }
+
+        public static bool Pos(this int x)
+        {
+            return x > 0;
+        }
+
+        public static bool Zero(this int x)
+        {
+            return x == 0;
+        }
+
+        public static bool Neg(this int x)
+        {
+            return x < 0;
+        }
+
+        public static bool Neg1(this int x)
+        {
+            return x == -1;
+        }
+
+        public static bool Not(this bool x)
+        {
+            return !x;
+        }
+
+        public static Func<A, bool> NotF<A>(this Func<A, bool> f)
+        {
+            return x => !f(x);
+        }
+
+        public static Func<A, bool> OrF<A>(params Func<A, bool>[] fs)
+        {
+            return x => fs.Any(f => f(x));
+        }
+
+        public static Func<A, bool> AndF<A>(params Func<A, bool>[] fs)
+        {
+            return x => fs.All(f => f(x));
+        }
+
+        public static Func<A, B, bool> OrF_<A, B>(Func<A, bool> fa, Func<B, bool> fb)
+        {
+            return (a, b) => fa(a) || fb(b);
+        }
+
+        public static Func<A, B, C, bool> OrF_<A, B, C>(Func<A, bool> fa, Func<B, bool> fb, Func<C, bool> fc)
+        {
+            return (a, b, c) => fa(a) || fb(b) || fc(c);
+        }
+
+        public static Func<A, B, bool> AndF_<A, B>(Func<A, bool> fa, Func<B, bool> fb)
+        {
+            return (a, b) => fa(a) && fb(b);
+        }
+
+        public static Func<A, B, C, bool> AndF_<A, B, C>(Func<A, bool> fa, Func<B, bool> fb, Func<C, bool> fc)
+        {
+            return (a, b, c) => fa(a) && fb(b) && fc(c);
         }
     }
 }
