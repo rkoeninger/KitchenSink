@@ -11,6 +11,11 @@ namespace ZedSharp
             return String.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
         }
 
+        public static String StringJoin(this IEnumerable<Object> seq, String sep = null)
+        {
+            return String.Join(sep ?? "", seq);
+        }
+
         public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq) where A : IComparable
         {
             return seq.OrderBy(Id);
