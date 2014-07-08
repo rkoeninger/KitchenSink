@@ -9,7 +9,17 @@ namespace ZedSharp
 {
     public static class Map
     {
-        public static Dictionary<A, B> New<A, B>(params Object[] pairs)
+        public static Dictionary<A, B> Of<A, B>(params Row<A, B>[] pairs)
+        {
+            return pairs.ToDictionary(x => x.Item1, x => x.Item2);
+        }
+
+        public static Dictionary<A, B> Of<A, B>(params Tuple<A, B>[] pairs)
+        {
+            return pairs.ToDictionary(x => x.Item1, x => x.Item2);
+        }
+
+        public static Dictionary<A, B> Of<A, B>(params Object[] pairs)
         {
             if (pairs.Length % 2 != 0)
                 throw new ArgumentException("Argument list must have even number of values");
@@ -22,7 +32,7 @@ namespace ZedSharp
             return dict;
         }
 
-        public static Dictionary<String, Object> New(params Object[] pairs)
+        public static Dictionary<String, Object> Of(params Object[] pairs)
         {
             if (pairs.Length % 2 != 0)
                 throw new ArgumentException("Argument list must have even number of values");
@@ -35,7 +45,7 @@ namespace ZedSharp
             return dict;
         }
 
-        public static Dictionary<String, Object> New(Object obj)
+        public static Dictionary<String, Object> Of(Object obj)
         {
             if (obj == null)
                 return new Dictionary<String, Object>();
@@ -44,7 +54,7 @@ namespace ZedSharp
                 x => x.Name, x => x.GetValue(obj, null));
         }
 
-        public static Dictionary<String, A> New<A>(params Expression<Func<Object, A>>[] exprs)
+        public static Dictionary<String, A> Of<A>(params Expression<Func<Object, A>>[] exprs)
         {
             return exprs.ToDictionary(x => x.Parameters.First().Name, x => x.Compile().Invoke(null));
         }

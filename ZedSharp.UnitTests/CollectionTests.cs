@@ -9,7 +9,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void DictionaryCreateByLambdas()
         {
-            var dict = Map.New(
+            var dict = Map.Of(
                 red => ConsoleColor.Red,
                 green => ConsoleColor.Green,
                 blue => ConsoleColor.Blue,
@@ -29,7 +29,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void DictionaryCreateByAnonObject()
         {
-            var dict2 = Map.New(new
+            var dict2 = Map.Of(new
             {
                 Red = ConsoleColor.Red,
                 ConsoleColor.Green,
@@ -50,7 +50,7 @@ namespace ZedSharp.UnitTests
             Assert.IsInstanceOfType(dict2["Func1"], typeof(Func<int, int>));
 
             // Can actually be any object
-            var dict3 = Map.New(new Color(12, 23, 34));
+            var dict3 = Map.Of(new Color(12, 23, 34));
             Assert.AreEqual(3, dict3.Count);
             Assert.IsTrue(dict3.ContainsKey("R"));
             Assert.IsTrue(dict3.ContainsKey("G"));
@@ -63,11 +63,43 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void DictionaryCreateByArgList()
         {
-            var dict = Map.New(
+            var dict = Map.Of(
                     "red", ConsoleColor.Red,
                     "blue", ConsoleColor.Blue,
                     "green", ConsoleColor.Green
             );
+            Assert.AreEqual(3, dict.Count);
+            Assert.IsTrue(dict.ContainsKey("red"));
+            Assert.IsTrue(dict.ContainsKey("green"));
+            Assert.IsTrue(dict.ContainsKey("blue"));
+            Assert.AreEqual(ConsoleColor.Red, dict["red"]);
+            Assert.AreEqual(ConsoleColor.Green, dict["green"]);
+            Assert.AreEqual(ConsoleColor.Blue, dict["blue"]);
+        }
+
+        [TestMethod]
+        public void DictionaryCreateByRows()
+        {
+            var dict = Map.Of(
+                Row.Of("red", ConsoleColor.Red),
+                Row.Of("blue", ConsoleColor.Blue),
+                Row.Of("green", ConsoleColor.Green));
+            Assert.AreEqual(3, dict.Count);
+            Assert.IsTrue(dict.ContainsKey("red"));
+            Assert.IsTrue(dict.ContainsKey("green"));
+            Assert.IsTrue(dict.ContainsKey("blue"));
+            Assert.AreEqual(ConsoleColor.Red, dict["red"]);
+            Assert.AreEqual(ConsoleColor.Green, dict["green"]);
+            Assert.AreEqual(ConsoleColor.Blue, dict["blue"]);
+        }
+
+        [TestMethod]
+        public void DictionaryCreateByTuples()
+        {
+            var dict = Map.Of(
+                Tuple.Create("red", ConsoleColor.Red),
+                Tuple.Create("blue", ConsoleColor.Blue),
+                Tuple.Create("green", ConsoleColor.Green));
             Assert.AreEqual(3, dict.Count);
             Assert.IsTrue(dict.ContainsKey("red"));
             Assert.IsTrue(dict.ContainsKey("green"));
