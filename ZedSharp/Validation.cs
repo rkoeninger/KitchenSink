@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZedSharp
 {
@@ -23,25 +21,40 @@ namespace ZedSharp
         private Validation(A value, IEnumerable<Exception> errors) : this()
         {
             Value = value;
-            ErrorList = errors.ToList();
+            ErrorList = errors.ToArray();
         }
 
         private A Value { get; set; }
-        private List<Exception> ErrorList { get; set; }
+        private Exception[] ErrorList { get; set; }
 
         public IEnumerable<Exception> Errors
         {
-            get { return ErrorList; }
+            get { return ErrorList.AsEnumerable(); }
         }
 
         public bool HasErrors
         {
-            get { return ErrorList.Count > 0; }
+            get { return ErrorList.Length > 0; }
+        }
+
+        public Validation<A> Is(bool cond, String message = null)
+        {
+            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Append(new ApplicationException(message ?? "")));
         }
 
         public Validation<A> Is(Func<A, bool> f, String message = null)
         {
-            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Concat(new[] { new ApplicationException(message ?? "") }));
+            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Append(new ApplicationException(message ?? "")));
+        }
+
+        public Validation<A> Is(bool cond, Exception exc)
+        {
+            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Append(exc));
+        }
+
+        public Validation<A> Is(Func<A, bool> f, Exception exc)
+        {
+            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Append(exc));
         }
 
         public Validation<A> Is(Action<A> f)
@@ -53,7 +66,7 @@ namespace ZedSharp
             }
             catch (Exception exc)
             {
-                return new Validation<A>(Value, ErrorList.Concat(new[] { exc }));
+                return new Validation<A>(Value, ErrorList.Append(exc));
             }
         }
 

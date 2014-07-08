@@ -41,6 +41,21 @@ namespace ZedSharp
             return new List<A>(vals);
         }
 
+        public static A[] Append<A>(this A[] array, params A[] vals)
+        {
+            var result = new A[array.Length + vals.Length];
+            array.CopyTo(result, 0);
+            vals.CopyTo(result, array.Length);
+            return result;
+        }
+
+        public static List<A> Append<A>(this List<A> list, params A[] vals)
+        {
+            var result = new List<A>(list);
+            list.AddRange(vals);
+            return result;
+        }
+
         public static A Id<A>(A x)
         {
             return x;
