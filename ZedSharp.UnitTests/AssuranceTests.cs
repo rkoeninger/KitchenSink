@@ -16,6 +16,8 @@ namespace ZedSharp.UnitTests
             Expect.Error(() => { RequiresSureString(null); });
             Expect.Error(() => { String ns = null; RequiresSureString(ns); });
 
+            Assert.IsNotNull(new Sure<String>().Value);
+
             Expect.CompileFail(Common.Wrap(@"Action<Sure<String>> a = x => {}; String s; a(s)"), Common.ZedDll);
             Expect.CompileFail(Common.Wrap(@"Action<Sure<String>> a = x => {}; Sure<String> ss; a(ss)"), Common.ZedDll);
         }
@@ -27,13 +29,9 @@ namespace ZedSharp.UnitTests
         {
             String ns = null;
             String s = "";
-            Exception ne = null;
-            Exception e = new Exception();
             AssertIsNone(Unsure.Of(ns));
             AssertIsSome(Unsure.Of(s));
             AssertIsNone(Unsure.None<String>());
-            AssertIsNone(Unsure.Error<String>(ne));
-            AssertIsError(Unsure.Error<String>(e));
         }
 
         [TestMethod]
@@ -68,14 +66,14 @@ namespace ZedSharp.UnitTests
         public void UnsureEnumerableExtensions()
         {
             AssertIsSome(new [] {0}.UnsureFirst());
-            AssertIsError(new int[0].UnsureFirst());
+            AssertIsNone(new int[0].UnsureFirst());
             AssertIsSome(new [] {0}.UnsureLast());
-            AssertIsError(new int[0].UnsureLast());
+            AssertIsNone(new int[0].UnsureLast());
             AssertIsSome(new [] {0}.UnsureSingle());
-            AssertIsError(new int[0].UnsureSingle());
+            AssertIsNone(new int[0].UnsureSingle());
             AssertIsSome(new [] {0,0,0,0}.UnsureElementAt(2));
-            AssertIsError(new [] {0,0,0,0}.UnsureElementAt(5));
-            AssertIsError(new [] {0,0,0,0}.UnsureElementAt(-1));
+            AssertIsNone(new[] { 0, 0, 0, 0 }.UnsureElementAt(5));
+            AssertIsNone(new[] { 0, 0, 0, 0 }.UnsureElementAt(-1));
             Assert.AreEqual(5, new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(x => x.ToInt()).WhereSure().Count());
             AssertIsNone(new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(x => x.ToInt()).Sequence());
             AssertIsSome(new [] {"9", "3", "2", "1", "6", "3", "5", "3"}.Select(x => x.ToInt()).Sequence());
@@ -94,19 +92,11 @@ namespace ZedSharp.UnitTests
         public void AssertIsSome<A>(Unsure<A> unsure)
         {
             Assert.IsTrue(unsure.HasValue);
-            Assert.IsFalse(unsure.HasError);
         }
 
         public void AssertIsNone<A>(Unsure<A> unsure)
         {
             Assert.IsFalse(unsure.HasValue);
-            Assert.IsFalse(unsure.HasError);
-        }
-
-        public void AssertIsError<A>(Unsure<A> unsure)
-        {
-            Assert.IsFalse(unsure.HasValue);
-            Assert.IsTrue(unsure.HasError);
         }
     }
 }
