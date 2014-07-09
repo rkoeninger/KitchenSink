@@ -133,9 +133,9 @@ namespace ZedSharp
     /// }
     /// </code>
     /// </remarks>
-    public class Col<A>
+    public struct Col<A>
     {
-        public Col(String name)
+        public Col(String name) : this()
         {
             Name = name ?? "";
         }
@@ -152,8 +152,11 @@ namespace ZedSharp
             if (ReferenceEquals(obj, this))
                 return true;
 
-            var that = obj as Col<A>;
-            return that != null && that.Name == this.Name;
+            if (obj == null || !(obj is Col<A>))
+                return false;
+
+            var that = (Col<A>) obj;
+            return that.Name == this.Name;
         }
 
         public override String ToString()
@@ -178,9 +181,9 @@ namespace ZedSharp
         var typeArgCsv = typeArgLists[arity];
         var className = "Row<" + typeArgCsv + ">"; #>
 
-	public class <#= className #>
+	public struct <#= className #>
 	{
-		internal Row(<#= String.Join(", ", alphabet.Take(arity).Select(x => x + " " + x.ToLower())) #>)
+		internal Row(<#= String.Join(", ", alphabet.Take(arity).Select(x => x + " " + x.ToLower())) #>) : this()
         {
         <# foreach (int item in Enumerable.Range(1, arity)) { #>    Item<#= item #> = <#= alphabet[item - 1].ToLower() #>;
         <# } #>}
@@ -193,12 +196,15 @@ namespace ZedSharp
             if (ReferenceEquals(obj, this))
                 return true;
 
-            var that = obj as <#= className #>;
-            return (that != null) && <#= String.Join(" && ", Enumerable.Range(1, arity).Select(x => "Equals(Item" + x + ", that.Item" + x + ")")) #>;
+            if (obj == null || !(obj is <#= className #>))
+                return false;
+
+            var that = (<#= className #>) obj;
+            return <#= String.Join(" && ", Enumerable.Range(1, arity).Select(x => "Equals(Item" + x + ", that.Item" + x + ")")) #>;
         }
 
-        private bool hashComputed = false;
-        private int hash = 0;
+        private bool hashComputed;
+        private int hash;
 
         public override int GetHashCode()
         {
@@ -219,25 +225,29 @@ namespace ZedSharp
 
     public static class Projection
     {
-        public static Projection<A, A2> Of<A, A2>(Col<A> column1, Func<A, A2> selector)
-        {
-            return new Projection<A, A2>(column1, selector);
-        }
-    }
-    
 <# foreach (int arity in Enumerable.Range(1, arityMax)) {
         var typeArgCsv = typeArgLists[arity]; #>
+        public static Projection<<#= typeArgCsv #>, A2> Of<<#= typeArgCsv #>, A2>(<#= String.Join(", ", Enumerable.Range(1, arity).Select(x => "Col<" + (char)((x - 1) + 'A') + "> column" + x)) #>, Func<<#= typeArgCsv #>, A2> selector)
+        {
+            return new Projection<<#= typeArgCsv #>, A2>(<#= String.Join(", ", Enumerable.Range(1, arity).Select(x => "column" + x)) #>, selector);
+        }
+
+<# } #>
+    }
+<# foreach (int arity in Enumerable.Range(1, arityMax)) {
+        var typeArgCsv = typeArgLists[arity]; #>
+
     public struct Projection<<#= typeArgCsv #>, A2>
     {
         internal Projection(<#= colArgLists[arity] #>, Func<<#= typeArgCsv #>, A2> selector) : this()
         {
-            <# foreach (int c in Enumerable.Range(1, arity)) { #>Column<#= c #> = <#= ("column" + c) #>;
-            <# } #>
+<# foreach (int c in Enumerable.Range(1, arity)) { #>            Column<#= c #> = <#= ("column" + c) #>;
+<# } #>
             Selector = selector;
         }
 
-        <# foreach (int c in Enumerable.Range(1, arity)) { #>public Col<<#= alphabet[c - 1] #>> Column<#= c #> { get; private set; }
-        <# } #>
+<# foreach (int c in Enumerable.Range(1, arity)) { #>        public Col<<#= alphabet[c - 1] #>> Column<#= c #> { get; private set; }
+<# } #>
         public Func<<#= typeArgCsv #>, A2> Selector { get; private set; }
     }
 <# } #>
