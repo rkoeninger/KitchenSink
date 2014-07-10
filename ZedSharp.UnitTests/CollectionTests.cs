@@ -9,7 +9,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void DictionaryCreateByLambdas()
         {
-            var dict = Map.Of(
+            var dict = Z.Map(
                 red => ConsoleColor.Red,
                 green => ConsoleColor.Green,
                 blue => ConsoleColor.Blue,
@@ -29,7 +29,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void DictionaryCreateByAnonObject()
         {
-            var dict2 = Map.Of(new
+            var dict2 = Z.Map(new
             {
                 Red = ConsoleColor.Red,
                 ConsoleColor.Green,
@@ -50,7 +50,7 @@ namespace ZedSharp.UnitTests
             Assert.IsInstanceOfType(dict2["Func1"], typeof(Func<int, int>));
 
             // Can actually be any object
-            var dict3 = Map.Of(new Color(12, 23, 34));
+            var dict3 = Z.Map(new Color(12, 23, 34));
             Assert.AreEqual(3, dict3.Count);
             Assert.IsTrue(dict3.ContainsKey("R"));
             Assert.IsTrue(dict3.ContainsKey("G"));
@@ -63,7 +63,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void DictionaryCreateByArgList()
         {
-            var dict = Map.Of(
+            var dict = Z.Map(
                     "red", ConsoleColor.Red,
                     "blue", ConsoleColor.Blue,
                     "green", ConsoleColor.Green
@@ -80,7 +80,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void DictionaryCreateByRows()
         {
-            var dict = Map.Of(
+            var dict = Z.Map(
                 Row.Of("red", ConsoleColor.Red),
                 Row.Of("blue", ConsoleColor.Blue),
                 Row.Of("green", ConsoleColor.Green));
@@ -96,7 +96,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void DictionaryCreateByTuples()
         {
-            var dict = Map.Of(
+            var dict = Z.Map(
                 Tuple.Create("red", ConsoleColor.Red),
                 Tuple.Create("blue", ConsoleColor.Blue),
                 Tuple.Create("green", ConsoleColor.Green));

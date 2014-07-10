@@ -42,7 +42,6 @@
   <ItemGroup>
     <Compile Include="Lens.cs" />
     <Compile Include="Ref.cs" />
-    <Compile Include="Map.cs" />
     <Compile Include="Match.cs" />
     <Compile Include="Natural.cs">
       <AutoGen>True</AutoGen>
