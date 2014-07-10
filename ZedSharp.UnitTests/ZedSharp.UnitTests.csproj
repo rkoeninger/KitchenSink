@@ -57,6 +57,7 @@
     <Compile Include="CollectionTests.cs" />
     <Compile Include="TableTests.cs" />
     <Compile Include="LensTests.cs" />
+    <Compile Include="StringTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZedSharp\ZedSharp.csproj">

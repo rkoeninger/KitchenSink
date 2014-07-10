@@ -39,22 +39,22 @@ namespace ZedSharp
 
         public Validation<A> Is(bool cond, String message = null)
         {
-            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Append(new ApplicationException(message ?? "")));
+            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Add(new ApplicationException(message ?? "")));
         }
 
         public Validation<A> Is(Func<A, bool> f, String message = null)
         {
-            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Append(new ApplicationException(message ?? "")));
+            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Add(new ApplicationException(message ?? "")));
         }
 
         public Validation<A> Is(bool cond, Exception exc)
         {
-            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Append(exc));
+            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Add(exc));
         }
 
         public Validation<A> Is(Func<A, bool> f, Exception exc)
         {
-            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Append(exc));
+            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Add(exc));
         }
 
         public Validation<A> Is(Action<A> f)
@@ -66,7 +66,7 @@ namespace ZedSharp
             }
             catch (Exception exc)
             {
-                return new Validation<A>(Value, ErrorList.Append(exc));
+                return new Validation<A>(Value, ErrorList.Add(exc));
             }
         }
 

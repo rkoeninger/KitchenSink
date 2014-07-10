@@ -131,32 +131,32 @@ namespace ZedSharp
 
         public static Maybe<IEnumerable<A>> NonEmpty<A>(Maybe<IEnumerable<A>> maybe)
         {
-            return maybe.Where(x => x.Any());
+            return maybe.Where(Z.NonEmpty);
         }
 
         public static Maybe<List<A>> NonEmpty<A>(Maybe<List<A>> maybe)
         {
-            return maybe.Where(x => x.Count > 0);
+            return maybe.Where(Z.NonEmpty);
         }
 
-        public static Maybe<String> NonEmpy(Maybe<String> maybe)
+        public static Maybe<String> NonEmpty(Maybe<String> maybe)
         {
-            return maybe.Where(x => !String.IsNullOrEmpty(x));
+            return maybe.Where(Z.NonEmpty);
         }
 
-        public static Maybe<String> NonWhitespace(Maybe<String> maybe)
+        public static Maybe<String> NonBlank(Maybe<String> maybe)
         {
-            return maybe.Where(x => !String.IsNullOrWhiteSpace(x));
+            return maybe.Where(Z.NonBlank);
         }
 
-        public static Maybe<int> NonNegative(Maybe<int> maybe)
+        public static Maybe<int> NonNeg(Maybe<int> maybe)
         {
-            return maybe.Where(x => x >= 0);
+            return maybe.Where(Z.NonNeg);
         }
 
-        public static Maybe<int> Positive(Maybe<int> maybe)
+        public static Maybe<int> Pos(Maybe<int> maybe)
         {
-            return maybe.Where(x => x > 0);
+            return maybe.Where(Z.Pos);
         }
     }
     
