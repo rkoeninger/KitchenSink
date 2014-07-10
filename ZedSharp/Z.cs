@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using RegexMatch = System.Text.RegularExpressions.Match;
 
 namespace ZedSharp
 {
@@ -10,7 +9,7 @@ namespace ZedSharp
     {
         public static IEnumerable<String> SplitSeq(this String s, Regex r)
         {
-            RegexMatch m = r.Match(s);
+            var m = r.Match(s);
 
             while (m.Success)
             {
@@ -50,7 +49,7 @@ namespace ZedSharp
 
         public static IEnumerable<String> TrimAll(this IEnumerable<String> seq)
         {
-            return seq.Select(x => x == null ? null : x.Trim()).Where(NonBlank);
+            return seq.Where(NonBlank).Select(x => x.Trim());
         }
 
         public static String StringJoin(this IEnumerable<Object> seq, String sep = null)
@@ -110,12 +109,12 @@ namespace ZedSharp
 
         public static bool NonEmpty<A>(this List<A> list)
         {
-            return list.Count > 0;
+            return list.Count.Pos();
         }
 
         public static bool NonEmpty<A>(this IEnumerable<A> seq)
         {
-            return seq.Count() > 0;
+            return seq.Count().Pos();
         }
 
         public static Func<A, B> AsFunc<A, B>(this IDictionary<A, B> dict)
@@ -125,12 +124,12 @@ namespace ZedSharp
 
         public static Func<int, A> AsFunc<A>(this IList<A> list)
         {
-            return x => list[x];
+            return list.ElementAt;
         }
 
         public static Func<A, bool> AsFunc<A>(this ISet<A> set)
         {
-            return x => set.Contains(x);
+            return set.Contains;
         }
 
         public static Func<A, B> F<A, B>(Func<A, B> f)
@@ -146,6 +145,31 @@ namespace ZedSharp
         public static Func<Object, A> Const<A>(A x)
         {
             return _ => x;
+        }
+
+        public static B Apply<A, B>(this Func<A, B> f, A x)
+        {
+            return f(x);
+        }
+
+        public static Func<B, C> Apply<A, B, C>(this Func<A, B, C> f, A x)
+        {
+            return y => f(x, y);
+        }
+
+        public static Func<B, C, D> Apply<A, B, C, D>(this Func<A, B, C, D> f, A x)
+        {
+            return (y, z) => f(x, y, z);
+        }
+
+        public static Func<B, C, D, E> Apply<A, B, C, D, E>(this Func<A, B, C, D, E> f, A x)
+        {
+            return (y, z, w) => f(x, y, z, w);
+        }
+
+        public static Func<A, C> Apply<A, B, C>(this Func<A, B> f, Func<B, C> g)
+        {
+            return x => g(f(x));
         }
 
         public static bool Pos(this int x)

@@ -79,12 +79,12 @@ namespace ZedSharp
             return Try(() => XDocument.Parse(s));
         }
 
-        public static Maybe<A> Get<A>(this IList<A> list, int index)
+        public static Maybe<A> MaybeGet<A>(this IList<A> list, int index)
         {
             return Try(() => list[index]);
         }
 
-        public static Maybe<B> Get<A, B>(this IDictionary<A, B> dict, A key)
+        public static Maybe<B> MaybeGet<A, B>(this IDictionary<A, B> dict, A key)
         {
             return Try(() => dict[key]);
         }

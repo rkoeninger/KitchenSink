@@ -23,6 +23,7 @@ namespace ZedSharp.UnitTests
             var s = "some text that (123) 555-1234 contains some U.S. phone 432.6545 numbers of varying 654 234 1233 formats";
             var seq = s.SplitSeq(usPhoneRegex);
             Assert.AreEqual(3, seq.Count());
+            Assert.IsTrue(seq.SequenceEqual(Z.Seq("(123) 555-1234", "432.6545", "654 234 1233")));
         }
     }
 }
