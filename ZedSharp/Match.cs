@@ -199,15 +199,15 @@ namespace ZedSharp
         private Matcher<A, B> Previous { get; set; }
         private Func<A, B> Selector { get; set; }
         
-        /// <summary>Gets the result of the Match as an Maybe. Won't have a value if no cases were matched.</summary>
-        public Maybe<B> End()
+        /// <summary>Gets the result of the Match as an Maybe.</summary>
+        public B End()
         {
             var me = this;
             var previousResult = Previous.End();
-            return previousResult.Or(Maybe.Try(() => me.Selector(me.Key)));
+            return previousResult.OrElse(me.Selector(me.Key));
         }
 
-        public static implicit operator Maybe<B>(MatcherDefault<A, B> matcher)
+        public static implicit operator B(MatcherDefault<A, B> matcher)
         {
             return matcher.End();
         }

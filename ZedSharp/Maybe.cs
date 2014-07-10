@@ -217,6 +217,11 @@ namespace ZedSharp
             return HasValue ? Value : other;
         }
 
+        public A OrElseEval(Func<A> f)
+        {
+            return HasValue ? Value : f();
+        }
+
         public Maybe<A> OrEval(Func<A> f)
         {
             return HasValue ? this : Maybe.Try(f);

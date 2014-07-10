@@ -78,6 +78,15 @@ namespace ZedSharp
             return seq.OrderByDescending(Id, comp);
         }
 
+        public static IEnumerable<IEnumerable<A>> Partition<A>(this IEnumerable<A> seq, int count)
+        {
+            while (seq.Count().Pos())
+            {
+                yield return seq.Take(count);
+                seq = seq.Skip(count);
+            }
+        }
+
         public static Dictionary<A, B> Map<A, B>(params Row<A, B>[] pairs)
         {
             return pairs.ToDictionary(x => x.Item1, x => x.Item2);
@@ -90,7 +99,7 @@ namespace ZedSharp
 
         public static Dictionary<A, B> Map<A, B>(params Object[] pairs)
         {
-            if (pairs.Length % 2 != 0)
+            if (pairs.Length.Even().Not())
                 throw new ArgumentException("Argument list must have even number of values");
 
             var dict = new Dictionary<A, B>();
@@ -103,7 +112,7 @@ namespace ZedSharp
 
         public static Dictionary<String, Object> Map(params Object[] pairs)
         {
-            if (pairs.Length % 2 != 0)
+            if (pairs.Length.Even().Not())
                 throw new ArgumentException("Argument list must have even number of values");
 
             var dict = new Dictionary<String, Object>();
@@ -183,6 +192,11 @@ namespace ZedSharp
             return set.Contains;
         }
 
+        public static bool Is<A>(this Object x)
+        {
+            return x is A;
+        }
+
         public static Func<A, B> F<A, B>(Func<A, B> f)
         {
             return f;
@@ -246,6 +260,11 @@ namespace ZedSharp
         public static bool Neg1(this int x)
         {
             return x == -1;
+        }
+
+        public static bool Even(this int x)
+        {
+            return x % 2 == 0;
         }
 
         public static bool Not(this bool x)
