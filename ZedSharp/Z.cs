@@ -61,6 +61,21 @@ namespace ZedSharp
             return result;
         }
 
+        public static Func<A, B> AsFunc<A, B>(this IDictionary<A, B> dict)
+        {
+            return x => dict[x];
+        }
+
+        public static Func<int, A> AsFunc<A>(this IList<A> list)
+        {
+            return x => list[x];
+        }
+
+        public static Func<A, bool> AsFunc<A>(this ISet<A> set)
+        {
+            return x => set.Contains(x);
+        }
+
         public static A Id<A>(A x)
         {
             return x;
