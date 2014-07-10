@@ -102,12 +102,7 @@ namespace ZedSharp
             if (pairs.Length.Even().Not())
                 throw new ArgumentException("Argument list must have even number of values");
 
-            var dict = new Dictionary<A, B>();
-
-            for (int i = 0; i < pairs.Length; ++i)
-                dict.Add((A)pairs[i], (B)pairs[i + 1]);
-
-            return dict;
+            return pairs.Partition(2).ToDictionary(x => x.First().As<A>(), x => x.Last().As<B>());
         }
 
         public static Dictionary<String, Object> Map(params Object[] pairs)
@@ -115,12 +110,7 @@ namespace ZedSharp
             if (pairs.Length.Even().Not())
                 throw new ArgumentException("Argument list must have even number of values");
 
-            var dict = new Dictionary<String, Object>();
-
-            for (int i = 0; i < pairs.Length; i += 2)
-                dict.Add(pairs[i].ToString(), pairs[i + 1]);
-
-            return dict;
+            return pairs.Partition(2).ToDictionary(x => x.First().ToString(), x => x.Last());
         }
 
         public static Dictionary<String, Object> Map(Object obj)
@@ -195,6 +185,21 @@ namespace ZedSharp
         public static bool Is<A>(this Object x)
         {
             return x is A;
+        }
+
+        public static Func<Object, bool> Is<A>()
+        {
+            return x => x is A;
+        }
+
+        public static A As<A>(this Object x)
+        {
+            return (A) x;
+        }
+
+        public static Func<Object, A> As<A>()
+        {
+            return x => (A) x;
         }
 
         public static Func<A, B> F<A, B>(Func<A, B> f)
