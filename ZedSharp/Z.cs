@@ -182,6 +182,21 @@ namespace ZedSharp
             return set.Contains;
         }
 
+        public static bool Null(this Object obj)
+        {
+            return obj == null;
+        }
+
+        public static bool NotNull(this Object obj)
+        {
+            return obj != null;
+        }
+
+        public static Func<A, bool> Eq<A>(this A x)
+        {
+            return y => Equals(x, y);
+        }
+
         public static bool Is<A>(this Object x)
         {
             return x is A;
@@ -237,7 +252,7 @@ namespace ZedSharp
             return (y, z, w) => f(x, y, z, w);
         }
 
-        public static Func<A, C> Apply<A, B, C>(this Func<A, B> f, Func<B, C> g)
+        public static Func<A, C> Compose<A, B, C>(this Func<A, B> f, Func<B, C> g)
         {
             return x => g(f(x));
         }
