@@ -32,19 +32,44 @@ namespace ZedSharp.UnitTests
             Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Case(""z"").Then(0).End()"), Common.ZedDll);
             Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Then(1).Then(0).End()"), Common.ZedDll);
 
-            var l = new List<String>();
-
+            List<String> l;
+            l = new List<String>();
             var res2 = Match.On(4)
-                .Case(Track<int, bool>(l, "case1", x => x == 1)).Then(Track<int, string>(l, "then1", _ => "one"))
-                .Case(Track<int, bool>(l, "case2", x => x == 2)).Then(Track<int, string>(l, "then2", _ => "two"))
-                .Case(Track<int, bool>(l, "case3", x => x == 3)).Then(Track<int, string>(l, "then3", _ => "three"))
-                .Case(Track<int, bool>(l, "case4", x => x == 4)).Then(Track<int, string>(l, "then4", _ => "four"))
-                .Case(Track<int, bool>(l, "case5", x => x == 5)).Then(Track<int, string>(l, "then5", _ => "five"))
+                .Case(Track<int, bool>(l, "case1", 1.Eq())).Then(Track<int, string>(l, "then1", _ => "one"))
+                .Case(Track<int, bool>(l, "case2", 2.Eq())).Then(Track<int, string>(l, "then2", _ => "two"))
+                .Case(Track<int, bool>(l, "case3", 3.Eq())).Then(Track<int, string>(l, "then3", _ => "three"))
+                .Case(Track<int, bool>(l, "case4", 4.Eq())).Then(Track<int, string>(l, "then4", _ => "four"))
+                .Case(Track<int, bool>(l, "case5", 5.Eq())).Then(Track<int, string>(l, "then5", _ => "five"))
                 .End();
             Assert.AreEqual(Maybe.Of("four"), res2);
-            Assert.IsTrue(l.SequenceEqual(new [] {"case1", "case2", "case3", "case4", "then4"}));
+            Assert.IsTrue(l.SequenceEqual(Z.Seq("case1", "case2", "case3", "case4", "then4")));
 
             Assert.AreEqual(31, Match.On("abc").Case("def").Then(23).Else().Then(31));
+
+            Assert.AreEqual("whatever", Match.On(3).Default("whatever").End());
+            Assert.AreEqual("whatever", Match.On(3).Default("whatever").Case(5).Then("asdf").Case(2).Then("awert").End());
+            Assert.AreEqual("fgjh", Match.On(3).Default("whatever").Case(5).Then("asdf").Case(3).Then("fgjh").Case(2).Then("awert").End());
+
+            l = new List<String>();
+            var res3 = Match.On(3)
+                .Default(Track<int, string>(l, "default", _ => "whatever"))
+                .Case(Track<int, bool>(l, "case1", 5.Eq())).Then(Track<int, string>(l, "then1", _ => "asdf"))
+                .Case(Track<int, bool>(l, "case2", 3.Eq())).Then(Track<int, string>(l, "then2", _ => "fgjh"))
+                .Case(Track<int, bool>(l, "case3", 2.Eq())).Then(Track<int, string>(l, "then3", _ => "awert"))
+                .End();
+            Assert.AreEqual("fgjh", res3);
+            Assert.IsTrue(l.SequenceEqual(Z.Seq("case1", "case2", "then2")));
+
+            l = new List<String>();
+            var res4 = Match.On(3)
+                .Default(Track<int, string>(l, "default", _ => "whatever"))
+                .Case(Track<int, bool>(l, "case1", 5.Eq())).Then(Track<int, string>(l, "then1", _ => "asdf"))
+                .Case(Track<int, bool>(l, "case2", 1.Eq())).Then(Track<int, string>(l, "then2", _ => "fgjh"))
+                .Case(Track<int, bool>(l, "case3", 7.Eq())).Then(Track<int, string>(l, "then3", _ => "sdfgg"))
+                .Case(Track<int, bool>(l, "case4", 2.Eq())).Then(Track<int, string>(l, "then4", _ => "awert"))
+                .End();
+            Assert.AreEqual("whatever", res4);
+            Assert.IsTrue(l.SequenceEqual(Z.Seq("case1", "case2", "case3", "case4", "default")));
         }
 
         private Func<A, B> Track<A, B>(List<String> l, String msg, Func<A, B> f)
