@@ -39,6 +39,11 @@ namespace ZedSharp
                 File.WriteAllText(path, contents);
             }
         }
+
+        public static readonly Deps StandardDeps = new DepsBuilder()
+            .Add<ConsoleDI>(StandardConsole)
+            .Add<FileSystemDI>(StandardFileSystem)
+            .End();
     }
 
     public interface ConsoleDI
