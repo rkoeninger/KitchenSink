@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace ZedSharp
 {
@@ -23,6 +25,21 @@ namespace ZedSharp
         public static IO<A> Flatten<A>(this IO<IO<A>> io)
         {
             return IO.Of(io.Eval().Cont);
+        }
+
+        public static IO<IEnumerable<A>> Sequence<A>(this IEnumerable<IO<A>> seq)
+        {
+            return IO.Of(() => seq.Select(x => x.Eval()));
+        }
+
+        public static IO<IEnumerable<B>> SelectSequence<A, B>(this IEnumerable<A> seq, Func<A, IO<B>> f)
+        {
+            return seq.Select(f).Sequence();
+        }
+
+        public static Func<A, IO<C>> Compose<A, B, C>(this Func<A, IO<B>> f, Func<B, IO<C>> g)
+        {
+            return a => IO.Of(() => g(f(a).Eval())).Flatten();
         }
     }
 
@@ -56,6 +73,23 @@ namespace ZedSharp
         {
             var me = this;
             return IO.Of(() => { me.Eval(); return io.Eval(); });
+        }
+
+        public IO<Unit> Forever()
+        {
+            return Forever<Unit>();
+        }
+
+        public IO<B> Forever<B>()
+        {
+            var me = this;
+            return IO.Of<B>(() => { while (true) me.Eval(); });
+        }
+
+        public IO<Unit> Ignore()
+        {
+            var me = this;
+            return IO.Of_(() => me.Eval());
         }
     }
 
