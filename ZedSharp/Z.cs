@@ -257,6 +257,11 @@ namespace ZedSharp
             return x => g(f(x));
         }
 
+        public static Func<A, R, C> ComposeMany<A, B, C, R>(this Func<A, R, B> f, Func<B, R, C> g)
+        {
+            return (a, r) => g(f(a, r), r);
+        }
+
         public static bool Pos(this int x)
         {
             return x > 0;

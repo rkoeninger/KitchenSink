@@ -27,19 +27,19 @@ namespace ZedSharp
             return IO.Of(io.Eval().Cont);
         }
 
+        public static IO<A> Sum<A>(this IEnumerable<IO<A>> seq)
+        {
+            return seq.Aggregate((x, y) => x.Then(y));
+        }
+
         public static IO<IEnumerable<A>> Sequence<A>(this IEnumerable<IO<A>> seq)
         {
             return IO.Of(() => seq.Select(x => x.Eval()));
         }
 
-        public static IO<IEnumerable<B>> SelectSequence<A, B>(this IEnumerable<A> seq, Func<A, IO<B>> f)
-        {
-            return seq.Select(f).Sequence();
-        }
-
         public static Func<A, IO<C>> Compose<A, B, C>(this Func<A, IO<B>> f, Func<B, IO<C>> g)
         {
-            return a => IO.Of(() => g(f(a).Eval())).Flatten();
+            return a => f(a).SelectMany(g);
         }
     }
 
@@ -73,6 +73,12 @@ namespace ZedSharp
         {
             var me = this;
             return IO.Of(() => { me.Eval(); return io.Eval(); });
+        }
+        
+        public IO<C> Join<B, C>(IO<B> other, Func<A, B, C> f)
+        {
+            var me = this;
+            return IO.Of(() => f(me.Eval(), other.Eval()));
         }
 
         public IO<Unit> Forever()

@@ -129,6 +129,11 @@ namespace ZedSharp
             return Maybe.Of(list).Cast<IEnumerable<A>>();
         }
 
+        public static Func<A, Maybe<C>> Compose<A, B, C>(this Func<A, Maybe<B>> f, Func<B, Maybe<C>> g)
+        {
+            return a => f(a).SelectMany(g);
+        }
+
         public static Maybe<IEnumerable<A>> NonEmpty<A>(Maybe<IEnumerable<A>> maybe)
         {
             return maybe.Where(Z.NonEmpty);
@@ -199,10 +204,21 @@ namespace ZedSharp
             return HasValue ? Maybe.If(Value, f) : this;
         }
 
-        public Maybe<C> Join<B, C>(Maybe<B> that, Func<A, B, C> f)
+        public Maybe<C> Join<B, C>(Maybe<B> inner, Func<A, B, C> resultSelector)
         {
-            var val = Value;
-            return HasValue ? that.Select(x => f(val, x)) : Maybe.None<C>();
+            return Join(inner, _ => 0, _ => 0, resultSelector, EqualityComparer<int>.Default);
+        }
+
+        public Maybe<C> Join<B, C, K>(Maybe<B> inner, Func<A, K> outerKeySelector, Func<B, K> innerKeySelector, Func<A, B, C> resultSelector)
+        {
+            return Join(inner, outerKeySelector, innerKeySelector, resultSelector, EqualityComparer<K>.Default);
+        }
+
+        public Maybe<C> Join<B, C, K>(Maybe<B> inner, Func<A, K> outerKeySelector, Func<B, K> innerKeySelector, Func<A, B, C> resultSelector, IEqualityComparer<K> comparer)
+        {
+            return HasValue && inner.HasValue && comparer.Equals(outerKeySelector(Value), innerKeySelector(inner.Value))
+                ? Maybe.Of(resultSelector(Value, inner.Value))
+                : Maybe.None<C>();
         }
 
         /// <summary>Attempts cast, returning Some or None.</summary>
