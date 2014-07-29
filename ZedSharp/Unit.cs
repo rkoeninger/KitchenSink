@@ -13,5 +13,20 @@
         {
             return obj is Unit;
         }
+
+        public static bool operator ==(Unit u1, Unit u2)
+        {
+            return true;
+        }
+
+        public static bool operator !=(Unit u1, Unit u2)
+        {
+            return ! (u1 == u2);
+        }
+
+        public override string ToString()
+        {
+            return "Unit";
+        }
     }
 }
