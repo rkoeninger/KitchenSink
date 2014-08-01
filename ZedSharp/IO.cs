@@ -19,7 +19,7 @@ namespace ZedSharp
 
         public static IO<Unit> Of_(Action cont)
         {
-            return new IO<Unit>(() => { cont(); return Unit.It; });
+            return new IO<Unit>(Z.UnitF(cont));
         }
 
         public static IO<A> Flatten<A>(this IO<IO<A>> io)

@@ -222,6 +222,16 @@ namespace ZedSharp
             return f;
         }
 
+        public static Func<Unit> UnitF(Action f)
+        {
+            return () => { f(); return Unit.It; };
+        }
+
+        public static Action Action(Func<Unit> f)
+        {
+            return () => { f(); };
+        }
+
         public static A Id<A>(A x)
         {
             return x;
