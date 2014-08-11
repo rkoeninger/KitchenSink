@@ -41,6 +41,11 @@ namespace ZedSharp
         {
             return a => f(a).SelectMany(g);
         }
+
+        public static IO<A> Fix<A>(this Func<A, IO<A>> f)
+        {
+            return f(Fix(f).Eval());
+        }
     }
 
     public struct IO<A>
