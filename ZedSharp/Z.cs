@@ -33,6 +33,16 @@ namespace ZedSharp
             yield return s.Substring(i, s.Length - i);
         }
 
+        public static bool EqualsAny(this Object obj, params Object[] vals)
+        {
+            return vals.Any(x => x == obj);
+        }
+
+        public static bool EqualsAny(this Object obj, IEnumerable<Object> vals)
+        {
+            return vals.Any(x => x == obj);
+        }
+
         public static bool EqualsIgnoreCase(this String x, String y)
         {
             return String.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
