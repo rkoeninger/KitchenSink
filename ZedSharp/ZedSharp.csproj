@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeLoader.cs" />
     <Compile Include="Deps.cs" />
     <Compile Include="Inject.cs" />
     <Compile Include="IO.cs" />

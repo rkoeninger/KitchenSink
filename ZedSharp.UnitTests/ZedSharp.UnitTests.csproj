@@ -58,12 +58,18 @@
     <Compile Include="TableTests.cs" />
     <Compile Include="LensTests.cs" />
     <Compile Include="StringTests.cs" />
+    <Compile Include="ConfigTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZedSharp\ZedSharp.csproj">
       <Project>{e993d487-e0d8-44ef-87d8-d335ecaa6cfa}</Project>
       <Name>ZedSharp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Test.csconfig">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

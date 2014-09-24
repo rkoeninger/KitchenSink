@@ -1,0 +1,11 @@
+﻿using System;
+
+public class Config : ZedSharp.UnitTests.IConfig
+{
+	public String BrandName { get { return "Brand Name"; } }
+
+	public String FormatName(String name)
+	{
+		return name.ToUpper();
+	}
+}
