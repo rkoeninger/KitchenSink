@@ -7,8 +7,49 @@ using ZedSharp.Test;
 namespace ZedSharp.UnitTests
 {
     [TestClass]
-    public class AssuranceTests
+    public class MaybeTests
     {
+        [TestMethod]
+        public void MaybeTrueFalseConversion()
+        {
+            if (Maybe.Of(0))
+            {
+            }
+            else
+            {
+                Assert.Fail();
+            }
+
+            if (Maybe.None<int>().Or(0))
+            {
+            }
+            else
+            {
+                Assert.Fail();
+            }
+            
+            if (Maybe.None<int>())
+            {
+                Assert.Fail();
+            }
+
+            var a = Maybe.Of("");
+            var b = Maybe.None<String>();
+            
+            if (a)
+            {
+            }
+            else
+            {
+                Assert.Fail();
+            }
+            
+            if (b)
+            {
+                Assert.Fail();
+            }
+        }
+
         [TestMethod]
         public void MaybeWrappers()
         {

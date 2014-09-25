@@ -177,6 +177,16 @@ namespace ZedSharp
             return Maybe.Of(val);
         }
 
+        public static bool operator true(Maybe<A> maybe)
+        {
+            return maybe.HasValue;
+        }
+
+        public static bool operator false(Maybe<A> maybe)
+        {
+            return ! maybe.HasValue;
+        }
+
         internal Maybe(A val) : this()
         {
             Value = val;
