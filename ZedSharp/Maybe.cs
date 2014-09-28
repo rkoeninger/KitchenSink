@@ -167,7 +167,7 @@ namespace ZedSharp
     
     /// <summary>
     /// A null-encapsulating wrapper.
-    /// A Maybe might not have a value, not a reference to an Maybe can not be null.
+    /// A Maybe might not have a value, but a reference to an Maybe will not itself be null.
     /// </summary>
     /// <typeparam name="A"></typeparam>
     public struct Maybe<A>
@@ -185,6 +185,16 @@ namespace ZedSharp
         public static bool operator false(Maybe<A> maybe)
         {
             return ! maybe.HasValue;
+        }
+
+        public static Maybe<A> operator |(Maybe<A> lhs, Maybe<A> rhs)
+        {
+            return lhs.Or(rhs);
+        }
+
+        public static Maybe<A> operator &(Maybe<A> lhs, Maybe<A> rhs)
+        {
+            return (lhs.HasValue && rhs.HasValue) ? lhs : Maybe.None<A>();
         }
 
         internal Maybe(A val) : this()
