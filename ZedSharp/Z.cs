@@ -49,6 +49,26 @@ namespace ZedSharp
             return new DateTimeRange(begin, end);
         }
 
+        public static IEnumerable<int> RandomInts(int max = Int32.MaxValue)
+        {
+            var rand = new Random();
+
+            while (true)
+            {
+                yield return rand.Next(max);
+            }
+        }
+
+        public static IEnumerable<double> RandomDoubles()
+        {
+            var rand = new Random();
+
+            while (true)
+            {
+                yield return rand.NextDouble();
+            }
+        }
+
         public static IEnumerable<String> SplitSeq(this String s, Regex r)
         {
             var m = r.Match(s);
