@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
@@ -8,6 +9,46 @@ namespace ZedSharp
 {
     public static partial class Z
     {
+        public static TimeSpan Days(this int x)
+        {
+            return new TimeSpan(x, 0, 0, 0);
+        }
+
+        public static TimeSpan Hours(this int x)
+        {
+            return new TimeSpan(x, 0, 0);
+        }
+
+        public static TimeSpan Minutes(this int x)
+        {
+            return new TimeSpan(0, x, 0);
+        }
+
+        public static DateTime AgoLocal(this TimeSpan x)
+        {
+            return DateTime.Now.Add(x.Negate());
+        }
+
+        public static DateTime Ago(this TimeSpan x)
+        {
+            return DateTime.UtcNow.Add(x.Negate());
+        }
+
+        public static DateTime FromNowLocal(this TimeSpan x)
+        {
+            return DateTime.Now.Add(x);
+        }
+
+        public static DateTime FromNow(this TimeSpan x)
+        {
+            return DateTime.UtcNow.Add(x);
+        }
+
+        public static DateTimeRange To(this DateTime begin, DateTime end)
+        {
+            return new DateTimeRange(begin, end);
+        }
+
         public static IEnumerable<String> SplitSeq(this String s, Regex r)
         {
             var m = r.Match(s);
@@ -56,6 +97,28 @@ namespace ZedSharp
         public static bool NonBlank(this String x)
         {
             return String.IsNullOrWhiteSpace(x).Not();
+        }
+
+        public static String IfEmpty(this String x, String y)
+        {
+            return String.IsNullOrEmpty(x) ? y : x;
+        }
+
+        public static String IfBlank(this String x, String y)
+        {
+            return String.IsNullOrWhiteSpace(x) ? y : x;
+        }
+
+        public static readonly Regex WhiteSpaceRegex = new Regex("\\s+");
+
+        public static String CollapseSpace(this String x)
+        {
+            return WhiteSpaceRegex.Split(x.Trim()).StringJoin(" ");
+        }
+
+        public static String ToTitleCase(this String x)
+        {
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x);
         }
 
         public static IEnumerable<String> TrimAll(this IEnumerable<String> seq)
@@ -135,6 +198,16 @@ namespace ZedSharp
         public static Dictionary<String, A> Map<A>(params Expression<Func<Object, A>>[] exprs)
         {
             return exprs.ToDictionary(x => x.Parameters.First().Name, x => x.Compile().Invoke(null));
+        }
+
+        public static HashSet<A> Set<A>(params A[] vals)
+        {
+            return new HashSet<A>(vals);
+        }
+
+        public static HashSet<A> Set<A>(this IEnumerable<A> seq)
+        {
+            return new HashSet<A>(seq);
         }
 
         public static IEnumerable<A> Seq<A>(params A[] vals)

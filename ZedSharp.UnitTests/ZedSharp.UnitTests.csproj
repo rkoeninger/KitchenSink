@@ -51,6 +51,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Common.cs" />
+    <Compile Include="DateTimeTests.cs" />
     <Compile Include="MatchTests.cs" />
     <Compile Include="MaybeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

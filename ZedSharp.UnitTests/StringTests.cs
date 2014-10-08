@@ -25,5 +25,11 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(3, seq.Count());
             Assert.IsTrue(seq.SequenceEqual(Z.Seq("(123) 555-1234", "432.6545", "654 234 1233")));
         }
+
+        [TestMethod]
+        public void CollapseWhiteSpace()
+        {
+            Assert.AreEqual("asd fdjkv sdfv fsv as4 '", " asd   fdjkv sdfv \nfsv \r\ras4 '  ".CollapseSpace());
+        }
     }
 }

@@ -41,10 +41,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeLoader.cs" />
+    <Compile Include="DateTimeRange.cs" />
     <Compile Include="Deps.cs" />
     <Compile Include="Inject.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="Lens.cs" />
+    <Compile Include="Month.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="Match.cs" />
     <Compile Include="Natural.cs">
