@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace ZedSharp
 {
-    public static class Z
+    public static partial class Z
     {
         public static IEnumerable<String> SplitSeq(this String s, Regex r)
         {

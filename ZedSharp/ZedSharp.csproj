@@ -68,6 +68,11 @@
     <Compile Include="Unit.cs" />
     <Compile Include="Validation.cs" />
     <Compile Include="Z.cs" />
+    <Compile Include="ZGen.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ZGen.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Natural.tt">
@@ -81,6 +86,10 @@
     <None Include="Tuples.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Tuples.cs</LastGenOutput>
+    </None>
+    <None Include="ZGen.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ZGen.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>
