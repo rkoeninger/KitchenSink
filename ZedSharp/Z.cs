@@ -85,7 +85,7 @@ namespace ZedSharp
             int i = 0;
             int j = 0;
 
-            while ((j = s.IndexOf(sep, i)).NonNeg())
+            while ((j = s.IndexOf(sep, i)).NotNeg())
             {
                 yield return s.Substring(i, j - i);
                 i = j + sep.Length;
@@ -109,12 +109,12 @@ namespace ZedSharp
             return String.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
         }
 
-        public static bool NonEmpty(this String x)
+        public static bool NotEmpty(this String x)
         {
             return String.IsNullOrEmpty(x).Not();
         }
 
-        public static bool NonBlank(this String x)
+        public static bool NotBlank(this String x)
         {
             return String.IsNullOrWhiteSpace(x).Not();
         }
@@ -143,7 +143,7 @@ namespace ZedSharp
 
         public static IEnumerable<String> TrimAll(this IEnumerable<String> seq)
         {
-            return seq.Where(NonBlank).Select(x => x.Trim());
+            return seq.Where(NotBlank).Select(x => x.Trim());
         }
 
         public static String StringJoin(this IEnumerable<Object> seq, String sep = null)
@@ -260,12 +260,12 @@ namespace ZedSharp
             return result;
         }
 
-        public static bool NonEmpty<A>(this List<A> list)
+        public static bool NotEmpty<A>(this List<A> list)
         {
             return list.Count.Pos();
         }
 
-        public static bool NonEmpty<A>(this IEnumerable<A> seq)
+        public static bool NotEmpty<A>(this IEnumerable<A> seq)
         {
             return seq.Count().Pos();
         }
@@ -385,7 +385,7 @@ namespace ZedSharp
             return x == 0;
         }
 
-        public static bool NonNeg(this int x)
+        public static bool NotNeg(this int x)
         {
             return x >= 0;
         }
