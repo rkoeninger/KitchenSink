@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ZedSharp
 {
     /// <summary>
-    /// Simple dependency injection container.
-    /// Glorified dictionary.
-    /// Mutable and not thread safe.
+    /// Mutable dependency collection builder.
     /// </summary>
     public class DepsBuilder
     {
         public DepsBuilder()
         {
-            Values = new Dictionary<Type, Object>();
+            Values = new List<Object>();
         }
 
-        private Dictionary<Type, Object> Values { get; set; }
+        private List<Object> Values { get; set; }
 
-        public DepsBuilder Add<T>(T val)
+        public DepsBuilder Add(Object val)
         {
-            Values.Add(typeof(T), val);
+            Values.Add(val);
             return this;
         }
 
@@ -27,7 +26,7 @@ namespace ZedSharp
         {
             try
             {
-                return new Deps(Values);
+                return Deps.Of(Values);
             }
             finally
             {
@@ -41,24 +40,29 @@ namespace ZedSharp
     /// </summary>
     public struct Deps
     {
-        internal Deps(Dictionary<Type, Object> values) : this()
+        public static Deps Of(params Object[] values)
         {
-            Values = Ref.Of(values);
+            return new Deps(values);
         }
 
-        private Ref<Dictionary<Type, Object>> Values { get; set; }
-
-        public Maybe<T> Get<T>()
+        private Deps(IEnumerable<Object> values) : this()
         {
-            return Values.ToMaybe().SelectMany(x => x.MaybeGet(typeof(T))).Cast<T>();
+            Values = values.ToArray();
         }
 
-        public T GetOrThrow<T>(String item)
+        private Object[] Values { get; set; }
+
+        public Maybe<T> Get<T>() where T : class
+        {
+            return Maybe.Of(Values.FirstOrDefault(x => x is T) as T);
+        }
+
+        public T GetOrThrow<T>(String item) where T : class
         {
             return Get<T>().OrThrow("No dependency registered for " + item);
         }
 
-        public T GetOrThrow<T>()
+        public T GetOrThrow<T>() where T : class
         {
             return GetOrThrow<T>("type " + typeof(T).Name);
         }

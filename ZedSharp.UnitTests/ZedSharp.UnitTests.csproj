@@ -60,6 +60,7 @@
     <Compile Include="LensTests.cs" />
     <Compile Include="StringTests.cs" />
     <Compile Include="ConfigTests.cs" />
+    <Compile Include="DepsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZedSharp\ZedSharp.csproj">

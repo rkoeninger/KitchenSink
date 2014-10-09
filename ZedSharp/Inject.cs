@@ -40,10 +40,9 @@ namespace ZedSharp
             }
         }
 
-        public static readonly Deps StandardDeps = new DepsBuilder()
-            .Add<ConsoleDI>(StandardConsole)
-            .Add<FileSystemDI>(StandardFileSystem)
-            .End();
+        public static readonly Deps StandardDeps = Deps.Of(
+            StandardConsole,
+            StandardFileSystem);
     }
 
     public interface ConsoleDI
