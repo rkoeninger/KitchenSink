@@ -1,5 +1,10 @@
 ﻿namespace ZedSharp
 {
+    /// <summary>
+    /// Unit contains only one value that is used as a placeholder.
+    /// A meaningfully different instance of Unit cannot be created.
+    /// All references to Unit will be equal.
+    /// </summary>
     public struct Unit
     {
         public static readonly Unit It = new Unit();
@@ -21,7 +26,7 @@
 
         public static bool operator !=(Unit u1, Unit u2)
         {
-            return ! (u1 == u2);
+            return false;
         }
 
         public override string ToString()
