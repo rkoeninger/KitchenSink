@@ -69,6 +69,16 @@ namespace ZedSharp
             }
         }
 
+        public static String ToLF(this String s)
+        {
+            return s.Replace("\r\n", "\n");
+        }
+
+        public static String ToCRLF(this String s)
+        {
+            return s.Replace("\r\n", "\n").Replace("\n", "\r\n");
+        }
+
         public static IEnumerable<String> SplitSeq(this String s, Regex r)
         {
             var m = r.Match(s);
