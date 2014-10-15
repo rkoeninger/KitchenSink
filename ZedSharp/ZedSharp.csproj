@@ -47,6 +47,11 @@
     <Compile Include="IO.cs" />
     <Compile Include="Lens.cs" />
     <Compile Include="Month.cs" />
+    <Compile Include="MultiMethod.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MultiMethod.tt</DependentUpon>
+    </Compile>
     <Compile Include="Ref.cs" />
     <Compile Include="Match.cs" />
     <Compile Include="Natural.cs">
@@ -69,6 +74,7 @@
     <Compile Include="Maybe.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="Validation.cs" />
+    <Compile Include="Void.cs" />
     <Compile Include="Z.cs" />
     <Compile Include="ZGen.cs">
       <AutoGen>True</AutoGen>
@@ -77,6 +83,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="MultiMethod.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MultiMethod.cs</LastGenOutput>
+    </None>
     <None Include="Natural.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Natural.cs</LastGenOutput>

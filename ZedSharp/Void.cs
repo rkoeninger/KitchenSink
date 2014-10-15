@@ -1,4 +1,6 @@
-﻿namespace ZedSharp
+﻿using System;
+
+namespace ZedSharp
 {
     /// <summary>
     /// Void is an empty placeholder type.

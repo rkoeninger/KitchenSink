@@ -1,0 +1,65 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#    var arityMin = 2; #>
+<#    var arityMax = 6; #>using System;
+using System.Collections.Generic;
+
+namespace ZedSharp
+{
+<#    foreach (var arity in Enumerable.Range(arityMin, arityMax)) {
+          var allTypeArgs = String.Join(", ", Enumerable.Range(0, arity).Select(x => (char) (x + 'A')));
+          var butLastParams = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => (char) (x + 'A') + " arg" + x));
+          var returnType = (char) (arity - 1 + 'A'); 
+          var selectors = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "Func<" + (char) (x + 'A') + ", Object> f" + x));
+          var targetParams = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "Object arg" + x));
+          var dictType = "Dictionary<Tuple<" + String.Join(", ", Enumerable.Repeat("Object", arity - 1)) + ">, Func<" + allTypeArgs + ">>";
+          var args = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "arg" + x));
+          var targets = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "target" + x)); #>
+    public class MultiMethod<<#= allTypeArgs #>>
+    {
+        public MultiMethod(<#= selectors #>)
+        {
+            Overloads = new <#= dictType #>();
+<#        foreach (var arg in Enumerable.Range(0, arity - 1)) { #>
+            Selector<#= arg #> = f<#= arg #>;
+<#        } #>
+        }
+
+<#        foreach (var arg in Enumerable.Range(0, arity - 1)) { #>
+        private Func<<#= (char) (arg + 'A') #>, Object> Selector<#= arg #> { get; set; }
+<#        } #>
+        private <#= dictType #> Overloads { get; set; }
+
+        public MultiMethod<<#= allTypeArgs #>> Add(<#= targetParams #>, Func<<#= allTypeArgs #>> f)
+        {
+            Overloads.Add(Tuple.Create(<#= args #>), f);
+            return this;
+        }
+
+        public Func<<#= allTypeArgs #>> Select(<#= butLastParams #>)
+        {
+<#        foreach (var arg in Enumerable.Range(0, arity - 1)) { #>
+            var target<#= arg #> = Selector<#= arg #>(arg<#= arg #>);
+<#        } #>
+            var targets = Tuple.Create(<#= targets #>);
+            return Overloads[targets];
+        }
+
+        public <#= returnType #> Apply(<#= butLastParams #>)
+        {
+            var f = Select(<#= args #>);
+            return f(<#= args #>);
+        }
+
+        public Func<<#= allTypeArgs #>> AsFunc()
+        {
+            return Apply;
+        }
+    }
+
+<#    } #>
+}
