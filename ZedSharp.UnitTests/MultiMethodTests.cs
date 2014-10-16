@@ -9,7 +9,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void SimpleDispatchTest()
         {
-            var multi = new MultiMethod<int, String>(x => x % 2 == 0)
+            var multi = new MultiMethod<int, bool, String>(x => x % 2 == 0)
                 .Add(true, _ => "Even")
                 .Add(false, _ => "Odd");
 
