@@ -10,16 +10,51 @@ using System.Collections.Generic;
 
 namespace ZedSharp
 {
+    public static class MultiMethod
+    {
 <#    foreach (var arity in Enumerable.Range(arityMin, arityMax)) {
-          var allTypeArgs = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => (char) (x + 'A') + ", " + (char) (x + 'A') + "Target")) + ", " + (char) (arity - 1 + 'A');
+          var butLastTypeArgs = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => (char) (x + 'A') + ", " + (char) (x + 'A') + "Target"));
+          var selectors = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "Func<" + (char) (x + 'A') + ", " + (char) (x + 'A') + "Target> f" + x));
+          var selectorsNoTypes = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "f" + x)); #>
+        public static MultiMethodBuilder<<#= butLastTypeArgs #>> For<<#= butLastTypeArgs #>>(<#= selectors #>)
+        {
+            return new MultiMethodBuilder<<#= butLastTypeArgs #>>(<#= selectorsNoTypes #>);
+        }
+        
+<#    } #>
+    }
+
+<#    foreach (var arity in Enumerable.Range(arityMin, arityMax)) {
+          var butLastTypeArgs = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => (char) (x + 'A') + ", " + (char) (x + 'A') + "Target"));
+          var allTypeArgs = butLastTypeArgs + ", " + (char) (arity - 1 + 'A');
           var funcTypeArgs = String.Join(", ", Enumerable.Range(0, arity).Select(x => (char) (x + 'A')));
           var butLastParams = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => (char) (x + 'A') + " arg" + x));
           var returnType = (char) (arity - 1 + 'A'); 
           var selectors = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "Func<" + (char) (x + 'A') + ", " + (char) (x + 'A') + "Target> f" + x));
+          var selectorsAsProps = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "Selector" + x));
           var targetParams = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => (char) (x + 'A') + "Target arg" + x));
           var dictType = "Dictionary<Tuple<" + String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => (char) (x + 'A') + "Target")) + ">, Func<" + funcTypeArgs + ">>";
           var args = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "arg" + x));
           var targets = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "target" + x)); #>
+    public struct MultiMethodBuilder<<#= butLastTypeArgs #>>
+    {
+        internal MultiMethodBuilder(<#= selectors #>) : this()
+        {
+<#        foreach (var arg in Enumerable.Range(0, arity - 1)) { #>
+            Selector<#= arg #> = f<#= arg #>;
+<#        } #>
+        }
+
+<#        foreach (var arg in Enumerable.Range(0, arity - 1)) { #>
+        private Func<<#= (char) (arg + 'A') #>, <#= (char) (arg + 'A') + "Target" #>> Selector<#= arg #> { get; set; }
+<#        } #>
+
+        public MultiMethod<<#= allTypeArgs #>> Return<<#= returnType #>>()
+        {
+            return new MultiMethod<<#= allTypeArgs #>>(<#= selectorsAsProps #>);
+        }
+    }
+
     public class MultiMethod<<#= allTypeArgs #>>
     {
         public MultiMethod(<#= selectors #>)
