@@ -6,25 +6,6 @@ namespace ZedSharp
 {
     public static class Z
     {
-        public static IEnumerable<int> RandomInts(int max = Int32.MaxValue)
-        {
-            var rand = new Random();
-
-            while (true)
-            {
-                yield return rand.Next(max);
-            }
-        }
-
-        public static IEnumerable<double> RandomDoubles()
-        {
-            var rand = new Random();
-
-            while (true)
-            {
-                yield return rand.NextDouble();
-            }
-        }
 
         public static bool EqualsAny(this Object obj, params Object[] vals)
         {
@@ -218,36 +199,6 @@ namespace ZedSharp
         public static Func<A, R, C> ComposeMany<A, B, C, R>(this Func<A, R, B> f, Func<B, R, C> g)
         {
             return (a, r) => g(f(a, r), r);
-        }
-
-        public static bool Pos(this int x)
-        {
-            return x > 0;
-        }
-
-        public static bool Zero(this int x)
-        {
-            return x == 0;
-        }
-
-        public static bool NotNeg(this int x)
-        {
-            return x >= 0;
-        }
-
-        public static bool Neg(this int x)
-        {
-            return x < 0;
-        }
-
-        public static bool Neg1(this int x)
-        {
-            return x == -1;
-        }
-
-        public static bool Even(this int x)
-        {
-            return x % 2 == 0;
         }
 
         public static bool Not(this bool x)

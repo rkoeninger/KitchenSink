@@ -53,6 +53,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>MultiMethod.tt</DependentUpon>
     </Compile>
+    <Compile Include="Numbers.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="Match.cs" />
     <Compile Include="Natural.cs">
