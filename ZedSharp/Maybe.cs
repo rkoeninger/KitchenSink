@@ -151,7 +151,7 @@ namespace ZedSharp
 
         public static Maybe<String> NotBlank(Maybe<String> maybe)
         {
-            return maybe.Where(Z.NotBlank);
+            return maybe.Where(Strings.NotBlank);
         }
 
         public static Maybe<int> NotNeg(Maybe<int> maybe)
