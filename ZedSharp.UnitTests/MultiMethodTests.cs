@@ -11,10 +11,11 @@ namespace ZedSharp.UnitTests
         {
             var multi = MultiMethod.For((int x) => x % 2 == 0).Return<String>()
                 .Add(true, _ => "Even")
-                .Add(false, _ => "Odd");
+                .Add(false, _ => "Odd")
+                .AsFunc();
 
-            Assert.AreEqual("Even", multi.Apply(14));
-            Assert.AreEqual("Odd", multi.Apply(-3));
+            Assert.AreEqual("Even", multi(14));
+            Assert.AreEqual("Odd", multi(-3));
         }
     }
 }
