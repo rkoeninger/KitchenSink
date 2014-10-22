@@ -6,9 +6,5 @@ namespace ZedSharp
 {
     public static class Z
     {
-        public static bool Not(this bool x)
-        {
-            return !x;
-        }
     }
 }
