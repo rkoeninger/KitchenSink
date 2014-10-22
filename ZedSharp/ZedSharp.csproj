@@ -44,6 +44,7 @@
     <Compile Include="Dates.cs" />
     <Compile Include="DateTimeRange.cs" />
     <Compile Include="Deps.cs" />
+    <Compile Include="Funcs.cs" />
     <Compile Include="Inject.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="Lens.cs" />

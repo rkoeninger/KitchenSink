@@ -44,7 +44,7 @@ namespace ZedSharp
 
         public static Maybe<A> If<A>(A val, Func<A, bool> f)
         {
-            return If(val, f, Z.Id);
+            return If(val, f, Funcs.Id);
         }
 
         public static Maybe<B> If<A, B>(A val, Func<A, bool> f, Func<A, B> convert)
@@ -156,12 +156,12 @@ namespace ZedSharp
 
         public static Maybe<int> NotNeg(Maybe<int> maybe)
         {
-            return maybe.Where(Z.NotNeg);
+            return maybe.Where(Numbers.NotNeg);
         }
 
         public static Maybe<int> Pos(Maybe<int> maybe)
         {
-            return maybe.Where(Z.Pos);
+            return maybe.Where(Numbers.Pos);
         }
     }
     
