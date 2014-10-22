@@ -175,5 +175,5 @@ FakesAssemblies/
 ZedSharp/Natural.cs
 ZedSharp/Table.cs
 ZedSharp/Tuples.cs
-ZedSharp/ZGen.cs
+ZedSharp/Map.cs
 ZedSharp/MultiMethod.cs

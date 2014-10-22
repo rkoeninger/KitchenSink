@@ -190,46 +190,6 @@ namespace ZedSharp
             }
         }
 
-        public static Dictionary<A, B> Map<A, B>(params Row<A, B>[] pairs)
-        {
-            return pairs.ToDictionary(x => x.Item1, x => x.Item2);
-        }
-
-        public static Dictionary<A, B> Map<A, B>(params Tuple<A, B>[] pairs)
-        {
-            return pairs.ToDictionary(x => x.Item1, x => x.Item2);
-        }
-
-        public static Dictionary<A, B> Map<A, B>(params Object[] pairs)
-        {
-            if (pairs.Length.Even().Not())
-                throw new ArgumentException("Argument list must have even number of values");
-
-            return pairs.Partition(2).ToDictionary(x => x.First().As<A>(), x => x.Last().As<B>());
-        }
-
-        public static Dictionary<String, Object> Map(params Object[] pairs)
-        {
-            if (pairs.Length.Even().Not())
-                throw new ArgumentException("Argument list must have even number of values");
-
-            return pairs.Partition(2).ToDictionary(x => x.First().ToString(), x => x.Last());
-        }
-
-        public static Dictionary<String, Object> Map(Object obj)
-        {
-            if (obj == null)
-                return new Dictionary<String, Object>();
-
-            return obj.GetType().GetProperties().Where(x => x.GetIndexParameters().Length == 0).ToDictionary(
-                x => x.Name, x => x.GetValue(obj, null));
-        }
-
-        public static Dictionary<String, A> Map<A>(params Expression<Func<Object, A>>[] exprs)
-        {
-            return exprs.ToDictionary(x => x.Parameters.First().Name, x => x.Compile().Invoke(null));
-        }
-
         public static HashSet<A> Set<A>(params A[] vals)
         {
             return new HashSet<A>(vals);

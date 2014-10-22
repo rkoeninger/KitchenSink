@@ -1,0 +1,40 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#    var arityMin = 0; #>
+<#    var arityMax = 21; #>using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+
+namespace ZedSharp
+{
+    /// <summary>A collection of utilities for building and working with Dictionaries.</summary>
+    public static class Map
+    {
+        /// <summary>Intended to be used with an anonymous object, but can be used with any object.</summary>
+        public static Dictionary<String, Object> Of(Object obj)
+        {
+            if (obj == null)
+                return new Dictionary<String, Object>();
+
+            return obj.GetType().GetProperties().Where(x => x.GetIndexParameters().Length == 0).ToDictionary(
+                x => x.Name, x => x.GetValue(obj, null));
+        }
+
+<#    foreach (var arity in Enumerable.Range(arityMin, arityMax)) { #>
+        public static Dictionary<A, B> Of<A, B>(<#= String.Join(", ", Enumerable.Range(0, arity).Select(arg => "A key" + arg + ", B val" + arg)) #>)
+        {
+            var dict = new Dictionary<A, B>();
+<#        foreach (var arg in Enumerable.Range(0, arity)) { #>
+            dict.Add(<#= "key" + arg #>, <#= "val" + arg #>);
+<#        } #>
+            return dict;
+        }
+
+<#    } #>
+    }
+}
