@@ -7,48 +7,8 @@ using System.Text.RegularExpressions;
 
 namespace ZedSharp
 {
-    public static partial class Z
+    public static class Z
     {
-        public static TimeSpan Days(this int x)
-        {
-            return new TimeSpan(x, 0, 0, 0);
-        }
-
-        public static TimeSpan Hours(this int x)
-        {
-            return new TimeSpan(x, 0, 0);
-        }
-
-        public static TimeSpan Minutes(this int x)
-        {
-            return new TimeSpan(0, x, 0);
-        }
-
-        public static DateTime AgoLocal(this TimeSpan x)
-        {
-            return DateTime.Now.Add(x.Negate());
-        }
-
-        public static DateTime Ago(this TimeSpan x)
-        {
-            return DateTime.UtcNow.Add(x.Negate());
-        }
-
-        public static DateTime FromNowLocal(this TimeSpan x)
-        {
-            return DateTime.Now.Add(x);
-        }
-
-        public static DateTime FromNow(this TimeSpan x)
-        {
-            return DateTime.UtcNow.Add(x);
-        }
-
-        public static DateTimeRange To(this DateTime begin, DateTime end)
-        {
-            return new DateTimeRange(begin, end);
-        }
-
         public static IEnumerable<int> RandomInts(int max = Int32.MaxValue)
         {
             var rand = new Random();
