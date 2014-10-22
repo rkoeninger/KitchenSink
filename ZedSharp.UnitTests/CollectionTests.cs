@@ -42,7 +42,7 @@ namespace ZedSharp.UnitTests
                 ConsoleColor.Green,
                 blue = "blue",
                 Color_Yellow = Tuple.Create(255, 255, 0),
-                Func1 = (Func<int, int>)((int x) => x + 5)
+                Func1 = Z.Add(5)
             });
             Assert.AreEqual(5, dict2.Count);
             Assert.IsTrue(dict2.ContainsKey("Red"));

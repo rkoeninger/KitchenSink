@@ -74,10 +74,10 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void MaybeJoining()
         {
-            Assert.AreEqual(Maybe.Of(3), Maybe.Of(1).Join(Maybe.Of(2), (x, y) => x + y));
-            Assert.AreEqual(Maybe.None<int>(), Maybe.None<int>().Join(Maybe.Of(2), (x, y) => x + y));
-            Assert.AreEqual(Maybe.None<int>(), Maybe.Of(1).Join(Maybe.None<int>(), (x, y) => x + y));
-            Assert.AreEqual(Maybe.None<int>(), Maybe.None<int>().Join(Maybe.None<int>(), (x, y) => x + y));
+            Assert.AreEqual(Maybe.Of(3), Maybe.Of(1).Join(Maybe.Of(2), Z.AddI));
+            Assert.AreEqual(Maybe.None<int>(), Maybe.None<int>().Join(Maybe.Of(2), Z.AddI));
+            Assert.AreEqual(Maybe.None<int>(), Maybe.Of(1).Join(Maybe.None<int>(), Z.AddI));
+            Assert.AreEqual(Maybe.None<int>(), Maybe.None<int>().Join(Maybe.None<int>(), Z.AddI));
         }
 
         [TestMethod]
