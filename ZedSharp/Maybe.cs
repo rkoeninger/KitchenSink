@@ -136,17 +136,17 @@ namespace ZedSharp
 
         public static Maybe<IEnumerable<A>> NotEmpty<A>(Maybe<IEnumerable<A>> maybe)
         {
-            return maybe.Where(Z.NotEmpty);
+            return maybe.Where(Collections.NotEmpty);
         }
 
         public static Maybe<List<A>> NotEmpty<A>(Maybe<List<A>> maybe)
         {
-            return maybe.Where(Z.NotEmpty);
+            return maybe.Where(Collections.NotEmpty);
         }
 
         public static Maybe<String> NotEmpty(Maybe<String> maybe)
         {
-            return maybe.Where(Z.NotEmpty);
+            return maybe.Where(Strings.NotEmpty);
         }
 
         public static Maybe<String> NotBlank(Maybe<String> maybe)
@@ -304,12 +304,12 @@ namespace ZedSharp
 
         public List<A> ToList()
         {
-            return HasValue ? Z.List(Value) : new List<A>();
+            return HasValue ? Collections.List(Value) : new List<A>();
         }
 
         public A[] ToArray()
         {
-            return HasValue ? Z.Array(Value) : new A[0];
+            return HasValue ? Collections.Array(Value) : new A[0];
         }
 
         public override string ToString()

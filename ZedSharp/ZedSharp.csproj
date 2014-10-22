@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeLoader.cs" />
+    <Compile Include="Collections.cs" />
     <Compile Include="Dates.cs" />
     <Compile Include="DateTimeRange.cs" />
     <Compile Include="Deps.cs" />
