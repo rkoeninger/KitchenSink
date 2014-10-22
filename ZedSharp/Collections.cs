@@ -47,11 +47,6 @@ namespace ZedSharp
             return new HashSet<A>(seq);
         }
 
-        public static IEnumerable<A> Seq<A>(params A[] vals)
-        {
-            return vals;
-        }
-
         public static A[] Array<A>(params A[] vals)
         {
             return vals;

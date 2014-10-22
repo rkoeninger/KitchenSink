@@ -42,7 +42,7 @@ namespace ZedSharp.UnitTests
                 .Case(Track<int, bool>(l, "case5", 5.Eq())).Then(Track<int, string>(l, "then5", _ => "five"))
                 .End();
             Assert.AreEqual(Maybe.Of("four"), res2);
-            Assert.IsTrue(l.SequenceEqual(Collections.Seq("case1", "case2", "case3", "case4", "then4")));
+            Assert.IsTrue(l.SequenceEqual(Seq.Of("case1", "case2", "case3", "case4", "then4")));
 
             Assert.AreEqual(31, Match.On("abc").Case("def").Then(23).Else().Then(31));
 
@@ -58,7 +58,7 @@ namespace ZedSharp.UnitTests
                 .Case(Track<int, bool>(l, "case3", 2.Eq())).Then(Track<int, string>(l, "then3", _ => "awert"))
                 .End();
             Assert.AreEqual("fgjh", res3);
-            Assert.IsTrue(l.SequenceEqual(Collections.Seq("case1", "case2", "then2")));
+            Assert.IsTrue(l.SequenceEqual(Seq.Of("case1", "case2", "then2")));
 
             l = new List<String>();
             var res4 = Match.On(3)
@@ -69,7 +69,7 @@ namespace ZedSharp.UnitTests
                 .Case(Track<int, bool>(l, "case4", 2.Eq())).Then(Track<int, string>(l, "then4", _ => "awert"))
                 .End();
             Assert.AreEqual("whatever", res4);
-            Assert.IsTrue(l.SequenceEqual(Collections.Seq("case1", "case2", "case3", "case4", "default")));
+            Assert.IsTrue(l.SequenceEqual(Seq.Of("case1", "case2", "case3", "case4", "default")));
         }
 
         private Func<A, B> Track<A, B>(List<String> l, String msg, Func<A, B> f)
