@@ -33,6 +33,11 @@ namespace ZedSharp
             return y => Equals(x, y);
         }
 
+        public static Func<A, bool> Same<A>(this A x)
+        {
+            return y => ReferenceEquals(x, y);
+        }
+
         public static bool Is<A>(this Object x)
         {
             return x is A;

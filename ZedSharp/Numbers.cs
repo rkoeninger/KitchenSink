@@ -38,6 +38,11 @@ namespace ZedSharp
             return x % 2 == 0;
         }
 
+        public static Func<int, int> Plus(this int i)
+        {
+            return x => x + i;
+        }
+
         public static IEnumerable<int> RandomInts(int max = Int32.MaxValue)
         {
             var rand = new Random();

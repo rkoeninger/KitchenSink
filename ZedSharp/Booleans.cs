@@ -25,6 +25,12 @@ namespace ZedSharp
             return x | y;
         }
 
+        /// <summary>Does not short-circuit.</summary>
+        public static bool Xor(this bool x, bool y)
+        {
+            return x ^ y;
+        }
+
         public static Func<A, bool> NotF<A>(this Func<A, bool> f)
         {
             return x => !f(x);
