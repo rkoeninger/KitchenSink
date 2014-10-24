@@ -38,7 +38,7 @@ namespace ZedSharp.Test
                 return e;
             }
 
-            throw toThrow ?? new AssertFailedException("Exception expected");
+            throw toThrow ?? new AssertFailedException(typeof(E).Name + " expected");
         }
 
         /// <summary>Throws exception if code can't compile.</summary>
