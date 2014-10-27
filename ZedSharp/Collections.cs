@@ -81,5 +81,10 @@ namespace ZedSharp
         {
             return seq.Count().Pos();
         }
+
+        public static IEnumerable<int> Indicies<A>(this IEnumerable<A> seq)
+        {
+            return seq.Select((x, i) => i);
+        }
     }
 }
