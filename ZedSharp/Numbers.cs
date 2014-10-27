@@ -126,5 +126,54 @@ namespace ZedSharp
 
             return result;
         }
+
+        public static IEnumerable<IEnumerable<A>> Combinations<A>(this IEnumerable<A> seq, int r)
+        {
+            if (seq == null)
+                throw new ArgumentNullException();
+            if (r < 0)
+                throw new ArgumentException();
+
+            return CombHelper(seq.Count(), r).Select(comb => ZipWhere(seq, comb));
+        }
+
+        private static IEnumerable<IEnumerable<bool>> CombHelper(int n, int r)
+        {
+            if (n == 0 && r == 0)
+            {
+                yield return EmptyBoolSeq;
+                yield break;
+            }
+            if (n < r)
+            {
+                yield break;
+            }
+
+            if (r > 0)
+            {
+                foreach (var subGroup in CombHelper(n - 1, r - 1))
+                {
+                    yield return OneTrue.Concat(subGroup);
+                }
+            }
+
+            foreach (var subGroup in CombHelper(n - 1, r))
+            {
+                yield return OneFalse.Concat(subGroup);
+            }
+        }
+
+        private static readonly IEnumerable<bool> OneTrue = Seq.Of(true);
+        private static readonly IEnumerable<bool> OneFalse = Seq.Of(false);
+        private static readonly IEnumerable<bool> EmptyBoolSeq = Seq.Of<bool>();
+
+        private static IEnumerable<A> ZipWhere<A>(IEnumerable<A> seq, IEnumerable<bool> selectors)
+        {
+            using (var e1 = seq.GetEnumerator())
+                using (var e2 = selectors.GetEnumerator())
+                    while (e1.MoveNext() && e2.MoveNext())
+                        if (e2.Current)
+                            yield return e1.Current;
+        }
     }
 }
