@@ -105,6 +105,41 @@ namespace ZedSharp
             return result;
         }
 
+        public static IEnumerable<IEnumerable<A>> Permutations<A>(this IEnumerable<A> list, int r)
+        {
+            var len = list.Count();
+
+            if (r > len)
+            {
+                throw new ArgumentException("Can't take subsequence longer than entire set");
+            }
+
+            if (r == 0 || len == 0)
+            {
+                yield break;
+            }
+
+            if (r == 1)
+            {
+                foreach (var item in list)
+                {
+                    yield return Seq.Of(item);
+                }
+
+                yield break;
+            }
+
+            foreach (var i in list.Indicies())
+            {
+                var sublist = list.WithoutAt(i);
+
+                foreach (var subseq in Permutations(sublist, r - 1))
+                {
+                    yield return subseq.Concat(Seq.Of(list.ElementAt(i)));
+                }
+            }
+        }
+
         public static int Combinations(this int n, int r)
         {
             if (n < 0)

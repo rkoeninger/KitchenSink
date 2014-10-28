@@ -86,5 +86,10 @@ namespace ZedSharp
         {
             return seq.Select((x, i) => i);
         }
+
+        public static IEnumerable<A> WithoutAt<A>(this IEnumerable<A> seq, int index)
+        {
+            return seq.Take(index).Concat(seq.Skip(index + 1));
+        }
     }
 }
