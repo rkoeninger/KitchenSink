@@ -53,6 +53,21 @@ namespace ZedSharp
             return x % y == 0;
         }
 
+        public static bool CoinFlip(Random rand = null)
+        {
+            return (rand ?? new Random()).NextBoolean();
+        }
+
+        public static bool NextBoolean(this Random rand)
+        {
+            return rand.Next(1) == 0;
+        }
+
+        public static A Pick<A>(this Random rand, IEnumerable<A> seq)
+        {
+            return seq.ElementAt(rand.Next(seq.Count()));
+        }
+
         public static IEnumerable<int> RandomInts(int max = Int32.MaxValue)
         {
             var rand = new Random();

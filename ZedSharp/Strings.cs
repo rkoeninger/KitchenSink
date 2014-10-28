@@ -20,6 +20,11 @@ namespace ZedSharp
             return s.Replace("\r\n", "\n").Replace("\n", "\r\n");
         }
 
+        public static String Format(this String s, params Object[] args)
+        {
+            return String.Format(s, args);
+        }
+
         public static IEnumerable<String> SplitSeq(this String s, Regex r)
         {
             var m = r.Match(s);

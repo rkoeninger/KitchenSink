@@ -8,6 +8,37 @@ namespace ZedSharp
 {
     public static class Objects
     {
+        public static A To<A>(this IConvertible obj)
+        {
+            return (A)Convert.ChangeType(obj, typeof(A));
+        }
+
+        public static bool IsLessThan<A>(this A val, A that) where A : IComparable<A>
+        {
+            return val.CompareTo(that) < 0;
+        }
+
+        public static bool IsLessThanOrEquals<A>(this A val, A that) where A : IComparable<A>
+        {
+            return val.CompareTo(that) < 0;
+        }
+
+        public static bool IsGreaterThan<A>(this A val, A that) where A : IComparable<A>
+        {
+            return val.CompareTo(that) > 0;
+        }
+
+        public static bool IsGreaterThanOrEquals<A>(this A val, A that) where A : IComparable<A>
+        {
+            return val.CompareTo(that) >= 0;
+        }
+
+        /// <summary>Inclusive on lower bound, exclusive on upper bound.</summary>
+        public static bool IsBetween<A>(this A val, A lower, A upper) where A : IComparable<A>
+        {
+            return val.IsGreaterThanOrEquals(lower) && val.IsLessThan(upper);
+        }
+
         public static bool EqualsAny(this Object obj, params Object[] vals)
         {
             return vals.Any(x => x == obj);
