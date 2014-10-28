@@ -135,7 +135,7 @@ namespace ZedSharp
 
                 foreach (var subseq in Permutations(sublist, r - 1))
                 {
-                    yield return subseq.Concat(Seq.Of(list.ElementAt(i)));
+                    yield return Seq.Of(list.ElementAt(i)).Concat(subseq);
                 }
             }
         }
