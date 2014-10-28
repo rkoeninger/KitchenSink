@@ -84,12 +84,25 @@ namespace ZedSharp
 
         public static IEnumerable<int> Indicies<A>(this IEnumerable<A> seq)
         {
-            return seq.Select((x, i) => i);
+            return Enumerable.Range(0, seq.Count());
         }
 
         public static IEnumerable<A> WithoutAt<A>(this IEnumerable<A> seq, int index)
         {
             return seq.Take(index).Concat(seq.Skip(index + 1));
+        }
+
+        public static IEnumerable<A> Shuffle<A>(this IEnumerable<A> seq)
+        {
+            var rand = new Random();
+            var temp = seq.ToArray();
+
+            foreach (var i in seq.Indicies())
+            {
+                int j = rand.Next(i, temp.Length);
+                yield return temp[j];
+                temp[j] = temp[i];
+            }
         }
     }
 }
