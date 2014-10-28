@@ -22,10 +22,33 @@ namespace ZedSharp
         {
             return new Blob<A>(vals);
         }
+
+        /// <summary>A lexicographical comparison of two blobs.</summary>
+        public static int Compare<A>(Blob<A> x, Blob<A> y) where A : IComparable<A>
+        {
+            for (int i = 0; i < Math.Max(x.Length, y.Length); ++i)
+            {
+                if (i == x.Length && i == y.Length)
+                    return 0;
+
+                if (i == x.Length)
+                    return -1;
+
+                if (i == y.Length)
+                    return 1;
+
+                int c = x[i].CompareTo(y[i]);
+
+                if (c != 0)
+                    return c;
+            }
+
+            return 0;
+        }
     }
 
     /// <summary>Immutable, array-like structure.</summary>
-    public struct Blob<A> : IEnumerable<A>
+    public struct Blob<A> : IEnumerable<A>, IEquatable<Blob<A>>
     {
         public static implicit operator A[](Blob<A> blob)
         {
@@ -48,7 +71,7 @@ namespace ZedSharp
         }
 
         private A[] Values { get; set; }
-        private int Length { get; set; }
+        public int Length { get; private set; }
 
         public A this[int index]
         {
@@ -71,6 +94,39 @@ namespace ZedSharp
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public override bool Equals(Object that)
+        {
+            return that.Is<Blob<A>>() && Equals((Blob<A>) that);
+        }
+
+        public bool Equals(Blob<A> that)
+        {
+            if (Length != that.Length)
+                return false;
+
+            if (Length == 0)
+                return true;
+
+            for (int i = 0; i < Length; ++i)
+                if (! Object.Equals(Values[i], that.Values[i]))
+                    return false;
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            if (Length == 0)
+                return "[]";
+
+            return "[" + String.Join(", ", Values) + "]";
         }
     }
 }
