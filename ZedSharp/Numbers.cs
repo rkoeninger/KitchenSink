@@ -48,6 +48,11 @@ namespace ZedSharp
             return x => x * i;
         }
 
+        public static bool IsMultipleOf(this int x, int y)
+        {
+            return x % y == 0;
+        }
+
         public static IEnumerable<int> RandomInts(int max = Int32.MaxValue)
         {
             var rand = new Random();

@@ -37,6 +37,16 @@ namespace ZedSharp
             }
         }
 
+        public static IEnumerable<List<A>> Partition<A>(this List<A> list, int count)
+        {
+            return Partition(list.As<IEnumerable<A>>(), count).Select(x => x.ToList());
+        }
+
+        public static IEnumerable<A[]> Partition<A>(this A[] array, int count)
+        {
+            return Partition(array.As<IEnumerable<A>>(), count).Select(x => x.ToArray());
+        }
+
         public static HashSet<A> Set<A>(params A[] vals)
         {
             return new HashSet<A>(vals);
