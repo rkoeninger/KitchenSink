@@ -44,19 +44,9 @@ namespace ZedSharp
         }
     }
 
-    /// <summary>Immutable, array-like structure.</summary>
+    /// <summary>Immutable, array-like structure. Provides random-access operations.</summary>
     public struct Blob<A> : IEnumerable<A>, IEquatable<Blob<A>>
     {
-        public static implicit operator A[](Blob<A> blob)
-        {
-            return blob.ToArray();
-        }
-
-        public static implicit operator Blob<A>(A[] array)
-        {
-            return new Blob<A>(array);
-        }
-
         public static bool operator ==(Blob<A> x, Blob<A> y)
         {
             return x.Equals(y);
@@ -65,10 +55,6 @@ namespace ZedSharp
         public static bool operator !=(Blob<A> x, Blob<A> y)
         {
             return ! (x == y);
-        }
-
-        internal Blob(params A[] vals) : this((IEnumerable<A>) vals)
-        {
         }
 
         internal Blob(IEnumerable<A> vals) : this()
@@ -94,7 +80,11 @@ namespace ZedSharp
 
         public IEnumerator<A> GetEnumerator()
         {
-            return Length == 0 ? Enumerable.Empty<A>().GetEnumerator() : Values.AsEnumerable().GetEnumerator();
+            if (Length == 0)
+                yield break;
+
+            foreach (var item in Values)
+                yield return item;
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -109,6 +99,9 @@ namespace ZedSharp
 
         public bool Equals(Blob<A> that)
         {
+            if (Object.ReferenceEquals(this, that))
+                return true;
+
             if (Length != that.Length)
                 return false;
 
@@ -127,6 +120,7 @@ namespace ZedSharp
             return ToString().GetHashCode();
         }
 
+        /// <summary>Returns a string formatted like: "[Item1, Item2, Item3]".</summary>
         public override string ToString()
         {
             if (Length == 0)

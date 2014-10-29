@@ -17,6 +17,11 @@ namespace ZedSharp
         {
             return r == null ? Maybe.None<A>() : Maybe.Of(r.Value);
         }
+
+        public static A OrElse<A>(this Ref<A> r, A val)
+        {
+            return r == null ? val : r.Value;
+        }
     }
 
     public class Ref<A>

@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Blob.cs" />
     <Compile Include="Booleans.cs" />
+    <Compile Include="Chain.cs" />
     <Compile Include="CodeLoader.cs" />
     <Compile Include="Collections.cs" />
     <Compile Include="Dates.cs" />
