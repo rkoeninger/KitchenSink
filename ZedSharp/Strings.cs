@@ -92,7 +92,7 @@ namespace ZedSharp
             return seq.Where(NotBlank).Select(x => x.Trim());
         }
 
-        public static String StringJoin(this IEnumerable<Object> seq, String sep = null)
+        public static String StringJoin<A>(this IEnumerable<A> seq, String sep = null)
         {
             return String.Join(sep ?? "", seq);
         }

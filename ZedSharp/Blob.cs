@@ -26,22 +26,19 @@ namespace ZedSharp
         /// <summary>A lexicographical comparison of two blobs.</summary>
         public static int Compare<A>(Blob<A> x, Blob<A> y) where A : IComparable<A>
         {
-            for (int i = 0; i < Math.Max(x.Length, y.Length); ++i)
+            for (int i = 0; i < Math.Min(x.Length, y.Length); ++i)
             {
-                if (i == x.Length && i == y.Length)
-                    return 0;
-
-                if (i == x.Length)
-                    return -1;
-
-                if (i == y.Length)
-                    return 1;
-
                 int c = x[i].CompareTo(y[i]);
 
                 if (c != 0)
                     return c;
             }
+
+            if (x.Length < y.Length)
+                return -1;
+
+            if (x.Length > y.Length)
+                return 1;
 
             return 0;
         }
@@ -77,11 +74,10 @@ namespace ZedSharp
         internal Blob(IEnumerable<A> vals) : this()
         {
             Values = vals.ToArray();
-            Length = Values.Length;
         }
 
         private A[] Values { get; set; }
-        public int Length { get; private set; }
+        public int Length { get { return Values == null ? 0 : Values.Length; } }
 
         public A this[int index]
         {
@@ -136,7 +132,7 @@ namespace ZedSharp
             if (Length == 0)
                 return "[]";
 
-            return "[" + String.Join(", ", Values) + "]";
+            return "[" + Values.StringJoin(", ") + "]";
         }
     }
 }
