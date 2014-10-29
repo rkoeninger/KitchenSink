@@ -60,6 +60,16 @@ namespace ZedSharp
             return new Blob<A>(array);
         }
 
+        public static bool operator ==(Blob<A> x, Blob<A> y)
+        {
+            return x.Equals(y);
+        }
+
+        public static bool operator !=(Blob<A> x, Blob<A> y)
+        {
+            return ! (x == y);
+        }
+
         internal Blob(params A[] vals) : this((IEnumerable<A>) vals)
         {
         }
