@@ -70,12 +70,19 @@ namespace ZedSharp
             get { return Get(index); }
         }
 
+        /// <summary>Returns the value at the given index in this blob.</summary>
         public A Get(int index)
         {
             if (index < 0 || index >= Length)
-                throw new IndexOutOfRangeException("Index of {0} is out of range for an array of length {1}".Format(index, Length));
+                throw new IndexOutOfRangeException("Index {0} is out of range for an array of length {1}".Format(index, Length));
 
             return Values[index];
+        }
+
+        public Maybe<A> GetMaybe(int index)
+        {
+            var len = Length;
+            return Maybe.If(Values, x => index >= 0 && index < len, x => x[index]);
         }
 
         public IEnumerator<A> GetEnumerator()
@@ -105,9 +112,6 @@ namespace ZedSharp
             if (Length != that.Length)
                 return false;
 
-            if (Length == 0)
-                return true;
-
             for (int i = 0; i < Length; ++i)
                 if (! Object.Equals(Values[i], that.Values[i]))
                     return false;
@@ -126,7 +130,7 @@ namespace ZedSharp
             if (Length == 0)
                 return "[]";
 
-            return "[" + Values.StringJoin(", ") + "]";
+            return "[" + Values.Intersperse(", ") + "]";
         }
     }
 }

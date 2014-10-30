@@ -89,8 +89,13 @@ namespace ZedSharp
             Length = next.Length + 1;
         }
 
+        /// <summary>The first value in this chain.</summary>
         public Maybe<A> Head { get; private set; }
+
+        /// <summary>The rest of this chain, following the first value.</summary>
         public Chain<A> Tail { get { return TailRef.OrElse(Empty); } }
+
+        /// <summary>Number of items in this chain.</summary>
         public int Length { get; private set; }
 
         private Ref<Chain<A>> TailRef { get; set; }
@@ -124,9 +129,6 @@ namespace ZedSharp
             if (Length != that.Length)
                 return false;
 
-            if (Length == 0)
-                return true;
-
             return this.SequenceEqual(that);
         }
 
@@ -141,7 +143,7 @@ namespace ZedSharp
             if (Length == 0)
                 return "[]";
 
-            return "[" + this.StringJoin(", ") + "]";
+            return "[" + this.Intersperse(", ") + "]";
         }
     }
 }

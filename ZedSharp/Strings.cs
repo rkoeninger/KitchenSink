@@ -79,7 +79,7 @@ namespace ZedSharp
 
         public static String CollapseSpace(this String x)
         {
-            return WhiteSpaceRegex.Split(x.Trim()).StringJoin(" ");
+            return WhiteSpaceRegex.Split(x.Trim()).Intersperse(" ");
         }
 
         public static String ToTitleCase(this String x)
@@ -92,7 +92,8 @@ namespace ZedSharp
             return seq.Where(NotBlank).Select(x => x.Trim());
         }
 
-        public static String StringJoin<A>(this IEnumerable<A> seq, String sep = null)
+        /// <summary>Joins the string representations of the elements in the sequence, separated by the given string (defaults to empty string).</summary>
+        public static String Intersperse<A>(this IEnumerable<A> seq, String sep = null)
         {
             return String.Join(sep ?? "", seq);
         }

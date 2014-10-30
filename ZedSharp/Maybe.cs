@@ -163,6 +163,11 @@ namespace ZedSharp
         {
             return maybe.Where(Numbers.Pos);
         }
+
+        public static A OrNull<A>(this Maybe<A> maybe) where A : class
+        {
+            return maybe.OrElse(null);
+        }
     }
     
     /// <summary>
