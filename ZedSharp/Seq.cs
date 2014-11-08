@@ -12,5 +12,11 @@ namespace ZedSharp
         {
             return vals;
         }
+
+        /// <summary>Infinitely repeats item.</summary>
+        public static IEnumerable<A> Repeat<A>(params A[] vals)
+        {
+            return vals.Cycle();
+        }
     }
 }
