@@ -314,7 +314,7 @@ namespace ZedSharp
 
         public A[] ToArray()
         {
-            return HasValue ? Collections.Array(Value) : new A[0];
+            return HasValue ? AnArray.Of(Value) : new A[0];
         }
 
         public override string ToString()

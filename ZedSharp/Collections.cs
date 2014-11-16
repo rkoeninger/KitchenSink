@@ -57,11 +57,6 @@ namespace ZedSharp
             return new HashSet<A>(seq);
         }
 
-        public static A[] Array<A>(params A[] vals)
-        {
-            return vals;
-        }
-
         public static A[] Add<A>(this A[] array, params A[] vals)
         {
             var result = new A[array.Length + vals.Length];
