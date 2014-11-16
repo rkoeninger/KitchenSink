@@ -52,6 +52,7 @@
     <Compile Include="Inject.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="Lens.cs" />
+    <Compile Include="List.cs" />
     <Compile Include="Month.cs" />
     <Compile Include="MultiMethod.cs">
       <AutoGen>True</AutoGen>

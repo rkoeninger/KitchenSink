@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ZedSharp.UnitTests
@@ -6,6 +8,14 @@ namespace ZedSharp.UnitTests
     [TestClass]
     public class CollectionTests
     {
+        [TestMethod]
+        public void ListCreateWithOfMethod()
+        {
+            var xs = List.Of(1, 2, 3, 4, 5);
+            var ys = new List<int>() { 1, 2, 3, 4, 5 };
+            Assert.IsTrue(xs.SequenceEqual(ys));
+        }
+
         [TestMethod]
         public void DictionaryCreateLongArgList()
         {
