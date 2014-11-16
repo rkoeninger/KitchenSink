@@ -62,29 +62,12 @@ namespace ZedSharp
             return vals;
         }
 
-        public static List<A> List<A>(params A[] vals)
-        {
-            return new List<A>(vals);
-        }
-
         public static A[] Add<A>(this A[] array, params A[] vals)
         {
             var result = new A[array.Length + vals.Length];
             array.CopyTo(result, 0);
             vals.CopyTo(result, array.Length);
             return result;
-        }
-
-        public static List<A> Add<A>(this List<A> list, params A[] vals)
-        {
-            var result = new List<A>(list);
-            list.AddRange(vals);
-            return result;
-        }
-
-        public static bool NotEmpty<A>(this List<A> list)
-        {
-            return list.Count.Pos();
         }
 
         public static bool NotEmpty<A>(this IEnumerable<A> seq)

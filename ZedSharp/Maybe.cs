@@ -309,7 +309,7 @@ namespace ZedSharp
 
         public List<A> ToList()
         {
-            return HasValue ? Collections.List(Value) : new List<A>();
+            return HasValue ? List.Of(Value) : new List<A>();
         }
 
         public A[] ToArray()
