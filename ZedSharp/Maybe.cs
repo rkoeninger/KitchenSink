@@ -168,6 +168,26 @@ namespace ZedSharp
         {
             return maybe.OrElse(null);
         }
+
+        public static bool OrFalse(this Maybe<bool> maybe)
+        {
+            return maybe.OrElse(false);
+        }
+
+        public static int OrZero(this Maybe<int> maybe)
+        {
+            return maybe.OrElse(0);
+        }
+
+        public static String OrEmpty(this Maybe<String> maybe)
+        {
+            return maybe.OrElse("");
+        }
+
+        public static IEnumerable<A> OrEmpty<A>(this Maybe<IEnumerable<A>> maybe)
+        {
+            return maybe.OrElse(Seq.Of<A>());
+        }
     }
     
     /// <summary>
@@ -297,6 +317,11 @@ namespace ZedSharp
                 throw e;
 
             return Value;
+        }
+
+        public A OrDefault()
+        {
+            return HasValue ? Value : default(A);
         }
         
         public Maybe<A> ForEach(Action<A> f)
