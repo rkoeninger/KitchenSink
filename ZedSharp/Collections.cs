@@ -92,15 +92,5 @@ namespace ZedSharp
                 temp[j] = temp[i];
             }
         }
-
-        /// <summary>Infinitely enumerates sequence.</summary>
-        public static IEnumerable<A> Cycle<A>(this IEnumerable<A> seq)
-        {
-            while (true)
-            {
-                foreach (var item in seq)
-                    yield return item;
-            }
-        }
     }
 }

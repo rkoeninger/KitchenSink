@@ -13,10 +13,31 @@ namespace ZedSharp
             return vals;
         }
 
-        /// <summary>Infinitely repeats item.</summary>
+        /// <summary>Infinitely enumerates sequence.</summary>
+        public static IEnumerable<A> Cycle<A>(this IEnumerable<A> seq)
+        {
+            while (true)
+                foreach (var item in seq)
+                    yield return item;
+        }
+
+        /// <summary>Infinitely repeats item(s).</summary>
         public static IEnumerable<A> Repeat<A>(params A[] vals)
         {
             return vals.Cycle();
+        }
+
+        /// <summary>Performs side-effecting Action on each item in sequence.</summary>
+        public static void ForEach<A>(this IEnumerable<A> seq, Action<A> f)
+        {
+            foreach (var item in seq)
+                f(item);
+        }
+
+        /// <summary>Forces sequence to enumerate.</summary>
+        public static void DoAll<A>(this IEnumerable<A> seq)
+        {
+            foreach (var item in seq);
         }
     }
 }
