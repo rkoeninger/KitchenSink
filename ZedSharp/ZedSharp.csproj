@@ -50,6 +50,11 @@
     <Compile Include="DateTimeRange.cs" />
     <Compile Include="Deps.cs" />
     <Compile Include="Funcs.cs" />
+    <Compile Include="GenericMethod.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GenericMethod.tt</DependentUpon>
+    </Compile>
     <Compile Include="Inject.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="Lens.cs" />
@@ -95,6 +100,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="GenericMethod.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>GenericMethod.cs</LastGenOutput>
+    </None>
     <None Include="MultiMethod.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>MultiMethod.cs</LastGenOutput>

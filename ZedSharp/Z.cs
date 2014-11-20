@@ -25,6 +25,8 @@ namespace ZedSharp
 
         public static readonly Func<int, int, int> Add = (x, y) => x + y;
 
+        public static readonly Func<int, int> Negate = x => -x;
+
         public static readonly Func<int, int> Inc = x => x + 1;
 
         public static readonly Func<int, int> Dec = x => x - 1;
@@ -38,6 +40,11 @@ namespace ZedSharp
         public static readonly Func<Object, int> Hash = x => x == null ? 0 : x.GetHashCode();
 
         public static readonly Func<Object, String> Show = x => x == null ? "" : x.ToString();
+
+        public static A Id<A>(A val)
+        {
+            return val;
+        }
 
         /// <summary>Curried versions of functions in the enclosing class.</summary>
         public static class C

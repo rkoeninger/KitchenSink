@@ -177,3 +177,4 @@ ZedSharp/Table.cs
 ZedSharp/Tuples.cs
 ZedSharp/Map.cs
 ZedSharp/MultiMethod.cs
+ZedSharp/GenericMethod.cs
