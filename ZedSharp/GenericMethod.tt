@@ -21,7 +21,18 @@ namespace ZedSharp
           var butLastTypeArgs = typeArgs.Take(arity - 1);
           var butLastTypeArgsCsv = String.Join(", ", butLastTypeArgs);
           var butLastParamsWithTypesCsv = String.Join(", ", indicies.Take(arity - 1).Select(x => toChar(x) + " arg" + x));
-          var butLastParamsCsv = String.Join(", ", indicies.Take(arity - 1).Select(x => "arg" + x));
+          var butLastParams = indicies.Take(arity - 1).Select(x => "arg" + x);
+          var butLastParamsCsv = String.Join(", ", butLastParams);
+          var overloadTypeArgs = butLastTypeArgs.Select(x => x + "2");
+          var overloadTypeArgsCsv = String.Join(", ", overloadTypeArgs);
+          var overloadTypeChecks = butLastParams.Zip(overloadTypeArgs, (x, y) => x + " is " + y);
+          var overloadTypeChecksCsv = String.Join(" && ", overloadTypeChecks);
+          var overloadCastParamsCsv = String.Join(", ", butLastParams.Zip(overloadTypeArgs, (x, y) => "(" + y + ") " + x));
+          var overloadPredicate = "(" + butLastParamsWithTypesCsv + ") => " + overloadTypeChecksCsv + " && pred(" + overloadCastParamsCsv + ")";
+          var overloadPredicateType = "Func<" + overloadTypeArgsCsv + ", bool>";
+          var overloadFunc = "(" + butLastParamsWithTypesCsv + ") => f(" + overloadCastParamsCsv + ")";
+          var overloadFuncType = "Func<" + overloadTypeArgsCsv + ", " + lastTypeArg + ">";
+          var overloadTypeConstraints = String.Join(" ", overloadTypeArgs.Zip(butLastTypeArgs, (x, y) => "where " + x + " : " + y));
           var genericMethodType = "GenericMethod<" + typeArgsCsv + ">";
           var predicateType = "Func<" + butLastTypeArgsCsv + ", bool>";
           var funcType = "Func<" + typeArgsCsv + ">";
@@ -51,14 +62,35 @@ namespace ZedSharp
         /// <summary>Provided overload will take precedence over all previously added overloads.</summary>
         public <#= genericMethodType #> AddFirst(<#= predicateType #> pred, Func<<#= lastTypeArg #>> f)
         {
-            Overloads.AddFirst(new <#= keyValuePairType #>(pred, (<#= butLastParamsCsv #>) => f()));
+            Overloads.AddFirst(new <#= keyValuePairType #>(pred, (<#= butLastParamsWithTypesCsv #>) => f()));
             return this;
         }
 
         /// <summary>Provided overload will take precedence over all previously added overloads.</summary>
         public <#= genericMethodType #> AddFirst(<#= predicateType #> pred, <#= lastTypeArg #> val)
         {
-            Overloads.AddFirst(new <#= keyValuePairType #>(pred, (<#= butLastParamsCsv #>) => val));
+            Overloads.AddFirst(new <#= keyValuePairType #>(pred, (<#= butLastParamsWithTypesCsv #>) => val));
+            return this;
+        }
+
+        /// <summary>Provided overload will take precedence over all previously added overloads.</summary>
+        public <#= genericMethodType #> AddFirst<<#= overloadTypeArgsCsv #>>(<#= overloadPredicateType #> pred, <#= overloadFuncType #> f) <#= overloadTypeConstraints #>
+        {
+            Overloads.AddFirst(new <#= keyValuePairType #>(<#= overloadPredicate #>, <#= overloadFunc #>));
+            return this;
+        }
+
+        /// <summary>Provided overload will take precedence over all previously added overloads.</summary>
+        public <#= genericMethodType #> AddFirst<<#= overloadTypeArgsCsv #>>(<#= overloadPredicateType #> pred, Func<<#= lastTypeArg #>> f) <#= overloadTypeConstraints #>
+        {
+            Overloads.AddFirst(new <#= keyValuePairType #>(<#= overloadPredicate #>, (<#= butLastParamsWithTypesCsv #>) => f()));
+            return this;
+        }
+
+        /// <summary>Provided overload will take precedence over all previously added overloads.</summary>
+        public <#= genericMethodType #> AddFirst<<#= overloadTypeArgsCsv #>>(<#= overloadPredicateType #> pred, <#= lastTypeArg #> val) <#= overloadTypeConstraints #>
+        {
+            Overloads.AddFirst(new <#= keyValuePairType #>(<#= overloadPredicate #>, (<#= butLastParamsWithTypesCsv #>) => val));
             return this;
         }
         
@@ -72,14 +104,35 @@ namespace ZedSharp
         /// <summary>All previously added overloads will take precedence over provided overload.</summary>
         public <#= genericMethodType #> AddLast(<#= predicateType #> pred, Func<<#= lastTypeArg #>> f)
         {
-            Overloads.AddLast(new <#= keyValuePairType #>(pred, (<#= butLastParamsCsv #>) => f()));
+            Overloads.AddLast(new <#= keyValuePairType #>(pred, (<#= butLastParamsWithTypesCsv #>) => f()));
             return this;
         }
         
         /// <summary>All previously added overloads will take precedence over provided overload.</summary>
         public <#= genericMethodType #> AddLast(<#= predicateType #> pred, <#= lastTypeArg #> val)
         {
-            Overloads.AddLast(new <#= keyValuePairType #>(pred, (<#= butLastParamsCsv #>) => val));
+            Overloads.AddLast(new <#= keyValuePairType #>(pred, (<#= butLastParamsWithTypesCsv #>) => val));
+            return this;
+        }
+
+        /// <summary>Provided overload will take precedence over all previously added overloads.</summary>
+        public <#= genericMethodType #> AddLast<<#= overloadTypeArgsCsv #>>(<#= overloadPredicateType #> pred, <#= overloadFuncType #> f) <#= overloadTypeConstraints #>
+        {
+            Overloads.AddLast(new <#= keyValuePairType #>(<#= overloadPredicate #>, <#= overloadFunc #>));
+            return this;
+        }
+
+        /// <summary>Provided overload will take precedence over all previously added overloads.</summary>
+        public <#= genericMethodType #> AddLast<<#= overloadTypeArgsCsv #>>(<#= overloadPredicateType #> pred, Func<<#= lastTypeArg #>> f) <#= overloadTypeConstraints #>
+        {
+            Overloads.AddLast(new <#= keyValuePairType #>(<#= overloadPredicate #>, (<#= butLastParamsWithTypesCsv #>) => f()));
+            return this;
+        }
+
+        /// <summary>Provided overload will take precedence over all previously added overloads.</summary>
+        public <#= genericMethodType #> AddLast<<#= overloadTypeArgsCsv #>>(<#= overloadPredicateType #> pred, <#= lastTypeArg #> val) <#= overloadTypeConstraints #>
+        {
+            Overloads.AddLast(new <#= keyValuePairType #>(<#= overloadPredicate #>, (<#= butLastParamsWithTypesCsv #>) => val));
             return this;
         }
 
