@@ -53,6 +53,11 @@ namespace ZedSharp
             return x % y == 0;
         }
 
+        public static IEnumerable<int> To(this int start, int end)
+        {
+            return Enumerable.Range(start, end - start);
+        }
+
         public static bool CoinFlip(Random rand = null)
         {
             return (rand ?? new Random()).NextBoolean();

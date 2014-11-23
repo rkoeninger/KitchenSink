@@ -92,6 +92,7 @@
     <Compile Include="Unit.cs" />
     <Compile Include="Validation.cs" />
     <Compile Include="Void.cs" />
+    <Compile Include="Xml.cs" />
     <Compile Include="Z.cs" />
     <Compile Include="Map.cs">
       <AutoGen>True</AutoGen>
