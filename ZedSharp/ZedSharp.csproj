@@ -57,6 +57,7 @@
     </Compile>
     <Compile Include="Inject.cs" />
     <Compile Include="IO.cs" />
+    <Compile Include="KeyValuePair.cs" />
     <Compile Include="Lens.cs" />
     <Compile Include="List.cs" />
     <Compile Include="Month.cs" />
