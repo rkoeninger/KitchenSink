@@ -23,9 +23,9 @@ namespace ZedSharp.UnitTests
         public void SubtypeDispatchTest()
         {
             var speak = new GenericMethod<Animal, String>()
-                .AddLast<Dog>(_ => true, x => x.Bark())
-                .AddLast<Cat>(_ => true, x => x.Purr())
-                .AddLast<Duck>(_ => true, x => x.Honk())
+                .AddLast<Dog>(x => x.Bark())
+                .AddLast<Cat>(x => x.Purr())
+                .AddLast<Duck>(x => x.Honk())
                 .AsFunc();
 
             Assert.AreEqual("Woof", speak(new Dog()));
