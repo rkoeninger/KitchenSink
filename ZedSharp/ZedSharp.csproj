@@ -96,10 +96,10 @@
     <Compile Include="Void.cs" />
     <Compile Include="Xml.cs" />
     <Compile Include="Z.cs" />
-    <Compile Include="Map.cs">
+    <Compile Include="Dictionary.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Map.tt</DependentUpon>
+      <DependentUpon>Dictionary.tt</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -123,9 +123,9 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Tuples.cs</LastGenOutput>
     </None>
-    <None Include="Map.tt">
+    <None Include="Dictionary.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Map.cs</LastGenOutput>
+      <LastGenOutput>Dictionary.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

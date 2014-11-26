@@ -19,7 +19,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void DictionaryCreateLongArgList()
         {
-            var dict = Map.Of(
+            var dict = Dictionary.Of(
                 "a", 1,
                 "b", 2,
                 "c", 3,
@@ -46,7 +46,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void DictionaryCreateByAnonObject()
         {
-            var dict2 = Map.Of(new
+            var dict2 = Dictionary.Of(new
             {
                 Red = ConsoleColor.Red,
                 ConsoleColor.Green,
@@ -67,7 +67,7 @@ namespace ZedSharp.UnitTests
             Assert.IsInstanceOfType(dict2["Func1"], typeof(Func<int, int>));
 
             // Can actually be any object
-            var dict3 = Map.Of(new Color(12, 23, 34));
+            var dict3 = Dictionary.Of(new Color(12, 23, 34));
             Assert.AreEqual(3, dict3.Count);
             Assert.IsTrue(dict3.ContainsKey("R"));
             Assert.IsTrue(dict3.ContainsKey("G"));
@@ -80,7 +80,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void DictionaryCreateByArgList()
         {
-            var dict = Map.Of(
+            var dict = Dictionary.Of(
                     "red", ConsoleColor.Red,
                     "blue", ConsoleColor.Blue,
                     "green", ConsoleColor.Green
