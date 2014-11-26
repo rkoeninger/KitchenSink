@@ -143,7 +143,7 @@ namespace ZedSharp
             if (Length == 0)
                 return "[]";
 
-            return "[" + this.Intersperse(", ") + "]";
+            return "[" + this.Concat(", ") + "]";
         }
     }
 }
