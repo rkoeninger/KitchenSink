@@ -22,8 +22,8 @@ namespace ZedSharp
         {
             Key = key;
         }
-
-        private A Key { get; set; }
+        
+        internal A Key { get; private set; }
 
         /// <summary>
         /// Specifies return type for Match.
@@ -197,53 +197,6 @@ namespace ZedSharp
         }
     }
 
-    public struct MatcherElsePredicate<A, B>
-    {
-        internal MatcherElsePredicate(Matcher<A, B> previous) : this()
-        {
-            Key = previous.Key;
-            Previous = previous;
-        }
-
-        private A Key { get; set; }
-        private Matcher<A, B> Previous { get; set; }
-
-        /// <summary>
-        /// After this, call End.
-        /// </summary>
-        public MatcherElse<A, B> Then(Func<A, B> f)
-        {
-            return new MatcherElse<A, B>(Key, Previous, x => f(x));
-        }
-    }
-
-    public struct MatcherElse<A, B>
-    {
-        internal MatcherElse(A key, Matcher<A, B> previous, Func<A, B> selector) : this()
-        {
-            Key = key;
-            Previous = previous;
-            Selector = selector;
-        }
-
-        private A Key { get; set; }
-        private Matcher<A, B> Previous { get; set; }
-        private Func<A, B> Selector { get; set; }
-        
-        /// <summary>Gets the result of the Match as an Maybe.</summary>
-        public B End()
-        {
-            var me = this;
-            var previousResult = Previous.End();
-            return previousResult.OrElseEval(() => me.Selector(me.Key));
-        }
-
-        public static implicit operator B(MatcherElse<A, B> matcher)
-        {
-            return matcher.End();
-        }
-    }
-
     public struct MatcherDefault<A, B>
     {
         internal MatcherDefault(A key, Func<A, B> selector) : this()
@@ -361,7 +314,7 @@ namespace ZedSharp
 
         /// <summary>
         /// Specifies a condition for the following consequent.
-        /// Condition will only be evaluated if no previous Case condition was evaluated to true.
+        /// Condition is evaluated immediately as it's not in a continuation.
         /// After this, call Then.
         /// </summary>
         public static MatcherPredicate<A, B, A> Case<A, B>(this Matcher<A, B> matcher, bool cond)
@@ -422,7 +375,7 @@ namespace ZedSharp
 
         /// <summary>
         /// Specifies a condition for the following consequent.
-        /// Condition will only be evaluated if no previous Case condition was evaluated to true.
+        /// Condition is evaluated immediately as it's not in a continuation.
         /// After this, call Then.
         /// </summary>
         public static MatcherInferencePredicate<A, A> Case<A>(this MatcherInitial<A> matcher, bool cond)
@@ -515,31 +468,61 @@ namespace ZedSharp
         /// <summary>
         /// Specifies the following consequence should be run if no previous case was true.
         /// No more Case methods can be called after this.
-        /// After this, call Then.
+        /// A final maybe of the matcher's return type is the result of Else.
         /// </summary>
-        public static MatcherElsePredicate<A, B> Else<A, B>(this Matcher<A, B> matcher)
+        public static B Else<A, B>(this Matcher<A, B> matcher, Func<A, B> f)
         {
-            return new MatcherElsePredicate<A, B>(matcher);
-        }
-        
-        /// <summary>
-        /// Specifies consequence if previous Case was the first true Case in this Match.
-        /// Also infers return type of Match.
-        /// After this, call End.
-        /// </summary>
-        public static MatcherElse<A, B> Then<A, B>(this MatcherElsePredicate<A, B> matcher, B val)
-        {
-            return matcher.Then(_ => val);
+            return matcher.End().OrElseEval(() => f(matcher.Key));
         }
 
         /// <summary>
-        /// Specifies consequence if previous Case was the first true Case in this Match.
-        /// Also infers return type of Match.
-        /// After this, call End.
+        /// Specifies the following consequence should be run if no previous case was true.
+        /// No more Case methods can be called after this.
+        /// A final maybe of the matcher's return type is the result of Else.
         /// </summary>
-        public static MatcherElse<A, B> Then<A, B>(this MatcherElsePredicate<A, B> matcher, Func<B> f)
+        public static B Else<A, B>(this Matcher<A, B> matcher, Func<B> f)
         {
-            return matcher.Then(_ => f());
+            return matcher.End().OrElseEval(f);
+        }
+
+        /// <summary>
+        /// Specifies the following consequence should be run if no previous case was true.
+        /// No more Case methods can be called after this.
+        /// A final maybe of the matcher's return type is the result of Else.
+        /// </summary>
+        public static B Else<A, B>(this Matcher<A, B> matcher, B val)
+        {
+            return matcher.End().OrElse(val);
+        }
+        
+        /// <summary>
+        /// Specifies the following consequence should be run if no previous case was true.
+        /// No more Case methods can be called after this.
+        /// A final maybe of the matcher's return type is the result of Else.
+        /// </summary>
+        public static B Else<A, B>(this MatcherInitial<A> matcher, Func<A, B> f)
+        {
+            return f(matcher.Key);
+        }
+
+        /// <summary>
+        /// Specifies the following consequence should be run if no previous case was true.
+        /// No more Case methods can be called after this.
+        /// A final maybe of the matcher's return type is the result of Else.
+        /// </summary>
+        public static B Else<A, B>(this MatcherInitial<A> matcher, Func<B> f)
+        {
+            return f();
+        }
+
+        /// <summary>
+        /// Specifies the following consequence should be run if no previous case was true.
+        /// No more Case methods can be called after this.
+        /// A final maybe of the matcher's return type is the result of Else.
+        /// </summary>
+        public static B Else<A, B>(this MatcherInitial<A> matcher, B val)
+        {
+            return val;
         }
     }
 
@@ -577,7 +560,7 @@ namespace ZedSharp
 
         /// <summary>
         /// Specifies a condition for the following consequent.
-        /// Condition will only be evaluated if no previous Case condition was evaluated to true.
+        /// Condition is evaluated immediately as it's not in a continuation.
         /// After this, call Then.
         /// </summary>
         public static MatcherDefaultPredicate<A, B, A> Case<A, B>(this MatcherDefault<A, B> matcher, bool cond)

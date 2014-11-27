@@ -44,7 +44,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(Maybe.Of("four"), res2);
             Assert.IsTrue(l.SequenceEqual(Seq.Of("case1", "case2", "case3", "case4", "then4")));
 
-            Assert.AreEqual(31, Match.On("abc").Case("def").Then(23).Else().Then(31));
+            Assert.AreEqual(31, Match.On("abc").Case("def").Then(23).Else(31));
 
             Assert.AreEqual("whatever", Match.On(3).Default("whatever").End());
             Assert.AreEqual("whatever", Match.On(3).Default("whatever").Case(5).Then("asdf").Case(2).Then("awert").End());
