@@ -4,6 +4,22 @@ using System.Text.RegularExpressions;
 
 namespace ZedSharp
 {
+    internal interface IMatcher<A, B>
+    {
+        /// <summary>Key may be ignored.</summary>
+        Maybe<B> Eval(A key);
+    }
+
+    internal class NullMatcher<A, B> : IMatcher<A, B>
+    {
+        public static readonly IMatcher<A, B> It = new NullMatcher<A, B>();
+
+        public Maybe<B> Eval(A _)
+        {
+            return Maybe.None<B>();
+        }
+    }
+
     public static class Match
     {
         /// <summary>
@@ -23,7 +39,7 @@ namespace ZedSharp
             Key = key;
         }
         
-        internal A Key { get; private set; }
+        internal readonly A Key;
 
         /// <summary>
         /// Specifies return type for Match.
@@ -59,9 +75,9 @@ namespace ZedSharp
         /// Condition will only be evaluated if no previous Case condition was evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public MatcherInferencePredicate<A, C> Case<C>(Func<C, bool> f)
+        public MatcherInferencePredicate<A, C> Case<C>(Func<C, bool> f) where C : A
         {
-            return new MatcherInferencePredicate<A, C>(Key, x => (x is C) && f(x.As<C>()));
+            return new MatcherInferencePredicate<A, C>(Key, x => x is C && f((C) x));
         }
 
         /// <summary>
@@ -69,42 +85,42 @@ namespace ZedSharp
         /// Condition will only be evaluated if no previous Case condition was evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public MatcherInferencePredicate<A, C> Case<C>()
+        public MatcherInferencePredicate<A, C> Case<C>() where C : A
         {
             return new MatcherInferencePredicate<A, C>(Key, x => x is C);
         }
     }
 
-    public struct Matcher<A, B>
+    public struct Matcher<A, B> : IMatcher<A, B>
     {
         internal Matcher(A key) : this()
         {
             Key = key;
-            Previous = null;
-            Predicate = null;
-            Selector = null;
+            Previous = NullMatcher<A, B>.It;
+            Predicate = _ => false;
+            Selector = _ => default(B);
         }
 
         internal Matcher(A key, Func<A, bool> predicate, Func<A, B> selector) : this()
         {
             Key = key;
-            Previous = null;
+            Previous = NullMatcher<A, B>.It;
             Predicate = predicate;
             Selector = selector;
         }
 
-        internal Matcher(A key, Matcher<A, B> previous, Func<A, bool> predicate, Func<A, B> selector) : this()
+        internal Matcher(A key, IMatcher<A, B> previous, Func<A, bool> predicate, Func<A, B> selector) : this()
         {
             Key = key;
-            Previous = Ref.Of(previous);
+            Previous = previous;
             Predicate = predicate;
             Selector = selector;
         }
 
-        internal A Key { get; private set; }
-        private Ref<Matcher<A, B>> Previous { get; set; }
-        private Func<A, bool> Predicate { get; set; }
-        private Func<A, B> Selector { get; set; }
+        internal readonly A Key;
+        private readonly IMatcher<A, B> Previous;
+        private readonly Func<A, bool> Predicate;
+        private readonly Func<A, B> Selector;
 
         /// <summary>
         /// Specifies a condition for the following consequent.
@@ -121,9 +137,9 @@ namespace ZedSharp
         /// Condition will only be evaluated if no previous Case condition was evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public MatcherPredicate<A, B, C> Case<C>(Func<C, bool> f)
+        public MatcherPredicate<A, B, C> Case<C>(Func<C, bool> f) where C : A
         {
-            return new MatcherPredicate<A, B, C>(Key, this, x => (x is C) && f(x.As<C>()));
+            return new MatcherPredicate<A, B, C>(Key, this, x => x is C && f((C) x));
         }
 
         /// <summary>
@@ -131,7 +147,7 @@ namespace ZedSharp
         /// Condition will only be evaluated if no previous Case condition was evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public MatcherPredicate<A, B, C> Case<C>()
+        public MatcherPredicate<A, B, C> Case<C>() where C : A
         {
             return new MatcherPredicate<A, B, C>(Key, this, x => x is C);
         }
@@ -139,20 +155,21 @@ namespace ZedSharp
         /// <summary>Gets the result of the Match as an Maybe. Won't have a value if no cases were matched.</summary>
         public Maybe<B> End()
         {
-            var me = this;
-            var previousResult = Previous.ToMaybe().SelectMany(x => x.End());
-            Func<A, bool> pred = x => (me.Predicate != null) && (me.Selector != null) && me.Predicate(me.Key);
-            Func<Maybe<B>> thisResult = () => Maybe.If(me.Key, pred, me.Selector);
-            return previousResult.OrEval(thisResult);
+            return Eval(Key);
         }
 
         public static implicit operator Maybe<B>(Matcher<A, B> matcher)
         {
             return matcher.End();
         }
+
+        public Maybe<B> Eval(A _)
+        {
+            return Previous.Eval(Key).OrIf(Key, Predicate, Selector);
+        }
     }
 
-    public struct MatcherInferencePredicate<A, C>
+    public struct MatcherInferencePredicate<A, C> where C : A
     {
         internal MatcherInferencePredicate(A key, Func<A, bool> predicate) : this()
         {
@@ -160,8 +177,8 @@ namespace ZedSharp
             Predicate = predicate;
         }
         
-        private A Key { get; set; }
-        private Func<A, bool> Predicate { get; set; }
+        private readonly A Key;
+        private readonly Func<A, bool> Predicate;
 
         /// <summary>
         /// Specifies consequence if previous Case was the first true Case in this Match.
@@ -174,18 +191,18 @@ namespace ZedSharp
         }
     }
 
-    public struct MatcherPredicate<A, B, C>
+    public struct MatcherPredicate<A, B, C> where C : A
     {
-        internal MatcherPredicate(A key, Matcher<A, B> previous, Func<A, bool> predicate) : this()
+        internal MatcherPredicate(A key, IMatcher<A, B> previous, Func<A, bool> predicate) : this()
         {
             Key = key;
             Previous = previous;
             Predicate = predicate;
         }
 
-        private A Key { get; set; }
-        private Matcher<A, B> Previous { get; set; }
-        private Func<A, bool> Predicate { get; set; }
+        private readonly A Key;
+        private readonly IMatcher<A, B> Previous;
+        private readonly Func<A, bool> Predicate;
 
         /// <summary>
         /// Specifies consequence if previous Case was the first true Case in this Match.
@@ -193,32 +210,35 @@ namespace ZedSharp
         /// </summary>
         public Matcher<A, B> Then(Func<C, B> f)
         {
-            return new Matcher<A, B>(Key, Previous, Predicate, x => f((C) (Object) x));
+            return new Matcher<A, B>(Key, Previous, Predicate, x => f((C) x));
         }
     }
 
-    public struct MatcherDefault<A, B>
+    public struct MatcherDefault<A, B> : IMatcher<A, B>
     {
-        internal MatcherDefault(A key, Func<A, B> selector) : this()
+        internal MatcherDefault(A key, Func<A, B> defaultF) : this()
         {
             Key = key;
-            Previous = null;
-            Predicate = null;
-            Selector = selector;
+            Default = defaultF;
+            Previous = NullMatcher<A, B>.It;
+            Predicate = _ => false;
+            Selector = _ => default(B);
         }
 
-        internal MatcherDefault(A key, MatcherDefault<A, B> previous, Func<A, bool> predicate, Func<A, B> selector) : this()
+        internal MatcherDefault(A key, Func<A, B> defaultF, IMatcher<A, B> previous, Func<A, bool> predicate, Func<A, B> selector) : this()
         {
             Key = key;
-            Previous = Ref.Of(previous);
+            Default = defaultF;
+            Previous = previous;
             Predicate = predicate;
             Selector = selector;
         }
 
-        internal A Key { get; private set; }
-        private Ref<MatcherDefault<A, B>> Previous { get; set; }
-        private Func<A, bool> Predicate { get; set; }
-        private Func<A, B> Selector { get; set; }
+        internal readonly A Key;
+        private readonly Func<A, B> Default;
+        private readonly IMatcher<A, B> Previous;
+        private readonly Func<A, bool> Predicate;
+        private readonly Func<A, B> Selector;
 
         /// <summary>
         /// Specifies a condition for the following consequent.
@@ -227,7 +247,7 @@ namespace ZedSharp
         /// </summary>
         public MatcherDefaultPredicate<A, B, A> Case(Func<A, bool> f)
         {
-            return new MatcherDefaultPredicate<A, B, A>(Key, this, f);
+            return new MatcherDefaultPredicate<A, B, A>(Key, Default, this, f);
         }
 
         /// <summary>
@@ -235,9 +255,9 @@ namespace ZedSharp
         /// Condition will only be evaluated if no previous Case condition was evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public MatcherDefaultPredicate<A, B, C> Case<C>(Func<C, bool> f)
+        public MatcherDefaultPredicate<A, B, C> Case<C>(Func<C, bool> f) where C : A
         {
-            return new MatcherDefaultPredicate<A, B, C>(Key, this, x => (x is C) && f(x.As<C>()));
+            return new MatcherDefaultPredicate<A, B, C>(Key, Default, this, x => x is C && f((C) x));
         }
 
         /// <summary>
@@ -245,50 +265,42 @@ namespace ZedSharp
         /// Condition will only be evaluated if no previous Case condition was evaluated to true.
         /// After this, call Then.
         /// </summary>
-        public MatcherDefaultPredicate<A, B, C> Case<C>()
+        public MatcherDefaultPredicate<A, B, C> Case<C>() where C : A
         {
-            return new MatcherDefaultPredicate<A, B, C>(Key, this, x => x is C);
-        }
-
-        private B RunDefault(A key)
-        {
-            return Previous == null ? Selector(key) : Previous.Value.RunDefault(key);
-        }
-
-        private Maybe<B> EndNoDefault()
-        {
-            var me = this;
-            var previousResult = Previous.ToMaybe().SelectMany(x => x.EndNoDefault());
-            Func<A, bool> pred = x => (me.Predicate != null) && (me.Selector != null) && me.Predicate(me.Key);
-            Func<Maybe<B>> thisResult = () => Maybe.If(me.Key, pred, me.Selector);
-            return previousResult.OrEval(thisResult);
+            return new MatcherDefaultPredicate<A, B, C>(Key, Default, this, x => x is C);
         }
 
         /// <summary>Gets the result of the Match. Will be default value if no cases were matched.</summary>
         public B End()
         {
-            var me = this;
-            return EndNoDefault().OrElseEval(() => me.RunDefault(me.Key));
+            return Eval(Key).OrElseEval(Key, Default);
         }
 
         public static implicit operator B(MatcherDefault<A, B> matcher)
         {
             return matcher.End();
         }
+
+        public Maybe<B> Eval(A _)
+        {
+            return Previous.Eval(Key).OrIf(Key, Predicate, Selector);
+        }
     }
 
-    public struct MatcherDefaultPredicate<A, B, C>
+    public struct MatcherDefaultPredicate<A, B, C> where C : A
     {
-        internal MatcherDefaultPredicate(A key, MatcherDefault<A, B> previous, Func<A, bool> predicate) : this()
+        internal MatcherDefaultPredicate(A key, Func<A, B> defaultF, IMatcher<A, B> previous, Func<A, bool> predicate) : this()
         {
             Key = key;
+            Default = defaultF;
             Previous = previous;
             Predicate = predicate;
         }
 
-        private A Key { get; set; }
-        private MatcherDefault<A, B> Previous { get; set; }
-        private Func<A, bool> Predicate { get; set; }
+        private readonly A Key;
+        private readonly Func<A, B> Default;
+        private readonly IMatcher<A, B> Previous;
+        private readonly Func<A, bool> Predicate;
 
         /// <summary>
         /// Specifies consequence if previous Case was the first true Case in this Match.
@@ -296,7 +308,208 @@ namespace ZedSharp
         /// </summary>
         public MatcherDefault<A, B> Then(Func<C, B> f)
         {
-            return new MatcherDefault<A, B>(Key, Previous, Predicate, x => f(x.As<C>()));
+            return new MatcherDefault<A, B>(Key, Default, Previous, Predicate, x => f(x.As<C>()));
+        }
+    }
+
+    public static class Match<A>
+    {
+        public static MatcherFunc<A, B> Return<B>()
+        {
+            return new MatcherFunc<A, B>(_ => false, _ => default(B));
+        }
+
+        public static MatcherFuncDefault<A, B> Default<B>(Func<A, B> f)
+        {
+            return new MatcherFuncDefault<A, B>(f);
+        }
+
+        public static MatcherFuncDefault<A, B> Default<B>(Func<B> f)
+        {
+            return new MatcherFuncDefault<A, B>(_ => f());
+        }
+
+        public static MatcherFuncDefault<A, B> Default<B>(B val)
+        {
+            return new MatcherFuncDefault<A, B>(_ => val);
+        }
+
+        public static MatcherFuncInferencePredicate<A, A> Case(Func<A, bool> f)
+        {
+            return new MatcherFuncInferencePredicate<A, A>(f);
+        }
+
+        public static MatcherFuncInferencePredicate<A, A> Case(Func<bool> f)
+        {
+            return new MatcherFuncInferencePredicate<A, A>(_ => f());
+        }
+
+        public static MatcherFuncInferencePredicate<A, A> Case(A val)
+        {
+            return new MatcherFuncInferencePredicate<A, A>(val.Eq());
+        }
+
+        public static MatcherFuncInferencePredicate<A, C> Case<C>(Func<C, bool> f) where C : A
+        {
+            return new MatcherFuncInferencePredicate<A, C>(x => x is C && f((C) x));
+        }
+
+        public static MatcherFuncInferencePredicate<A, C> Case<C>() where C : A
+        {
+            return new MatcherFuncInferencePredicate<A, C>(x => x is C);
+        }
+    }
+
+    public struct MatcherFunc<A, B> : IMatcher<A, B>
+    {
+        internal MatcherFunc(Func<A, bool> predicate, Func<A, B> selector) : this()
+        {
+            Previous = NullMatcher<A, B>.It;
+            Predicate = predicate;
+            Selector = selector;
+        }
+        
+        internal MatcherFunc(IMatcher<A, B> previous, Func<A, bool> predicate, Func<A, B> selector) : this()
+        {
+            Previous = previous;
+            Predicate = predicate;
+            Selector = selector;
+        }
+
+        private readonly IMatcher<A, B> Previous;
+        private readonly Func<A, bool> Predicate;
+        private readonly Func<A, B> Selector;
+
+        public MatcherFuncPredicate<A, B, A> Case(Func<A, bool> f)
+        {
+            return new MatcherFuncPredicate<A, B, A>(this, f);
+        }
+
+        public MatcherFuncPredicate<A, B, C> Case<C>(Func<C, bool> f) where C : A
+        {
+            return new MatcherFuncPredicate<A, B, C>(this, x => x is C && f((C) x));
+        }
+
+        public MatcherFuncPredicate<A, B, C> Case<C>() where C : A
+        {
+            return new MatcherFuncPredicate<A, B, C>(this, x => x is C);
+        }
+
+        public Func<A, B> Else(Func<A, B> f)
+        {
+            var me = this;
+            return key => me.Eval(key).OrElseEval(key, f);
+        }
+
+        public Matcher<A, B> On(A key)
+        {
+            return new Matcher<A,B>(key, Previous, Predicate, Selector);
+        }
+
+        public Func<A, Maybe<B>> End()
+        {
+            return Eval;
+        }
+
+        public Maybe<B> Eval(A key)
+        {
+            return Maybe.If(key, Predicate, Selector).OrEval(key, Previous.Eval);
+        }
+    }
+
+    public struct MatcherFuncPredicate<A, B, C> where C : A
+    {
+        internal MatcherFuncPredicate(IMatcher<A, B> previous, Func<A, bool> predicate) : this()
+        {
+            Previous = previous;
+            Predicate = predicate;
+        }
+
+        private readonly IMatcher<A, B> Previous;
+        private readonly Func<A, bool> Predicate;
+
+        public MatcherFunc<A, B> Then(Func<C, B> f)
+        {
+            return new MatcherFunc<A, B>(Previous, Predicate, x => f(x.As<C>()));
+        }
+    }
+
+    public struct MatcherFuncInferencePredicate<A, C> where C : A
+    {
+        internal MatcherFuncInferencePredicate(Func<A, bool> predicate) : this()
+        {
+            Predicate = predicate;
+        }
+
+        private readonly Func<A, bool> Predicate;
+
+        public MatcherFunc<A, B> Then<B>(Func<C, B> f)
+        {
+            return new MatcherFunc<A, B>(Predicate, x => f(x.As<C>()));
+        }
+    }
+
+    public struct MatcherFuncDefault<A, B> : IMatcher<A, B>
+    {
+        internal MatcherFuncDefault(Func<A, B> defaultF)
+        {
+            Default = defaultF;
+            Previous = NullMatcher<A, B>.It;
+            Predicate = _ => false;
+            Selector = _ => default(B);
+        }
+
+        internal MatcherFuncDefault(Func<A, B> defaultF, IMatcher<A, B> previous, Func<A, bool> predicate, Func<A, B> selector)
+        {
+            Default = defaultF;
+            Previous = previous;
+            Predicate = predicate;
+            Selector = selector;
+        }
+
+        private readonly Func<A, B> Default;
+        private readonly IMatcher<A, B> Previous;
+        private readonly Func<A, bool> Predicate;
+        private readonly Func<A, B> Selector;
+
+        public MatcherFuncDefaultPredicate<A, B, C> Case<C>(Func<C, bool> f) where C : A
+        {
+            return new MatcherFuncDefaultPredicate<A, B, C>(Default, this, x => x is C && f((C) x));
+        }
+
+        public MatcherDefault<A, B> On(A key)
+        {
+            return new MatcherDefault<A, B>(key, Default, Previous, Predicate, Selector);
+        }
+
+        public Func<A, B> End()
+        {
+            var me = this;
+            return key => me.Eval(key).OrElseEval(key, me.Default);
+        }
+
+        public Maybe<B> Eval(A key)
+        {
+            return Previous.Eval(key).OrIf(key, Predicate, Selector);
+        }
+    }
+
+    public struct MatcherFuncDefaultPredicate<A, B, C> where C : A
+    {
+        internal MatcherFuncDefaultPredicate(Func<A, B> defaultF, IMatcher<A, B> previous, Func<A, bool> predicate)
+        {
+            Default = defaultF;
+            Previous = previous;
+            Predicate = predicate;
+        }
+
+        private readonly Func<A, B> Default;
+        private readonly IMatcher<A, B> Previous;
+        private readonly Func<A, bool> Predicate;
+
+        public MatcherFuncDefault<A, B> Then(Func<C, B> f)
+        {
+            return new MatcherFuncDefault<A, B>(Default, Previous, Predicate, x => f((C) x));
         }
     }
 
@@ -309,7 +522,7 @@ namespace ZedSharp
         /// </summary>
         public static MatcherPredicate<A, B, A> Case<A, B>(this Matcher<A, B> matcher, A val)
         {
-            return matcher.Case(key => Object.Equals(key, val));
+            return matcher.Case(val.Eq());
         }
 
         /// <summary>
@@ -346,7 +559,7 @@ namespace ZedSharp
         /// Specifies consequence if previous Case was the first true Case in this Match.
         /// After this, call Case or End.
         /// </summary>
-        public static Matcher<A, B> Then<A, B, C>(this MatcherPredicate<A, B, C> matcher, B val)
+        public static Matcher<A, B> Then<A, B, C>(this MatcherPredicate<A, B, C> matcher, B val) where C : A
         {
             return matcher.Then(_ => val);
         }
@@ -355,7 +568,7 @@ namespace ZedSharp
         /// Specifies consequence if previous Case was the first true Case in this Match.
         /// After this, call Case or End.
         /// </summary>
-        public static Matcher<A, B> Then<A, B, C>(this MatcherPredicate<A, B, C> matcher, Func<B> f)
+        public static Matcher<A, B> Then<A, B, C>(this MatcherPredicate<A, B, C> matcher, Func<B> f) where C : A
         {
             return matcher.Then(_ => f());
         }
@@ -370,7 +583,7 @@ namespace ZedSharp
         /// </summary>
         public static MatcherInferencePredicate<A, A> Case<A>(this MatcherInitial<A> matcher, A val)
         {
-            return matcher.Case(key => Object.Equals(key, val));
+            return matcher.Case(val.Eq());
         }
 
         /// <summary>
@@ -408,7 +621,7 @@ namespace ZedSharp
         /// Also infers return type of Match.
         /// After this, call Case or End.
         /// </summary>
-        public static Matcher<A, B> Then<A, B, C>(this MatcherInferencePredicate<A, C> matcher, B val)
+        public static Matcher<A, B> Then<A, B, C>(this MatcherInferencePredicate<A, C> matcher, B val) where C : A
         {
             return matcher.Then(_ => val);
         }
@@ -418,7 +631,7 @@ namespace ZedSharp
         /// Also infers return type of Match.
         /// After this, call Case or End.
         /// </summary>
-        public static Matcher<A, B> Then<A, B, C>(this MatcherInferencePredicate<A, C> matcher, Func<B> f)
+        public static Matcher<A, B> Then<A, B, C>(this MatcherInferencePredicate<A, C> matcher, Func<B> f) where C : A
         {
             return matcher.Then(_ => f());
         }
@@ -472,7 +685,7 @@ namespace ZedSharp
         /// </summary>
         public static B Else<A, B>(this Matcher<A, B> matcher, Func<A, B> f)
         {
-            return matcher.End().OrElseEval(() => f(matcher.Key));
+            return matcher.End().OrElseEval(matcher.Key, f);
         }
 
         /// <summary>
@@ -592,7 +805,7 @@ namespace ZedSharp
         /// Specifies consequence if previous Case was the first true Case in this Match.
         /// After this, call End.
         /// </summary>
-        public static MatcherDefault<A, B> Then<A, B, C>(this MatcherDefaultPredicate<A, B, C> matcher, B val)
+        public static MatcherDefault<A, B> Then<A, B, C>(this MatcherDefaultPredicate<A, B, C> matcher, B val) where C : A
         {
             return matcher.Then(_ => val);
         }
@@ -601,9 +814,57 @@ namespace ZedSharp
         /// Specifies consequence if previous Case was the first true Case in this Match.
         /// After this, call End.
         /// </summary>
-        public static MatcherDefault<A, B> Then<A, B, C>(this MatcherDefaultPredicate<A, B, C> matcher, Func<B> f)
+        public static MatcherDefault<A, B> Then<A, B, C>(this MatcherDefaultPredicate<A, B, C> matcher, Func<B> f) where C : A
         {
             return matcher.Then(_ => f());
+        }
+    }
+
+    public static class MatcherFuncExtensions
+    {
+        public static MatcherFuncPredicate<A, B, A> Case<A, B>(this MatcherFunc<A, B> matcher, Func<bool> f)
+        {
+            return matcher.Case(_ => f());
+        }
+
+        public static MatcherFuncPredicate<A, B, A> Case<A, B>(this MatcherFunc<A, B> matcher, A val)
+        {
+            return matcher.Case(val.Eq());
+        }
+
+        public static MatcherFunc<A, B> Then<A, B, C>(this MatcherFuncPredicate<A, B, C> matcher, Func<B> f) where C : A
+        {
+            return matcher.Then(_ => f());
+        }
+
+        public static MatcherFunc<A, B> Then<A, B, C>(this MatcherFuncPredicate<A, B, C> matcher, B val) where C : A
+        {
+            return matcher.Then(_ => val);
+        }
+
+        public static MatcherFunc<A, B> Then<A, B, C>(this MatcherFuncInferencePredicate<A, C> matcher, Func<B> f) where C : A
+        {
+            return matcher.Then(_ => f());
+        }
+
+        public static MatcherFunc<A, B> Then<A, B, C>(this MatcherFuncInferencePredicate<A, C> matcher, B val) where C : A
+        {
+            return matcher.Then(_ => val);
+        }
+        
+        public static Func<A, B> Else<A, B>(this MatcherFunc<A, B> matcher, Func<A, B> f)
+        {
+            return key => matcher.Eval(key).OrElseEval(key, f);
+        }
+
+        public static Func<A, B> Else<A, B>(this MatcherFunc<A, B> matcher, Func<B> f)
+        {
+            return key => matcher.Eval(key).OrElseEval(f);
+        }
+
+        public static Func<A, B> Else<A, B>(this MatcherFunc<A, B> matcher, B val)
+        {
+            return key => matcher.Eval(key).OrElse(val);
         }
     }
 }
