@@ -75,6 +75,11 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("qwerty", f(1));
             Assert.AreEqual("zxcvb", f(7));
             Assert.AreEqual("poiuy", f(3));
+
+            var g = Match<int>.Default("poiuy").Case(1).Then("qwerty").Case(4).Then("lkjhg").Case(7).Then("zxcvb").End();
+            Assert.AreEqual("qwerty", g(1));
+            Assert.AreEqual("zxcvb", g(7));
+            Assert.AreEqual("poiuy", g(3));
         }
 
         private Func<A, B> Track<A, B>(List<String> l, String msg, Func<A, B> f)
