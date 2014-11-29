@@ -55,6 +55,11 @@ namespace ZedSharp
             return String.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
         }
 
+        public static Func<String, bool> EqualsIgnoreCase(this String x)
+        {
+            return y => EqualsIgnoreCase(x, y);
+        }
+
         public static bool NotEmpty(this String x)
         {
             return String.IsNullOrEmpty(x).Not();
