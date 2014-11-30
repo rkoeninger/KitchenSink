@@ -129,6 +129,11 @@ namespace ZedSharp
             return Eval(Key);
         }
 
+        public Lazy<Maybe<B>> EndLazy()
+        {
+            return new Lazy<Maybe<B>>(End);
+        }
+
         public static implicit operator Maybe<B>(Matcher<A, B> matcher)
         {
             return matcher.End();
@@ -225,6 +230,11 @@ namespace ZedSharp
         public B End()
         {
             return Eval(Key).OrElseEval(Key, Default);
+        }
+
+        public Lazy<B> EndLazy()
+        {
+            return new Lazy<B>(End);
         }
 
         public static implicit operator B(MatcherDefault<A, B> matcher)
@@ -624,6 +634,21 @@ namespace ZedSharp
         public static B Else<A, B>(this Matcher<A, B> matcher, B val)
         {
             return matcher.End().OrElse(val);
+        }
+
+        public static Lazy<B> ElseLazy<A, B>(this Matcher<A, B> matcher, Func<A, B> f)
+        {
+            return new Lazy<B>(() => matcher.Else(f));
+        }
+
+        public static Lazy<B> ElseLazy<A, B>(this Matcher<A, B> matcher, Func<B> f)
+        {
+            return new Lazy<B>(() => matcher.Else(f));
+        }
+
+        public static Lazy<B> ElseLazy<A, B>(this Matcher<A, B> matcher, B val)
+        {
+            return new Lazy<B>(() => matcher.Else(val));
         }
         
         public static B Else<A, B>(this MatcherInitial<A> matcher, Func<A, B> f)
