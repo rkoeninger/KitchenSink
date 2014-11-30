@@ -114,6 +114,16 @@ namespace ZedSharp
             return new MatcherPredicate<A, B, C>(Key, this, x => x is C);
         }
 
+        public MatcherFunc<A, B> Off()
+        {
+            return new MatcherFunc<A, B>(this, _ => false, _ => default(B));
+        }
+
+        public Matcher<A, B> Swap(A key)
+        {
+            return new Matcher<A, B>(key, this, _ => false, _ => default(B));
+        }
+
         public Maybe<B> End()
         {
             return Eval(Key);
@@ -205,6 +215,11 @@ namespace ZedSharp
         public MatcherDefaultPredicate<A, B, C> Case<C>() where C : A
         {
             return new MatcherDefaultPredicate<A, B, C>(Key, Default, this, x => x is C);
+        }
+        
+        public MatcherFuncDefault<A, B> Off()
+        {
+            return new MatcherFuncDefault<A, B>(Default, this, _ => false, _ => default(B));
         }
 
         public B End()
@@ -373,7 +388,7 @@ namespace ZedSharp
 
         public Maybe<B> Eval(A key)
         {
-            return Maybe.If(key, Predicate, Selector).OrEval(key, Previous.Eval);
+            return Previous.Eval(key).OrIf(key, Predicate, Selector);
         }
     }
 
@@ -702,22 +717,22 @@ namespace ZedSharp
             return matcher.Case(key => type.IsInstanceOfType(key));
         }
 
-        public static MatcherFuncInferencePredicate<A, A> Case<A, B>(this MatcherFuncInitial<A> matcher, A val)
+        public static MatcherFuncInferencePredicate<A, A> Case<A>(this MatcherFuncInitial<A> matcher, A val)
         {
             return matcher.Case(val.Eq());
         }
 
-        public static MatcherFuncInferencePredicate<A, A> Case<A, B>(this MatcherFuncInitial<A> matcher, bool cond)
+        public static MatcherFuncInferencePredicate<A, A> Case<A>(this MatcherFuncInitial<A> matcher, bool cond)
         {
             return matcher.Case(_ => cond);
         }
 
-        public static MatcherFuncInferencePredicate<A, A> Case<A, B>(this MatcherFuncInitial<A> matcher, Func<bool> f)
+        public static MatcherFuncInferencePredicate<A, A> Case<A>(this MatcherFuncInitial<A> matcher, Func<bool> f)
         {
             return matcher.Case(_ => f());
         }
 
-        public static MatcherFuncInferencePredicate<A, A> Case<A, B>(this MatcherFuncInitial<A> matcher, Type type)
+        public static MatcherFuncInferencePredicate<A, A> Case<A>(this MatcherFuncInitial<A> matcher, Type type)
         {
             return matcher.Case(key => type.IsInstanceOfType(key));
         }

@@ -80,6 +80,42 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("qwerty", g(1));
             Assert.AreEqual("zxcvb", g(7));
             Assert.AreEqual("poiuy", g(3));
+
+        }
+
+        [TestMethod]
+        public void MatchEvalOrder()
+        {
+            var res = Match.On(3).Case(1).Then("a").Case(3).Then("b").Case(3).Then("c").Else("d");
+            Assert.AreEqual("b", res);
+        }
+
+        [TestMethod]
+        public void MatchFuncEvalOrder()
+        {
+            var res = Match.From<int>().Case(1).Then("a").Case(3).Then("b").Case(3).Then("c").Else("d");
+            Assert.AreEqual("b", res(3));
+        }
+
+        [TestMethod]
+        public void MatchOnOff()
+        {
+            var res12 = Match.On(5)
+                .Case(1).Then("a")
+                .Case(2).Then("b")
+                .Case(3).Then("c")
+                .Swap(12)
+                .Case(4).Then("d")
+                .Case(5).Then("e")
+                .Swap(7)
+                .Case(6).Then("f")
+                .Case(7).Then("g")
+                .Case(8).Then("h")
+                .Swap(9)
+                .Case(9).Then("i")
+                .Case(10).Then("j")
+                .Else("qwerty");
+            Assert.AreEqual("g", res12);
         }
 
         private Func<A, B> Track<A, B>(List<String> l, String msg, Func<A, B> f)
