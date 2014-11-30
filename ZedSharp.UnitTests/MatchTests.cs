@@ -12,7 +12,7 @@ namespace ZedSharp.UnitTests
     public class MatchTests
     {
         [TestMethod]
-        public void ValueMatching()
+        public void MatchBasics()
         {
             Assert.IsFalse(Match.On("").Return<int>().End().HasValue);
             Assert.IsTrue(Match.On("").Return<int>().Case("").Then(0).End().HasValue);
@@ -25,13 +25,23 @@ namespace ZedSharp.UnitTests
             var res1 = m1.Case("abc").Then(2).Case("jkl").Then(3).End();
             Assert.AreEqual(Maybe.Of(2), res1);
 
+            Assert.AreEqual(31, Match.On("abc").Case("def").Then(23).Else(31));
+        }
+
+        [TestMethod]
+        public void MatchTypeCorrectness()
+        {
             // Result type is inferred from first Then() to be an Int32 so false, a Boolean, in the second Then() is invalid
             Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Then(0).Case(""y"").Then(false).End()"), Common.ZedDll);
 
             // Can't call Case or Then twice in a row
             Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Case(""z"").Then(0).End()"), Common.ZedDll);
             Expect.CompileFail(Common.Wrap(@"Match.On("""").Case(""x"").Then(1).Then(0).End()"), Common.ZedDll);
+        }
 
+        [TestMethod]
+        public void MatchTrackingEvalOrder()
+        {
             List<String> l;
             l = new List<String>();
             var res2 = Match.On(4)
@@ -43,12 +53,20 @@ namespace ZedSharp.UnitTests
                 .End();
             Assert.AreEqual(Maybe.Of("four"), res2);
             Assert.IsTrue(l.SequenceEqual(Seq.Of("case1", "case2", "case3", "case4", "then4")));
+        }
 
-            Assert.AreEqual(31, Match.On("abc").Case("def").Then(23).Else(31));
-
+        [TestMethod]
+        public void MatchDefault()
+        {
             Assert.AreEqual("whatever", Match.On(3).Default("whatever").End());
             Assert.AreEqual("whatever", Match.On(3).Default("whatever").Case(5).Then("asdf").Case(2).Then("awert").End());
             Assert.AreEqual("fgjh", Match.On(3).Default("whatever").Case(5).Then("asdf").Case(3).Then("fgjh").Case(2).Then("awert").End());
+        }
+
+        [TestMethod]
+        public void MatchDefaultTrackingEvalOrder()
+        {
+            List<String> l;
 
             l = new List<String>();
             var res3 = Match.On(3)
@@ -70,7 +88,11 @@ namespace ZedSharp.UnitTests
                 .End();
             Assert.AreEqual("whatever", res4);
             Assert.IsTrue(l.SequenceEqual(Seq.Of("case1", "case2", "case3", "case4", "default")));
+        }
 
+        [TestMethod]
+        public void MatchFunc()
+        {
             var f = Match<int>.Case(1).Then("qwerty").Case(4).Then("lkjhg").Case(7).Then("zxcvb").Else("poiuy");
             Assert.AreEqual("qwerty", f(1));
             Assert.AreEqual("zxcvb", f(7));
@@ -80,7 +102,6 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("qwerty", g(1));
             Assert.AreEqual("zxcvb", g(7));
             Assert.AreEqual("poiuy", g(3));
-
         }
 
         [TestMethod]
@@ -98,9 +119,9 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
-        public void MatchOnOff()
+        public void MatchSwap()
         {
-            var res12 = Match.On(5)
+            var res = Match.On(5)
                 .Case(1).Then("a")
                 .Case(2).Then("b")
                 .Case(3).Then("c")
@@ -115,7 +136,28 @@ namespace ZedSharp.UnitTests
                 .Case(9).Then("i")
                 .Case(10).Then("j")
                 .Else("qwerty");
-            Assert.AreEqual("g", res12);
+            Assert.AreEqual("g", res);
+        }
+
+        [TestMethod]
+        public void MatchOnOff()
+        {
+            var res = Match.On(5)
+                .Case(1).Then("a")
+                .Case(2).Then("b")
+                .Case(3).Then("c")
+                .Off()
+                .Case(4).Then("d")
+                .Case(5).Then("e")
+                .On(7)
+                .Case(6).Then("f")
+                .Case(7).Then("g")
+                .Case(8).Then("h")
+                .Off()
+                .Case(9).Then("i")
+                .Case(10).Then("j")
+                .Else("qwerty");
+            Assert.AreEqual("g", res(9));
         }
 
         private Func<A, B> Track<A, B>(List<String> l, String msg, Func<A, B> f)
