@@ -118,48 +118,6 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("b", res(3));
         }
 
-        [TestMethod]
-        public void MatchSwap()
-        {
-            //var res = Match.On(5)
-            //    .Case(1, "a")
-            //    .Case(2, "b")
-            //    .Case(3, "c")
-            //    .Swap(12)
-            //    .Case(4, "d")
-            //    .Case(5, "e")
-            //    .Swap(7)
-            //    .Case(6, "f")
-            //    .Case(7, "g")
-            //    .Case(8, "h")
-            //    .Swap(9)
-            //    .Case(9, "i")
-            //    .Case(10, "j")
-            //    .Else("qwerty");
-            //Assert.AreEqual("g", res);
-        }
-
-        [TestMethod]
-        public void MatchOnOff()
-        {
-            //var res = Match.On(5)
-            //    .Case(1, "a")
-            //    .Case(2, "b")
-            //    .Case(3, "c")
-            //    .Off()
-            //    .Case(4, "d")
-            //    .Case(5, "e")
-            //    .On(7)
-            //    .Case(6, "f")
-            //    .Case(7, "g")
-            //    .Case(8, "h")
-            //    .Off()
-            //    .Case(9, "i")
-            //    .Case(10, "j")
-            //    .Else("qwerty");
-            //Assert.AreEqual("g", res(9));
-        }
-
         private Func<A, B> Track<A, B>(List<String> l, String msg, Func<A, B> f)
         {
             return x => {

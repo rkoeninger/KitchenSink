@@ -255,9 +255,7 @@ namespace ZedSharp
     }
 <#+
     }
-    #>
 
-<#+
     public void End(String returnType, String expr)
     { #>public <#= returnType #> End
         {
@@ -276,9 +274,7 @@ namespace ZedSharp
         }
 <#+
     }
-    #>
 
-<#+
     public void On(String className, String args)
     { #>
 
@@ -288,9 +284,7 @@ namespace ZedSharp
         }
 
 <#+ }
-    #>
 
-<#+
     public void Eval(String expr)
     { #>
 
@@ -300,9 +294,7 @@ namespace ZedSharp
         }
 
 <#+ }
-    #>
 
-<#+
     public void Else(bool func)
     {
         var consequences = new List<Tuple<String, String, String>> {
@@ -323,9 +315,7 @@ namespace ZedSharp
 
 <#+     }
     }
-    #>
 
-<#+
     public void Defaults(bool typeArg, String className, String beforeArgs, String extraArgs)
     {
         var consequences = new List<Tuple<String, String>> {
@@ -345,9 +335,7 @@ namespace ZedSharp
 <#+
         }
     }
-    #>
 
-<#+
     public void CaseOverloads(String className)
     {
         CaseOverloads(className, "");
@@ -380,9 +368,8 @@ namespace ZedSharp
         }
 <#+ }               
         }
-    } #>
+    }
 
-<#+
     public void CaseInferenceOverloads(String className)
     {
         CaseInferenceOverloads(className, "");
@@ -415,9 +402,8 @@ namespace ZedSharp
         }
 <#+ }               
         }
-    } #>
+    }
 
-<#+
     public void CaseStaticOverloads(String className)
     {
         CaseStaticOverloads(className, "");
@@ -450,9 +436,8 @@ namespace ZedSharp
         }
 <#+ }               
         }
-    } #>
+    }
 
-<#+
     public void CaseSubtypeOverloads(String className)
     {
         CaseSubtypeOverloads(className, "");
