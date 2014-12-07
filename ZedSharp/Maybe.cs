@@ -38,7 +38,7 @@ namespace ZedSharp
             }
             catch
             {
-                return None<A>();
+                return Maybe<A>.None;
             }
         }
 
@@ -49,7 +49,7 @@ namespace ZedSharp
 
         public static Maybe<B> If<A, B>(A val, Func<A, bool> f, Func<A, B> convert)
         {
-            return f(val) ? Of(convert(val)) : None<B>();
+            return f(val) ? Of(convert(val)) : Maybe<B>.None;
         }
 
         public static Lazy<Maybe<B>> LazyIf<A, B>(A val, Func<A, bool> f, Func<A, B> selector)
@@ -59,19 +59,19 @@ namespace ZedSharp
 
         public static Maybe<A> Flatten<A>(this Maybe<Maybe<A>> maybe)
         {
-            return maybe.HasValue ? maybe.Value : None<A>();
+            return maybe.HasValue ? maybe.Value : Maybe<A>.None;
         }
 
         public static Maybe<Int32> ToInt(this String s)
         {
             int i;
-            return Int32.TryParse(s, out i) ? Maybe.Of(i) : Maybe.None<Int32>();
+            return Int32.TryParse(s, out i) ? Maybe.Of(i) : Maybe<Int32>.None;
         }
 
         public static Maybe<Double> ToDouble(this String s)
         {
             double d;
-            return Double.TryParse(s, out d) ? Maybe.Of(d) : Maybe.None<Double>();
+            return Double.TryParse(s, out d) ? Maybe.Of(d) : Maybe<Double>.None;
         }
 
         public static Maybe<XDocument> ToXml(this String s)
@@ -124,7 +124,7 @@ namespace ZedSharp
                 if (x.HasValue)
                     list.Add(x.Value);
                 else
-                    return Maybe.None<IEnumerable<A>>();
+                    return Maybe<IEnumerable<A>>.None;
 
             return Maybe.Of(list).Cast<IEnumerable<A>>();
         }
@@ -197,6 +197,8 @@ namespace ZedSharp
     /// <typeparam name="A"></typeparam>
     public struct Maybe<A>
     {
+        public static readonly Maybe<A> None = new Maybe<A>();
+
         public static implicit operator Maybe<A>(A val)
         {
             return Maybe.Of(val);
@@ -219,7 +221,7 @@ namespace ZedSharp
 
         public static Maybe<A> operator &(Maybe<A> lhs, Maybe<A> rhs)
         {
-            return (lhs.HasValue && rhs.HasValue) ? lhs : Maybe.None<A>();
+            return (lhs.HasValue && rhs.HasValue) ? lhs : Maybe<A>.None;
         }
 
         internal Maybe(A val) : this()
@@ -236,7 +238,7 @@ namespace ZedSharp
         public Maybe<B> Select<B>(Func<A, B> f)
         {
             var val = Value;
-            return HasValue ? Maybe.Try(() => f(val)) : Maybe.None<B>();
+            return HasValue ? Maybe.Try(() => f(val)) : Maybe<B>.None;
         }
 
         public Maybe<B> SelectMany<B>(Func<A, Maybe<B>> f)
@@ -263,7 +265,7 @@ namespace ZedSharp
         {
             return HasValue && inner.HasValue && comparer.Equals(outerKeySelector(Value), innerKeySelector(inner.Value))
                 ? Maybe.Of(resultSelector(Value, inner.Value))
-                : Maybe.None<C>();
+                : Maybe<C>.None;
         }
 
         /// <summary>Attempts cast, returning Some or None.</summary>
@@ -305,7 +307,7 @@ namespace ZedSharp
 
         public Maybe<A> OrIf<B>(B key, Func<B, bool> p, Func<B, A> f)
         {
-            return HasValue ? this : p(key) ? Maybe.Of(f(key)) : Maybe.None<A>();
+            return HasValue ? this : p(key) ? Maybe.Of(f(key)) : Maybe<A>.None;
         }
 
         public Maybe<A> Or(Maybe<A> maybe)

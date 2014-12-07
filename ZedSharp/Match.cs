@@ -1,833 +1,2388 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace ZedSharp
 {
-    internal interface IMatcher<A, B>
-    {
-        /// <remarks>Key may be ignored, depending on implementation.</remarks>
-        Maybe<B> Eval(A key);
-    }
-
-    internal class NullMatcher<A, B> : IMatcher<A, B>
-    {
-        public static readonly IMatcher<A, B> It = new NullMatcher<A, B>();
-
-        public Maybe<B> Eval(A _)
-        {
-            return Maybe.None<B>();
-        }
-    }
-
     public static class Match
     {
-        public static MatcherInitial<A> On<A>(A key)
+        public static MatcherK0<A> On<A>(A k)
         {
-            return new MatcherInitial<A>(key);
+            return new MatcherK0<A>(k);
         }
 
-        public static MatcherFuncInitial<A> From<A>()
+        public static MatcherKD0<A, B> On<A, B>(A k, Func<A, B> defaultF)
         {
-            return new MatcherFuncInitial<A>();
-        }
-    }
-
-    public struct MatcherInitial<A>
-    {
-        internal MatcherInitial(A key) : this()
-        {
-            Key = key;
-        }
-        
-        internal readonly A Key;
-
-        public Matcher<A, B> Return<B>()
-        {
-            return new Matcher<A, B>(Key);
+            return new MatcherKD0<A, B>(k, defaultF);
         }
 
-        public MatcherDefault<A, B> Default<B>(Func<A, B> f)
+        public static Matcher0<A> From<A>()
         {
-            return new MatcherDefault<A, B>(Key, f);
-        }
-
-        public MatcherInferencePredicate<A, A> Case(Func<A, bool> f)
-        {
-            return new MatcherInferencePredicate<A, A>(Key, f);
-        }
-
-        public MatcherInferencePredicate<A, C> Case<C>(Func<C, bool> f) where C : A
-        {
-            return new MatcherInferencePredicate<A, C>(Key, x => x is C && f((C) x));
-        }
-
-        public MatcherInferencePredicate<A, C> Case<C>() where C : A
-        {
-            return new MatcherInferencePredicate<A, C>(Key, x => x is C);
-        }
-    }
-
-    public struct Matcher<A, B> : IMatcher<A, B>
-    {
-        internal Matcher(A key) : this()
-        {
-            Key = key;
-            Previous = NullMatcher<A, B>.It;
-            Predicate = _ => false;
-            Selector = _ => default(B);
-        }
-
-        internal Matcher(A key, Func<A, bool> predicate, Func<A, B> selector) : this()
-        {
-            Key = key;
-            Previous = NullMatcher<A, B>.It;
-            Predicate = predicate;
-            Selector = selector;
-        }
-
-        internal Matcher(A key, IMatcher<A, B> previous, Func<A, bool> predicate, Func<A, B> selector) : this()
-        {
-            Key = key;
-            Previous = previous;
-            Predicate = predicate;
-            Selector = selector;
-        }
-
-        internal readonly A Key;
-        private readonly IMatcher<A, B> Previous;
-        private readonly Func<A, bool> Predicate;
-        private readonly Func<A, B> Selector;
-
-        public MatcherPredicate<A, B, A> Case(Func<A, bool> f)
-        {
-            return new MatcherPredicate<A, B, A>(Key, this, f);
-        }
-
-        public MatcherPredicate<A, B, C> Case<C>(Func<C, bool> f) where C : A
-        {
-            return new MatcherPredicate<A, B, C>(Key, this, x => x is C && f((C) x));
-        }
-
-        public MatcherPredicate<A, B, C> Case<C>() where C : A
-        {
-            return new MatcherPredicate<A, B, C>(Key, this, x => x is C);
-        }
-
-        public MatcherFunc<A, B> Off()
-        {
-            return new MatcherFunc<A, B>(this, _ => false, _ => default(B));
-        }
-
-        public Matcher<A, B> Swap(A key)
-        {
-            return new Matcher<A, B>(key, this, _ => false, _ => default(B));
-        }
-
-        public Maybe<B> End()
-        {
-            return Eval(Key);
-        }
-
-        public Lazy<Maybe<B>> EndLazy()
-        {
-            return new Lazy<Maybe<B>>(End);
-        }
-
-        public static implicit operator Maybe<B>(Matcher<A, B> matcher)
-        {
-            return matcher.End();
-        }
-
-        public Maybe<B> Eval(A _)
-        {
-            return Previous.Eval(Key).OrIf(Key, Predicate, Selector);
-        }
-    }
-
-    public struct MatcherInferencePredicate<A, C> where C : A
-    {
-        internal MatcherInferencePredicate(A key, Func<A, bool> predicate) : this()
-        {
-            Key = key;
-            Predicate = predicate;
-        }
-        
-        private readonly A Key;
-        private readonly Func<A, bool> Predicate;
-
-        public Matcher<A, B> Then<B>(Func<C, B> f)
-        {
-            return new Matcher<A, B>(Key, Predicate, x => f(x.As<C>()));
-        }
-    }
-
-    public struct MatcherPredicate<A, B, C> where C : A
-    {
-        internal MatcherPredicate(A key, IMatcher<A, B> previous, Func<A, bool> predicate) : this()
-        {
-            Key = key;
-            Previous = previous;
-            Predicate = predicate;
-        }
-
-        private readonly A Key;
-        private readonly IMatcher<A, B> Previous;
-        private readonly Func<A, bool> Predicate;
-
-        public Matcher<A, B> Then(Func<C, B> f)
-        {
-            return new Matcher<A, B>(Key, Previous, Predicate, x => f((C) x));
-        }
-    }
-
-    public struct MatcherDefault<A, B> : IMatcher<A, B>
-    {
-        internal MatcherDefault(A key, Func<A, B> defaultF) : this()
-        {
-            Key = key;
-            Default = defaultF;
-            Previous = NullMatcher<A, B>.It;
-            Predicate = _ => false;
-            Selector = _ => default(B);
-        }
-
-        internal MatcherDefault(A key, Func<A, B> defaultF, IMatcher<A, B> previous, Func<A, bool> predicate, Func<A, B> selector) : this()
-        {
-            Key = key;
-            Default = defaultF;
-            Previous = previous;
-            Predicate = predicate;
-            Selector = selector;
-        }
-
-        internal readonly A Key;
-        private readonly Func<A, B> Default;
-        private readonly IMatcher<A, B> Previous;
-        private readonly Func<A, bool> Predicate;
-        private readonly Func<A, B> Selector;
-
-        public MatcherDefaultPredicate<A, B, A> Case(Func<A, bool> f)
-        {
-            return new MatcherDefaultPredicate<A, B, A>(Key, Default, this, f);
-        }
-
-        public MatcherDefaultPredicate<A, B, C> Case<C>(Func<C, bool> f) where C : A
-        {
-            return new MatcherDefaultPredicate<A, B, C>(Key, Default, this, x => x is C && f((C) x));
-        }
-
-        public MatcherDefaultPredicate<A, B, C> Case<C>() where C : A
-        {
-            return new MatcherDefaultPredicate<A, B, C>(Key, Default, this, x => x is C);
-        }
-        
-        public MatcherFuncDefault<A, B> Off()
-        {
-            return new MatcherFuncDefault<A, B>(Default, this, _ => false, _ => default(B));
-        }
-
-        public B End()
-        {
-            return Eval(Key).OrElseEval(Key, Default);
-        }
-
-        public Lazy<B> EndLazy()
-        {
-            return new Lazy<B>(End);
-        }
-
-        public static implicit operator B(MatcherDefault<A, B> matcher)
-        {
-            return matcher.End();
-        }
-
-        public Maybe<B> Eval(A _)
-        {
-            return Previous.Eval(Key).OrIf(Key, Predicate, Selector);
-        }
-    }
-
-    public struct MatcherDefaultPredicate<A, B, C> where C : A
-    {
-        internal MatcherDefaultPredicate(A key, Func<A, B> defaultF, IMatcher<A, B> previous, Func<A, bool> predicate) : this()
-        {
-            Key = key;
-            Default = defaultF;
-            Previous = previous;
-            Predicate = predicate;
-        }
-
-        private readonly A Key;
-        private readonly Func<A, B> Default;
-        private readonly IMatcher<A, B> Previous;
-        private readonly Func<A, bool> Predicate;
-
-        public MatcherDefault<A, B> Then(Func<C, B> f)
-        {
-            return new MatcherDefault<A, B>(Key, Default, Previous, Predicate, x => f(x.As<C>()));
+            return new Matcher0<A>();
         }
     }
 
     public static class Match<A>
     {
-        public static MatcherFunc<A, B> Return<B>()
+        public static MatcherK0<A> On(A k)
         {
-            return new MatcherFunc<A, B>(_ => false, _ => default(B));
+            return new MatcherK0<A>(k);
         }
 
-        public static MatcherFuncDefault<A, B> Default<B>(Func<A, B> f)
+        public static MatcherKD0<A, B> On<B>(A k, Func<A, B> defaultF)
         {
-            return new MatcherFuncDefault<A, B>(f);
+            return new MatcherKD0<A, B>(k, defaultF);
         }
 
-        public static MatcherFuncDefault<A, B> Default<B>(Func<B> f)
+        public static Matcher0<A, B> Return<B>()
         {
-            return new MatcherFuncDefault<A, B>(_ => f());
+            return new Matcher0<A, B>();
         }
 
-        public static MatcherFuncDefault<A, B> Default<B>(B val)
+        public static MatcherD0<A, B> Default<B>(Func<A, B> v)
         {
-            return new MatcherFuncDefault<A, B>(_ => val);
+            return new MatcherD0<A, B>(v);
         }
 
-        public static MatcherFuncInferencePredicate<A, A> Case(Func<A, bool> f)
+        public static MatcherD0<A, B> Default<B>(Func<B> v)
         {
-            return new MatcherFuncInferencePredicate<A, A>(f);
+            return new MatcherD0<A, B>(_ => v());
         }
 
-        public static MatcherFuncInferencePredicate<A, A> Case(Func<bool> f)
+        public static MatcherD0<A, B> Default<B>(B v)
         {
-            return new MatcherFuncInferencePredicate<A, A>(_ => f());
-        }
-
-        public static MatcherFuncInferencePredicate<A, A> Case(A val)
-        {
-            return new MatcherFuncInferencePredicate<A, A>(val.Eq());
-        }
-
-        public static MatcherFuncInferencePredicate<A, C> Case<C>(Func<C, bool> f) where C : A
-        {
-            return new MatcherFuncInferencePredicate<A, C>(x => x is C && f((C) x));
-        }
-
-        public static MatcherFuncInferencePredicate<A, C> Case<C>() where C : A
-        {
-            return new MatcherFuncInferencePredicate<A, C>(x => x is C);
-        }
-    }
-
-    public struct MatcherFuncInitial<A>
-    {
-        public MatcherFunc<A, B> Return<B>()
-        {
-            return new MatcherFunc<A, B>(_ => false, _ => default(B));
-        }
-
-        public MatcherFuncDefault<A, B> Default<B>(Func<A, B> f)
-        {
-            return new MatcherFuncDefault<A, B>(f);
-        }
-
-        public MatcherFuncInferencePredicate<A, A> Case(Func<A, bool> f)
-        {
-            return new MatcherFuncInferencePredicate<A, A>(f);
-        }
-
-        public MatcherFuncInferencePredicate<A, C> Case<C>(Func<C, bool> f) where C : A
-        {
-            return new MatcherFuncInferencePredicate<A, C>(x => x is C && f((C) x));
-        }
-
-        public MatcherFuncInferencePredicate<A, C> Case<C>() where C : A
-        {
-            return new MatcherFuncInferencePredicate<A, C>(x => x is C);
-        }
-    }
-
-    public struct MatcherFunc<A, B> : IMatcher<A, B>
-    {
-        internal MatcherFunc(Func<A, bool> predicate, Func<A, B> selector) : this()
-        {
-            Previous = NullMatcher<A, B>.It;
-            Predicate = predicate;
-            Selector = selector;
+            return new MatcherD0<A, B>(_ => v);
         }
         
-        internal MatcherFunc(IMatcher<A, B> previous, Func<A, bool> predicate, Func<A, B> selector) : this()
+        public static Matcher1<A, B> Case<B>(Func<A, bool> p, Func<A, B> f)
         {
-            Previous = previous;
-            Predicate = predicate;
-            Selector = selector;
+            return new Matcher1<A, B>(p, f);
         }
 
-        private readonly IMatcher<A, B> Previous;
-        private readonly Func<A, bool> Predicate;
-        private readonly Func<A, B> Selector;
-
-        public MatcherFuncPredicate<A, B, A> Case(Func<A, bool> f)
+        public static Matcher1<A, B> Case<B>(Func<A, bool> p, Func<B> f)
         {
-            return new MatcherFuncPredicate<A, B, A>(this, f);
+            return new Matcher1<A, B>(p, _ => f());
         }
 
-        public MatcherFuncPredicate<A, B, C> Case<C>(Func<C, bool> f) where C : A
+        public static Matcher1<A, B> Case<B>(Func<A, bool> p, B f)
         {
-            return new MatcherFuncPredicate<A, B, C>(this, x => x is C && f((C) x));
+            return new Matcher1<A, B>(p, _ => f);
         }
 
-        public MatcherFuncPredicate<A, B, C> Case<C>() where C : A
+        public static Matcher1<A, B> Case<B>(Func<bool> p, Func<A, B> f)
         {
-            return new MatcherFuncPredicate<A, B, C>(this, x => x is C);
+            return new Matcher1<A, B>(_ => p(), f);
         }
 
+        public static Matcher1<A, B> Case<B>(Func<bool> p, Func<B> f)
+        {
+            return new Matcher1<A, B>(_ => p(), _ => f());
+        }
+
+        public static Matcher1<A, B> Case<B>(Func<bool> p, B f)
+        {
+            return new Matcher1<A, B>(_ => p(), _ => f);
+        }
+
+        public static Matcher1<A, B> Case<B>(bool p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(_ => p, f);
+        }
+
+        public static Matcher1<A, B> Case<B>(bool p, Func<B> f)
+        {
+            return new Matcher1<A, B>(_ => p, _ => f());
+        }
+
+        public static Matcher1<A, B> Case<B>(bool p, B f)
+        {
+            return new Matcher1<A, B>(_ => p, _ => f);
+        }
+
+        public static Matcher1<A, B> Case<B>(A p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(x => Object.Equals(x, p), f);
+        }
+
+        public static Matcher1<A, B> Case<B>(A p, Func<B> f)
+        {
+            return new Matcher1<A, B>(x => Object.Equals(x, p), _ => f());
+        }
+
+        public static Matcher1<A, B> Case<B>(A p, B f)
+        {
+            return new Matcher1<A, B>(x => Object.Equals(x, p), _ => f);
+        }
+
+        public static Matcher1<A, B> Case<B>(Type p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(x => p.IsInstanceOfType(x), f);
+        }
+
+        public static Matcher1<A, B> Case<B>(Type p, Func<B> f)
+        {
+            return new Matcher1<A, B>(x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public static Matcher1<A, B> Case<B>(Type p, B f)
+        {
+            return new Matcher1<A, B>(x => p.IsInstanceOfType(x), _ => f);
+        }
+    }
+
+    public static class Match<A, B>
+    {
+        public static MatcherK0<A, B> On(A k)
+        {
+            return new MatcherK0<A, B>(k);
+        }
+
+        public static MatcherKD0<A, B> On(A k, Func<A, B> defaultF)
+        {
+            return new MatcherKD0<A, B>(k, defaultF);
+        }
+    }
+
+    /// <remarks>Key may be ignored, depending on implementation.</remarks>
+    internal interface IMatcher<A, B>
+    {
+        Maybe<B> Eval(A k);
+    }
+
+    public class Matcher0<A>
+    {
+        internal Matcher0()
+        {
+        }
+
+        public Matcher0<A, B> Return<B>()
+        {
+            return new Matcher0<A, B>();
+        }
+        
+        public MatcherD0<A, B> Default<B>(Func<A, B> defaultF)
+        {
+            return new MatcherD0<A, B>(defaultF);
+        }
+
+        public MatcherD0<A, B> Default<B>(Func<B> defaultF)
+        {
+            return new MatcherD0<A, B>(_ => defaultF());
+        }
+
+        public MatcherD0<A, B> Default<B>(B defaultF)
+        {
+            return new MatcherD0<A, B>(_ => defaultF);
+        }
+        
+        public Matcher1<A, B> Case<B>(Func<A, bool> p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(p, f);
+        }
+
+        public Matcher1<A, B> Case<B>(Func<A, bool> p, Func<B> f)
+        {
+            return new Matcher1<A, B>(p, _ => f());
+        }
+
+        public Matcher1<A, B> Case<B>(Func<A, bool> p, B f)
+        {
+            return new Matcher1<A, B>(p, _ => f);
+        }
+
+        public Matcher1<A, B> Case<B>(Func<bool> p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(_ => p(), f);
+        }
+
+        public Matcher1<A, B> Case<B>(Func<bool> p, Func<B> f)
+        {
+            return new Matcher1<A, B>(_ => p(), _ => f());
+        }
+
+        public Matcher1<A, B> Case<B>(Func<bool> p, B f)
+        {
+            return new Matcher1<A, B>(_ => p(), _ => f);
+        }
+
+        public Matcher1<A, B> Case<B>(bool p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(_ => p, f);
+        }
+
+        public Matcher1<A, B> Case<B>(bool p, Func<B> f)
+        {
+            return new Matcher1<A, B>(_ => p, _ => f());
+        }
+
+        public Matcher1<A, B> Case<B>(bool p, B f)
+        {
+            return new Matcher1<A, B>(_ => p, _ => f);
+        }
+
+        public Matcher1<A, B> Case<B>(A p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(x => Object.Equals(x, p), f);
+        }
+
+        public Matcher1<A, B> Case<B>(A p, Func<B> f)
+        {
+            return new Matcher1<A, B>(x => Object.Equals(x, p), _ => f());
+        }
+
+        public Matcher1<A, B> Case<B>(A p, B f)
+        {
+            return new Matcher1<A, B>(x => Object.Equals(x, p), _ => f);
+        }
+
+        public Matcher1<A, B> Case<B>(Type p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(x => p.IsInstanceOfType(x), f);
+        }
+
+        public Matcher1<A, B> Case<B>(Type p, Func<B> f)
+        {
+            return new Matcher1<A, B>(x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public Matcher1<A, B> Case<B>(Type p, B f)
+        {
+            return new Matcher1<A, B>(x => p.IsInstanceOfType(x), _ => f);
+        }
+    }
+
+    
+    public class Matcher0<A, B> : IMatcher<A, B>
+    {
+        internal Matcher0()
+        {
+
+        }
+
+
+        
+        public Maybe<B> Eval(A k)
+        {
+            return Maybe<B>.None;
+        }
+
+        public Func<A, Maybe<B>> End
+        {
+            get { return Eval; }
+        }
+        
         public Func<A, B> Else(Func<A, B> f)
         {
             var me = this;
-            return key => me.Eval(key).OrElseEval(key, f);
+            return k => me.End(k).OrElseEval(k, f);
         }
 
-        public Matcher<A, B> On(A key)
-        {
-            return new Matcher<A,B>(key, Previous, Predicate, Selector);
-        }
 
-        public Func<A, Maybe<B>> End()
-        {
-            return Eval;
-        }
-
-        public Maybe<B> Eval(A key)
-        {
-            return Previous.Eval(key).OrIf(key, Predicate, Selector);
-        }
-    }
-
-    public struct MatcherFuncPredicate<A, B, C> where C : A
-    {
-        internal MatcherFuncPredicate(IMatcher<A, B> previous, Func<A, bool> predicate) : this()
-        {
-            Previous = previous;
-            Predicate = predicate;
-        }
-
-        private readonly IMatcher<A, B> Previous;
-        private readonly Func<A, bool> Predicate;
-
-        public MatcherFunc<A, B> Then(Func<C, B> f)
-        {
-            return new MatcherFunc<A, B>(Previous, Predicate, x => f(x.As<C>()));
-        }
-    }
-
-    public struct MatcherFuncInferencePredicate<A, C> where C : A
-    {
-        internal MatcherFuncInferencePredicate(Func<A, bool> predicate) : this()
-        {
-            Predicate = predicate;
-        }
-
-        private readonly Func<A, bool> Predicate;
-
-        public MatcherFunc<A, B> Then<B>(Func<C, B> f)
-        {
-            return new MatcherFunc<A, B>(Predicate, x => f(x.As<C>()));
-        }
-    }
-
-    public struct MatcherFuncDefault<A, B> : IMatcher<A, B>
-    {
-        internal MatcherFuncDefault(Func<A, B> defaultF)
-        {
-            Default = defaultF;
-            Previous = NullMatcher<A, B>.It;
-            Predicate = _ => false;
-            Selector = _ => default(B);
-        }
-
-        internal MatcherFuncDefault(Func<A, B> defaultF, IMatcher<A, B> previous, Func<A, bool> predicate, Func<A, B> selector)
-        {
-            Default = defaultF;
-            Previous = previous;
-            Predicate = predicate;
-            Selector = selector;
-        }
-
-        private readonly Func<A, B> Default;
-        private readonly IMatcher<A, B> Previous;
-        private readonly Func<A, bool> Predicate;
-        private readonly Func<A, B> Selector;
-
-        public MatcherFuncDefaultPredicate<A, B, A> Case(Func<A, bool> f)
-        {
-            return new MatcherFuncDefaultPredicate<A, B, A>(Default, this, f);
-        }
-
-        public MatcherFuncDefaultPredicate<A, B, C> Case<C>(Func<C, bool> f) where C : A
-        {
-            return new MatcherFuncDefaultPredicate<A, B, C>(Default, this, x => x is C && f((C) x));
-        }
-
-        public MatcherFuncDefaultPredicate<A, B, C> Case<C>() where C : A
-        {
-            return new MatcherFuncDefaultPredicate<A, B, C>(Default, this, x => x is C);
-        }
-
-        public MatcherDefault<A, B> On(A key)
-        {
-            return new MatcherDefault<A, B>(key, Default, Previous, Predicate, Selector);
-        }
-
-        public Func<A, B> End()
+        public Func<A, B> Else(Func<B> f)
         {
             var me = this;
-            return key => me.Eval(key).OrElseEval(key, me.Default);
+            return k => me.End(k).OrElseEval(f);
         }
 
-        public Maybe<B> Eval(A key)
+
+        public Func<A, B> Else(B f)
         {
-            return Previous.Eval(key).OrIf(key, Predicate, Selector);
+            var me = this;
+            return k => me.End(k).OrElse(f);
         }
+
+        
+        public MatcherK0<A, B> On(A k)
+        {
+            return new MatcherK0<A, B>(k);
+        }
+
+        
+        public MatcherD0<A, B> Default(Func<A, B> defaultF)
+        {
+            return new MatcherD0<A, B>(defaultF);
+        }
+
+        public MatcherD0<A, B> Default(Func<B> defaultF)
+        {
+            return new MatcherD0<A, B>(_ => defaultF());
+        }
+
+        public MatcherD0<A, B> Default(B defaultF)
+        {
+            return new MatcherD0<A, B>(_ => defaultF);
+        }
+        
+        public Matcher1<A, B> Case(Func<A, bool> p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(p, f);
+        }
+
+        public Matcher1<A, B> Case(Func<A, bool> p, Func<B> f)
+        {
+            return new Matcher1<A, B>(p, _ => f());
+        }
+
+        public Matcher1<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new Matcher1<A, B>(p, _ => f);
+        }
+
+        public Matcher1<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(_ => p(), f);
+        }
+
+        public Matcher1<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new Matcher1<A, B>(_ => p(), _ => f());
+        }
+
+        public Matcher1<A, B> Case(Func<bool> p, B f)
+        {
+            return new Matcher1<A, B>(_ => p(), _ => f);
+        }
+
+        public Matcher1<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(_ => p, f);
+        }
+
+        public Matcher1<A, B> Case(bool p, Func<B> f)
+        {
+            return new Matcher1<A, B>(_ => p, _ => f());
+        }
+
+        public Matcher1<A, B> Case(bool p, B f)
+        {
+            return new Matcher1<A, B>(_ => p, _ => f);
+        }
+
+        public Matcher1<A, B> Case(A p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(x => Object.Equals(x, p), f);
+        }
+
+        public Matcher1<A, B> Case(A p, Func<B> f)
+        {
+            return new Matcher1<A, B>(x => Object.Equals(x, p), _ => f());
+        }
+
+        public Matcher1<A, B> Case(A p, B f)
+        {
+            return new Matcher1<A, B>(x => Object.Equals(x, p), _ => f);
+        }
+
+        public Matcher1<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new Matcher1<A, B>(x => p.IsInstanceOfType(x), f);
+        }
+
+        public Matcher1<A, B> Case(Type p, Func<B> f)
+        {
+            return new Matcher1<A, B>(x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public Matcher1<A, B> Case(Type p, B f)
+        {
+            return new Matcher1<A, B>(x => p.IsInstanceOfType(x), _ => f);
+        }
+        
+        public Matcher1<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
+        {
+            return new Matcher1<A, B>(x => x is C && p((C) x), x => f((C) x));
+        }
+       
+        public Matcher1<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
+        {
+            return new Matcher1<A, B>(x => x is C && p((C) x), _ => f());
+        }
+       
+        public Matcher1<A, B> Case<C>(Func<C, bool> p, B f) where C : A
+        {
+            return new Matcher1<A, B>(x => x is C && p((C) x), _ => f);
+        }
+       
+        public Matcher1<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new Matcher1<A, B>(_ => p(), x => f((C) x));
+        }
+       
+        public Matcher1<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new Matcher1<A, B>(_ => p(), _ => f());
+        }
+       
+        public Matcher1<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new Matcher1<A, B>(_ => p(), _ => f);
+        }
+       
+        public Matcher1<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new Matcher1<A, B>(_ => p, x => f((C) x));
+        }
+       
+        public Matcher1<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new Matcher1<A, B>(_ => p, _ => f());
+        }
+       
+        public Matcher1<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new Matcher1<A, B>(_ => p, _ => f);
+        }
+           
     }
 
-    public struct MatcherFuncDefaultPredicate<A, B, C> where C : A
+    
+    public class Matcher1<A, B> : IMatcher<A, B>
     {
-        internal MatcherFuncDefaultPredicate(Func<A, B> defaultF, IMatcher<A, B> previous, Func<A, bool> predicate)
+        internal Matcher1(Func<A, bool> p, Func<A, B> f)
+        {
+            Condition = p;
+            Consequent = f;
+
+        }
+
+        private readonly Func<A, bool> Condition;
+        private readonly Func<A, B> Consequent;
+
+        
+        public Maybe<B> Eval(A k)
+        {
+            return Maybe.If(k, Condition, Consequent);
+        }
+
+        public Func<A, Maybe<B>> End
+        {
+            get { return Eval; }
+        }
+        
+        public Func<A, B> Else(Func<A, B> f)
+        {
+            var me = this;
+            return k => me.End(k).OrElseEval(k, f);
+        }
+
+
+        public Func<A, B> Else(Func<B> f)
+        {
+            var me = this;
+            return k => me.End(k).OrElseEval(f);
+        }
+
+
+        public Func<A, B> Else(B f)
+        {
+            var me = this;
+            return k => me.End(k).OrElse(f);
+        }
+
+        
+        public MatcherK1<A, B> On(A k)
+        {
+            return new MatcherK1<A, B>(k, Condition, Consequent);
+        }
+
+        
+        public MatcherD1<A, B> Default(Func<A, B> defaultF)
+        {
+            return new MatcherD1<A, B>(defaultF, Condition, Consequent);
+        }
+
+        public MatcherD1<A, B> Default(Func<B> defaultF)
+        {
+            return new MatcherD1<A, B>(_ => defaultF(), Condition, Consequent);
+        }
+
+        public MatcherD1<A, B> Default(B defaultF)
+        {
+            return new MatcherD1<A, B>(_ => defaultF, Condition, Consequent);
+        }
+        
+        public MatcherN<A, B> Case(Func<A, bool> p, Func<A, B> f)
+        {
+            return new MatcherN<A, B>(this, p, f);
+        }
+
+        public MatcherN<A, B> Case(Func<A, bool> p, Func<B> f)
+        {
+            return new MatcherN<A, B>(this, p, _ => f());
+        }
+
+        public MatcherN<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new MatcherN<A, B>(this, p, _ => f);
+        }
+
+        public MatcherN<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherN<A, B>(this, _ => p(), f);
+        }
+
+        public MatcherN<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new MatcherN<A, B>(this, _ => p(), _ => f());
+        }
+
+        public MatcherN<A, B> Case(Func<bool> p, B f)
+        {
+            return new MatcherN<A, B>(this, _ => p(), _ => f);
+        }
+
+        public MatcherN<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new MatcherN<A, B>(this, _ => p, f);
+        }
+
+        public MatcherN<A, B> Case(bool p, Func<B> f)
+        {
+            return new MatcherN<A, B>(this, _ => p, _ => f());
+        }
+
+        public MatcherN<A, B> Case(bool p, B f)
+        {
+            return new MatcherN<A, B>(this, _ => p, _ => f);
+        }
+
+        public MatcherN<A, B> Case(A p, Func<A, B> f)
+        {
+            return new MatcherN<A, B>(this, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherN<A, B> Case(A p, Func<B> f)
+        {
+            return new MatcherN<A, B>(this, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherN<A, B> Case(A p, B f)
+        {
+            return new MatcherN<A, B>(this, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherN<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new MatcherN<A, B>(this, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherN<A, B> Case(Type p, Func<B> f)
+        {
+            return new MatcherN<A, B>(this, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherN<A, B> Case(Type p, B f)
+        {
+            return new MatcherN<A, B>(this, x => p.IsInstanceOfType(x), _ => f);
+        }
+        
+        public MatcherN<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, x => x is C && p((C) x), x => f((C) x));
+        }
+       
+        public MatcherN<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, x => x is C && p((C) x), _ => f());
+        }
+       
+        public MatcherN<A, B> Case<C>(Func<C, bool> p, B f) where C : A
+        {
+            return new MatcherN<A, B>(this, x => x is C && p((C) x), _ => f);
+        }
+       
+        public MatcherN<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p(), x => f((C) x));
+        }
+       
+        public MatcherN<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p(), _ => f());
+        }
+       
+        public MatcherN<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p(), _ => f);
+        }
+       
+        public MatcherN<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p, x => f((C) x));
+        }
+       
+        public MatcherN<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p, _ => f());
+        }
+       
+        public MatcherN<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p, _ => f);
+        }
+           
+    }
+
+    
+    public class MatcherN<A, B> : IMatcher<A, B>
+    {
+        internal MatcherN(IMatcher<A, B> m, Func<A, bool> p, Func<A, B> f)
+        {
+            Previous = m;
+            Condition = p;
+            Consequent = f;
+
+        }
+
+        private readonly IMatcher<A, B> Previous;
+        private readonly Func<A, bool> Condition;
+        private readonly Func<A, B> Consequent;
+
+        
+        public Maybe<B> Eval(A k)
+        {
+            return Previous.Eval(k).OrIf(k, Condition, Consequent);
+        }
+
+        public Func<A, Maybe<B>> End
+        {
+            get { return Eval; }
+        }
+        
+        public Func<A, B> Else(Func<A, B> f)
+        {
+            var me = this;
+            return k => me.End(k).OrElseEval(k, f);
+        }
+
+
+        public Func<A, B> Else(Func<B> f)
+        {
+            var me = this;
+            return k => me.End(k).OrElseEval(f);
+        }
+
+
+        public Func<A, B> Else(B f)
+        {
+            var me = this;
+            return k => me.End(k).OrElse(f);
+        }
+
+        
+        public MatcherKN<A, B> On(A k)
+        {
+            return new MatcherKN<A, B>(k, Previous, Condition, Consequent);
+        }
+
+        
+        public MatcherDN<A, B> Default(Func<A, B> defaultF)
+        {
+            return new MatcherDN<A, B>(this, defaultF, Condition, Consequent);
+        }
+
+        public MatcherDN<A, B> Default(Func<B> defaultF)
+        {
+            return new MatcherDN<A, B>(this, _ => defaultF(), Condition, Consequent);
+        }
+
+        public MatcherDN<A, B> Default(B defaultF)
+        {
+            return new MatcherDN<A, B>(this, _ => defaultF, Condition, Consequent);
+        }
+        
+        public MatcherN<A, B> Case(Func<A, bool> p, Func<A, B> f)
+        {
+            return new MatcherN<A, B>(this, p, f);
+        }
+
+        public MatcherN<A, B> Case(Func<A, bool> p, Func<B> f)
+        {
+            return new MatcherN<A, B>(this, p, _ => f());
+        }
+
+        public MatcherN<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new MatcherN<A, B>(this, p, _ => f);
+        }
+
+        public MatcherN<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherN<A, B>(this, _ => p(), f);
+        }
+
+        public MatcherN<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new MatcherN<A, B>(this, _ => p(), _ => f());
+        }
+
+        public MatcherN<A, B> Case(Func<bool> p, B f)
+        {
+            return new MatcherN<A, B>(this, _ => p(), _ => f);
+        }
+
+        public MatcherN<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new MatcherN<A, B>(this, _ => p, f);
+        }
+
+        public MatcherN<A, B> Case(bool p, Func<B> f)
+        {
+            return new MatcherN<A, B>(this, _ => p, _ => f());
+        }
+
+        public MatcherN<A, B> Case(bool p, B f)
+        {
+            return new MatcherN<A, B>(this, _ => p, _ => f);
+        }
+
+        public MatcherN<A, B> Case(A p, Func<A, B> f)
+        {
+            return new MatcherN<A, B>(this, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherN<A, B> Case(A p, Func<B> f)
+        {
+            return new MatcherN<A, B>(this, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherN<A, B> Case(A p, B f)
+        {
+            return new MatcherN<A, B>(this, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherN<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new MatcherN<A, B>(this, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherN<A, B> Case(Type p, Func<B> f)
+        {
+            return new MatcherN<A, B>(this, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherN<A, B> Case(Type p, B f)
+        {
+            return new MatcherN<A, B>(this, x => p.IsInstanceOfType(x), _ => f);
+        }
+        
+        public MatcherN<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, x => x is C && p((C) x), x => f((C) x));
+        }
+       
+        public MatcherN<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, x => x is C && p((C) x), _ => f());
+        }
+       
+        public MatcherN<A, B> Case<C>(Func<C, bool> p, B f) where C : A
+        {
+            return new MatcherN<A, B>(this, x => x is C && p((C) x), _ => f);
+        }
+       
+        public MatcherN<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p(), x => f((C) x));
+        }
+       
+        public MatcherN<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p(), _ => f());
+        }
+       
+        public MatcherN<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p(), _ => f);
+        }
+       
+        public MatcherN<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p, x => f((C) x));
+        }
+       
+        public MatcherN<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p, _ => f());
+        }
+       
+        public MatcherN<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new MatcherN<A, B>(this, _ => p, _ => f);
+        }
+           
+    }
+
+    
+    public class MatcherD0<A, B> : IMatcher<A, B>
+    {
+        internal MatcherD0(Func<A, B> defaultF)
         {
             Default = defaultF;
-            Previous = previous;
-            Predicate = predicate;
+
         }
 
         private readonly Func<A, B> Default;
+
+        
+        public Maybe<B> Eval(A k)
+        {
+            return Maybe<B>.None;
+        }
+
+        public Func<A, B> End
+        {
+            get { return Default; }
+        }
+        
+        public MatcherKD0<A, B> On(A k)
+        {
+            return new MatcherKD0<A, B>(k, Default);
+        }
+
+        
+        public MatcherD1<A, B> Case(Func<A, bool> p, Func<A, B> f)
+        {
+            return new MatcherD1<A, B>(Default, p, f);
+        }
+
+        public MatcherD1<A, B> Case(Func<A, bool> p, Func<B> f)
+        {
+            return new MatcherD1<A, B>(Default, p, _ => f());
+        }
+
+        public MatcherD1<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new MatcherD1<A, B>(Default, p, _ => f);
+        }
+
+        public MatcherD1<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherD1<A, B>(Default, _ => p(), f);
+        }
+
+        public MatcherD1<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new MatcherD1<A, B>(Default, _ => p(), _ => f());
+        }
+
+        public MatcherD1<A, B> Case(Func<bool> p, B f)
+        {
+            return new MatcherD1<A, B>(Default, _ => p(), _ => f);
+        }
+
+        public MatcherD1<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new MatcherD1<A, B>(Default, _ => p, f);
+        }
+
+        public MatcherD1<A, B> Case(bool p, Func<B> f)
+        {
+            return new MatcherD1<A, B>(Default, _ => p, _ => f());
+        }
+
+        public MatcherD1<A, B> Case(bool p, B f)
+        {
+            return new MatcherD1<A, B>(Default, _ => p, _ => f);
+        }
+
+        public MatcherD1<A, B> Case(A p, Func<A, B> f)
+        {
+            return new MatcherD1<A, B>(Default, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherD1<A, B> Case(A p, Func<B> f)
+        {
+            return new MatcherD1<A, B>(Default, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherD1<A, B> Case(A p, B f)
+        {
+            return new MatcherD1<A, B>(Default, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherD1<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new MatcherD1<A, B>(Default, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherD1<A, B> Case(Type p, Func<B> f)
+        {
+            return new MatcherD1<A, B>(Default, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherD1<A, B> Case(Type p, B f)
+        {
+            return new MatcherD1<A, B>(Default, x => p.IsInstanceOfType(x), _ => f);
+        }
+        
+        public MatcherD1<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherD1<A, B>(Default, x => x is C && p((C) x), x => f((C) x));
+        }
+       
+        public MatcherD1<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
+        {
+            return new MatcherD1<A, B>(Default, x => x is C && p((C) x), _ => f());
+        }
+       
+        public MatcherD1<A, B> Case<C>(Func<C, bool> p, B f) where C : A
+        {
+            return new MatcherD1<A, B>(Default, x => x is C && p((C) x), _ => f);
+        }
+       
+        public MatcherD1<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherD1<A, B>(Default, _ => p(), x => f((C) x));
+        }
+       
+        public MatcherD1<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new MatcherD1<A, B>(Default, _ => p(), _ => f());
+        }
+       
+        public MatcherD1<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new MatcherD1<A, B>(Default, _ => p(), _ => f);
+        }
+       
+        public MatcherD1<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new MatcherD1<A, B>(Default, _ => p, x => f((C) x));
+        }
+       
+        public MatcherD1<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new MatcherD1<A, B>(Default, _ => p, _ => f());
+        }
+       
+        public MatcherD1<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new MatcherD1<A, B>(Default, _ => p, _ => f);
+        }
+           
+    }
+
+    
+    public class MatcherD1<A, B> : IMatcher<A, B>
+    {
+        internal MatcherD1(Func<A, B> defaultF, Func<A, bool> p, Func<A, B> f)
+        {
+            Default = defaultF;
+            Condition = p;
+            Consequent = f;
+
+        }
+
+        private readonly Func<A, B> Default;
+        private readonly Func<A, bool> Condition;
+        private readonly Func<A, B> Consequent;
+
+        
+        public Maybe<B> Eval(A k)
+        {
+            return Maybe.If(k, Condition, Consequent);
+        }
+
+        public Func<A, B> End
+        {
+            get
+            {
+                var me = this;
+                return k => me.Eval(k).OrElseEval(k, me.Default);
+            }
+        }
+        
+        public MatcherKD1<A, B> On(A k)
+        {
+            return new MatcherKD1<A, B>(k, Default, Condition, Consequent);
+        }
+
+        
+        public MatcherDN<A, B> Case(Func<A, bool> p, Func<A, B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, p, f);
+        }
+
+        public MatcherDN<A, B> Case(Func<A, bool> p, Func<B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, p, _ => f());
+        }
+
+        public MatcherDN<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new MatcherDN<A, B>(this, Default, p, _ => f);
+        }
+
+        public MatcherDN<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), f);
+        }
+
+        public MatcherDN<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), _ => f());
+        }
+
+        public MatcherDN<A, B> Case(Func<bool> p, B f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), _ => f);
+        }
+
+        public MatcherDN<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, f);
+        }
+
+        public MatcherDN<A, B> Case(bool p, Func<B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, _ => f());
+        }
+
+        public MatcherDN<A, B> Case(bool p, B f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, _ => f);
+        }
+
+        public MatcherDN<A, B> Case(A p, Func<A, B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherDN<A, B> Case(A p, Func<B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherDN<A, B> Case(A p, B f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherDN<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherDN<A, B> Case(Type p, Func<B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherDN<A, B> Case(Type p, B f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => p.IsInstanceOfType(x), _ => f);
+        }
+        
+        public MatcherDN<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, x => x is C && p((C) x), x => f((C) x));
+        }
+       
+        public MatcherDN<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, x => x is C && p((C) x), _ => f());
+        }
+       
+        public MatcherDN<A, B> Case<C>(Func<C, bool> p, B f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, x => x is C && p((C) x), _ => f);
+        }
+       
+        public MatcherDN<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), x => f((C) x));
+        }
+       
+        public MatcherDN<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), _ => f());
+        }
+       
+        public MatcherDN<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), _ => f);
+        }
+       
+        public MatcherDN<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, x => f((C) x));
+        }
+       
+        public MatcherDN<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, _ => f());
+        }
+       
+        public MatcherDN<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, _ => f);
+        }
+           
+    }
+
+    
+    public class MatcherDN<A, B> : IMatcher<A, B>
+    {
+        internal MatcherDN(IMatcher<A, B> m, Func<A, B> defaultF, Func<A, bool> p, Func<A, B> f)
+        {
+            Previous = m;
+            Default = defaultF;
+            Condition = p;
+            Consequent = f;
+
+        }
+
         private readonly IMatcher<A, B> Previous;
-        private readonly Func<A, bool> Predicate;
+        private readonly Func<A, B> Default;
+        private readonly Func<A, bool> Condition;
+        private readonly Func<A, B> Consequent;
 
-        public MatcherFuncDefault<A, B> Then(Func<C, B> f)
+        
+        public Maybe<B> Eval(A k)
         {
-            return new MatcherFuncDefault<A, B>(Default, Previous, Predicate, x => f((C) x));
-        }
-    }
-
-    public static class MatcherExtensions
-    {
-        public static MatcherPredicate<A, B, A> Case<A, B>(this Matcher<A, B> matcher, A val)
-        {
-            return matcher.Case(val.Eq());
+            return Previous.Eval(k).OrIf(k, Condition, Consequent);
         }
 
-        public static MatcherPredicate<A, B, A> Case<A, B>(this Matcher<A, B> matcher, bool cond)
+        public Func<A, B> End
         {
-            return matcher.Case(_ => cond);
-        }
-
-        public static MatcherPredicate<A, B, A> Case<A, B>(this Matcher<A, B> matcher, Func<bool> f)
-        {
-            return matcher.Case(_ => f());
-        }
-
-        public static MatcherPredicate<A, B, A> Case<A, B>(this Matcher<A, B> matcher, Type type)
-        {
-            return matcher.Case(key => type.IsInstanceOfType(key));
-        }
-
-        public static Matcher<A, B> Then<A, B, C>(this MatcherPredicate<A, B, C> matcher, B val) where C : A
-        {
-            return matcher.Then(_ => val);
-        }
-
-        public static Matcher<A, B> Then<A, B, C>(this MatcherPredicate<A, B, C> matcher, Func<B> f) where C : A
-        {
-            return matcher.Then(_ => f());
-        }
-    }
-
-    public static class MatcherInferenceExtensions
-    {
-        public static MatcherInferencePredicate<A, A> Case<A>(this MatcherInitial<A> matcher, A val)
-        {
-            return matcher.Case(val.Eq());
-        }
-
-        public static MatcherInferencePredicate<A, A> Case<A>(this MatcherInitial<A> matcher, bool cond)
-        {
-            return matcher.Case(_ => cond);
-        }
-
-        public static MatcherInferencePredicate<A, A> Case<A>(this MatcherInitial<A> matcher, Func<bool> f)
-        {
-            return matcher.Case(_ => f());
-        }
-
-        public static MatcherInferencePredicate<A, A> Case<A>(this MatcherInitial<A> matcher, Type type)
-        {
-            return matcher.Case(key => type.IsInstanceOfType(key));
+            get
+            {
+                var me = this;
+                return k => me.Eval(k).OrElseEval(k, me.Default);
+            }
         }
         
-        public static Matcher<A, B> Then<A, B, C>(this MatcherInferencePredicate<A, C> matcher, B val) where C : A
+        public MatcherKDN<A, B> On(A k)
         {
-            return matcher.Then(_ => val);
+            return new MatcherKDN<A, B>(k, Default, this, Condition, Consequent);
         }
 
-        public static Matcher<A, B> Then<A, B, C>(this MatcherInferencePredicate<A, C> matcher, Func<B> f) where C : A
+        
+        public MatcherDN<A, B> Case(Func<A, bool> p, Func<A, B> f)
         {
-            return matcher.Then(_ => f());
+            return new MatcherDN<A, B>(this, Default, p, f);
         }
-    }
 
-    public static class MatcherStringExtensions
-    {
-        public static MatcherPredicate<String, B, String> Case<B>(this Matcher<String, B> matcher, Regex regex)
+        public MatcherDN<A, B> Case(Func<A, bool> p, Func<B> f)
         {
-            return matcher.Case(regex.IsMatch);
+            return new MatcherDN<A, B>(this, Default, p, _ => f());
+        }
+
+        public MatcherDN<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new MatcherDN<A, B>(this, Default, p, _ => f);
+        }
+
+        public MatcherDN<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), f);
+        }
+
+        public MatcherDN<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), _ => f());
+        }
+
+        public MatcherDN<A, B> Case(Func<bool> p, B f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), _ => f);
+        }
+
+        public MatcherDN<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, f);
+        }
+
+        public MatcherDN<A, B> Case(bool p, Func<B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, _ => f());
+        }
+
+        public MatcherDN<A, B> Case(bool p, B f)
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, _ => f);
+        }
+
+        public MatcherDN<A, B> Case(A p, Func<A, B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherDN<A, B> Case(A p, Func<B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherDN<A, B> Case(A p, B f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherDN<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherDN<A, B> Case(Type p, Func<B> f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherDN<A, B> Case(Type p, B f)
+        {
+            return new MatcherDN<A, B>(this, Default, x => p.IsInstanceOfType(x), _ => f);
         }
         
-        public static MatcherInferencePredicate<String, String> Case(this MatcherInitial<String> matcher, Regex regex)
+        public MatcherDN<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
         {
-            return matcher.Case(regex.IsMatch);
+            return new MatcherDN<A, B>(this, Default, x => x is C && p((C) x), x => f((C) x));
         }
-
-        /// <summary>
-        /// Does case-insensitive equality comparison with the key.
-        /// </summary>
-        public static MatcherPredicate<String, B, String> CaseInsenstive<B>(this Matcher<String, B> matcher, String s)
+       
+        public MatcherDN<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
         {
-            return matcher.Case(s.EqualsIgnoreCase());
+            return new MatcherDN<A, B>(this, Default, x => x is C && p((C) x), _ => f());
         }
-
-        /// <summary>
-        /// Does case-insensitive equality comparison with the key.
-        /// </summary>
-        public static MatcherInferencePredicate<String, String> CaseInsensitive(this MatcherInitial<String> matcher, String s)
+       
+        public MatcherDN<A, B> Case<C>(Func<C, bool> p, B f) where C : A
         {
-            return matcher.Case(s.EqualsIgnoreCase());
+            return new MatcherDN<A, B>(this, Default, x => x is C && p((C) x), _ => f);
         }
+       
+        public MatcherDN<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), x => f((C) x));
+        }
+       
+        public MatcherDN<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), _ => f());
+        }
+       
+        public MatcherDN<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p(), _ => f);
+        }
+       
+        public MatcherDN<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, x => f((C) x));
+        }
+       
+        public MatcherDN<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, _ => f());
+        }
+       
+        public MatcherDN<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new MatcherDN<A, B>(this, Default, _ => p, _ => f);
+        }
+           
     }
 
-    public static class MatcherFuncStringExtensions
+    public class MatcherK0<A>
     {
-        public static MatcherFuncPredicate<String, B, String> Case<B>(this MatcherFunc<String, B> matcher, Regex regex)
+        internal MatcherK0(A k)
         {
-            return matcher.Case(regex.IsMatch);
+            Key = k;
         }
 
-        /// <summary>
-        /// Does case-insensitive equality comparison with the key.
-        /// </summary>
-        public static MatcherFuncPredicate<String, B, String> CaseInsenstive<B>(this MatcherFunc<String, B> matcher, String s)
-        {
-            return matcher.Case(s.EqualsIgnoreCase());
-        }
-    }
+        private readonly A Key;
 
-    public static class MatcherElseExtensions
-    {
-        public static B Else<A, B>(this Matcher<A, B> matcher, Func<A, B> f)
+        public MatcherK0<A, B> Return<B>()
         {
-            return matcher.End().OrElseEval(matcher.Key, f);
-        }
-
-        public static B Else<A, B>(this Matcher<A, B> matcher, Func<B> f)
-        {
-            return matcher.End().OrElseEval(f);
-        }
-
-        public static B Else<A, B>(this Matcher<A, B> matcher, B val)
-        {
-            return matcher.End().OrElse(val);
-        }
-
-        public static Lazy<B> ElseLazy<A, B>(this Matcher<A, B> matcher, Func<A, B> f)
-        {
-            return new Lazy<B>(() => matcher.Else(f));
-        }
-
-        public static Lazy<B> ElseLazy<A, B>(this Matcher<A, B> matcher, Func<B> f)
-        {
-            return new Lazy<B>(() => matcher.Else(f));
-        }
-
-        public static Lazy<B> ElseLazy<A, B>(this Matcher<A, B> matcher, B val)
-        {
-            return new Lazy<B>(() => matcher.Else(val));
+            return new MatcherK0<A, B>(Key);
         }
         
-        public static B Else<A, B>(this MatcherInitial<A> matcher, Func<A, B> f)
+        public MatcherKD0<A, B> Default<B>(Func<A, B> defaultF)
         {
-            return f(matcher.Key);
+            return new MatcherKD0<A, B>(Key, defaultF);
         }
 
-        public static B Else<A, B>(this MatcherInitial<A> matcher, Func<B> f)
+        public MatcherKD0<A, B> Default<B>(Func<B> defaultF)
         {
-            return f();
+            return new MatcherKD0<A, B>(Key, _ => defaultF());
         }
 
-        public static B Else<A, B>(this MatcherInitial<A> matcher, B val)
+        public MatcherKD0<A, B> Default<B>(B defaultF)
         {
-            return val;
-        }
-    }
-
-    public static class MatcherDefaultExtensions
-    {
-        public static MatcherDefault<A, B> Default<A, B>(this MatcherInitial<A> matcher, Func<B> f)
-        {
-            return matcher.Default(_ => f());
-        }
-
-        public static MatcherDefault<A, B> Default<A, B>(this MatcherInitial<A> matcher, B val)
-        {
-            return matcher.Default(_ => val);
-        }
-
-        public static MatcherDefaultPredicate<A, B, A> Case<A, B>(this MatcherDefault<A, B> matcher, A val)
-        {
-            return matcher.Case(val.Eq());
-        }
-
-        public static MatcherDefaultPredicate<A, B, A> Case<A, B>(this MatcherDefault<A, B> matcher, bool cond)
-        {
-            return matcher.Case(_ => cond);
-        }
-
-        public static MatcherDefaultPredicate<A, B, A> Case<A, B>(this MatcherDefault<A, B> matcher, Func<bool> f)
-        {
-            return matcher.Case(_ => f());
-        }
-
-        public static MatcherDefaultPredicate<A, B, A> Case<A, B>(this MatcherDefault<A, B> matcher, Type type)
-        {
-            return matcher.Case(key => type.IsInstanceOfType(key));
-        }
-
-        public static MatcherDefault<A, B> Then<A, B, C>(this MatcherDefaultPredicate<A, B, C> matcher, B val) where C : A
-        {
-            return matcher.Then(_ => val);
-        }
-
-        public static MatcherDefault<A, B> Then<A, B, C>(this MatcherDefaultPredicate<A, B, C> matcher, Func<B> f) where C : A
-        {
-            return matcher.Then(_ => f());
-        }
-    }
-
-    public static class MatcherFuncExtensions
-    {
-        public static MatcherFuncDefault<A, B> Default<A, B>(this MatcherFuncInitial<A> matcher, Func<B> f)
-        {
-            return matcher.Default(_ => f());
-        }
-
-        public static MatcherFuncDefault<A, B> Default<A, B>(this MatcherFuncInitial<A> matcher, B val)
-        {
-            return matcher.Default(_ => val);
-        }
-
-        public static MatcherFuncPredicate<A, B, A> Case<A, B>(this MatcherFunc<A, B> matcher, A val)
-        {
-            return matcher.Case(val.Eq());
-        }
-
-        public static MatcherFuncPredicate<A, B, A> Case<A, B>(this MatcherFunc<A, B> matcher, bool cond)
-        {
-            return matcher.Case(_ => cond);
-        }
-
-        public static MatcherFuncPredicate<A, B, A> Case<A, B>(this MatcherFunc<A, B> matcher, Func<bool> f)
-        {
-            return matcher.Case(_ => f());
-        }
-
-        public static MatcherFuncPredicate<A, B, A> Case<A, B>(this MatcherFunc<A, B> matcher, Type type)
-        {
-            return matcher.Case(key => type.IsInstanceOfType(key));
-        }
-
-        public static MatcherFuncInferencePredicate<A, A> Case<A>(this MatcherFuncInitial<A> matcher, A val)
-        {
-            return matcher.Case(val.Eq());
-        }
-
-        public static MatcherFuncInferencePredicate<A, A> Case<A>(this MatcherFuncInitial<A> matcher, bool cond)
-        {
-            return matcher.Case(_ => cond);
-        }
-
-        public static MatcherFuncInferencePredicate<A, A> Case<A>(this MatcherFuncInitial<A> matcher, Func<bool> f)
-        {
-            return matcher.Case(_ => f());
-        }
-
-        public static MatcherFuncInferencePredicate<A, A> Case<A>(this MatcherFuncInitial<A> matcher, Type type)
-        {
-            return matcher.Case(key => type.IsInstanceOfType(key));
-        }
-
-        public static MatcherFunc<A, B> Then<A, B, C>(this MatcherFuncPredicate<A, B, C> matcher, Func<B> f) where C : A
-        {
-            return matcher.Then(_ => f());
-        }
-
-        public static MatcherFunc<A, B> Then<A, B, C>(this MatcherFuncPredicate<A, B, C> matcher, B val) where C : A
-        {
-            return matcher.Then(_ => val);
-        }
-
-        public static MatcherFunc<A, B> Then<A, B, C>(this MatcherFuncInferencePredicate<A, C> matcher, Func<B> f) where C : A
-        {
-            return matcher.Then(_ => f());
-        }
-
-        public static MatcherFunc<A, B> Then<A, B, C>(this MatcherFuncInferencePredicate<A, C> matcher, B val) where C : A
-        {
-            return matcher.Then(_ => val);
+            return new MatcherKD0<A, B>(Key, _ => defaultF);
         }
         
-        public static Func<A, B> Else<A, B>(this MatcherFunc<A, B> matcher, Func<A, B> f)
+        public MatcherK1<A, B> Case<B>(Func<A, bool> p, Func<A, B> f)
         {
-            return key => matcher.Eval(key).OrElseEval(key, f);
+            return new MatcherK1<A, B>(Key, p, f);
         }
 
-        public static Func<A, B> Else<A, B>(this MatcherFunc<A, B> matcher, Func<B> f)
+        public MatcherK1<A, B> Case<B>(Func<A, bool> p, Func<B> f)
         {
-            return key => matcher.Eval(key).OrElseEval(f);
+            return new MatcherK1<A, B>(Key, p, _ => f());
         }
 
-        public static Func<A, B> Else<A, B>(this MatcherFunc<A, B> matcher, B val)
+        public MatcherK1<A, B> Case<B>(Func<A, bool> p, B f)
         {
-            return key => matcher.Eval(key).OrElse(val);
+            return new MatcherK1<A, B>(Key, p, _ => f);
         }
+
+        public MatcherK1<A, B> Case<B>(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p(), f);
+        }
+
+        public MatcherK1<A, B> Case<B>(Func<bool> p, Func<B> f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p(), _ => f());
+        }
+
+        public MatcherK1<A, B> Case<B>(Func<bool> p, B f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p(), _ => f);
+        }
+
+        public MatcherK1<A, B> Case<B>(bool p, Func<A, B> f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p, f);
+        }
+
+        public MatcherK1<A, B> Case<B>(bool p, Func<B> f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p, _ => f());
+        }
+
+        public MatcherK1<A, B> Case<B>(bool p, B f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p, _ => f);
+        }
+
+        public MatcherK1<A, B> Case<B>(A p, Func<A, B> f)
+        {
+            return new MatcherK1<A, B>(Key, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherK1<A, B> Case<B>(A p, Func<B> f)
+        {
+            return new MatcherK1<A, B>(Key, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherK1<A, B> Case<B>(A p, B f)
+        {
+            return new MatcherK1<A, B>(Key, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherK1<A, B> Case<B>(Type p, Func<A, B> f)
+        {
+            return new MatcherK1<A, B>(Key, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherK1<A, B> Case<B>(Type p, Func<B> f)
+        {
+            return new MatcherK1<A, B>(Key, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherK1<A, B> Case<B>(Type p, B f)
+        {
+            return new MatcherK1<A, B>(Key, x => p.IsInstanceOfType(x), _ => f);
+        }
+
     }
 
-    public static class MatcherFuncDefaultExtensions
+    
+    public class MatcherK0<A, B> : IMatcher<A, B>
     {
-        public static MatcherFuncDefaultPredicate<A, B, A> Case<A, B>(this MatcherFuncDefault<A, B> matcher, A val)
+        internal MatcherK0(A k)
         {
-            return matcher.Case(val.Eq());
+            Key = k;
+
         }
 
-        public static MatcherFuncDefaultPredicate<A, B, A> Case<A, B>(this MatcherFuncDefault<A, B> matcher, bool cond)
+        private readonly A Key;
+
+        
+        public Maybe<B> Eval(A k)
         {
-            return matcher.Case(_ => cond);
+            return Maybe<B>.None;
         }
 
-        public static MatcherFuncDefaultPredicate<A, B, A> Case<A, B>(this MatcherFuncDefault<A, B> matcher, Func<bool> f)
+        public Maybe<B> End
         {
-            return matcher.Case(_ => f());
+            get { return Eval(Key); }
+        }
+        
+        public B Else(Func<A, B> f)
+        {
+            
+            return End.OrElseEval(Key, f);
         }
 
-        public static MatcherFuncDefaultPredicate<A, B, A> Case<A, B>(this MatcherFuncDefault<A, B> matcher, Type type)
+
+        public B Else(Func<B> f)
         {
-            return matcher.Case(key => type.IsInstanceOfType(key));
+            
+            return End.OrElseEval(f);
         }
 
-        public static MatcherFuncDefault<A, B> Then<A, B, C>(this MatcherFuncDefaultPredicate<A, B, C> matcher, B val) where C : A
+
+        public B Else(B f)
         {
-            return matcher.Then(_ => val);
+            
+            return End.OrElse(f);
         }
 
-        public static MatcherFuncDefault<A, B> Then<A, B, C>(this MatcherFuncDefaultPredicate<A, B, C> matcher, Func<B> f) where C : A
+        
+        public MatcherKD0<A, B> Default(Func<A, B> defaultF)
         {
-            return matcher.Then(_ => f());
+            return new MatcherKD0<A, B>(Key, defaultF);
         }
+
+        public MatcherKD0<A, B> Default(Func<B> defaultF)
+        {
+            return new MatcherKD0<A, B>(Key, _ => defaultF());
+        }
+
+        public MatcherKD0<A, B> Default(B defaultF)
+        {
+            return new MatcherKD0<A, B>(Key, _ => defaultF);
+        }
+        
+        public MatcherK1<A, B> Case(Func<A, bool> p, Func<A, B> f)
+        {
+            return new MatcherK1<A, B>(Key, p, f);
+        }
+
+        public MatcherK1<A, B> Case(Func<A, bool> p, Func<B> f)
+        {
+            return new MatcherK1<A, B>(Key, p, _ => f());
+        }
+
+        public MatcherK1<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new MatcherK1<A, B>(Key, p, _ => f);
+        }
+
+        public MatcherK1<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p(), f);
+        }
+
+        public MatcherK1<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p(), _ => f());
+        }
+
+        public MatcherK1<A, B> Case(Func<bool> p, B f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p(), _ => f);
+        }
+
+        public MatcherK1<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p, f);
+        }
+
+        public MatcherK1<A, B> Case(bool p, Func<B> f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p, _ => f());
+        }
+
+        public MatcherK1<A, B> Case(bool p, B f)
+        {
+            return new MatcherK1<A, B>(Key, _ => p, _ => f);
+        }
+
+        public MatcherK1<A, B> Case(A p, Func<A, B> f)
+        {
+            return new MatcherK1<A, B>(Key, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherK1<A, B> Case(A p, Func<B> f)
+        {
+            return new MatcherK1<A, B>(Key, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherK1<A, B> Case(A p, B f)
+        {
+            return new MatcherK1<A, B>(Key, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherK1<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new MatcherK1<A, B>(Key, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherK1<A, B> Case(Type p, Func<B> f)
+        {
+            return new MatcherK1<A, B>(Key, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherK1<A, B> Case(Type p, B f)
+        {
+            return new MatcherK1<A, B>(Key, x => p.IsInstanceOfType(x), _ => f);
+        }
+        
+        public MatcherK1<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherK1<A, B>(Key, x => x is C && p((C) x), x => f((C) x));
+        }
+       
+        public MatcherK1<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
+        {
+            return new MatcherK1<A, B>(Key, x => x is C && p((C) x), _ => f());
+        }
+       
+        public MatcherK1<A, B> Case<C>(Func<C, bool> p, B f) where C : A
+        {
+            return new MatcherK1<A, B>(Key, x => x is C && p((C) x), _ => f);
+        }
+       
+        public MatcherK1<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherK1<A, B>(Key, _ => p(), x => f((C) x));
+        }
+       
+        public MatcherK1<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new MatcherK1<A, B>(Key, _ => p(), _ => f());
+        }
+       
+        public MatcherK1<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new MatcherK1<A, B>(Key, _ => p(), _ => f);
+        }
+       
+        public MatcherK1<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new MatcherK1<A, B>(Key, _ => p, x => f((C) x));
+        }
+       
+        public MatcherK1<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new MatcherK1<A, B>(Key, _ => p, _ => f());
+        }
+       
+        public MatcherK1<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new MatcherK1<A, B>(Key, _ => p, _ => f);
+        }
+           
+    }
+
+    
+    public class MatcherK1<A, B> : IMatcher<A, B>
+    {
+        internal MatcherK1(A k, Func<A, bool> p, Func<A, B> f)
+        {
+            Key = k;
+            Condition = p;
+            Consequent = f;
+
+        }
+
+        private readonly A Key;
+        private readonly Func<A, bool> Condition;
+        private readonly Func<A, B> Consequent;
+
+        
+        public Maybe<B> Eval(A k)
+        {
+            return Maybe.If(Key, Condition, Consequent);
+        }
+
+        public Maybe<B> End
+        {
+            get { return Eval(Key); }
+        }
+        
+        public B Else(Func<A, B> f)
+        {
+            
+            return End.OrElseEval(Key, f);
+        }
+
+
+        public B Else(Func<B> f)
+        {
+            
+            return End.OrElseEval(f);
+        }
+
+
+        public B Else(B f)
+        {
+            
+            return End.OrElse(f);
+        }
+
+        
+        public MatcherKD1<A, B> Default(Func<A, B> defaultF)
+        {
+            return new MatcherKD1<A, B>(Key, defaultF, Condition, Consequent);
+        }
+
+        public MatcherKD1<A, B> Default(Func<B> defaultF)
+        {
+            return new MatcherKD1<A, B>(Key, _ => defaultF(), Condition, Consequent);
+        }
+
+        public MatcherKD1<A, B> Default(B defaultF)
+        {
+            return new MatcherKD1<A, B>(Key, _ => defaultF, Condition, Consequent);
+        }
+        
+        public MatcherKN<A, B> Case(Func<A, bool> p, Func<A, B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, p, f);
+        }
+
+        public MatcherKN<A, B> Case(Func<A, bool> p, Func<B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, p, _ => f());
+        }
+
+        public MatcherKN<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new MatcherKN<A, B>(Key, this, p, _ => f);
+        }
+
+        public MatcherKN<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), f);
+        }
+
+        public MatcherKN<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), _ => f());
+        }
+
+        public MatcherKN<A, B> Case(Func<bool> p, B f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), _ => f);
+        }
+
+        public MatcherKN<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, f);
+        }
+
+        public MatcherKN<A, B> Case(bool p, Func<B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, _ => f());
+        }
+
+        public MatcherKN<A, B> Case(bool p, B f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, _ => f);
+        }
+
+        public MatcherKN<A, B> Case(A p, Func<A, B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherKN<A, B> Case(A p, Func<B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherKN<A, B> Case(A p, B f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherKN<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherKN<A, B> Case(Type p, Func<B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherKN<A, B> Case(Type p, B f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => p.IsInstanceOfType(x), _ => f);
+        }
+        
+        public MatcherKN<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, x => x is C && p((C) x), x => f((C) x));
+        }
+       
+        public MatcherKN<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, x => x is C && p((C) x), _ => f());
+        }
+       
+        public MatcherKN<A, B> Case<C>(Func<C, bool> p, B f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, x => x is C && p((C) x), _ => f);
+        }
+       
+        public MatcherKN<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), x => f((C) x));
+        }
+       
+        public MatcherKN<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), _ => f());
+        }
+       
+        public MatcherKN<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), _ => f);
+        }
+       
+        public MatcherKN<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, x => f((C) x));
+        }
+       
+        public MatcherKN<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, _ => f());
+        }
+       
+        public MatcherKN<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, _ => f);
+        }
+           
+    }
+
+    
+    public class MatcherKN<A, B> : IMatcher<A, B>
+    {
+        internal MatcherKN(A k, IMatcher<A, B> m, Func<A, bool> p, Func<A, B> f)
+        {
+            Key = k;
+            Previous = m;
+            Condition = p;
+            Consequent = f;
+
+        }
+
+        private readonly A Key;
+        private readonly IMatcher<A, B> Previous;
+        private readonly Func<A, bool> Condition;
+        private readonly Func<A, B> Consequent;
+
+        
+        public Maybe<B> Eval(A k)
+        {
+            return Previous.Eval(Key).OrIf(Key, Condition, Consequent);
+        }
+
+        public Maybe<B> End
+        {
+            get { return Eval(Key); }
+        }
+        
+        public B Else(Func<A, B> f)
+        {
+            
+            return End.OrElseEval(Key, f);
+        }
+
+
+        public B Else(Func<B> f)
+        {
+            
+            return End.OrElseEval(f);
+        }
+
+
+        public B Else(B f)
+        {
+            
+            return End.OrElse(f);
+        }
+
+        
+        public MatcherKDN<A, B> Default(Func<A, B> defaultF)
+        {
+            return new MatcherKDN<A, B>(Key, defaultF, this, Condition, Consequent);
+        }
+
+        public MatcherKDN<A, B> Default(Func<B> defaultF)
+        {
+            return new MatcherKDN<A, B>(Key, _ => defaultF(), this, Condition, Consequent);
+        }
+
+        public MatcherKDN<A, B> Default(B defaultF)
+        {
+            return new MatcherKDN<A, B>(Key, _ => defaultF, this, Condition, Consequent);
+        }
+        
+        public MatcherKN<A, B> Case(Func<A, bool> p, Func<A, B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, p, f);
+        }
+
+        public MatcherKN<A, B> Case(Func<A, bool> p, Func<B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, p, _ => f());
+        }
+
+        public MatcherKN<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new MatcherKN<A, B>(Key, this, p, _ => f);
+        }
+
+        public MatcherKN<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), f);
+        }
+
+        public MatcherKN<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), _ => f());
+        }
+
+        public MatcherKN<A, B> Case(Func<bool> p, B f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), _ => f);
+        }
+
+        public MatcherKN<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, f);
+        }
+
+        public MatcherKN<A, B> Case(bool p, Func<B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, _ => f());
+        }
+
+        public MatcherKN<A, B> Case(bool p, B f)
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, _ => f);
+        }
+
+        public MatcherKN<A, B> Case(A p, Func<A, B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherKN<A, B> Case(A p, Func<B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherKN<A, B> Case(A p, B f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherKN<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherKN<A, B> Case(Type p, Func<B> f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherKN<A, B> Case(Type p, B f)
+        {
+            return new MatcherKN<A, B>(Key, this, x => p.IsInstanceOfType(x), _ => f);
+        }
+        
+        public MatcherKN<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, x => x is C && p((C) x), x => f((C) x));
+        }
+       
+        public MatcherKN<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, x => x is C && p((C) x), _ => f());
+        }
+       
+        public MatcherKN<A, B> Case<C>(Func<C, bool> p, B f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, x => x is C && p((C) x), _ => f);
+        }
+       
+        public MatcherKN<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), x => f((C) x));
+        }
+       
+        public MatcherKN<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), _ => f());
+        }
+       
+        public MatcherKN<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p(), _ => f);
+        }
+       
+        public MatcherKN<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, x => f((C) x));
+        }
+       
+        public MatcherKN<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, _ => f());
+        }
+       
+        public MatcherKN<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new MatcherKN<A, B>(Key, this, _ => p, _ => f);
+        }
+           
+    }
+
+    
+    public class MatcherKD0<A, B> : IMatcher<A, B>
+    {
+        internal MatcherKD0(A k, Func<A, B> defaultF)
+        {
+            Key = k;
+            Default = defaultF;
+
+        }
+
+        private readonly A Key;
+        private readonly Func<A, B> Default;
+
+        
+        public Maybe<B> Eval(A k)
+        {
+            return Maybe<B>.None;
+        }
+
+        public B End
+        {
+            get { return Default(Key); }
+        }
+        
+        public MatcherKD1<A, B> Case(Func<A, bool> p, Func<A, B> f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, p, f);
+        }
+
+        public MatcherKD1<A, B> Case(Func<A, bool> p, Func<B> f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, p, _ => f());
+        }
+
+        public MatcherKD1<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, p, _ => f);
+        }
+
+        public MatcherKD1<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p(), f);
+        }
+
+        public MatcherKD1<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p(), _ => f());
+        }
+
+        public MatcherKD1<A, B> Case(Func<bool> p, B f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p(), _ => f);
+        }
+
+        public MatcherKD1<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p, f);
+        }
+
+        public MatcherKD1<A, B> Case(bool p, Func<B> f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p, _ => f());
+        }
+
+        public MatcherKD1<A, B> Case(bool p, B f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p, _ => f);
+        }
+
+        public MatcherKD1<A, B> Case(A p, Func<A, B> f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherKD1<A, B> Case(A p, Func<B> f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherKD1<A, B> Case(A p, B f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherKD1<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherKD1<A, B> Case(Type p, Func<B> f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherKD1<A, B> Case(Type p, B f)
+        {
+            return new MatcherKD1<A, B>(Key, Default, x => p.IsInstanceOfType(x), _ => f);
+        }
+        
+        public MatcherKD1<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherKD1<A, B>(Key, Default, x => x is C && p((C) x), x => f((C) x));
+        }
+       
+        public MatcherKD1<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
+        {
+            return new MatcherKD1<A, B>(Key, Default, x => x is C && p((C) x), _ => f());
+        }
+       
+        public MatcherKD1<A, B> Case<C>(Func<C, bool> p, B f) where C : A
+        {
+            return new MatcherKD1<A, B>(Key, Default, x => x is C && p((C) x), _ => f);
+        }
+       
+        public MatcherKD1<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p(), x => f((C) x));
+        }
+       
+        public MatcherKD1<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p(), _ => f());
+        }
+       
+        public MatcherKD1<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p(), _ => f);
+        }
+       
+        public MatcherKD1<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p, x => f((C) x));
+        }
+       
+        public MatcherKD1<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p, _ => f());
+        }
+       
+        public MatcherKD1<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new MatcherKD1<A, B>(Key, Default, _ => p, _ => f);
+        }
+           
+    }
+
+    
+    public class MatcherKD1<A, B> : IMatcher<A, B>
+    {
+        internal MatcherKD1(A k, Func<A, B> defaultF, Func<A, bool> p, Func<A, B> f)
+        {
+            Key = k;
+            Default = defaultF;
+            Condition = p;
+            Consequent = f;
+
+        }
+
+        private readonly A Key;
+        private readonly Func<A, B> Default;
+        private readonly Func<A, bool> Condition;
+        private readonly Func<A, B> Consequent;
+
+        
+        public Maybe<B> Eval(A k)
+        {
+            return Maybe.If(Key, Condition, Consequent);
+        }
+
+        public B End
+        {
+            get { return Eval(Key).OrElseEval(Key, Default); }
+        }
+        
+        public MatcherKDN<A, B> Case(Func<A, bool> p, Func<A, B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, p, f);
+        }
+
+        public MatcherKDN<A, B> Case(Func<A, bool> p, Func<B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, p, _ => f());
+        }
+
+        public MatcherKDN<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, p, _ => f);
+        }
+
+        public MatcherKDN<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), f);
+        }
+
+        public MatcherKDN<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), _ => f());
+        }
+
+        public MatcherKDN<A, B> Case(Func<bool> p, B f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), _ => f);
+        }
+
+        public MatcherKDN<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, f);
+        }
+
+        public MatcherKDN<A, B> Case(bool p, Func<B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, _ => f());
+        }
+
+        public MatcherKDN<A, B> Case(bool p, B f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, _ => f);
+        }
+
+        public MatcherKDN<A, B> Case(A p, Func<A, B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherKDN<A, B> Case(A p, Func<B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherKDN<A, B> Case(A p, B f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherKDN<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherKDN<A, B> Case(Type p, Func<B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherKDN<A, B> Case(Type p, B f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => p.IsInstanceOfType(x), _ => f);
+        }
+        
+        public MatcherKDN<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => x is C && p((C) x), x => f((C) x));
+        }
+       
+        public MatcherKDN<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => x is C && p((C) x), _ => f());
+        }
+       
+        public MatcherKDN<A, B> Case<C>(Func<C, bool> p, B f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => x is C && p((C) x), _ => f);
+        }
+       
+        public MatcherKDN<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), x => f((C) x));
+        }
+       
+        public MatcherKDN<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), _ => f());
+        }
+       
+        public MatcherKDN<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), _ => f);
+        }
+       
+        public MatcherKDN<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, x => f((C) x));
+        }
+       
+        public MatcherKDN<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, _ => f());
+        }
+       
+        public MatcherKDN<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, _ => f);
+        }
+           
+    }
+
+    
+    public class MatcherKDN<A, B> : IMatcher<A, B>
+    {
+        internal MatcherKDN(A k, Func<A, B> defaultF, IMatcher<A, B> m, Func<A, bool> p, Func<A, B> f)
+        {
+            Key = k;
+            Default = defaultF;
+            Previous = m;
+            Condition = p;
+            Consequent = f;
+
+        }
+
+        private readonly A Key;
+        private readonly Func<A, B> Default;
+        private readonly IMatcher<A, B> Previous;
+        private readonly Func<A, bool> Condition;
+        private readonly Func<A, B> Consequent;
+
+        
+        public Maybe<B> Eval(A k)
+        {
+            return Previous.Eval(Key).OrIf(Key, Condition, Consequent);
+        }
+
+        public B End
+        {
+            get { return Eval(Key).OrElseEval(Key, Default); }
+        }
+        
+        public MatcherKDN<A, B> Case(Func<A, bool> p, Func<A, B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, p, f);
+        }
+
+        public MatcherKDN<A, B> Case(Func<A, bool> p, Func<B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, p, _ => f());
+        }
+
+        public MatcherKDN<A, B> Case(Func<A, bool> p, B f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, p, _ => f);
+        }
+
+        public MatcherKDN<A, B> Case(Func<bool> p, Func<A, B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), f);
+        }
+
+        public MatcherKDN<A, B> Case(Func<bool> p, Func<B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), _ => f());
+        }
+
+        public MatcherKDN<A, B> Case(Func<bool> p, B f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), _ => f);
+        }
+
+        public MatcherKDN<A, B> Case(bool p, Func<A, B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, f);
+        }
+
+        public MatcherKDN<A, B> Case(bool p, Func<B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, _ => f());
+        }
+
+        public MatcherKDN<A, B> Case(bool p, B f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, _ => f);
+        }
+
+        public MatcherKDN<A, B> Case(A p, Func<A, B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => Object.Equals(x, p), f);
+        }
+
+        public MatcherKDN<A, B> Case(A p, Func<B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => Object.Equals(x, p), _ => f());
+        }
+
+        public MatcherKDN<A, B> Case(A p, B f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => Object.Equals(x, p), _ => f);
+        }
+
+        public MatcherKDN<A, B> Case(Type p, Func<A, B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => p.IsInstanceOfType(x), f);
+        }
+
+        public MatcherKDN<A, B> Case(Type p, Func<B> f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => p.IsInstanceOfType(x), _ => f());
+        }
+
+        public MatcherKDN<A, B> Case(Type p, B f)
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => p.IsInstanceOfType(x), _ => f);
+        }
+        
+        public MatcherKDN<A, B> Case<C>(Func<C, bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => x is C && p((C) x), x => f((C) x));
+        }
+       
+        public MatcherKDN<A, B> Case<C>(Func<C, bool> p, Func<B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => x is C && p((C) x), _ => f());
+        }
+       
+        public MatcherKDN<A, B> Case<C>(Func<C, bool> p, B f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, x => x is C && p((C) x), _ => f);
+        }
+       
+        public MatcherKDN<A, B> Case<C>(Func<bool> p, Func<C, B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), x => f((C) x));
+        }
+       
+        public MatcherKDN<A, B> Case<C>(Func<bool> p, Func<B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), _ => f());
+        }
+       
+        public MatcherKDN<A, B> Case<C>(Func<bool> p, B f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p(), _ => f);
+        }
+       
+        public MatcherKDN<A, B> Case<C>(bool p, Func<C, B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, x => f((C) x));
+        }
+       
+        public MatcherKDN<A, B> Case<C>(bool p, Func<B> f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, _ => f());
+        }
+       
+        public MatcherKDN<A, B> Case<C>(bool p, B f) where C : A
+        {
+            return new MatcherKDN<A, B>(Key, Default, this, _ => p, _ => f);
+        }
+           
     }
 }
+

@@ -69,8 +69,12 @@
     <Compile Include="Nullable.cs" />
     <Compile Include="Numbers.cs" />
     <Compile Include="Objects.cs" />
+    <Compile Include="Match.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Match.tt</DependentUpon>
+    </Compile>
     <Compile Include="Ref.cs" />
-    <Compile Include="Match.cs" />
     <Compile Include="Natural.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -114,6 +118,10 @@
     <None Include="Natural.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Natural.cs</LastGenOutput>
+    </None>
+    <None Include="Match.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Match.cs</LastGenOutput>
     </None>
     <None Include="Table.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

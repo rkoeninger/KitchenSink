@@ -1,0 +1,486 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace ZedSharp
+{
+    public static class Match
+    {
+        public static MatcherK0<A> On<A>(A k)
+        {
+            return new MatcherK0<A>(k);
+        }
+
+        public static MatcherKD0<A, B> On<A, B>(A k, Func<A, B> defaultF)
+        {
+            return new MatcherKD0<A, B>(k, defaultF);
+        }
+
+        public static Matcher0<A> From<A>()
+        {
+            return new Matcher0<A>();
+        }
+    }
+
+    public static class Match<A>
+    {
+        public static MatcherK0<A> On(A k)
+        {
+            return new MatcherK0<A>(k);
+        }
+
+        public static MatcherKD0<A, B> On<B>(A k, Func<A, B> defaultF)
+        {
+            return new MatcherKD0<A, B>(k, defaultF);
+        }
+
+        public static Matcher0<A, B> Return<B>()
+        {
+            return new Matcher0<A, B>();
+        }
+
+        public static MatcherD0<A, B> Default<B>(Func<A, B> v)
+        {
+            return new MatcherD0<A, B>(v);
+        }
+
+        public static MatcherD0<A, B> Default<B>(Func<B> v)
+        {
+            return new MatcherD0<A, B>(_ => v());
+        }
+
+        public static MatcherD0<A, B> Default<B>(B v)
+        {
+            return new MatcherD0<A, B>(_ => v);
+        }
+        <# CaseStaticOverloads("Matcher1"); #>
+    }
+
+    public static class Match<A, B>
+    {
+        public static MatcherK0<A, B> On(A k)
+        {
+            return new MatcherK0<A, B>(k);
+        }
+
+        public static MatcherKD0<A, B> On(A k, Func<A, B> defaultF)
+        {
+            return new MatcherKD0<A, B>(k, defaultF);
+        }
+    }
+
+    /// <remarks>Key may be ignored, depending on implementation.</remarks>
+    internal interface IMatcher<A, B>
+    {
+        Maybe<B> Eval(A k);
+    }
+
+    public class Matcher0<A>
+    {
+        internal Matcher0()
+        {
+        }
+
+        public Matcher0<A, B> Return<B>()
+        {
+            return new Matcher0<A, B>();
+        }
+        <# Defaults(true, "MatcherD0", "", ""); #>
+        <# CaseInferenceOverloads("Matcher1", ""); #>
+    }
+
+    <# Class("Matcher0"); #>
+        <# Eval("Maybe<B>.None"); #>
+        <# End("Func<A, Maybe<B>>", "Eval"); #>
+        <# Else(true); #>
+        <# On("MatcherK0", "k"); #>
+        <# Defaults(false, "MatcherD0", "", ""); #>
+        <# CaseOverloads("Matcher1"); #>
+        <# CaseSubtypeOverloads("Matcher1"); #>
+    <# EndClass(); #>
+
+    <# Class("Matcher1", ConditionParam, ConsequentParam); #>
+        <# Eval("Maybe.If(k, Condition, Consequent)"); #>
+        <# End("Func<A, Maybe<B>>", "Eval"); #>
+        <# Else(true); #>
+        <# On("MatcherK1", "k, Condition, Consequent"); #>
+        <# Defaults(false, "MatcherD1", "", ", Condition, Consequent"); #>
+        <# CaseOverloads("MatcherN", "this, "); #>
+        <# CaseSubtypeOverloads("MatcherN", "this, "); #>
+    <# EndClass(); #>
+
+    <# Class("MatcherN", PreviousParam, ConditionParam, ConsequentParam); #>
+        <# Eval("Previous.Eval(k).OrIf(k, Condition, Consequent)"); #>
+        <# End("Func<A, Maybe<B>>", "Eval"); #>
+        <# Else(true); #>
+        <# On("MatcherKN", "k, Previous, Condition, Consequent"); #>
+        <# Defaults(false, "MatcherDN", "this, ", ", Condition, Consequent"); #>
+        <# CaseOverloads("MatcherN", "this, "); #>
+        <# CaseSubtypeOverloads("MatcherN", "this, "); #>
+    <# EndClass(); #>
+
+    <# Class("MatcherD0", DefaultParam); #>
+        <# Eval("Maybe<B>.None"); #>
+        <# End("Func<A, B>", "Default"); #>
+        <# On("MatcherKD0", "k, Default"); #>
+        <# CaseOverloads("MatcherD1", "Default, "); #>
+        <# CaseSubtypeOverloads("MatcherD1", "Default, "); #>
+    <# EndClass(); #>
+
+    <# Class("MatcherD1", DefaultParam, ConditionParam, ConsequentParam); #>
+        <# Eval("Maybe.If(k, Condition, Consequent)"); #>
+        <# End("Func<A, B>", "k => me.Eval(k).OrElseEval(k, me.Default)"); #>
+        <# On("MatcherKD1", "k, Default, Condition, Consequent"); #>
+        <# CaseOverloads("MatcherDN", "this, Default, "); #>
+        <# CaseSubtypeOverloads("MatcherDN", "this, Default, "); #>
+    <# EndClass(); #>
+
+    <# Class("MatcherDN", PreviousParam, DefaultParam, ConditionParam, ConsequentParam); #>
+        <# Eval("Previous.Eval(k).OrIf(k, Condition, Consequent)"); #>
+        <# End("Func<A, B>", "k => me.Eval(k).OrElseEval(k, me.Default)"); #>
+        <# On("MatcherKDN", "k, Default, this, Condition, Consequent"); #>
+        <# CaseOverloads("MatcherDN", "this, Default, "); #>
+        <# CaseSubtypeOverloads("MatcherDN", "this, Default, "); #>
+    <# EndClass(); #>
+
+    public class MatcherK0<A>
+    {
+        internal MatcherK0(A k)
+        {
+            Key = k;
+        }
+
+        private readonly A Key;
+
+        public MatcherK0<A, B> Return<B>()
+        {
+            return new MatcherK0<A, B>(Key);
+        }
+        <# Defaults(true, "MatcherKD0", "Key, ", ""); #>
+        <# CaseInferenceOverloads("MatcherK1", "Key, "); #>
+
+    }
+
+    <# Class("MatcherK0", KeyParam); #>
+        <# Eval("Maybe<B>.None"); #>
+        <# End("Maybe<B>", "Eval(Key)"); #>
+        <# Else(false); #>
+        <# Defaults(false, "MatcherKD0", "Key, ", ""); #>
+        <# CaseOverloads("MatcherK1", "Key, "); #>
+        <# CaseSubtypeOverloads("MatcherK1", "Key, "); #>
+    <# EndClass(); #>
+
+    <# Class("MatcherK1", KeyParam, ConditionParam, ConsequentParam); #>
+        <# Eval("Maybe.If(Key, Condition, Consequent)"); #>
+        <# End("Maybe<B>", "Eval(Key)"); #>
+        <# Else(false); #>
+        <# Defaults(false, "MatcherKD1", "Key, ", ", Condition, Consequent"); #>
+        <# CaseOverloads("MatcherKN", "Key, this, "); #>
+        <# CaseSubtypeOverloads("MatcherKN", "Key, this, "); #>
+    <# EndClass(); #>
+
+    <# Class("MatcherKN", KeyParam, PreviousParam, ConditionParam, ConsequentParam); #>
+        <# Eval("Previous.Eval(Key).OrIf(Key, Condition, Consequent)"); #>
+        <# End("Maybe<B>", "Eval(Key)"); #>
+        <# Else(false); #>
+        <# Defaults(false, "MatcherKDN", "Key, ", ", this, Condition, Consequent"); #>
+        <# CaseOverloads("MatcherKN", "Key, this, "); #>
+        <# CaseSubtypeOverloads("MatcherKN", "Key, this, "); #>
+    <# EndClass(); #>
+
+    <# Class("MatcherKD0", KeyParam, DefaultParam); #>
+        <# Eval("Maybe<B>.None"); #>
+        <# End("B", "Default(Key)"); #>
+        <# CaseOverloads("MatcherKD1", "Key, Default, "); #>
+        <# CaseSubtypeOverloads("MatcherKD1", "Key, Default, "); #>
+    <# EndClass(); #>
+
+    <# Class("MatcherKD1", KeyParam, DefaultParam, ConditionParam, ConsequentParam); #>
+        <# Eval("Maybe.If(Key, Condition, Consequent)"); #>
+        <# End("B", "Eval(Key).OrElseEval(Key, Default)"); #>
+        <# CaseOverloads("MatcherKDN", "Key, Default, this, "); #>
+        <# CaseSubtypeOverloads("MatcherKDN", "Key, Default, this, "); #>
+    <# EndClass(); #>
+
+    <# Class("MatcherKDN", KeyParam, DefaultParam, PreviousParam, ConditionParam, ConsequentParam); #>
+        <# Eval("Previous.Eval(Key).OrIf(Key, Condition, Consequent)"); #>
+        <# End("B", "Eval(Key).OrElseEval(Key, Default)"); #>
+        <# CaseOverloads("MatcherKDN", "Key, Default, this, "); #>
+        <# CaseSubtypeOverloads("MatcherKDN", "Key, Default, this, "); #>
+    <# EndClass(); #>
+}
+
+<#+
+    public Tuple<String, String, String> KeyParam = Tuple.Create("A", "Key", "k");
+    public Tuple<String, String, String> DefaultParam = Tuple.Create("Func<A, B>", "Default", "defaultF");
+    public Tuple<String, String, String> PreviousParam = Tuple.Create("IMatcher<A, B>", "Previous", "m");
+    public Tuple<String, String, String> ConditionParam = Tuple.Create("Func<A, bool>", "Condition", "p");
+    public Tuple<String, String, String> ConsequentParam = Tuple.Create("Func<A, B>", "Consequent", "f");
+
+    public void Class(String className, params Tuple<String, String, String>[] args)
+    { #>
+
+    public class <#= className #><A, B> : IMatcher<A, B>
+    {
+        internal <#= className #>(<#= String.Join(", ", args.Select(x => x.Item1 + " " + x.Item3)) #>)
+        {
+<#+
+        foreach (var arg in args)
+        {
+            #>            <#= arg.Item2 #> = <#= arg.Item3 #>;<#+
+            WriteLine("");
+        }
+#>
+
+        }
+
+<#+
+        foreach (var arg in args)
+        {
+            #>        private readonly <#= arg.Item1 #> <#= arg.Item2 #>;<#+
+            WriteLine("");
+        }
+
+        WriteLine("");
+    }
+
+    public void EndClass()
+    {#>
+
+    }
+<#+
+    }
+    #>
+
+<#+
+    public void End(String returnType, String expr)
+    { #>public <#= returnType #> End
+        {
+    <#+ if (expr.Contains("me"))
+        { #>        get
+            {
+                var me = this;
+                return <#= expr #>;
+            }
+<#+
+        }
+        else
+        { #>        get { return <#= expr #>; }
+<#+
+        }#>
+        }
+<#+
+    }
+    #>
+
+<#+
+    public void On(String className, String args)
+    { #>
+
+        public <#= className #><A, B> On(A k)
+        {
+            return new <#= className #><A, B>(<#= args #>);
+        }
+
+<#+ }
+    #>
+
+<#+
+    public void Eval(String expr)
+    { #>
+
+        public Maybe<B> Eval(A k)
+        {
+            return <#= expr #>;
+        }
+
+<#+ }
+    #>
+
+<#+
+    public void Else(bool func)
+    {
+        var consequences = new List<Tuple<String, String, String>> {
+            Tuple.Create("Func<A, B> f", "k => me.End(k).OrElseEval(k, f)", "End.OrElseEval(Key, f)"),
+            Tuple.Create("Func<B> f",    "k => me.End(k).OrElseEval(f)",    "End.OrElseEval(f)"),
+            Tuple.Create("B f",          "k => me.End(k).OrElse(f)",        "End.OrElse(f)")
+            };
+
+        foreach (var conseq in consequences)
+        {
+#>
+
+        public <#= func ? "Func<A, B>" : "B" #> Else(<#= conseq.Item1 #>)
+        {
+            <#= func ? "var me = this;" : "" #>
+            return <#= func ? conseq.Item2 : conseq.Item3 #>;
+        }
+
+<#+     }
+    }
+    #>
+
+<#+
+    public void Defaults(bool typeArg, String className, String beforeArgs, String extraArgs)
+    {
+        var consequences = new List<Tuple<String, String>> {
+            Tuple.Create("Func<A, B> defaultF", "defaultF"),
+            Tuple.Create("Func<B> defaultF",    "_ => defaultF()"),
+            Tuple.Create("B defaultF",          "_ => defaultF")
+        };
+
+        foreach (var conseq in consequences)
+        {
+#>
+
+        public <#= className #><A, B> Default<#= typeArg ? "<B>" : "" #>(<#= conseq.Item1 #>)
+        {
+            return new <#= className #><A, B>(<#= beforeArgs #><#= conseq.Item2 #><#= extraArgs #>);
+        }
+<#+
+        }
+    }
+    #>
+
+<#+
+    public void CaseOverloads(String className)
+    {
+        CaseOverloads(className, "");
+    }
+
+    public void CaseOverloads(String className, String extraArgs)
+    {
+        var conditions = new List<Tuple<String, String>> {
+            Tuple.Create("Func<A, bool> p", "p"),
+            Tuple.Create("Func<bool> p",    "_ => p()"),
+            Tuple.Create("bool p",          "_ => p"),
+            Tuple.Create("A p",             "x => Object.Equals(x, p)"),
+            Tuple.Create("Type p",          "x => p.IsInstanceOfType(x)")
+        };
+
+        var consequences = new List<Tuple<String, String>> {
+            Tuple.Create("Func<A, B> f", "f"),
+            Tuple.Create("Func<B> f",    "_ => f()"),
+            Tuple.Create("B f",          "_ => f")
+        };
+
+        foreach (var cond in conditions)
+        {
+            foreach (var conseq in consequences)
+            { #>
+
+        public <#= className #><A, B> Case(<#= cond.Item1 #>, <#= conseq.Item1 #>)
+        {
+            return new <#= className #><A, B>(<#= extraArgs #><#= cond.Item2 #>, <#= conseq.Item2 #>);
+        }
+<#+ }               
+        }
+    } #>
+
+<#+
+    public void CaseInferenceOverloads(String className)
+    {
+        CaseInferenceOverloads(className, "");
+    }
+
+    public void CaseInferenceOverloads(String className, String extraArgs)
+    {
+        var conditions = new List<Tuple<String, String>> {
+            Tuple.Create("Func<A, bool> p", "p"),
+            Tuple.Create("Func<bool> p",    "_ => p()"),
+            Tuple.Create("bool p",          "_ => p"),
+            Tuple.Create("A p",             "x => Object.Equals(x, p)"),
+            Tuple.Create("Type p",          "x => p.IsInstanceOfType(x)")
+        };
+
+        var consequences = new List<Tuple<String, String>> {
+            Tuple.Create("Func<A, B> f", "f"),
+            Tuple.Create("Func<B> f",    "_ => f()"),
+            Tuple.Create("B f",          "_ => f")
+        };
+
+        foreach (var cond in conditions)
+        {
+            foreach (var conseq in consequences)
+            { #>
+
+        public <#= className #><A, B> Case<B>(<#= cond.Item1 #>, <#= conseq.Item1 #>)
+        {
+            return new <#= className #><A, B>(<#= extraArgs #><#= cond.Item2 #>, <#= conseq.Item2 #>);
+        }
+<#+ }               
+        }
+    } #>
+
+<#+
+    public void CaseStaticOverloads(String className)
+    {
+        CaseStaticOverloads(className, "");
+    }
+
+    public void CaseStaticOverloads(String className, String extraArgs)
+    {
+        var conditions = new List<Tuple<String, String>> {
+            Tuple.Create("Func<A, bool> p", "p"),
+            Tuple.Create("Func<bool> p",    "_ => p()"),
+            Tuple.Create("bool p",          "_ => p"),
+            Tuple.Create("A p",             "x => Object.Equals(x, p)"),
+            Tuple.Create("Type p",          "x => p.IsInstanceOfType(x)")
+        };
+
+        var consequences = new List<Tuple<String, String>> {
+            Tuple.Create("Func<A, B> f", "f"),
+            Tuple.Create("Func<B> f",    "_ => f()"),
+            Tuple.Create("B f",          "_ => f")
+        };
+
+        foreach (var cond in conditions)
+        {
+            foreach (var conseq in consequences)
+            { #>
+
+        public static <#= className #><A, B> Case<B>(<#= cond.Item1 #>, <#= conseq.Item1 #>)
+        {
+            return new <#= className #><A, B>(<#= extraArgs #><#= cond.Item2 #>, <#= conseq.Item2 #>);
+        }
+<#+ }               
+        }
+    } #>
+
+<#+
+    public void CaseSubtypeOverloads(String className)
+    {
+        CaseSubtypeOverloads(className, "");
+    }
+
+    public void CaseSubtypeOverloads(String className, String extraArgs)
+    {
+        var conditions = new List<Tuple<String, String>> {
+            Tuple.Create("Func<C, bool> p", "x => x is C && p((C) x)"),
+            Tuple.Create("Func<bool> p",    "_ => p()"),
+            Tuple.Create("bool p",          "_ => p")
+        };
+
+        var consequences = new List<Tuple<String, String>> {
+            Tuple.Create("Func<C, B> f", "x => f((C) x)"),
+            Tuple.Create("Func<B> f",    "_ => f()"),
+            Tuple.Create("B f",          "_ => f")
+        };
+
+        foreach (var cond in conditions)
+        {
+            foreach (var conseq in consequences)
+            { #>
+
+        public <#= className #><A, B> Case<C>(<#= cond.Item1 #>, <#= conseq.Item1 #>) where C : A
+        {
+            return new <#= className #><A, B>(<#= extraArgs #><#= cond.Item2 #>, <#= conseq.Item2 #>);
+        }
+       <#+            }
+        }
+} #>
