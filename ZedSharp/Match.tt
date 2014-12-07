@@ -408,6 +408,15 @@ namespace ZedSharp
         {
             return new <#= className #><A, B>(<#= extraArgs #><#= cond.Item2 #>, <#= conseq.Item2 #>);
         }
-       <#+            }
+<#+         }
         }
-} #>
+
+        foreach (var conseq in consequences)
+        { #>
+
+        public <#= className #><A, B> Case<C>(<#= conseq.Item1 #>) where C : A
+        {
+            return new <#= className #><A, B>(<#= extraArgs #>x => x is C, <#= conseq.Item2 #>);
+        }
+<#+     }
+    } #>
