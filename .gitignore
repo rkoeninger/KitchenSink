@@ -178,3 +178,4 @@ ZedSharp/Tuples.cs
 ZedSharp/Dictionary.cs
 ZedSharp/MultiMethod.cs
 ZedSharp/GenericMethod.cs
+ZedSharp/Match.cs
