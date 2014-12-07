@@ -65,9 +65,9 @@ namespace ZedSharp.UnitTests
         }
     }
 
-    public struct Person
+    public class Person
     {
-        public Person(String firstName, String lastName, Address address) : this()
+        public Person(String firstName, String lastName, Address address)
         {
             FirstName = firstName;
             LastName = lastName;
@@ -79,9 +79,9 @@ namespace ZedSharp.UnitTests
         public Address Address { get; private set; }
     }
 
-    public struct Address
+    public class Address
     {
-        public Address(String street, String city) : this()
+        public Address(String street, String city)
         {
             Street = street;
             City = city;
