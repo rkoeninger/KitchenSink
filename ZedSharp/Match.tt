@@ -58,7 +58,7 @@ namespace ZedSharp
         {
             return new MatcherD0<A, B>(_ => v);
         }
-        <# CaseStaticOverloads("Matcher1"); #>
+        <# CaseStaticInferenceOverloads("Matcher1"); #>
     }
 
     public static class Match<A, B>
@@ -72,6 +72,22 @@ namespace ZedSharp
         {
             return new MatcherKD0<A, B>(k, defaultF);
         }
+
+        public static MatcherD0<A, B> Default(Func<A, B> v)
+        {
+            return new MatcherD0<A, B>(v);
+        }
+
+        public static MatcherD0<A, B> Default(Func<B> v)
+        {
+            return new MatcherD0<A, B>(_ => v());
+        }
+
+        public static MatcherD0<A, B> Default(B v)
+        {
+            return new MatcherD0<A, B>(_ => v);
+        }
+        <# CaseStaticOverloads("Matcher1"); #>
     }
 
     /// <remarks>Key may be ignored, depending on implementation.</remarks>
@@ -404,6 +420,40 @@ namespace ZedSharp
         }
     }
 
+    public void CaseStaticInferenceOverloads(String className)
+    {
+        CaseStaticInferenceOverloads(className, "");
+    }
+
+    public void CaseStaticInferenceOverloads(String className, String extraArgs)
+    {
+        var conditions = new List<Tuple<String, String>> {
+            Tuple.Create("Func<A, bool> p", "p"),
+            Tuple.Create("Func<bool> p",    "_ => p()"),
+            Tuple.Create("bool p",          "_ => p"),
+            Tuple.Create("A p",             "x => Object.Equals(x, p)"),
+            Tuple.Create("Type p",          "x => p.IsInstanceOfType(x)")
+        };
+
+        var consequences = new List<Tuple<String, String>> {
+            Tuple.Create("Func<A, B> f", "f"),
+            Tuple.Create("Func<B> f",    "_ => f()"),
+            Tuple.Create("B f",          "_ => f")
+        };
+
+        foreach (var cond in conditions)
+        {
+            foreach (var conseq in consequences)
+            { #>
+
+        public static <#= className #><A, B> Case<B>(<#= cond.Item1 #>, <#= conseq.Item1 #>)
+        {
+            return new <#= className #><A, B>(<#= extraArgs #><#= cond.Item2 #>, <#= conseq.Item2 #>);
+        }
+<#+ }               
+        }
+    }
+
     public void CaseStaticOverloads(String className)
     {
         CaseStaticOverloads(className, "");
@@ -430,7 +480,7 @@ namespace ZedSharp
             foreach (var conseq in consequences)
             { #>
 
-        public static <#= className #><A, B> Case<B>(<#= cond.Item1 #>, <#= conseq.Item1 #>)
+        public static <#= className #><A, B> Case(<#= cond.Item1 #>, <#= conseq.Item1 #>)
         {
             return new <#= className #><A, B>(<#= extraArgs #><#= cond.Item2 #>, <#= conseq.Item2 #>);
         }
