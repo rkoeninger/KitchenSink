@@ -9,9 +9,21 @@ namespace ZedSharp
     public static class Verify
     {
         /// <summary>Target of this method is not checked. Argument gets passed through unmodified.</summary>
-        public static A Exempt<A>(this A x)
+        public static A NoVerify<A>(this A x) where A : class
         {
             return x;
+        }
+
+        private static MethodInfo NoVerifyMethodInfo;
+
+        static Verify()
+        {
+            NoVerifyMethodInfo = GetMethod(() => NoVerify(""));
+        }
+
+        private static MethodInfo GetMethod<A>(Expression<Func<A>> expr)
+        {
+            return ((MethodCallExpression) expr.Body).Method.GetGenericMethodDefinition();
         }
 
         public static A Null<A>() where A : class
@@ -30,8 +42,7 @@ namespace ZedSharp
                 .Case<MemberExpression>(x => x.Expression)
                 .Case<MethodCallExpression>(x => x.Object != null, x => x.Object)
                 .Case<MethodCallExpression>(x => x.Arguments.Any(), x => x.Arguments.First())
-                .End
-                .OrThrow("Expr type not handled");
+                .Else(expr);
         }
 
         private static Expression MakeRobust(Expression expr)
@@ -46,7 +57,7 @@ namespace ZedSharp
             {
                 var mexpr = (MethodCallExpression) expr;
 
-                if (mexpr.Method.Name == "Exempt" && mexpr.Method.DeclaringType == typeof(Verify))
+                if (mexpr.Method.GetGenericMethodDefinition() == NoVerifyMethodInfo)
                 {
                     return MakeRobust(Skip(mexpr.Arguments.First()));
                 }

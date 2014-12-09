@@ -23,7 +23,7 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(Verify.That(() => c.Address.City == c.Address.City));
             Assert.IsFalse(Verify.That(() => b.Address.City == b.Address.City));
             Assert.IsFalse(Verify.That(() => a.Address.City == a.Address.City));
-            Assert.IsTrue(Verify.That(() => b.Address.City.Exempt()));
+            Assert.IsTrue(Verify.That(() => b.Address.City.NoVerify()));
         }
     }
 }
