@@ -88,7 +88,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Table.tt</DependentUpon>
     </Compile>
-    <Compile Include="Test\Expect.cs" />
+    <Compile Include="Expect.cs" />
     <Compile Include="Tuples.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -161,10 +161,10 @@
     <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\14.0\TextTransform.exe"</_TransformExe>
   </PropertyGroup>
   <Target Name="TransformOnBuild" AfterTargets="BeforeBuild">
-    <Error Text="Failed to find TextTransform.exe tool at '$(_TransformExe)." Condition="!Exists('$(_TransformExe)')"/>
+    <Error Text="Failed to find TextTransform.exe tool at '$(_TransformExe)." Condition="!Exists('$(_TransformExe)')" />
     <ItemGroup>
       <_TextTransform Include="@(None)" Condition="'%(None.Generator)' == 'TextTemplatingFilePreprocessor' Or '%(None.Generator)' == 'TextTemplatingFileGenerator'" />
     </ItemGroup>
-    <Exec Command="&quot;$(_TransformExe)&quot; &quot;@(_TextTransform)&quot;" Condition="'%(Identity)' != ''"/>
+    <Exec Command="&quot;$(_TransformExe)&quot; &quot;@(_TextTransform)&quot;" Condition="'%(Identity)' != ''" />
   </Target>
 </Project>

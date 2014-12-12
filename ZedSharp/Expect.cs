@@ -4,7 +4,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 
-namespace ZedSharp.Test
+namespace ZedSharp
 {
     /// <summary>
     /// Expect contains methods that are used to assert failures,

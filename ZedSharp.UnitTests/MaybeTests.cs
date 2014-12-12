@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ZedSharp;
-using ZedSharp.Test;
 
 namespace ZedSharp.UnitTests
 {
