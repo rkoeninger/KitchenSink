@@ -8,17 +8,31 @@ namespace ZedSharp
 {
     public static class Verify
     {
+        public static Validation<A> That<A>(A obj)
+        {
+            return new Validation<A>(obj);
+        }
+
         /// <summary>Target of this method is not checked. Argument gets passed through unmodified.</summary>
-        public static A NoVerify<A>(this A x) where A : class
+        public static A SkipVerify<A>(this A x) where A : class
         {
             return x;
         }
 
-        private static MethodInfo NoVerifyMethodInfo;
+        /// <summary>All sub-expressions of this method are not checked. Argument gets passed through unmodified.</summary>
+        public static A VerifyNone<A>(this A x) where A : class
+        {
+            return x;
+        }
+
+        private static readonly MethodInfo SkipVerifyMethodInfo;
+        private static readonly MethodInfo VerifyNoneMethodInfo;
+        private static readonly Expression TrueExpr = Expression.Constant(true);
 
         static Verify()
         {
-            NoVerifyMethodInfo = GetMethod(() => NoVerify(""));
+            SkipVerifyMethodInfo = GetMethod(() => SkipVerify(""));
+            VerifyNoneMethodInfo = GetMethod(() => VerifyNone(""));
         }
 
         private static MethodInfo GetMethod<A>(Expression<Func<A>> expr)
@@ -51,33 +65,63 @@ namespace ZedSharp
             {
                 var mexpr = (MemberExpression) expr;
 
-                return Expression.AndAlso(MakeRobust(mexpr.Expression), NotNullOrFalse(expr));
+                if (mexpr.Expression != null) // local/static member with no subexpression
+                {
+                    return AndAlso(MakeRobust(mexpr.Expression), NotNullOrFalse(expr));
+                }
             }
-            else if (expr is MethodCallExpression)
-            {
-                var mexpr = (MethodCallExpression) expr;
 
-                if (mexpr.Method.GetGenericMethodDefinition() == NoVerifyMethodInfo)
+            if (expr is MethodCallExpression)
+            {
+                var mexpr = (MethodCallExpression)expr;
+
+                if (mexpr.Method.GetGenericMethodDefinition() == SkipVerifyMethodInfo)
                 {
                     return MakeRobust(Skip(mexpr.Arguments.First()));
                 }
-                else if (mexpr.Object != null)
+
+                if (mexpr.Method.GetGenericMethodDefinition() == VerifyNoneMethodInfo)
                 {
-                    return Expression.AndAlso(MakeRobust(mexpr.Object), NotNullOrFalse(expr));
+                    return TrueExpr;
                 }
-                else
+
+                if (mexpr.Object != null) // instance method
                 {
-                    return Expression.AndAlso(MakeRobust(mexpr.Arguments.First()), NotNullOrFalse(expr));
+                    return AndAlso(MakeRobust(mexpr.Object), NotNullOrFalse(expr));
                 }
+
+                return AndAlso(mexpr.Arguments.Select(MakeRobust), NotNullOrFalse(expr)); // static or extension method
             }
-            else if (expr is BinaryExpression)
+            
+            if (expr is BinaryExpression)
             {
                 var bexpr = (BinaryExpression) expr;
 
-                return Expression.AndAlso(Expression.AndAlso(MakeRobust(bexpr.Left), MakeRobust(bexpr.Right)), expr);
+                return AndAlso(MakeRobust(bexpr.Left), MakeRobust(bexpr.Right), expr);
             }
 
             return NotNullOrFalse(expr);
+        }
+
+        private static Expression AndAlso(IEnumerable<Expression> exprs0, params Expression[] exprs1)
+        {
+            return AndAlso(exprs0.Concat(exprs1));
+        }
+
+        private static Expression AndAlso(IEnumerable<Expression> exprs)
+        {
+            return AndAlso(exprs.ToArray());
+        }
+
+        private static Expression AndAlso(params Expression[] exprs)
+        {
+            if (exprs.Length == 0)
+                return TrueExpr;
+
+            if (exprs.Length == 1)
+                return exprs.Single();
+
+            return exprs.Aggregate(Expression.AndAlso);
         }
 
         private static Expression<Func<bool>> BoolThunk(Expression expr)
@@ -91,10 +135,8 @@ namespace ZedSharp
             {
                 return Expression.IsTrue(expr);
             }
-            else
-            {
-                return Expression.NotEqual(Expression.Constant(null), expr);
-            }
+
+            return Expression.NotEqual(Expression.Constant(null), expr);
         }
     }
 
@@ -116,10 +158,19 @@ namespace ZedSharp
         {
             Value = value;
             ErrorList = errors.ToArray();
+            Done = false;
+        }
+
+        private Validation(A value, IEnumerable<Exception> errors, bool done) : this()
+        {
+            Value = value;
+            ErrorList = errors.ToArray();
+            Done = done;
         }
 
         private A Value { get; set; }
         private Exception[] ErrorList { get; set; }
+        private bool Done { get; set; }
 
         public IEnumerable<Exception> Errors
         {
@@ -131,28 +182,64 @@ namespace ZedSharp
             get { return ErrorList.Length > 0; }
         }
 
+        public Validation<A> Cut()
+        {
+            return new Validation<A>(Value, Errors, HasErrors);
+        }
+
+        public Validation<A> Try(Action<A> f)
+        {
+            if (Done)
+                return this;
+
+            try
+            {
+                f(Value);
+                return this;
+            }
+            catch (Exception e)
+            {
+                return new Validation<A>(Value, ErrorList.Add(e));
+            }
+        }
+
         public Validation<A> Is(bool cond, String message = null)
         {
+            if (Done)
+                return this;
+
             return new Validation<A>(Value, cond ? ErrorList : ErrorList.Add(new ApplicationException(message ?? "")));
         }
 
         public Validation<A> Is(Func<A, bool> f, String message = null)
         {
+            if (Done)
+                return this;
+
             return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Add(new ApplicationException(message ?? "")));
         }
 
         public Validation<A> Is(bool cond, Exception exc)
         {
+            if (Done)
+                return this;
+
             return new Validation<A>(Value, cond ? ErrorList : ErrorList.Add(exc));
         }
 
         public Validation<A> Is(Func<A, bool> f, Exception exc)
         {
+            if (Done)
+                return this;
+
             return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Add(exc));
         }
 
         public Validation<A> Is(Action<A> f)
         {
+            if (Done)
+                return this;
+
             try
             {
                 f(Value);

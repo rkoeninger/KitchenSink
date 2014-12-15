@@ -62,31 +62,31 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("Someville", ct.Set(address, "Someville").City);
             Assert.AreEqual("John", fn.Set(person, "John").FirstName);
         }
-    }
 
-    public class Person
-    {
-        public Person(String firstName, String lastName, Address address)
+        public class Person
         {
-            FirstName = firstName;
-            LastName = lastName;
-            Address = address;
+            public Person(String firstName, String lastName, Address address)
+            {
+                FirstName = firstName;
+                LastName = lastName;
+                Address = address;
+            }
+
+            public String FirstName { get; private set; }
+            public String LastName { get; private set; }
+            public Address Address { get; private set; }
         }
 
-        public String FirstName { get; private set; }
-        public String LastName { get; private set; }
-        public Address Address { get; private set; }
-    }
-
-    public class Address
-    {
-        public Address(String street, String city)
+        public class Address
         {
-            Street = street;
-            City = city;
-        }
+            public Address(String street, String city)
+            {
+                Street = street;
+                City = city;
+            }
 
-        public String Street { get; private set; }
-        public String City { get; private set; }
+            public String Street { get; private set; }
+            public String City { get; private set; }
+        }
     }
 }
