@@ -41,8 +41,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void MatchTrackingEvalOrder()
         {
-            List<String> l;
-            l = new List<String>();
+            var l = new List<String>();
             var res2 = Match.On(4)
                 .Case(Track<int, bool>(l, "case1", 1.Eq()), Track<int, string>(l, "then1", _ => "one"))
                 .Case(Track<int, bool>(l, "case2", 2.Eq()), Track<int, string>(l, "then2", _ => "two"))
@@ -65,9 +64,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void MatchDefaultTrackingEvalOrder()
         {
-            List<String> l;
-
-            l = new List<String>();
+            var l = new List<String>();
             var res3 = Match.On(3)
                 .Default(Track<int, string>(l, "default", _ => "whatever"))
                 .Case(Track<int, bool>(l, "case1", 5.Eq()), Track<int, string>(l, "then1", _ => "asdf"))

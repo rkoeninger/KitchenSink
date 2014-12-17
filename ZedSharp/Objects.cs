@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -39,24 +40,36 @@ namespace ZedSharp
             return val.IsGreaterThanOrEquals(lower) && val.IsLessThan(upper);
         }
 
-        public static bool EqualsAny(this Object obj, params Object[] vals)
+        public static bool IsIn<A>(this A val, params A[] vals)
         {
-            return vals.Any(x => x == obj);
+            return IsIn(val, (ICollection<A>) vals);
         }
 
-        public static bool EqualsAny(this Object obj, IEnumerable<Object> vals)
+        public static bool IsIn<A>(this A val, ICollection<A> coll)
         {
-            return vals.Any(x => x == obj);
+            return coll.Any(val.Eq());
         }
 
-        public static bool Null(this Object obj)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNull(this Object obj)
         {
             return obj == null;
         }
 
-        public static bool NotNull(this Object obj)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNotNull(this Object obj)
         {
             return obj != null;
+        }
+
+        public static bool EqualsAny(this Object obj, params Object[] vals)
+        {
+            return EqualsAny(obj, (IEnumerable<Object>) vals);
+        }
+
+        public static bool EqualsAny(this Object obj, IEnumerable<Object> vals)
+        {
+            return vals.Any(obj.Eq());
         }
 
         public static Func<A, bool> Eq<A>(this A x)
@@ -87,6 +100,32 @@ namespace ZedSharp
         public static Func<Object, A> As<A>()
         {
             return x => (A)x;
+        }
+
+        public static B With<A, B>(this A x, Func<A, B> f)
+        {
+            return x.IsNotNull() ? f(x) : default(B);
+        }
+
+        public static A With<A>(this A x, Action<A> f)
+        {
+            if (x.IsNotNull())
+                f(x);
+
+            return x;
+        }
+
+        public static B When<A, B>(this A x, Func<A, bool> p, Func<A, B> f)
+        {
+            return x.IsNotNull() && p(x) ? f(x) : default(B);
+        }
+
+        public static A When<A>(this A x, Func<A, bool> p, Action<A> f)
+        {
+            if (x.IsNotNull() && p(x))
+                f(x);
+
+            return x;
         }
     }
 }
