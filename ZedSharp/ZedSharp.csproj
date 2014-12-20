@@ -106,6 +106,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Dictionary.tt</DependentUpon>
     </Compile>
+    <Compile Include="ZonedDateTime.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="GenericMethod.tt">

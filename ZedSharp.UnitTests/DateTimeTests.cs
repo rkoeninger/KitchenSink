@@ -17,5 +17,14 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(DateTimeRange.GetEntireYear(2005).Contains(DateTimeRange.GetEntireMonth(2005, Month.July)));
             Assert.AreEqual(new DateTime(2000, 4, 10), DateTimeRange.Parse("2000-4-10 to 2000-5-10").Begin);
         }
+
+        [TestMethod]
+        public void DateBuilderMethods()
+        {
+            var d = 2014.Apr(20).At(5, 30, 12).In(TimeZoneInfo.Utc);
+            var e = 2014.Apr(20).At(5, 30, 12).In(TimeZoneInfo.FindSystemTimeZoneById("Dateline Standard Time"));
+
+            Assert.IsTrue(d < e);
+        }
     }
 }
