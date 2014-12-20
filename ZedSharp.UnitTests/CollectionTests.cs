@@ -101,5 +101,35 @@ namespace ZedSharp.UnitTests
             public int B { get; private set; }
             public Color(int r, int g, int b) { R = r; G = g; B = b; }
         }
+
+        [TestMethod]
+        public void EnumerableForce()
+        {
+            /*
+             * Enumerable methods like Where() and Select() make use of deferred execution so side-effects in
+             * functions will not occur until the resulting Enumerable is iterated or a method like ToList() is called.
+             */
+            var x = 0;
+            var y = 0;
+            var z = 0;
+
+            var e = Seq.Of<Func<Unit>>(
+                () => { x = 1; return Unit.It; },
+                () => { y = 2; return Unit.It; },
+                () => { z = 3; return Unit.It; }).Select(f => f.Invoke());
+
+            Assert.IsFalse(x == 1);
+            Assert.IsFalse(y == 2);
+            Assert.IsFalse(z == 3);
+
+            /*
+             * Force() causes an IEnumerable to be evaluated and side-effects to occur.
+             */
+            e.Force();
+
+            Assert.IsTrue(x == 1);
+            Assert.IsTrue(y == 2);
+            Assert.IsTrue(z == 3);
+        }
     }
 }

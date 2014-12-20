@@ -37,7 +37,7 @@ namespace ZedSharp
                 }
                 else
                 {
-                    var prop = props.Where(x => param.Name.EqualsIgnoreCase(x.Name)).MaybeFirst().OrThrow("No property has the same name as constructor parameter: " + param.Name);
+                    var prop = props.Where(x => param.Name.EqualsIgnoreCase(x.Name)).FirstMaybe().OrThrow("No property has the same name as constructor parameter: " + param.Name);
                     return (Expression) Expression.PropertyOrField(objParam, prop.Name);
                 }
             }).ToArray();

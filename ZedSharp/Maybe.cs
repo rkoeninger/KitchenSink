@@ -9,7 +9,7 @@ namespace ZedSharp
     {
         public static Maybe<A> Of<A>(Nullable<A> nullable) where A : struct
         {
-            return nullable.HasValue ? new Maybe<A>(nullable.Value) : new Maybe<A>();
+            return nullable.HasValue ? new Maybe<A>(nullable.Value) : Maybe<A>.None;
         }
 
         public static Maybe<A> Of<A>(A val)
@@ -27,7 +27,7 @@ namespace ZedSharp
 
         public static Maybe<A> None<A>()
         {
-            return new Maybe<A>();
+            return Maybe<A>.None;
         }
 
         public static Maybe<A> Try<A>(Func<A> f)
@@ -79,32 +79,32 @@ namespace ZedSharp
             return Try(() => XDocument.Parse(s));
         }
 
-        public static Maybe<A> MaybeGet<A>(this IList<A> list, int index)
+        public static Maybe<A> GetMaybe<A>(this IList<A> list, int index)
         {
             return Try(() => list[index]);
         }
 
-        public static Maybe<B> MaybeGet<A, B>(this IDictionary<A, B> dict, A key)
+        public static Maybe<B> GetMaybe<A, B>(this IDictionary<A, B> dict, A key)
         {
             return Try(() => dict[key]);
         }
 
-        public static Maybe<A> MaybeFirst<A>(this IEnumerable<A> seq)
+        public static Maybe<A> FirstMaybe<A>(this IEnumerable<A> seq)
         {
             return Try(() => seq.First());
         }
 
-        public static Maybe<A> MaybeLast<A>(this IEnumerable<A> seq)
+        public static Maybe<A> LastMaybe<A>(this IEnumerable<A> seq)
         {
             return Try(() => seq.Last());
         }
 
-        public static Maybe<A> MaybeSingle<A>(this IEnumerable<A> seq)
+        public static Maybe<A> SingleMaybe<A>(this IEnumerable<A> seq)
         {
             return Try(() => seq.Single());
         }
 
-        public static Maybe<A> MaybeElementAt<A>(this IEnumerable<A> seq, int index)
+        public static Maybe<A> ElementAtMaybe<A>(this IEnumerable<A> seq, int index)
         {
             return Try(() => seq.ElementAt(index));
         }
@@ -134,12 +134,12 @@ namespace ZedSharp
             return a => f(a).SelectMany(g);
         }
 
-        public static Maybe<IEnumerable<A>> NotEmpty<A>(Maybe<IEnumerable<A>> maybe)
+        public static Maybe<IEnumerable<A>> IsNotEmpty<A>(Maybe<IEnumerable<A>> maybe)
         {
             return maybe.Where(Collections.NotEmpty);
         }
 
-        public static Maybe<List<A>> NotEmpty<A>(Maybe<List<A>> maybe)
+        public static Maybe<List<A>> IsNotEmpty<A>(Maybe<List<A>> maybe)
         {
             return maybe.Where(Collections.NotEmpty);
         }
@@ -211,7 +211,7 @@ namespace ZedSharp
     /// </summary>
     public struct Maybe<A>
     {
-        public static readonly Maybe<A> None = new Maybe<A>();
+        public static readonly Maybe<A> None = default(Maybe<A>);
 
         public static implicit operator Maybe<A>(A val)
         {

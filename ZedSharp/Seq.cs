@@ -35,16 +35,20 @@ namespace ZedSharp
         }
 
         /// <summary>Performs side-effecting Action on each item in sequence.</summary>
-        public static void ForEach<A>(this IEnumerable<A> seq, Action<A> f)
+        public static IEnumerable<A> ForEach<A>(this IEnumerable<A> seq, Action<A> f)
         {
             foreach (var item in seq)
                 f(item);
+
+            return seq;
         }
 
         /// <summary>Forces sequence to enumerate.</summary>
-        public static void DoAll<A>(this IEnumerable<A> seq)
+        public static IEnumerable<A> Force<A>(this IEnumerable<A> seq)
         {
             foreach (var item in seq);
+
+            return seq;
         }
     }
 }

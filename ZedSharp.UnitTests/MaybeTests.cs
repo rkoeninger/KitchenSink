@@ -89,15 +89,15 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void MaybeEnumerableExtensions()
         {
-            AssertIsSome(new [] {0}.MaybeFirst());
-            AssertIsNone(new int[0].MaybeFirst());
-            AssertIsSome(new [] {0}.MaybeLast());
-            AssertIsNone(new int[0].MaybeLast());
-            AssertIsSome(new [] {0}.MaybeSingle());
-            AssertIsNone(new int[0].MaybeSingle());
-            AssertIsSome(new [] {0,0,0,0}.MaybeElementAt(2));
-            AssertIsNone(new[] { 0, 0, 0, 0 }.MaybeElementAt(5));
-            AssertIsNone(new[] { 0, 0, 0, 0 }.MaybeElementAt(-1));
+            AssertIsSome(new [] {0}.FirstMaybe());
+            AssertIsNone(new int[0].FirstMaybe());
+            AssertIsSome(new [] {0}.LastMaybe());
+            AssertIsNone(new int[0].LastMaybe());
+            AssertIsSome(new [] {0}.SingleMaybe());
+            AssertIsNone(new int[0].SingleMaybe());
+            AssertIsSome(new [] {0,0,0,0}.ElementAtMaybe(2));
+            AssertIsNone(new[] { 0, 0, 0, 0 }.ElementAtMaybe(5));
+            AssertIsNone(new[] { 0, 0, 0, 0 }.ElementAtMaybe(-1));
             Assert.AreEqual(5, new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(x => x.ToInt()).WhereSome().Count());
             AssertIsNone(new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(x => x.ToInt()).Sequence());
             AssertIsSome(new [] {"9", "3", "2", "1", "6", "3", "5", "3"}.Select(x => x.ToInt()).Sequence());
