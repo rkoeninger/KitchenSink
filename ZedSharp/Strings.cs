@@ -60,12 +60,7 @@ namespace ZedSharp
             return y => EqualsIgnoreCase(x, y);
         }
 
-        public static bool NotEmpty(this String x)
-        {
-            return String.IsNullOrEmpty(x).Not();
-        }
-
-        public static bool NotBlank(this String x)
+        public static bool IsNotBlank(this String x)
         {
             return String.IsNullOrWhiteSpace(x).Not();
         }
@@ -94,7 +89,7 @@ namespace ZedSharp
 
         public static IEnumerable<String> TrimAll(this IEnumerable<String> seq)
         {
-            return seq.Where(NotBlank).Select(x => x.Trim());
+            return seq.Where(IsNotBlank).Select(x => x.Trim());
         }
 
         /// <summary>Joins the string representations of the elements in the sequence, separated by the given string (defaults to empty string).</summary>

@@ -144,14 +144,9 @@ namespace ZedSharp
             return maybe.Where(Collections.NotEmpty);
         }
 
-        public static Maybe<String> NotEmpty(Maybe<String> maybe)
+        public static Maybe<String> IsNotBlank(Maybe<String> maybe)
         {
-            return maybe.Where(Strings.NotEmpty);
-        }
-
-        public static Maybe<String> NotBlank(Maybe<String> maybe)
-        {
-            return maybe.Where(Strings.NotBlank);
+            return maybe.Where(Strings.IsNotBlank);
         }
 
         public static Maybe<int> NotNeg(Maybe<int> maybe)
@@ -164,29 +159,49 @@ namespace ZedSharp
             return maybe.Where(Numbers.Pos);
         }
 
-        public static A OrNull<A>(this Maybe<A> maybe) where A : class
+        public static A OrElseNull<A>(this Maybe<A> maybe) where A : class
         {
             return maybe.OrElse(null);
         }
 
-        public static bool OrFalse(this Maybe<bool> maybe)
+        public static bool OrElseFalse(this Maybe<bool> maybe)
         {
             return maybe.OrElse(false);
         }
 
-        public static int OrZero(this Maybe<int> maybe)
+        public static int OrElseZero(this Maybe<int> maybe)
         {
             return maybe.OrElse(0);
         }
 
-        public static String OrEmpty(this Maybe<String> maybe)
+        public static String OrElseEmpty(this Maybe<String> maybe)
         {
             return maybe.OrElse("");
         }
 
-        public static IEnumerable<A> OrEmpty<A>(this Maybe<IEnumerable<A>> maybe)
+        public static IEnumerable<A> OrElseEmpty<A>(this Maybe<IEnumerable<A>> maybe)
         {
             return maybe.OrElse(Seq.Of<A>());
+        }
+
+        public static Maybe<bool> OrFalse(this Maybe<bool> maybe)
+        {
+            return maybe.Or(Maybe.Of(false));
+        }
+
+        public static Maybe<int> OrZero(this Maybe<int> maybe)
+        {
+            return maybe.Or(Maybe.Of(0));
+        }
+
+        public static Maybe<String> OrEmpty(this Maybe<String> maybe)
+        {
+            return maybe.Or(Maybe.Of(""));
+        }
+
+        public static Maybe<IEnumerable<A>> OrEmpty<A>(this Maybe<IEnumerable<A>> maybe)
+        {
+            return maybe.Or(Maybe.Of(Seq.Of<A>()));
         }
     }
     
@@ -194,7 +209,6 @@ namespace ZedSharp
     /// A null-encapsulating wrapper.
     /// A Maybe might not have a value, but a reference to an Maybe will not itself be null.
     /// </summary>
-    /// <typeparam name="A"></typeparam>
     public struct Maybe<A>
     {
         public static readonly Maybe<A> None = new Maybe<A>();
@@ -214,14 +228,14 @@ namespace ZedSharp
             return ! maybe.HasValue;
         }
 
-        public static Maybe<A> operator |(Maybe<A> lhs, Maybe<A> rhs)
+        public static Maybe<A> operator |(Maybe<A> x, Maybe<A> y)
         {
-            return lhs.Or(rhs);
+            return x.Or(y);
         }
 
-        public static Maybe<A> operator &(Maybe<A> lhs, Maybe<A> rhs)
+        public static A operator |(Maybe<A> x, A y)
         {
-            return (lhs.HasValue && rhs.HasValue) ? lhs : Maybe<A>.None;
+            return x.OrElse(y);
         }
 
         internal Maybe(A val) : this()
@@ -273,6 +287,18 @@ namespace ZedSharp
         {
             var val = Value;
             return Maybe.Try(() => (B) (Object) val);
+        }
+
+        private static readonly Maybe<A> Default = Maybe.Of(default(A));
+
+        public Maybe<A> OrDefault()
+        {
+            return HasValue ? this : Default;
+        }
+
+        public A OrElseDefault()
+        {
+            return HasValue ? Value : default(A);
         }
 
         public A OrElse(A other)
@@ -336,11 +362,6 @@ namespace ZedSharp
             return Value;
         }
 
-        public A OrDefault()
-        {
-            return HasValue ? Value : default(A);
-        }
-        
         public Maybe<A> ForEach(Action<A> f)
         {
             if (HasValue)

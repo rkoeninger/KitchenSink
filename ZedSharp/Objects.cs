@@ -13,31 +13,43 @@ namespace ZedSharp
         {
             return (A)Convert.ChangeType(obj, typeof(A));
         }
-
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsLessThan<A>(this A val, A that) where A : IComparable<A>
         {
             return val.CompareTo(that) < 0;
         }
-
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsLessThanOrEquals<A>(this A val, A that) where A : IComparable<A>
         {
             return val.CompareTo(that) < 0;
         }
-
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsGreaterThan<A>(this A val, A that) where A : IComparable<A>
         {
             return val.CompareTo(that) > 0;
         }
-
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsGreaterThanOrEquals<A>(this A val, A that) where A : IComparable<A>
         {
             return val.CompareTo(that) >= 0;
         }
-
+        
         /// <summary>Inclusive on lower bound, exclusive on upper bound.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsBetween<A>(this A val, A lower, A upper) where A : IComparable<A>
         {
             return val.IsGreaterThanOrEquals(lower) && val.IsLessThan(upper);
+        }
+        
+        /// <summary>Inclusive on lower bound, exclusive on upper bound.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNotBetween<A>(this A val, A lower, A upper) where A : IComparable<A>
+        {
+            return ! val.IsBetween(lower, upper);
         }
 
         public static bool IsIn<A>(this A val, params A[] vals)
@@ -48,6 +60,16 @@ namespace ZedSharp
         public static bool IsIn<A>(this A val, ICollection<A> coll)
         {
             return coll.Any(val.Eq());
+        }
+
+        public static bool IsNotIn<A>(this A val, params A[] vals)
+        {
+            return ! IsIn(val, (ICollection<A>) vals);
+        }
+
+        public static bool IsNotIn<A>(this A val, ICollection<A> coll)
+        {
+            return ! IsIn(val, coll);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -62,14 +84,24 @@ namespace ZedSharp
             return obj != null;
         }
 
-        public static bool EqualsAny(this Object obj, params Object[] vals)
+        public static bool EqualsAny<A>(this A obj, params A[] vals)
         {
-            return EqualsAny(obj, (IEnumerable<Object>) vals);
+            return EqualsAny(obj, (IEnumerable<A>) vals);
         }
 
-        public static bool EqualsAny(this Object obj, IEnumerable<Object> vals)
+        public static bool EqualsAny<A>(this A obj, IEnumerable<A> vals)
         {
             return vals.Any(obj.Eq());
+        }
+
+        public static bool EqualsNone<A>(this A obj, params A[] vals)
+        {
+            return ! EqualsAny(obj, (IEnumerable<A>) vals);
+        }
+
+        public static bool EqualsNone<A>(this A obj, IEnumerable<A> vals)
+        {
+            return ! EqualsAny(obj, vals);
         }
 
         public static Func<A, bool> Eq<A>(this A x)
