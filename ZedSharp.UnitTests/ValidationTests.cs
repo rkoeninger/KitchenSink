@@ -28,9 +28,7 @@ namespace ZedSharp.UnitTests
 
             Assert.IsFalse(Verify.That(PersonD)
                 .Is(x => x != null)
-                .Cut()
                 .Is(x => x.Address != null)
-                .Cut()
                 .Is(x => x.Address.City != null)
                 .HasErrors);
         }
@@ -46,8 +44,10 @@ namespace ZedSharp.UnitTests
             Assert.IsFalse(Verify.That(() => PersonB.Address.City == PersonB.Address.City));
             Assert.IsFalse(Verify.That(() => PersonA.Address.City == PersonA.Address.City));
             Assert.IsTrue(Verify.That(() => PersonB.Address.City.SkipVerify()));
+            Assert.IsTrue(Verify.That(() => Person0.Address.City.NoVerify()));
         }
 
+        private static readonly Person Person0 = null;
         private static readonly Person PersonA = new Person("John", "Smith", null);
         private static readonly Person PersonB = new Person("John", "Smith", new Address("123", null));
         private static readonly Person PersonC = new Person("John", "Smith", new Address("123", "qwerty"));

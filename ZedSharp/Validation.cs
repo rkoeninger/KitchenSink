@@ -20,7 +20,7 @@ namespace ZedSharp
         }
 
         /// <summary>All sub-expressions of this method are not checked. Argument gets passed through unmodified.</summary>
-        public static A VerifyNone<A>(this A x) where A : class
+        public static A NoVerify<A>(this A x) where A : class
         {
             return x;
         }
@@ -32,7 +32,7 @@ namespace ZedSharp
         static Verify()
         {
             SkipVerifyMethodInfo = GetMethod(() => SkipVerify(""));
-            VerifyNoneMethodInfo = GetMethod(() => VerifyNone(""));
+            VerifyNoneMethodInfo = GetMethod(() => NoVerify(""));
         }
 
         private static MethodInfo GetMethod<A>(Expression<Func<A>> expr)
