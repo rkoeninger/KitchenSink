@@ -27,6 +27,13 @@ namespace ZedSharp
             return vals.Cycle();
         }
 
+        /// <summary>Infinitely enumerates items returned from provided function.</summary>
+        public static IEnumerable<A> Forever<A>(Func<A> f)
+        {
+            while (true)
+                yield return f();
+        }
+
         /// <summary>Performs side-effecting Action on each item in sequence.</summary>
         public static void ForEach<A>(this IEnumerable<A> seq, Action<A> f)
         {
