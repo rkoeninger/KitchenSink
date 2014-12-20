@@ -68,9 +68,29 @@ namespace ZedSharp
             return (y, z, w) => f(x, y, z, w);
         }
 
-        public static Func<A, C> Compose<A, B, C>(this Func<A, B> f, Func<B, C> g)
+        public static Func<B, A, C> Flip<A, B, C>(this Func<A, B, C> f)
         {
-            return x => g(f(x));
+            return (x, y) => f(y, x);
+        }
+
+        public static Func<A, D> Zip<A, B, C, D>(this Func<A, B> f, Func<A, C> g, Func<B, C, D> zipper)
+        {
+            return x => zipper(f(x), g(x));
+        }
+
+        public static Func<A, C, E> Join<A, B, C, D, E>(this Func<A, B> f, Func<C, D> g, Func<B, D, E> zipper)
+        {
+            return (x, y) => zipper(f(x), g(y));
+        }
+
+        public static Func<A, C> Then<A, B, C>(this Func<A, B> f, Func<B, C> g)
+        {
+            return g.Compose(f);
+        }
+
+        public static Func<A, C> Compose<A, B, C>(this Func<B, C> f, Func<A, B> g)
+        {
+            return x => f(g(x));
         }
 
         public static Func<A, R, C> ComposeMany<A, B, C, R>(this Func<A, R, B> f, Func<B, R, C> g)
