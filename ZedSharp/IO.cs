@@ -24,17 +24,17 @@ namespace ZedSharp
 
         public static IO<A> Flatten<A>(this IO<IO<A>> io)
         {
-            return IO.Of(io.Eval().Cont);
+            return IO.Of(() => io.Eval().Eval());
         }
 
         public static IO<A> Sum<A>(this IEnumerable<IO<A>> seq)
         {
-            return seq.Aggregate((x, y) => x.Then(y));
+            return seq.Aggregate(Then);
         }
 
         public static IO<IEnumerable<A>> Sequence<A>(this IEnumerable<IO<A>> seq)
         {
-            return IO.Of(() => seq.Select(x => x.Eval()));
+            return IO.Of(() => seq.Select(Eval));
         }
 
         public static Func<A, IO<C>> Compose<A, B, C>(this Func<A, IO<B>> f, Func<B, IO<C>> g)
@@ -45,6 +45,19 @@ namespace ZedSharp
         public static IO<A> Fix<A>(this Func<A, IO<A>> f)
         {
             return f(Fix(f).Eval());
+        }
+
+        public static readonly IO<DateTime> Now = IO.Of(() => DateTime.Now);
+        public static readonly IO<DateTime> UtcNow = IO.Of(() => DateTime.UtcNow);
+
+        private static A Eval<A>(IO<A> io)
+        {
+            return io.Eval();
+        }
+
+        private static IO<B> Then<A, B>(IO<A> a, IO<B> b)
+        {
+            return a.Then(b);
         }
     }
 
