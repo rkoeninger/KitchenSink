@@ -8,32 +8,12 @@ namespace ZedSharp
 {
     public static class Numbers
     {
-        public static bool Pos(this int x)
+        public static bool IsReal(this double x)
         {
-            return x > 0;
+            return ! (Double.IsInfinity(x) || Double.IsNaN(x));
         }
 
-        public static bool Zero(this int x)
-        {
-            return x == 0;
-        }
-
-        public static bool NotNeg(this int x)
-        {
-            return x >= 0;
-        }
-
-        public static bool Neg(this int x)
-        {
-            return x < 0;
-        }
-
-        public static bool Neg1(this int x)
-        {
-            return x == -1;
-        }
-
-        public static bool Even(this int x)
+        public static bool IsEven(this int x)
         {
             return x % 2 == 0;
         }
@@ -48,7 +28,7 @@ namespace ZedSharp
             return x => x * i;
         }
 
-        public static bool IsMultipleOf(this int x, int y)
+        public static bool IsDivisibleBy(this int x, int y)
         {
             return x % y == 0;
         }

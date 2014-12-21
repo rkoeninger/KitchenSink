@@ -151,12 +151,12 @@ namespace ZedSharp
 
         public static Maybe<int> NotNeg(Maybe<int> maybe)
         {
-            return maybe.Where(Numbers.NotNeg);
+            return maybe.Where(Numbers.IsNotNegative);
         }
 
         public static Maybe<int> Pos(Maybe<int> maybe)
         {
-            return maybe.Where(Numbers.Pos);
+            return maybe.Where(Numbers.IsPositive);
         }
 
         public static A OrElseNull<A>(this Maybe<A> maybe) where A : class

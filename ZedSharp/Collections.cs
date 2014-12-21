@@ -30,7 +30,7 @@ namespace ZedSharp
 
         public static IEnumerable<IEnumerable<A>> Partition<A>(this IEnumerable<A> seq, int count)
         {
-            while (seq.Count().Pos())
+            while (seq.Count().IsPositive())
             {
                 yield return seq.Take(count);
                 seq = seq.Skip(count);
@@ -67,7 +67,7 @@ namespace ZedSharp
 
         public static bool NotEmpty<A>(this IEnumerable<A> seq)
         {
-            return seq.Count().Pos();
+            return seq.Count().IsPositive();
         }
 
         public static IEnumerable<int> Indicies<A>(this IEnumerable<A> seq)
