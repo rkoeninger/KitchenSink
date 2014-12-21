@@ -37,6 +37,17 @@ namespace ZedSharp
             return IO.Of(() => seq.Select(Eval));
         }
 
+        public static IO<Unit> Sequence(this IEnumerable<IO<Unit>> seq)
+        {
+            return IO.Of(() =>
+            {
+                foreach (var io in seq)
+                    io.Eval();
+
+                return Unit.It;
+            });
+        }
+
         public static Func<A, IO<C>> Compose<A, B, C>(this Func<A, IO<B>> f, Func<B, IO<C>> g)
         {
             return a => f(a).SelectMany(g);

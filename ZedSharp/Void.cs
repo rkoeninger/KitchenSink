@@ -13,7 +13,7 @@ namespace ZedSharp
 
         private Void()
         {
-            throw new Exception("Void cannot be created");
+            throw new InvalidOperationException("Void cannot be created");
         }
     }
 }
