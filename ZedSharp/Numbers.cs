@@ -13,9 +13,19 @@ namespace ZedSharp
             return ! (Double.IsInfinity(x) || Double.IsNaN(x));
         }
 
+        public static bool IsNotReal(this double x)
+        {
+            return Double.IsInfinity(x) || Double.IsNaN(x);
+        }
+
         public static bool IsEven(this int x)
         {
             return x % 2 == 0;
+        }
+
+        public static bool IsOdd(this int x)
+        {
+            return x % 2 != 0;
         }
 
         public static Func<int, int> Plus(this int i)
@@ -31,6 +41,11 @@ namespace ZedSharp
         public static bool IsDivisibleBy(this int x, int y)
         {
             return x % y == 0;
+        }
+
+        public static bool IsNotDivisibleBy(this int x, int y)
+        {
+            return x % y != 0;
         }
 
         public static IEnumerable<int> To(this int start, int end)
@@ -174,7 +189,7 @@ namespace ZedSharp
             if (r < 0)
                 throw new ArgumentException();
 
-            return CombHelper(seq.Count(), r).Select(comb => ZipWhere(seq, comb));
+            return CombHelper(seq.Count(), r).Select(ZipWhere(seq));
         }
 
         private static IEnumerable<IEnumerable<bool>> CombHelper(int n, int r)
@@ -207,13 +222,9 @@ namespace ZedSharp
         private static readonly IEnumerable<bool> OneFalse = Seq.Of(false);
         private static readonly IEnumerable<bool> EmptyBoolSeq = Seq.Of<bool>();
 
-        private static IEnumerable<A> ZipWhere<A>(IEnumerable<A> seq, IEnumerable<bool> selectors)
+        private static Func<IEnumerable<bool>, IEnumerable<A>> ZipWhere<A>(IEnumerable<A> seq)
         {
-            using (var e1 = seq.GetEnumerator())
-                using (var e2 = selectors.GetEnumerator())
-                    while (e1.MoveNext() && e2.MoveNext())
-                        if (e2.Current)
-                            yield return e1.Current;
+            return selectors => seq.Zip(selectors, Row.Of).Where(x => x.Item2).Select(x => x.Item1);
         }
     }
 }

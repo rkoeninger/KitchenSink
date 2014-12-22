@@ -14,14 +14,18 @@ namespace ZedSharp
             1, 2, 3,
             9, 10, 11,
             99, 100, 101,
+            255, 256, 257,
             999, 1000, 1001,
             9999, 10000, 10001,
+            65535, 65536, 65537,
             int.MaxValue - 2, int.MaxValue - 1, int.MaxValue,
             -1, -2, -3,
             -9, -10, -11,
             -99, -100, -101,
+            -255, -256, -257,
             -999, -1000, -1001,
             -9999, -10000, -10001,
+            -65535, -65536, -65537,
             int.MinValue + 2, int.MinValue + 1, int.MinValue
         };
 
@@ -29,13 +33,13 @@ namespace ZedSharp
 
         public static readonly double[] Doubles = new []
         {
-            0.0,
-            double.Epsilon, double.Epsilon * 2, double.Epsilon * 3,
-            -double.Epsilon, -double.Epsilon * 2, -double.Epsilon * 3,
             double.NaN,
             double.PositiveInfinity,
             double.NegativeInfinity,
+            0.0,
+            double.Epsilon, double.Epsilon * 2, double.Epsilon * 3,
             double.MaxValue, double.MaxValue - double.Epsilon, double.MaxValue - (double.Epsilon * 2),
+            -double.Epsilon, -double.Epsilon * 2, -double.Epsilon * 3,
             double.MinValue, double.MinValue + double.Epsilon, double.MinValue + (double.Epsilon * 2)
         };
 

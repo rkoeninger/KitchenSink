@@ -126,7 +126,7 @@ namespace ZedSharp
                 else
                     return Maybe<IEnumerable<A>>.None;
 
-            return Maybe.Of(list).Cast<IEnumerable<A>>();
+            return Maybe.Of(list.AsEnumerable());
         }
 
         public static Func<A, Maybe<C>> Compose<A, B, C>(this Func<A, Maybe<B>> f, Func<B, Maybe<C>> g)
@@ -151,12 +151,12 @@ namespace ZedSharp
 
         public static Maybe<int> NotNeg(Maybe<int> maybe)
         {
-            return maybe.Where(Numbers.IsNotNegative);
+            return maybe.Where(Z.NotNeg);
         }
 
         public static Maybe<int> Pos(Maybe<int> maybe)
         {
-            return maybe.Where(Numbers.IsPositive);
+            return maybe.Where(Z.Pos);
         }
 
         public static A OrElseNull<A>(this Maybe<A> maybe) where A : class
@@ -202,6 +202,20 @@ namespace ZedSharp
         public static Maybe<IEnumerable<A>> OrEmpty<A>(this Maybe<IEnumerable<A>> maybe)
         {
             return maybe.Or(Maybe.Of(Seq.Of<A>()));
+        }
+
+        public static int Compare<A>(Maybe<A> x, Maybe<A> y) where A : IComparable<A>
+        {
+            if (x.HasValue == y.HasValue == false)
+                return 0;
+
+            if (x.HasValue && !y.HasValue)
+                return 1;
+
+            if (!x.HasValue && y.HasValue)
+                return -1;
+
+            return 0;
         }
     }
     
@@ -251,6 +265,11 @@ namespace ZedSharp
 
         public Maybe<B> Select<B>(Func<A, B> f)
         {
+            return HasValue ? Maybe.Of(f(Value)) : Maybe<B>.None;
+        }
+
+        public Maybe<B> TrySelect<B>(Func<A, B> f)
+        {
             var val = Value;
             return HasValue ? Maybe.Try(() => f(val)) : Maybe<B>.None;
         }
@@ -285,8 +304,7 @@ namespace ZedSharp
         /// <summary>Attempts cast, returning Some or None.</summary>
         public Maybe<B> Cast<B>()
         {
-            var val = Value;
-            return Maybe.Try(() => (B) (Object) val);
+            return Maybe.If<A, B>(Value, x => x is B, x => (B) (Object) x);
         }
 
         private static readonly Maybe<A> Default = Maybe.Of(default(A));

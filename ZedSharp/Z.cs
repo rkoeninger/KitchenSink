@@ -19,6 +19,8 @@ namespace ZedSharp
 
         public static readonly Func<int, bool> Neg = x => x < 0;
 
+        public static readonly Func<int, bool> NotNeg = x => x >= 0;
+
         public static readonly Func<int, bool> Even = x => x % 2 == 0;
 
         public static readonly Func<int, bool> Odd = x => x % 2 != 0;

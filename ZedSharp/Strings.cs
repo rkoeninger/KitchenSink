@@ -41,7 +41,7 @@ namespace ZedSharp
             int i = 0;
             int j = 0;
 
-            while ((j = s.IndexOf(sep, i)).IsNotNegative())
+            while ((j = s.IndexOf(sep, i)) >= 0)
             {
                 yield return s.Substring(i, j - i);
                 i = j + sep.Length;

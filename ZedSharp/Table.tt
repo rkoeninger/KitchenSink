@@ -32,7 +32,7 @@ namespace ZedSharp
 
         public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(params object[] values)
         {
-            if (values.Length.IsMultipleOf(<#= arity #>).Not())
+            if (values.Length.IsNotDivisibleBy(<#= arity #>))
                 throw new ArgumentException("Number of values must be a multiple of <#= arity #>");
 
             return new Table<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "new Col<" + x + ">(\"\")")) #>, values.Partition(<#= arity #>).Select(xs => Row.Of(<#= String.Join(", ", alphabet.Take(arity).Select((t, i) => "(" + t + ") xs[" + i + "]")) #>)));
@@ -40,7 +40,7 @@ namespace ZedSharp
 
         public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "String colName" + x)) #>, params object[] values)
         {
-            if (values.Length.IsMultipleOf(<#= arity #>).Not())
+            if (values.Length.IsNotDivisibleBy(<#= arity #>))
                 throw new ArgumentException("Number of values must be a multiple of <#= arity #>");
 
             return new Table<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "new Col<" + x + ">(colName" + x + ")")) #>, values.Partition(<#= arity #>).Select(xs => Row.Of(<#= String.Join(", ", alphabet.Take(arity).Select((t, i) => "(" + t + ") xs[" + i + "]")) #>)));
@@ -195,17 +195,9 @@ namespace ZedSharp
             return <#= String.Join(" && ", Enumerable.Range(1, arity).Select(x => "Equals(Item" + x + ", that.Item" + x + ")")) #>;
         }
 
-        private bool hashComputed;
-        private int hash;
-
         public override int GetHashCode()
         {
-            if (hashComputed)
-                return hash;
-
-            hash = ("" + <#= String.Join(" + ", Enumerable.Range(1, arity).Select(x => "Item" + x)) #>).GetHashCode();
-            hashComputed = true;
-            return hash;
+            return ToString().GetHashCode();
         }
 
         public override String ToString()
