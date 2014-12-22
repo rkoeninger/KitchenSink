@@ -81,9 +81,10 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void MaybeCasting()
         {
-            Assert.IsTrue(Maybe.Of("").Cast<string>().HasValue);
-            Assert.IsTrue(Maybe.Of("").Cast<object>().HasValue);
-            Assert.IsFalse(Maybe.Of("").Cast<int>().HasValue);
+            Assert.IsTrue(Maybe.Of("").Cast<string>().HasValue); // same-type
+            Assert.IsTrue(Maybe.Of("").Cast<object>().HasValue); // up-casting
+            Assert.IsFalse(Maybe.Of(new object()).Cast<string>().HasValue); // down-casting
+            Assert.IsFalse(Maybe.Of("").Cast<int>().HasValue); // casting to unrelated type
         }
 
         [TestMethod]

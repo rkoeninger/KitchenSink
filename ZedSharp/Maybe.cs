@@ -279,6 +279,11 @@ namespace ZedSharp
             return Select(f).Flatten();
         }
 
+        public Maybe<B> TrySelectMany<B>(Func<A, Maybe<B>> f)
+        {
+            return TrySelect(f).Flatten();
+        }
+
         public Maybe<A> Where(Func<A, bool> f)
         {
             return HasValue ? Maybe.If(Value, f) : this;
