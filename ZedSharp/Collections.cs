@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZedSharp
 {
@@ -30,10 +28,19 @@ namespace ZedSharp
 
         public static IEnumerable<IEnumerable<A>> Partition<A>(this IEnumerable<A> seq, int count)
         {
-            while (seq.Any())
+            var array = seq.ToArray();
+
+            for (var i = 0; i < array.Length; i += count)
             {
-                yield return seq.Take(count);
-                seq = seq.Skip(count);
+                var partSize = Math.Min(count, array.Length - i);
+                var array2 = new A[partSize];
+
+                for (var j = 0; j < partSize; ++j)
+                {
+                    array2[j] = array[i + j];
+                }
+
+                yield return array2;
             }
         }
 
@@ -77,7 +84,7 @@ namespace ZedSharp
 
         public static IEnumerable<A> WithoutAt<A>(this IEnumerable<A> seq, int index)
         {
-            return seq.Take(index).Concat(seq.Skip(index + 1));
+            return seq.Where((_, i) => i != index);
         }
 
         public static IEnumerable<A> Shuffle<A>(this IEnumerable<A> seq)
@@ -85,9 +92,9 @@ namespace ZedSharp
             var rand = new Random();
             var temp = seq.ToArray();
 
-            foreach (var i in seq.Indicies())
+            foreach (var i in temp.Indicies())
             {
-                int j = rand.Next(i, temp.Length);
+                var j = rand.Next(i, temp.Length);
                 yield return temp[j];
                 temp[j] = temp[i];
             }

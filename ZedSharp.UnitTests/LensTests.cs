@@ -15,13 +15,13 @@ namespace ZedSharp.UnitTests
             var st = Lens.From<Address>().Of(x => x.Street, (x, y) => new Address(y, x.City));
             var ct = Lens.From<Address>().Of(x => x.City, (x, y) => new Address(x.Street, y));
 
-            var addr_ct = addr.Compose(ct);
+            var addrCt = addr.Compose(ct);
 
             var address = new Address("123 Fake Street", "Anytown");
             var person = new Person("John", "Doe", address);
 
-            Assert.AreEqual("Anytown", addr_ct.Get(person));
-            Assert.AreEqual("Someville", addr_ct.Set(person, "Someville").Address.City);
+            Assert.AreEqual("Anytown", addrCt.Get(person));
+            Assert.AreEqual("Someville", addrCt.Set(person, "Someville").Address.City);
         }
 
         [TestMethod]

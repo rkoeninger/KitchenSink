@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ZedSharp
 {
     public static class Samples
     {
-        public static readonly int[] Ints = new []
+        public static readonly int[] Ints =
         {
             0,
             1, 2, 3,
@@ -31,7 +27,7 @@ namespace ZedSharp
 
         public static readonly IEnumerable<int> RandomInts = Numbers.RandomInts();
 
-        public static readonly double[] Doubles = new []
+        public static readonly double[] Doubles =
         {
             double.NaN,
             double.PositiveInfinity,

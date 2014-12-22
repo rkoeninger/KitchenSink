@@ -32,14 +32,10 @@ namespace ZedSharp
             var argExprs = ctor.GetParameters().Select(param =>
             {
                 if (String.Equals(param.Name, propertyName, StringComparison.InvariantCultureIgnoreCase))
-                {
                     return (Expression) valParam;
-                }
-                else
-                {
-                    var prop = props.Where(x => param.Name.EqualsIgnoreCase(x.Name)).FirstMaybe().OrThrow("No property has the same name as constructor parameter: " + param.Name);
-                    return (Expression) Expression.PropertyOrField(objParam, prop.Name);
-                }
+
+                var prop = props.Where(x => param.Name.EqualsIgnoreCase(x.Name)).FirstMaybe().OrThrow("No property has the same name as constructor parameter: " + param.Name);
+                return (Expression) Expression.PropertyOrField(objParam, prop.Name);
             }).ToArray();
             var newExpr = Expression.New(ctor, argExprs);
             var setter = Expression.Lambda<Func<A, B, A>>(newExpr, objParam, valParam).Compile();

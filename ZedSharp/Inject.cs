@@ -5,9 +5,9 @@ namespace ZedSharp
 {
     public static class Inject
     {
-        public static readonly ConsoleDI StandardConsole = new StdConsole();
+        public static readonly IConsole StandardConsole = new StdConsole();
 
-        private class StdConsole : ConsoleDI
+        private class StdConsole : IConsole
         {
             public String ReadLine()
             {
@@ -25,9 +25,9 @@ namespace ZedSharp
             }
         }
 
-        public static readonly FileSystemDI StandardFileSystem = new StdFileSystem();
+        public static readonly IFileSystem StandardFileSystem = new StdFileSystem();
 
-        private class StdFileSystem : FileSystemDI
+        private class StdFileSystem : IFileSystem
         {
             public String ReadAllText(String path)
             {
@@ -45,14 +45,14 @@ namespace ZedSharp
             StandardFileSystem);
     }
 
-    public interface ConsoleDI
+    public interface IConsole
     {
         String ReadLine();
         void WriteLine(Object s);
         void WriteLine(String format, params Object[] args);
     }
 
-    public interface FileSystemDI
+    public interface IFileSystem
     {
         String ReadAllText(String path);
         void WriteAllText(String path, String contents);

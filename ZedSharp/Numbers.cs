@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZedSharp
 {
@@ -63,9 +61,15 @@ namespace ZedSharp
             return rand.Next(1) == 0;
         }
 
+        public static A Pick<A>(this Random rand, params A[] vals)
+        {
+            return rand.Pick((IEnumerable<A>) vals);
+        }
+
         public static A Pick<A>(this Random rand, IEnumerable<A> seq)
         {
-            return seq.ElementAt(rand.Next(seq.Count()));
+            var array = seq.ToArray();
+            return array[rand.Next(array.Length)];
         }
 
         public static IEnumerable<int> RandomInts(int max = Int32.MaxValue)
@@ -76,6 +80,8 @@ namespace ZedSharp
             {
                 yield return rand.Next(max);
             }
+
+            // ReSharper disable once FunctionNeverReturns
         }
 
         public static IEnumerable<double> RandomDoubles()
@@ -86,6 +92,8 @@ namespace ZedSharp
             {
                 yield return rand.NextDouble();
             }
+
+            // ReSharper disable once FunctionNeverReturns
         }
 
         public static int Factorial(this int n)
@@ -125,9 +133,10 @@ namespace ZedSharp
             return result;
         }
 
-        public static IEnumerable<IEnumerable<A>> Permutations<A>(this IEnumerable<A> list, int r)
+        public static IEnumerable<IEnumerable<A>> Permutations<A>(this IEnumerable<A> seq, int r)
         {
-            var len = list.Count();
+            var array = seq.ToArray();
+            var len = array.Length;
 
             if (r > len)
             {
@@ -141,7 +150,7 @@ namespace ZedSharp
 
             if (r == 1)
             {
-                foreach (var item in list)
+                foreach (var item in array)
                 {
                     yield return Seq.Of(item);
                 }
@@ -149,13 +158,13 @@ namespace ZedSharp
                 yield break;
             }
 
-            foreach (var i in list.Indicies())
+            foreach (var i in array.Indicies())
             {
-                var sublist = list.WithoutAt(i);
+                var sublist = array.WithoutAt(i);
 
                 foreach (var subseq in Permutations(sublist, r - 1))
                 {
-                    yield return Seq.Of(list.ElementAt(i)).Concat(subseq);
+                    yield return Seq.Of(array[i]).Concat(subseq);
                 }
             }
         }
@@ -189,7 +198,8 @@ namespace ZedSharp
             if (r < 0)
                 throw new ArgumentException();
 
-            return CombHelper(seq.Count(), r).Select(ZipWhere(seq));
+            var array = seq.ToArray();
+            return CombHelper(array.Length, r).Select(ZipWhere(array));
         }
 
         private static IEnumerable<IEnumerable<bool>> CombHelper(int n, int r)

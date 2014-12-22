@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZedSharp
 {
@@ -52,9 +48,9 @@ namespace ZedSharp
             return new DateTimeRange(begin, begin.AddYears(1));
         }
 
-        public static DateTimeRange Parse(String s)
+        public static DateTimeRange Parse(String s, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            int i = s.IndexOf(DateTimeSeparator);
+            var i = s.IndexOf(DateTimeSeparator, comparison);
 
             if (i < 0 || i > (s.Length - DateTimeSeparator.Length))
                 throw new ArgumentException("Invalid DateTimeRange string");
@@ -65,9 +61,9 @@ namespace ZedSharp
             return new DateTimeRange(DateTime.Parse(beginString), DateTime.Parse(endString));
         }
 
-        public static DateTimeRange ParseExact(String s, String format)
+        public static DateTimeRange ParseExact(String s, String format, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            int i = s.IndexOf(DateTimeSeparator);
+            var i = s.IndexOf(DateTimeSeparator, comparison);
 
             if (i < 0 || i > (s.Length - DateTimeSeparator.Length))
                 throw new ArgumentException("Invalid DateTimeRange string");
@@ -113,14 +109,14 @@ namespace ZedSharp
 
         public bool Contains(DateTimeRange that)
         {
-            return that.Begin >= this.Begin && that.End <= this.End;
+            return that.Begin >= Begin && that.End <= End;
         }
 
         public bool Overlaps(DateTimeRange that)
         {
             return Contains(that)
-                || (that.Begin < this.End && that.End > this.Begin)
-                || (this.Begin < that.End && this.End > that.Begin);
+                || (that.Begin < End && that.End > Begin)
+                || (Begin < that.End && End > that.Begin);
         }
 
         public String ToString(String format)

@@ -19,12 +19,9 @@ namespace ZedSharp
             };
         }
 
-        private String Path { get; set; }
-
-        private Lazy<T> LazyLoader { get; set; }
-
-        private String[] StandardAssemblies { get; set; }
-
+        private readonly String Path;
+        private readonly Lazy<T> LazyLoader;
+        private readonly String[] StandardAssemblies;
         public T Value { get { return LazyLoader.Value; } }
 
         public void Load()
@@ -35,12 +32,14 @@ namespace ZedSharp
         private T Compile()
         {
             var referencingAssembly = typeof(T).Assembly;
-            var options = new Dictionary<String, String>() {{"CompilerVersion", "v4.0"}};//referencingAssembly.ImageRuntimeVersion}};
+            var options = new Dictionary<String, String> {{"CompilerVersion", "v4.0"}};
             var provider = new CSharpCodeProvider(options);
-            var parameters = new CompilerParameters(StandardAssemblies.Add(referencingAssembly.CodeBase.Replace("file:///", "")));
-            parameters.GenerateInMemory = true;
-            parameters.IncludeDebugInformation = true;
-            CompilerResults results = provider.CompileAssemblyFromFile(parameters, new [] {Path});
+            var parameters = new CompilerParameters(StandardAssemblies.Add(referencingAssembly.CodeBase.Replace("file:///", "")))
+            {
+                GenerateInMemory = true,
+                IncludeDebugInformation = true
+            };
+            var results = provider.CompileAssemblyFromFile(parameters, new [] {Path});
 
             if (results.Errors.HasErrors)
                 throw new Exception("");

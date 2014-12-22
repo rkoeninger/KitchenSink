@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZedSharp
 {
@@ -16,13 +14,23 @@ namespace ZedSharp
         /// <summary>Infinitely enumerates sequence.</summary>
         public static IEnumerable<A> Cycle<A>(this IEnumerable<A> seq)
         {
+            var list = new List<A>();
+
+            foreach (var item in list)
+            {
+                list.Add(item);
+                yield return item;
+            }
+
             while (true)
-                foreach (var item in seq)
+                foreach (var item in list)
                     yield return item;
+
+            // ReSharper disable once FunctionNeverReturns
         }
 
         /// <summary>Infinitely repeats item(s).</summary>
-        public static IEnumerable<A> Repeat<A>(params A[] vals)
+        public static IEnumerable<A> Cycle<A>(params A[] vals)
         {
             return vals.Cycle();
         }
@@ -32,23 +40,24 @@ namespace ZedSharp
         {
             while (true)
                 yield return f();
+
+            // ReSharper disable once FunctionNeverReturns
         }
 
         /// <summary>Performs side-effecting Action on each item in sequence.</summary>
         public static IEnumerable<A> ForEach<A>(this IEnumerable<A> seq, Action<A> f)
         {
             foreach (var item in seq)
+            {
                 f(item);
-
-            return seq;
+                yield return item;
+            }
         }
 
         /// <summary>Forces sequence to enumerate.</summary>
         public static IEnumerable<A> Force<A>(this IEnumerable<A> seq)
         {
-            foreach (var item in seq);
-
-            return seq;
+            return seq.ToArray();
         }
     }
 }

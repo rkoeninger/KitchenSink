@@ -12,7 +12,7 @@ namespace ZedSharp.UnitTests
         public void ListCreateWithOfMethod()
         {
             var xs = List.Of(1, 2, 3, 4, 5);
-            var ys = new List<int>() { 1, 2, 3, 4, 5 };
+            var ys = new List<int> { 1, 2, 3, 4, 5 };
             Assert.IsTrue(xs.SequenceEqual(ys));
         }
 
@@ -48,6 +48,7 @@ namespace ZedSharp.UnitTests
         {
             var dict2 = Dictionary.Of(new
             {
+                // ReSharper disable once RedundantAnonymousTypePropertyName
                 Red = ConsoleColor.Red,
                 ConsoleColor.Green,
                 blue = "blue",
@@ -96,9 +97,13 @@ namespace ZedSharp.UnitTests
 
         class Color
         {
-            public int R { get; private set; }
-            public int G { get; private set; }
-            public int B { get; private set; }
+            // ReSharper disable MemberCanBePrivate.Local
+            // ReSharper disable UnusedAutoPropertyAccessor.Local
+            public int R { get; set; }
+            public int G { get; set; }
+            public int B { get; set; }
+            // ReSharper restore UnusedAutoPropertyAccessor.Local
+            // ReSharper restore MemberCanBePrivate.Local
             public Color(int r, int g, int b) { R = r; G = g; B = b; }
         }
 
@@ -130,6 +135,18 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(x == 1);
             Assert.IsTrue(y == 2);
             Assert.IsTrue(z == 3);
+        }
+
+        [TestMethod]
+        public void EnumerablePartition()
+        {
+            var p = Seq.Of(1, 2, 3, 4, 5, 6, 7, 8);
+            var actual = p.Partition(3);
+            var expected = Seq.Of(
+                Seq.Of(1, 2, 3),
+                Seq.Of(4, 5, 6),
+                Seq.Of(7, 8));
+            Assert.IsTrue(actual.Zip(expected, Tuple.Create).All(t => t.Item1.SequenceEqual(t.Item2)));
         }
     }
 }

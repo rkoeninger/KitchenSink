@@ -44,8 +44,7 @@ namespace ZedSharp
         /// <summary>Throws exception if code can't compile.</summary>
         public static void Compile(String source, params String[] assemblies)
         {
-            var options = new Dictionary<String, String>();
-            options.Add("CompilerVersion", "v4.0");
+            var options = new Dictionary<String, String> {{"CompilerVersion", "v4.0"}};
             var provider = new CSharpCodeProvider(options);
             var parameters = new CompilerParameters(assemblies);
             parameters.ReferencedAssemblies.Add("mscorlib.dll");
@@ -66,7 +65,6 @@ namespace ZedSharp
 
         /// <summary>Throws exception if code compiles (it shouldn't).</summary>
         /// <remarks>This is used to test that type-level programming will invalidate certain uses.</remarks>
-        /// <param name="source"></param>
         public static void CompileFail(String source, params String[] assemblies)
         {
             Error(() => Compile(source, assemblies), new AssertFailedException("Compile should have failed"));

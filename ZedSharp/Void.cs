@@ -7,6 +7,7 @@ namespace ZedSharp
     /// An instance of Void can never be created.
     /// References will always be null.
     /// </summary>
+    // ReSharper disable once ConvertToStaticClass
     public sealed class Void
     {
         public static readonly Void It = null;

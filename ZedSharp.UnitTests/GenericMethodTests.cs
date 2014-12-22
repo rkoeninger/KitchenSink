@@ -22,7 +22,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void SubtypeDispatchTest()
         {
-            var speak = new GenericMethod<Animal, String>()
+            var speak = new GenericMethod<IAnimal, String>()
                 .AddLast<Dog>(x => x.Bark())
                 .AddLast<Cat>(x => x.Purr())
                 .AddLast<Duck>(x => x.Honk())
@@ -33,9 +33,9 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("Quack", speak(new Duck()));
         }
 
-        interface Animal { }
+        interface IAnimal { }
 
-        class Dog : Animal
+        class Dog : IAnimal
         {
             public String Bark()
             {
@@ -43,7 +43,7 @@ namespace ZedSharp.UnitTests
             }
         }
 
-        class Cat : Animal
+        class Cat : IAnimal
         {
             public String Purr()
             {
@@ -51,7 +51,7 @@ namespace ZedSharp.UnitTests
             }
         }
 
-        class Duck : Animal
+        class Duck : IAnimal
         {
             public String Honk()
             {

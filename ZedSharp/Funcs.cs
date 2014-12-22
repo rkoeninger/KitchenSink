@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZedSharp
 {
@@ -35,7 +33,7 @@ namespace ZedSharp
 
         public static Action Action(Func<Unit> f)
         {
-            return () => { f(); };
+            return () => f();
         }
 
         public static A Id<A>(A x)
@@ -96,6 +94,21 @@ namespace ZedSharp
         public static Func<A, R, C> ComposeMany<A, B, C, R>(this Func<A, R, B> f, Func<B, R, C> g)
         {
             return (a, r) => g(f(a, r), r);
+        }
+
+        public static Func<A, Func<B, C>> Curry<A, B, C>(this Func<A, B, C> f)
+        {
+            return a => b => f(a, b);
+        }
+
+        public static Func<A, Func<B, Func<C, D>>> Curry<A, B, C, D>(this Func<A, B, C, D> f)
+        {
+            return a => b => c => f(a, b, c);
+        }
+
+        public static Func<A, Func<B, Func<C, Func<D, E>>>> Curry<A, B, C, D, E>(this Func<A, B, C, D, E> f)
+        {
+            return a => b => c => d => f(a, b, c, d);
         }
     }
 }

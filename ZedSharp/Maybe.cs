@@ -7,7 +7,7 @@ namespace ZedSharp
 {
     public static class Maybe
     {
-        public static Maybe<A> Of<A>(Nullable<A> nullable) where A : struct
+        public static Maybe<A> Of<A>(A? nullable) where A : struct
         {
             return nullable.HasValue ? new Maybe<A>(nullable.Value) : Maybe<A>.None;
         }
@@ -19,7 +19,7 @@ namespace ZedSharp
 
         public static Maybe<A> Some<A>(A val)
         {
-            if (val == null)
+            if (val.IsNotNull())
                 throw new ArgumentNullException("Can't create Maybe.Some<" + typeof(A) + "> with null value");
 
             return new Maybe<A>(val);
@@ -54,7 +54,7 @@ namespace ZedSharp
 
         public static Lazy<Maybe<B>> LazyIf<A, B>(A val, Func<A, bool> f, Func<A, B> selector)
         {
-            return new Lazy<Maybe<B>>(() => Maybe.If(val, f, selector));
+            return new Lazy<Maybe<B>>(() => If(val, f, selector));
         }
 
         public static Maybe<A> Flatten<A>(this Maybe<Maybe<A>> maybe)
@@ -65,13 +65,13 @@ namespace ZedSharp
         public static Maybe<Int32> ToInt(this String s)
         {
             int i;
-            return Int32.TryParse(s, out i) ? Maybe.Of(i) : Maybe<Int32>.None;
+            return Int32.TryParse(s, out i) ? Of(i) : Maybe<Int32>.None;
         }
 
         public static Maybe<Double> ToDouble(this String s)
         {
             double d;
-            return Double.TryParse(s, out d) ? Maybe.Of(d) : Maybe<Double>.None;
+            return Double.TryParse(s, out d) ? Of(d) : Maybe<Double>.None;
         }
 
         public static Maybe<XDocument> ToXml(this String s)
@@ -91,17 +91,17 @@ namespace ZedSharp
 
         public static Maybe<A> FirstMaybe<A>(this IEnumerable<A> seq)
         {
-            return Try(() => seq.First());
+            return Try(seq.First);
         }
 
         public static Maybe<A> LastMaybe<A>(this IEnumerable<A> seq)
         {
-            return Try(() => seq.Last());
+            return Try(seq.Last);
         }
 
         public static Maybe<A> SingleMaybe<A>(this IEnumerable<A> seq)
         {
-            return Try(() => seq.Single());
+            return Try(seq.Single);
         }
 
         public static Maybe<A> ElementAtMaybe<A>(this IEnumerable<A> seq, int index)
@@ -111,9 +111,7 @@ namespace ZedSharp
 
         public static IEnumerable<A> WhereSome<A>(this IEnumerable<Maybe<A>> seq)
         {
-            foreach (var x in seq)
-                if (x.HasValue)
-                    yield return x.Value;
+            return seq.Where(x => x.HasValue).Select(x => x.Value);
         }
 
         public static Maybe<IEnumerable<A>> Sequence<A>(this IEnumerable<Maybe<A>> seq)
@@ -126,7 +124,7 @@ namespace ZedSharp
                 else
                     return Maybe<IEnumerable<A>>.None;
 
-            return Maybe.Of(list.AsEnumerable());
+            return Of(list.AsEnumerable());
         }
 
         public static Func<A, Maybe<C>> Compose<A, B, C>(this Func<A, Maybe<B>> f, Func<B, Maybe<C>> g)
@@ -186,22 +184,22 @@ namespace ZedSharp
 
         public static Maybe<bool> OrFalse(this Maybe<bool> maybe)
         {
-            return maybe.Or(Maybe.Of(false));
+            return maybe.Or(Of(false));
         }
 
         public static Maybe<int> OrZero(this Maybe<int> maybe)
         {
-            return maybe.Or(Maybe.Of(0));
+            return maybe.Or(Of(0));
         }
 
         public static Maybe<String> OrEmpty(this Maybe<String> maybe)
         {
-            return maybe.Or(Maybe.Of(""));
+            return maybe.Or(Of(""));
         }
 
         public static Maybe<IEnumerable<A>> OrEmpty<A>(this Maybe<IEnumerable<A>> maybe)
         {
-            return maybe.Or(Maybe.Of(Seq.Of<A>()));
+            return maybe.Or(Of(Seq.Of<A>()));
         }
 
         public static int Compare<A>(Maybe<A> x, Maybe<A> y) where A : IComparable<A>
@@ -255,7 +253,7 @@ namespace ZedSharp
         internal Maybe(A val) : this()
         {
             Value = val;
-            HasValue = val != null;
+            HasValue = val.IsNotNull();
         }
 
         internal A Value { get; set; }
@@ -309,7 +307,7 @@ namespace ZedSharp
         /// <summary>Attempts cast, returning Some or None.</summary>
         public Maybe<B> Cast<B>()
         {
-            return Maybe.If<A, B>(Value, x => x is B, x => (B) (Object) x);
+            return Maybe.If(Value, x => x is B, x => (B) (Object) x);
         }
 
         private static readonly Maybe<A> Default = Maybe.Of(default(A));
@@ -356,7 +354,7 @@ namespace ZedSharp
 
         public Maybe<A> OrIf<B>(B key, Func<B, bool> p, Func<B, A> f)
         {
-            return HasValue ? this : p(key) ? Maybe.Of(f(key)) : Maybe<A>.None;
+            return HasValue ? this : p(key) ? Maybe.Of(f(key)) : None;
         }
 
         public Maybe<A> Or(Maybe<A> maybe)
@@ -410,21 +408,16 @@ namespace ZedSharp
 
         public override int GetHashCode()
         {
-            return HasValue ? Value.GetHashCode() ^ (int)0x0a5a5a5a : 1;
+            return HasValue ? Value.GetHashCode() ^ 0x0a5a5a5a : 1;
         }
 
         public override bool Equals(object other)
         {
-            if (ReferenceEquals(other, this))
-                return true;
-
-            if (other == null || !(other is Maybe<A>))
+            if (!(other is Maybe<A>))
                 return false;
 
             var that = (Maybe<A>) other;
- 
-            return (this.HasValue && that.HasValue && Object.Equals(this.Value, that.Value))
-                || (!this.HasValue && !that.HasValue);
+            return (!HasValue && !that.HasValue) || (HasValue && that.HasValue && Equals(Value, that.Value));
         }
     }
 }

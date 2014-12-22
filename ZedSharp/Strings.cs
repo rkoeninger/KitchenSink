@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace ZedSharp
 {
@@ -36,12 +34,12 @@ namespace ZedSharp
             }
         }
 
-        public static IEnumerable<String> SplitSeq(this String s, String sep)
+        public static IEnumerable<String> SplitSeq(this String s, String sep, StringComparison comparison = StringComparison.InvariantCulture)
         {
-            int i = 0;
-            int j = 0;
+            var i = 0;
+            int j;
 
-            while ((j = s.IndexOf(sep, i)) >= 0)
+            while ((j = s.IndexOf(sep, i, comparison)) >= 0)
             {
                 yield return s.Substring(i, j - i);
                 i = j + sep.Length;

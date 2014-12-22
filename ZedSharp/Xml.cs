@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace ZedSharp
@@ -66,10 +63,9 @@ namespace ZedSharp
         public static Xml operator >(Xml xml, int depth)
         {
             if (depth < -1)
-            {
                 throw new InvalidOperationException();
-            }
-            else if (depth == -1)
+
+            if (depth == -1)
             {
                 while (xml.CurrentDepth > 0)
                 {

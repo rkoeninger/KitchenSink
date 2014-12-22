@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZedSharp
 {
@@ -25,12 +23,7 @@ namespace ZedSharp
 
         public static Chain<A> ToChain<A>(this IEnumerable<A> seq)
         {
-            var current = Chain<A>.Empty;
-
-            foreach (var item in seq.Reverse())
-                current = new Chain<A>(item, current);
-
-            return current;
+            return seq.Reverse().Aggregate(Chain<A>.Empty, (chain, item) => new Chain<A>(item, chain));
         }
 
         /// <summary>A lexicographical comparison of two chains.</summary>
@@ -46,7 +39,7 @@ namespace ZedSharp
 
                 if (xHasNext && yHasNext)
                 {
-                    int c = xs.Current.CompareTo(ys.Current);
+                    var c = xs.Current.CompareTo(ys.Current);
 
                     if (c != 0)
                         return c;
@@ -123,13 +116,7 @@ namespace ZedSharp
 
         public bool Equals(Chain<A> that)
         {
-            if (Object.ReferenceEquals(this, that))
-                return true;
-
-            if (Length != that.Length)
-                return false;
-
-            return this.SequenceEqual(that);
+            return Length == that.Length && this.SequenceEqual(that);
         }
 
         public override int GetHashCode()

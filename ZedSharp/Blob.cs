@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZedSharp
 {
@@ -106,14 +104,11 @@ namespace ZedSharp
 
         public bool Equals(Blob<A> that)
         {
-            if (Object.ReferenceEquals(this, that))
-                return true;
-
             if (Length != that.Length)
                 return false;
 
             for (int i = 0; i < Length; ++i)
-                if (! Object.Equals(Values[i], that.Values[i]))
+                if (! Equals(Values[i], that.Values[i]))
                     return false;
 
             return true;

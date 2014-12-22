@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace ZedSharp
 {
@@ -35,9 +33,9 @@ namespace ZedSharp
 
         public static readonly Func<Object, Type> Type = x => x.GetType();
 
-        public static readonly Func<Object, Object, bool> Eq = Object.Equals;
+        public static readonly Func<Object, Object, bool> Eq = Equals;
 
-        public static readonly Func<Object, Object, bool> Same = Object.ReferenceEquals;
+        public static readonly Func<Object, Object, bool> Same = ReferenceEquals;
 
         public static readonly Func<Object, int> Hash = x => x == null ? 0 : x.GetHashCode();
 
@@ -46,22 +44,6 @@ namespace ZedSharp
         public static A Id<A>(A val)
         {
             return val;
-        }
-
-        /// <summary>Curried versions of functions in the enclosing class.</summary>
-        public static class C
-        {
-            public static readonly Func<bool, Func<bool, bool>> And = x => y => x & y;
-            
-            public static readonly Func<bool, Func<bool, bool>> Or = x => y => x | y;
-            
-            public static readonly Func<bool, Func<bool, bool>> Xor = x => y => x ^ y;
-            
-            public static readonly Func<int, Func<int, int>> Add = x => y => x + y;
-            
-            public static readonly Func<Object, Func<Object, bool>> Eq = x => y => Object.Equals(x, y);
-            
-            public static readonly Func<Object, Func<Object, bool>> Same = x => y => Object.ReferenceEquals(x, y);
         }
     }
 }
