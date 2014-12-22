@@ -51,51 +51,6 @@ namespace ZedSharp
             return Enumerable.Range(start, end - start);
         }
 
-        public static bool CoinFlip(Random rand = null)
-        {
-            return (rand ?? new Random()).NextBoolean();
-        }
-
-        public static bool NextBoolean(this Random rand)
-        {
-            return rand.Next(1) == 0;
-        }
-
-        public static A Pick<A>(this Random rand, params A[] vals)
-        {
-            return rand.Pick((IEnumerable<A>) vals);
-        }
-
-        public static A Pick<A>(this Random rand, IEnumerable<A> seq)
-        {
-            var array = seq.ToArray();
-            return array[rand.Next(array.Length)];
-        }
-
-        public static IEnumerable<int> RandomInts(int max = Int32.MaxValue)
-        {
-            var rand = new Random();
-
-            while (true)
-            {
-                yield return rand.Next(max);
-            }
-
-            // ReSharper disable once FunctionNeverReturns
-        }
-
-        public static IEnumerable<double> RandomDoubles()
-        {
-            var rand = new Random();
-
-            while (true)
-            {
-                yield return rand.NextDouble();
-            }
-
-            // ReSharper disable once FunctionNeverReturns
-        }
-
         public static int Factorial(this int n)
         {
             if (n < 0)

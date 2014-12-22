@@ -16,7 +16,7 @@ namespace ZedSharp
         {
             var list = new List<A>();
 
-            foreach (var item in list)
+            foreach (var item in seq)
             {
                 list.Add(item);
                 yield return item;

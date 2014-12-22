@@ -76,6 +76,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Match.tt</DependentUpon>
     </Compile>
+    <Compile Include="Rand.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="Natural.cs">
       <AutoGen>True</AutoGen>
@@ -83,7 +84,7 @@
       <DependentUpon>Natural.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Samples.cs" />
+    <Compile Include="Sample.cs" />
     <Compile Include="Seq.cs" />
     <Compile Include="Strings.cs" />
     <Compile Include="Table.cs">
