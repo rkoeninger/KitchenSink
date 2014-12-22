@@ -24,7 +24,7 @@ namespace ZedSharp
 
         public static IO<A> Flatten<A>(this IO<IO<A>> io)
         {
-            return IO.Of(() => io.Eval().Eval());
+            return Of(() => io.Eval().Eval());
         }
 
         public static IO<A> Sum<A>(this IEnumerable<IO<A>> seq)
@@ -34,12 +34,12 @@ namespace ZedSharp
 
         public static IO<IEnumerable<A>> Sequence<A>(this IEnumerable<IO<A>> seq)
         {
-            return IO.Of(() => seq.Select(Eval));
+            return Of(() => seq.Select(Eval));
         }
 
         public static IO<Unit> Sequence(this IEnumerable<IO<Unit>> seq)
         {
-            return IO.Of(() =>
+            return Of(() =>
             {
                 foreach (var io in seq)
                     io.Eval();
@@ -53,13 +53,13 @@ namespace ZedSharp
             return a => f(a).SelectMany(g);
         }
 
-        public static IO<A> Fix<A>(this Func<A, IO<A>> f)
+        public static IO<Func<A, B>> Promote<A, B>(Func<A, IO<B>> f)
         {
-            return f(Fix(f).Eval());
+            return Of<Func<A, B>>(() => a => f(a).Eval());
         }
 
-        public static readonly IO<DateTime> Now = IO.Of(() => DateTime.Now);
-        public static readonly IO<DateTime> UtcNow = IO.Of(() => DateTime.UtcNow);
+        public static readonly IO<DateTime> Now = Of(() => DateTime.Now);
+        public static readonly IO<DateTime> UtcNow = Of(() => DateTime.UtcNow);
 
         private static A Eval<A>(IO<A> io)
         {
@@ -118,6 +118,8 @@ namespace ZedSharp
         public IO<B> Forever<B>()
         {
             var me = this;
+
+            // ReSharper disable once FunctionNeverReturns
             return IO.Of<B>(() => { while (true) me.Eval(); });
         }
 
