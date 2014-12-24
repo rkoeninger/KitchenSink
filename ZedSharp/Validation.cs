@@ -253,7 +253,7 @@ namespace ZedSharp
 
         public Maybe<A> ToMaybe()
         {
-            return HasErrors ? Maybe.None<A>() : Maybe.Of(Value);
+            return HasErrors ? Maybe<A>.None : Maybe.Of(Value);
         }
     }
 }

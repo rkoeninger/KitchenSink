@@ -9,7 +9,7 @@
 
         public static Maybe<A> ToMaybe<A>(this Ref<A> r)
         {
-            return r == null ? Maybe.None<A>() : Maybe.Of(r.Value);
+            return r == null ? Maybe<A>.None : Maybe.Of(r.Value);
         }
 
         public static A OrElse<A>(this Ref<A> r, A val)

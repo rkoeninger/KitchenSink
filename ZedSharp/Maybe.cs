@@ -25,11 +25,6 @@ namespace ZedSharp
             return new Maybe<A>(val);
         }
 
-        public static Maybe<A> None<A>()
-        {
-            return Maybe<A>.None;
-        }
-
         public static Maybe<A> Try<A>(Func<A> f)
         {
             try
@@ -55,11 +50,6 @@ namespace ZedSharp
         public static Lazy<Maybe<B>> LazyIf<A, B>(A val, Func<A, bool> f, Func<A, B> selector)
         {
             return new Lazy<Maybe<B>>(() => If(val, f, selector));
-        }
-
-        public static Maybe<A> Flatten<A>(this Maybe<Maybe<A>> maybe)
-        {
-            return maybe.HasValue ? maybe.Value : Maybe<A>.None;
         }
 
         public static Maybe<Int32> ToInt(this String s)
@@ -109,27 +99,37 @@ namespace ZedSharp
             return Try(() => seq.ElementAt(index));
         }
 
-        public static IEnumerable<A> WhereSome<A>(this IEnumerable<Maybe<A>> seq)
+        public static Maybe<A> Flatten<A>(this Maybe<Maybe<A>> maybe)
+        {
+            return maybe.HasValue ? maybe.Value : Maybe<A>.None;
+        }
+
+        public static IEnumerable<A> Flatten<A>(this IEnumerable<Maybe<A>> seq)
         {
             return seq.Where(x => x.HasValue).Select(x => x.Value);
         }
 
+        public static IEnumerable<B> SelectMany<A, B>(this IEnumerable<A> seq, Func<A, Maybe<B>> f)
+        {
+            return seq.Select(f).Flatten();
+        }
+
         public static Maybe<IEnumerable<A>> Sequence<A>(this IEnumerable<Maybe<A>> seq)
         {
-            var list = new List<A>();
-
-            foreach (var x in seq)
-                if (x.HasValue)
-                    list.Add(x.Value);
-                else
-                    return Maybe<IEnumerable<A>>.None;
-
-            return Of(list.AsEnumerable());
+            return seq.Any(x => ! x.HasValue) ? Maybe<IEnumerable<A>>.None : Of(seq.Flatten());
         }
 
         public static Func<A, Maybe<C>> Compose<A, B, C>(this Func<A, Maybe<B>> f, Func<B, Maybe<C>> g)
         {
             return a => f(a).SelectMany(g);
+        }
+
+        public static Func<A, Maybe<B>> Demote<A, B>(this Maybe<Func<A, B>> maybe)
+        {
+            if (maybe.HasValue)
+                return x => Maybe.Of(maybe.Value(x));
+
+            return _ => Maybe<B>.None;
         }
 
         public static Maybe<IEnumerable<A>> IsNotEmpty<A>(Maybe<IEnumerable<A>> maybe)
@@ -228,16 +228,6 @@ namespace ZedSharp
         public static implicit operator Maybe<A>(A val)
         {
             return Maybe.Of(val);
-        }
-
-        public static bool operator true(Maybe<A> maybe)
-        {
-            return maybe.HasValue;
-        }
-
-        public static bool operator false(Maybe<A> maybe)
-        {
-            return ! maybe.HasValue;
         }
 
         public static Maybe<A> operator |(Maybe<A> x, Maybe<A> y)

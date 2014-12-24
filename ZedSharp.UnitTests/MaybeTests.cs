@@ -8,54 +8,13 @@ namespace ZedSharp.UnitTests
     public class MaybeTests
     {
         [TestMethod]
-        public void MaybeTrueFalseConversion()
-        {
-            if (Maybe.Of(0))
-            {
-            }
-            else
-            {
-                Assert.Fail();
-            }
-
-            if (Maybe.None<int>().Or(0))
-            {
-            }
-            else
-            {
-                Assert.Fail();
-            }
-            
-            if (Maybe.None<int>())
-            {
-                Assert.Fail();
-            }
-
-            var a = Maybe.Of("");
-            var b = Maybe.None<String>();
-            
-            if (a)
-            {
-            }
-            else
-            {
-                Assert.Fail();
-            }
-            
-            if (b)
-            {
-                Assert.Fail();
-            }
-        }
-
-        [TestMethod]
         public void MaybeWrappers()
         {
             String ns = null;
             String s = "";
             AssertIsNone(Maybe.Of(ns));
             AssertIsSome(Maybe.Of(s));
-            AssertIsNone(Maybe.None<String>());
+            AssertIsNone(Maybe<String>.None);
         }
 
         [TestMethod]
@@ -73,9 +32,9 @@ namespace ZedSharp.UnitTests
         public void MaybeJoining()
         {
             Assert.AreEqual(Maybe.Of(3), Maybe.Of(1).Join(Maybe.Of(2), Z.Add));
-            Assert.AreEqual(Maybe.None<int>(), Maybe.None<int>().Join(Maybe.Of(2), Z.Add));
-            Assert.AreEqual(Maybe.None<int>(), Maybe.Of(1).Join(Maybe.None<int>(), Z.Add));
-            Assert.AreEqual(Maybe.None<int>(), Maybe.None<int>().Join(Maybe.None<int>(), Z.Add));
+            Assert.AreEqual(Maybe<int>.None, Maybe<int>.None.Join(Maybe.Of(2), Z.Add));
+            Assert.AreEqual(Maybe<int>.None, Maybe.Of(1).Join(Maybe<int>.None, Z.Add));
+            Assert.AreEqual(Maybe<int>.None, Maybe<int>.None.Join(Maybe<int>.None, Z.Add));
         }
 
         [TestMethod]
@@ -99,9 +58,9 @@ namespace ZedSharp.UnitTests
             AssertIsSome(new [] {0,0,0,0}.ElementAtMaybe(2));
             AssertIsNone(new[] { 0, 0, 0, 0 }.ElementAtMaybe(5));
             AssertIsNone(new[] { 0, 0, 0, 0 }.ElementAtMaybe(-1));
-            Assert.AreEqual(5, new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(x => x.ToInt()).WhereSome().Count());
-            AssertIsNone(new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(x => x.ToInt()).Sequence());
-            AssertIsSome(new [] {"9", "3", "2", "1", "6", "3", "5", "3"}.Select(x => x.ToInt()).Sequence());
+            Assert.AreEqual(5, new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(Maybe.ToInt).Flatten().Count());
+            AssertIsNone(new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(Maybe.ToInt).Sequence());
+            AssertIsSome(new [] {"9", "3", "2", "1", "6", "3", "5", "3"}.Select(Maybe.ToInt).Sequence());
         }
 
         [TestMethod]
