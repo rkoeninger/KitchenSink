@@ -18,25 +18,25 @@ namespace ZedSharp
         {
             get { return new XmlStart(new XmlWriterSettings { Indent = true, IndentChars = "    " }); }
         }
-
-        /// <summary>Used to close all remaining open tags with <code>&lt; Xml.End</code>.</summary>
-        public static XmlEnd End
+        
+        /// <summary>Used to close open tag with <code>&lt; Xml.End</code>.</summary>
+        public static int End
         {
-            get { return default(XmlEnd); }
+            get { return 1; }
         }
         
-        /// <summary>Undefined. Throws InvalidOperationException.</summary>
-        public static String operator <(Xml xml, XmlEnd end)
+        /// <summary>Used to close <code>x</code> levels of open tags with <code>&lt; Xml.EndMany(3)</code>.</summary>
+        public static int EndMany(int x)
         {
-            throw new InvalidOperationException();
+            return x;
         }
 
-        /// <summary>Closes all preceding tags.</summary>
-        public static String operator >(Xml xml, XmlEnd end)
+        /// <summary>Used to close all remaining open tags with <code>&lt; Xml.EndDoc</code>.</summary>
+        public static int EndDoc
         {
-            return (xml > -1).ToString();
+            get { return -1; }
         }
-
+        
         /// <summary>Opens new tag.</summary>
         public static Xml operator <(Xml xml, String tagName)
         {
@@ -161,10 +161,5 @@ namespace ZedSharp
         }
 
         private readonly XmlWriterSettings Settings;
-    }
-
-    public struct XmlEnd
-    {
-
     }
 }
