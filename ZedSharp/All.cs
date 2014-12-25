@@ -8,7 +8,10 @@ namespace ZedSharp
 {
     public static class All
     {
-        public static readonly IEnumerable<int> Ints = int.MinValue.To(int.MaxValue);
+        public static IEnumerable<int> Ints()
+        {
+            return int.MinValue.To(int.MaxValue).Concat(Seq.Of(int.MaxValue));
+        }
 
         public static readonly Blob<char> AlphaUpperChars = 48.To(58).Select(x => (char) x).ToBlob();
 
