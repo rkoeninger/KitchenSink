@@ -30,5 +30,12 @@ namespace ZedSharp.UnitTests
 
             Check.EqualsAndHashCode(Seq.Forever(() => Rand.Ints().Take(Rand.Int(64)).ToBlob()).Take(16));
         }
+
+        [TestMethod]
+        public void CheckComparableAndOperators()
+        {
+            Check.Comparable(Sample.Ints);
+            Check.CompareOperators(Sample.Ints);
+        }
     }
 }

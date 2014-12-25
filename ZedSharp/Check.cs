@@ -62,11 +62,15 @@ namespace ZedSharp
             That((A x, A y) => x.CompareTo(y) == -(y.CompareTo(x)), testData0, testData0);
         }
 
-        // TODO: figure out how to implement this
-        //public static void CompareOperators<A>(IEnumerable<A> testData0)
-        //{
-        //    That((A x, A y) => (x > y) == !(x <= y) && (x < y) == !(x >= y), testData0, testData0);
-        //}
+        public static void CompareOperators<A>(IEnumerable<A> testData0)
+        {
+            That((A x, A y) =>
+            {
+                dynamic dx = x;
+                dynamic dy = y;
+                return (dx > dy) == !(dx <= dy) && (dx < dy) == !(dx >= dy);
+            }, testData0, testData0);
+        }
 
         private static int Hash<A>(A x)
         {
