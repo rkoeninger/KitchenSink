@@ -5,6 +5,11 @@ namespace ZedSharp
 {
     public static class Booleans
     {
+        public static bool Implies(this bool x, bool y)
+        {
+            return !x || y;
+        }
+
         public static bool Not(this bool x)
         {
             return !x;

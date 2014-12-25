@@ -13,6 +13,16 @@ namespace ZedSharp
             return Global.Next();
         }
 
+        public static int Int(int max)
+        {
+            return Global.Next(max);
+        }
+
+        public static int Int(int min, int max)
+        {
+            return Global.Next(min, max);
+        }
+
         public static IEnumerable<int> Ints()
         {
             return Seq.Forever(Int);
@@ -38,14 +48,19 @@ namespace ZedSharp
             return Seq.Forever(Char);
         }
 
-        public static String String()
+        public static String UnicodeString()
         {
-            return Chars().Take(Int()).Concat();
+            return Chars().Take(Int(256)).Concat();
         }
 
-        public static IEnumerable<String> Strings()
+        public static String UnicodeString(int length)
         {
-            return Seq.Forever(String);
+            return Chars().Take(Int(length)).Concat();
+        }
+
+        public static IEnumerable<String> UnicodeStrings()
+        {
+            return Seq.Forever(UnicodeString);
         }
 
         public static char AsciiChar()
@@ -60,7 +75,17 @@ namespace ZedSharp
 
         public static String AsciiString()
         {
-            return AsciiChars().Take(Int()).Concat();
+            return AsciiChars().Take(Int(256)).Concat();
+        }
+
+        public static String AsciiString(int length)
+        {
+            return AsciiChars().Take(Int(length)).Concat();
+        }
+
+        public static String AsciiStringNoWhiteSpace(int minLength, int maxLength)
+        {
+            return Chars().Where(x => ! char.IsWhiteSpace(x)).Take(Int(minLength, maxLength)).Concat();
         }
 
         public static IEnumerable<String> AsciiStrings()
@@ -70,7 +95,10 @@ namespace ZedSharp
 
         public static String Email()
         {
-            return AsciiString() + "@" + AsciiString() + "." + Pick(Sample.TopLevelDomains);
+            return String.Format("{0}@{1}.{2}",
+                AsciiStringNoWhiteSpace(16, 32),
+                AsciiStringNoWhiteSpace(8, 16),
+                Pick(Sample.TopLevelDomains));
         }
 
         public static IEnumerable<String> Emails()
