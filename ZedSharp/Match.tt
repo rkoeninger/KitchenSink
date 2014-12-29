@@ -4,8 +4,6 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace ZedSharp
 {
@@ -91,7 +89,7 @@ namespace ZedSharp
     }
 
     /// <remarks>Key may be ignored, depending on implementation.</remarks>
-    internal interface IMatcher<A, B>
+    internal interface IMatcher<in A, B>
     {
         Maybe<B> Eval(A k);
     }
@@ -357,7 +355,7 @@ namespace ZedSharp
             Tuple.Create("Func<A, bool> p", "p"),
             Tuple.Create("Func<bool> p",    "_ => p()"),
             Tuple.Create("bool p",          "_ => p"),
-            Tuple.Create("A p",             "x => Object.Equals(x, p)"),
+            Tuple.Create("A p",             "x => Equals(x, p)"),
             Tuple.Create("Type p",          "x => p.IsInstanceOfType(x)")
         };
 
@@ -387,31 +385,31 @@ namespace ZedSharp
 
     public void CaseSubtypeOverloads(String className, String extraArgs)
     {
-        var conditions = new List<Tuple<String, String>> {
-            Tuple.Create("Func<C, bool> p", "x => x is C && p((C) x)"),
-            Tuple.Create("Func<bool> p",    "_ => p()"),
-            Tuple.Create("bool p",          "_ => p")
+        var conditions = new List<Tuple<String, String, bool>> {
+            Tuple.Create("Func<C, bool> p", "x => x is C && p((C) x)", true),
+            Tuple.Create("Func<bool> p",    "_ => p()",                false),
+            Tuple.Create("bool p",          "_ => p",                  false)
         };
 
-        var consequences = new List<Tuple<String, String>> {
-            Tuple.Create("Func<C, B> f", "x => f((C) x)"),
-            Tuple.Create("Func<B> f",    "_ => f()"),
-            Tuple.Create("B f",          "_ => f")
+        var consequences = new List<Tuple<String, String, bool>> {
+            Tuple.Create("Func<C, B> f", "x => f((C) x)", true),
+            Tuple.Create("Func<B> f",    "_ => f()",      false),
+            Tuple.Create("B f",          "_ => f",        false)
         };
 
         foreach (var cond in conditions)
         {
-            foreach (var conseq in consequences)
+            foreach (var conseq in consequences.Where(x => x.Item3 && cond.Item3))
             { #>
 
         public <#= className #><A, B> Case<C>(<#= cond.Item1 #>, <#= conseq.Item1 #>) where C : A
         {
             return new <#= className #><A, B>(<#= extraArgs #><#= cond.Item2 #>, <#= conseq.Item2 #>);
         }
-<#+         }
+<#+			}
         }
 
-        foreach (var conseq in consequences)
+        foreach (var conseq in consequences.Where(x => x.Item3))
         { #>
 
         public <#= className #><A, B> Case<C>(<#= conseq.Item1 #>) where C : A

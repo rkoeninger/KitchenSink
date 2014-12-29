@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ZedSharp
 {
-    public struct ZonedDateTime : IComparable<ZonedDateTime>
+    public struct ZonedDateTime : IComparable<ZonedDateTime>, IEquatable<ZonedDateTime>
     {
         public ZonedDateTime(DateTime dateTime, TimeZoneInfo timeZoneInfo) : this()
         {
@@ -60,6 +56,21 @@ namespace ZedSharp
         public static bool operator !=(ZonedDateTime x, ZonedDateTime y)
         {
             return x.CompareTo(y) != 0;
+        }
+
+        public override bool Equals(Object obj)
+        {
+            return (obj is ZonedDateTime) && Equals((ZonedDateTime) obj);
+        }
+
+        public bool Equals(ZonedDateTime that)
+        {
+            return DateTime == that.DateTime & Equals(TimeZoneInfo, that.TimeZoneInfo);
+        }
+
+        public override int GetHashCode()
+        {
+            return DateTime.GetHashCode() ^ (TimeZoneInfo == null ? 0 : TimeZoneInfo.GetHashCode());
         }
     }
 }
