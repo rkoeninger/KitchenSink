@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 
 namespace ZedSharp.UnitTests
 {
@@ -50,7 +48,7 @@ namespace ZedSharp.UnitTests
         public void CombinationsOfSet()
         {
             var seq1 = Seq.Of(5, 6, 7, 8, 9);
-            var subsetSize = 3;
+            const int subsetSize = 3;
             var combinations = seq1.Combinations(subsetSize);
             var expectedCombinations = Seq.Of(
                 Seq.Of(5,6,7),
@@ -78,7 +76,7 @@ namespace ZedSharp.UnitTests
         public void PermutationsOfSet()
         {
             var seq1 = Seq.Of(5, 6, 7, 8, 9);
-            var subsetSize = 2;
+            const int subsetSize = 2;
             var permutations = seq1.Permutations(subsetSize);
             var expectedPermutations = Seq.Of(
                 Seq.Of(5, 6),

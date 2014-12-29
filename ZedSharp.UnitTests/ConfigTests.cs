@@ -12,10 +12,10 @@ namespace ZedSharp.UnitTests
 
     public static class App
     {
-        private static readonly String path = "Test.csconfig";
-        private static readonly CodeLoader<IConfig> loader = new CodeLoader<IConfig>(path);
-        public static void LoadConfig() { loader.Load(); }
-        public static IConfig Config { get { return loader.Value; } }
+        private const String Path = "Test.csconfig";
+        private static readonly CodeLoader<IConfig> Loader = new CodeLoader<IConfig>(Path);
+        public static void LoadConfig() { Loader.Load(); }
+        public static IConfig Config { get { return Loader.Value; } }
     }
 
     [TestClass]

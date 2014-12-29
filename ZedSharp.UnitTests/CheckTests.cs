@@ -18,7 +18,7 @@ namespace ZedSharp.UnitTests
         public void CheckWithProvidedInputs()
         {
             Check.That(
-                (int x) => Math.Abs(x) >= 0,
+                x => Math.Abs(x) >= 0,
                 Sample.Ints.Where(x => x != int.MinValue));
 
             Check.EqualsAndHashCode(Seq.Of(

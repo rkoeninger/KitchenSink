@@ -116,7 +116,9 @@ namespace ZedSharp
 
         public static Maybe<IEnumerable<A>> Sequence<A>(this IEnumerable<Maybe<A>> seq)
         {
-            return seq.Any(x => ! x.HasValue) ? Maybe<IEnumerable<A>>.None : Of(seq.Flatten());
+            var array = seq.ToArray();
+
+            return array.Any(x => !x.HasValue) ? Maybe<IEnumerable<A>>.None : Of(array.Flatten());
         }
 
         public static Func<A, Maybe<C>> Compose<A, B, C>(this Func<A, Maybe<B>> f, Func<B, Maybe<C>> g)
@@ -127,7 +129,7 @@ namespace ZedSharp
         public static Func<A, Maybe<B>> Demote<A, B>(this Maybe<Func<A, B>> maybe)
         {
             if (maybe.HasValue)
-                return x => Maybe.Of(maybe.Value(x));
+                return x => Of(maybe.Value(x));
 
             return _ => Maybe<B>.None;
         }

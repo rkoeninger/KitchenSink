@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ZedSharp.UnitTests
@@ -43,11 +41,11 @@ namespace ZedSharp.UnitTests
         {
             var l = new List<String>();
             var res2 = Match.On(4)
-                .Case(Track<int, bool>(l, "case1", 1.Eq()), Track<int, string>(l, "then1", _ => "one"))
-                .Case(Track<int, bool>(l, "case2", 2.Eq()), Track<int, string>(l, "then2", _ => "two"))
-                .Case(Track<int, bool>(l, "case3", 3.Eq()), Track<int, string>(l, "then3", _ => "three"))
-                .Case(Track<int, bool>(l, "case4", 4.Eq()), Track<int, string>(l, "then4", _ => "four"))
-                .Case(Track<int, bool>(l, "case5", 5.Eq()), Track<int, string>(l, "then5", _ => "five"))
+                .Case(Track(l, "case1", 1.Eq()), Track<int, string>(l, "then1", _ => "one"))
+                .Case(Track(l, "case2", 2.Eq()), Track<int, string>(l, "then2", _ => "two"))
+                .Case(Track(l, "case3", 3.Eq()), Track<int, string>(l, "then3", _ => "three"))
+                .Case(Track(l, "case4", 4.Eq()), Track<int, string>(l, "then4", _ => "four"))
+                .Case(Track(l, "case5", 5.Eq()), Track<int, string>(l, "then5", _ => "five"))
                 .End;
             Assert.AreEqual(Maybe.Of("four"), res2);
             Assert.IsTrue(l.SequenceEqual(Seq.Of("case1", "case2", "case3", "case4", "then4")));
@@ -67,9 +65,9 @@ namespace ZedSharp.UnitTests
             var l = new List<String>();
             var res3 = Match.On(3)
                 .Default(Track<int, string>(l, "default", _ => "whatever"))
-                .Case(Track<int, bool>(l, "case1", 5.Eq()), Track<int, string>(l, "then1", _ => "asdf"))
-                .Case(Track<int, bool>(l, "case2", 3.Eq()), Track<int, string>(l, "then2", _ => "fgjh"))
-                .Case(Track<int, bool>(l, "case3", 2.Eq()), Track<int, string>(l, "then3", _ => "awert"))
+                .Case(Track(l, "case1", 5.Eq()), Track<int, string>(l, "then1", _ => "asdf"))
+                .Case(Track(l, "case2", 3.Eq()), Track<int, string>(l, "then2", _ => "fgjh"))
+                .Case(Track(l, "case3", 2.Eq()), Track<int, string>(l, "then3", _ => "awert"))
                 .End;
             Assert.AreEqual("fgjh", res3);
             Assert.IsTrue(l.SequenceEqual(Seq.Of("case1", "case2", "then2")));
@@ -77,10 +75,10 @@ namespace ZedSharp.UnitTests
             l = new List<String>();
             var res4 = Match.On(3)
                 .Default(Track<int, string>(l, "default", _ => "whatever"))
-                .Case(Track<int, bool>(l, "case1", 5.Eq()), Track<int, string>(l, "then1", _ => "asdf"))
-                .Case(Track<int, bool>(l, "case2", 1.Eq()), Track<int, string>(l, "then2", _ => "fgjh"))
-                .Case(Track<int, bool>(l, "case3", 7.Eq()), Track<int, string>(l, "then3", _ => "sdfgg"))
-                .Case(Track<int, bool>(l, "case4", 2.Eq()), Track<int, string>(l, "then4", _ => "awert"))
+                .Case(Track(l, "case1", 5.Eq()), Track<int, string>(l, "then1", _ => "asdf"))
+                .Case(Track(l, "case2", 1.Eq()), Track<int, string>(l, "then2", _ => "fgjh"))
+                .Case(Track(l, "case3", 7.Eq()), Track<int, string>(l, "then3", _ => "sdfgg"))
+                .Case(Track(l, "case4", 2.Eq()), Track<int, string>(l, "then4", _ => "awert"))
                 .End;
             Assert.AreEqual("whatever", res4);
             Assert.IsTrue(l.SequenceEqual(Seq.Of("case1", "case2", "case3", "case4", "default")));
@@ -114,7 +112,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("b", res(3));
         }
 
-        private Func<A, B> Track<A, B>(List<String> l, String msg, Func<A, B> f)
+        private static Func<A, B> Track<A, B>(List<String> l, String msg, Func<A, B> f)
         {
             return x => {
                 l.Add(msg);

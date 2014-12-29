@@ -9,10 +9,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void LensComposition()
         {
-            var fn = Lens.From<Person>().Of(x => x.FirstName, (x, y) => new Person(y, x.LastName, x.Address));
-            var ln = Lens.From<Person>().Of(x => x.LastName, (x, y) => new Person(x.FirstName, y, x.Address));
             var addr = Lens.From<Person>().Of(x => x.Address, (x, y) => new Person(x.FirstName, x.LastName, y));
-            var st = Lens.From<Address>().Of(x => x.Street, (x, y) => new Address(y, x.City));
             var ct = Lens.From<Address>().Of(x => x.City, (x, y) => new Address(x.Street, y));
 
             var addrCt = addr.Compose(ct);
@@ -29,8 +26,6 @@ namespace ZedSharp.UnitTests
         {
             var fn = Lens.Gen<Person, String>("FirstName");
             var ln = Lens.Gen<Person, String>("LastName");
-            var addr = Lens.Gen<Person, Address>("Address");
-            var st = Lens.Gen<Address, String>("Street");
             var ct = Lens.Gen<Address, String>("City");
 
             var address = new Address("123 Fake Street", "Anytown");
@@ -50,8 +45,6 @@ namespace ZedSharp.UnitTests
         {
             var fn = Lens.From<Person>().Gen(x => x.FirstName);
             var ln = Lens.From<Person>().Gen(x => x.LastName);
-            var addr = Lens.From<Person>().Gen(x => x.Address);
-            var st = Lens.From<Address>().Gen(x => x.Street);
             var ct = Lens.From<Address>().Gen(x => x.City);
 
             var address = new Address("123 Fake Street", "Anytown");

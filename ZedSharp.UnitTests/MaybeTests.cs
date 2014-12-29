@@ -11,7 +11,7 @@ namespace ZedSharp.UnitTests
         public void MaybeWrappers()
         {
             String ns = null;
-            String s = "";
+            const String s = "";
             AssertIsNone(Maybe.Of(ns));
             AssertIsSome(Maybe.Of(s));
             AssertIsNone(Maybe<String>.None);

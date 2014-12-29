@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,17 +17,24 @@ namespace ZedSharp
 
         public static void That<A, B>(Func<A, B, bool> f, IEnumerable<A> testData0, IEnumerable<B> testData1)
         {
-            foreach (var arg0 in testData0)
-                foreach (var arg1 in testData1)
+            var list0 = testData0.ToList();
+            var list1 = testData1.ToList();
+
+            foreach (var arg0 in list0)
+                foreach (var arg1 in list1)
                     if (! f(arg0, arg1))
                         throw new AssertFailedException("Property refuted with (" + arg0 + ", " + arg1 + ")");
         }
 
         public static void That<A, B, C>(Func<A, B, C, bool> f, IEnumerable<A> testData0, IEnumerable<B> testData1, IEnumerable<C> testData2)
         {
-            foreach (var arg0 in testData0)
-                foreach (var arg1 in testData1)
-                    foreach (var arg2 in testData2)
+            var list0 = testData0.ToList();
+            var list1 = testData1.ToList();
+            var list2 = testData2.ToList();
+
+            foreach (var arg0 in list0)
+                foreach (var arg1 in list1)
+                    foreach (var arg2 in list2)
                         if (! f(arg0, arg1, arg2))
                             throw new AssertFailedException("Property refuted with (" + arg0 + ", " + arg1 + ", " + arg2 + ")");
         }
@@ -48,7 +56,8 @@ namespace ZedSharp
 
         public static void ReflexiveEquality<A>(IEnumerable<A> testData0)
         {
-            That((A x, A y) => Equals(x, y) == Equals(y, x), testData0, testData0);
+            var list0 = testData0.ToList();
+            That((x, y) => Equals(x, y) == Equals(y, x), list0, list0);
         }
 
         public static void ReflexiveEquality<A>()
@@ -59,27 +68,30 @@ namespace ZedSharp
 
         public static void Comparable<A>(IEnumerable<A> testData0) where A : IComparable<A>
         {
-            That((A x, A y) => x.CompareTo(y) == -(y.CompareTo(x)), testData0, testData0);
+            var list0 = testData0.ToList();
+            That((x, y) => x.CompareTo(y) == -(y.CompareTo(x)), list0, list0);
         }
 
         public static void CompareOperators<A>(IEnumerable<A> testData0)
         {
-            That((A x, A y) =>
+            var list0 = testData0.ToList();
+            That((x, y) =>
             {
                 dynamic dx = x;
                 dynamic dy = y;
                 return (dx > dy) == !(dx <= dy) && (dx < dy) == !(dx >= dy);
-            }, testData0, testData0);
+            }, list0, list0);
         }
 
         private static int Hash<A>(A x)
         {
-            return x == null ? 0 : x.GetHashCode();
+            return x.IsNull() ? 0 : x.GetHashCode();
         }
 
         public static void EqualsAndHashCode<A>(IEnumerable<A> testData0)
         {
-            That((A x, A y) => Equals(x, y).Implies(Hash(x) == Hash(y)), testData0, testData0);
+            var list0 = testData0.ToList();
+            That((x, y) => Equals(x, y).Implies(Hash(x) == Hash(y)), list0, list0);
         }
     }
 }
