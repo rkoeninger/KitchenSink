@@ -59,7 +59,7 @@ namespace ZedSharp
 
         public T GetOrThrow<T>(String item) where T : class
         {
-            return Get<T>().OrThrow("No dependency registered for " + item);
+            return Get<T>().OrElseThrow("No dependency registered for " + item);
         }
 
         public T GetOrThrow<T>() where T : class
