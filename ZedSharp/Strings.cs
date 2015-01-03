@@ -85,6 +85,11 @@ namespace ZedSharp
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x);
         }
 
+        public static String ToCurrencyString(this decimal x)
+        {
+            return String.Format("{0:c}", x);
+        }
+
         public static IEnumerable<String> TrimAll(this IEnumerable<String> seq)
         {
             return seq.Where(IsNotBlank).Select(x => x.Trim());
