@@ -39,11 +39,35 @@ namespace ZedSharp
 
         public static readonly Func<Object, int> Hash = x => x == null ? 0 : x.GetHashCode();
 
-        public static readonly Func<Object, String> Show = x => x == null ? "" : x.ToString();
+        public static readonly Func<Object, String> Str = x => x == null ? "" : x.ToString();
 
         public static A Id<A>(A val)
         {
             return val;
+        }
+
+        /// <summary>Curried less than comparison.</summary>
+        public static Func<A, bool> Lt<A>(A x) where A : IComparable<A>
+        {
+            return y => x.CompareTo(y) < 0;
+        }
+        
+        /// <summary>Curried less than or equal to comparison.</summary>
+        public static Func<A, bool> LtEq<A>(A x) where A : IComparable<A>
+        {
+            return y => x.CompareTo(y) <= 0;
+        }
+        
+        /// <summary>Curried greater than comparison.</summary>
+        public static Func<A, bool> Gt<A>(A x) where A : IComparable<A>
+        {
+            return y => x.CompareTo(y) > 0;
+        }
+        
+        /// <summary>Curried greater than or equal to comparison.</summary>
+        public static Func<A, bool> GtEq<A>(A x) where A : IComparable<A>
+        {
+            return y => x.CompareTo(y) >= 0;
         }
     }
 }
