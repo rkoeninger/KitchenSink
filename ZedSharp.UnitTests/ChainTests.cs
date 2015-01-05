@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ZedSharp.UnitTests
@@ -6,22 +7,22 @@ namespace ZedSharp.UnitTests
     [TestClass]
     public class ChainTests
     {
-        [TestMethod]
-        public void ChainEquality()
+        private static IEnumerable<Chain<int>> Chains()
         {
-            Assert.IsTrue(Chain.Of(1, 2, 3) == Chain.Of(1, 2, 3));
-            Assert.IsTrue(default(Chain<int>) == Chain.Of<int>());
+            yield return default(Chain<int>);
+            yield return Chain.Of<int>();
+
+            foreach (var len in Seq.Forever(() => Rand.Int(32)).Take(32))
+                yield return Chain.Of(Rand.Ints().Take(len));
         }
 
         [TestMethod]
-        public void ChainComparison()
+        public void ChainProperties()
         {
-            Assert.IsTrue(Chain.Compare(Chain.Of(1, 2, 3), Chain.Of(1, 2, 3)) == 0);
-            Assert.IsTrue(Chain.Compare(Chain.Of<int>(), Chain.Of<int>()) == 0);
-            Assert.IsTrue(Chain.Compare(Chain.Of(1, 2), Chain.Of(1, 2, 3)) < 0);
-            Assert.IsTrue(Chain.Compare(Chain.Of(1, 2), Chain.Of<int>()) > 0);
-            Assert.IsTrue(Chain.Compare(Chain.Of(7, 3, 5), Chain.Of(7, 4, 3)) < 0);
-            Assert.IsTrue(Chain.Compare(default(Chain<String>), Chain.Of("hi")) < 0);
+            Check.EqualsAndHashCode(Chains());
+            Check.ReflexiveEquality(Chains());
+            Check.That((x, y) => Equals(x, y).Implies(Chain.Compare(x, y) == 0), Chains(), Chains());
+            Check.That((x, y) => Chain.Compare(y, x) == -Chain.Compare(x, y), Chains(), Chains());
         }
     }
 }
