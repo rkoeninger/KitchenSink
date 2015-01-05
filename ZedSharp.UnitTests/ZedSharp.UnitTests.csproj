@@ -67,6 +67,7 @@
     <Compile Include="ChainTests.cs" />
     <Compile Include="GenericMethodTests.cs" />
     <Compile Include="CheckTests.cs" />
+    <Compile Include="TypeTreeTests.cs" />
     <Compile Include="ValidationTests.cs" />
     <Compile Include="XmlTests.cs" />
   </ItemGroup>

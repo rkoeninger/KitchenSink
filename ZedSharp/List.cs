@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ZedSharp
@@ -27,9 +28,9 @@ namespace ZedSharp
             return list.Count > 0;
         }
 
-        public static IEnumerable<int> Indicies<A>(this IList<A> seq)
+        public static IEnumerable<int> Indicies<A>(this IList<A> list)
         {
-            return Enumerable.Range(0, seq.Count);
+            return Enumerable.Range(0, list.Count);
         }
     }
 }

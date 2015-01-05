@@ -101,6 +101,7 @@
       <DependentUpon>Tuples.tt</DependentUpon>
     </Compile>
     <Compile Include="Maybe.cs" />
+    <Compile Include="TypeTree.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="Validation.cs" />
     <Compile Include="Void.cs" />
