@@ -69,5 +69,25 @@ namespace ZedSharp
         {
             Error(() => Compile(source, assemblies), new AssertFailedException("Compile should have failed"));
         }
+
+        /// <summary>Asserts that the actual maybe has a value and the value is equal to the expected value.</summary>
+        public static void Some<A>(A expected, Maybe<A> actual)
+        {
+            Assert.AreEqual(Maybe.Some(expected), actual);
+        }
+
+        /// <summary>Asserts that the given maybe has a value.</summary>
+        public static void Some<A>(Maybe<A> maybe)
+        {
+            if (! maybe.HasValue)
+                throw new AssertFailedException("Maybe was supposed to have a value");
+        }
+
+        /// <summary>Asserts that the given maybe does not have a value.</summary>
+        public static void None<A>(Maybe<A> maybe)
+        {
+            if (maybe.HasValue)
+                throw new AssertFailedException("Maybe was not supposed to have a value, but does: " + maybe);
+        }
     }
 }

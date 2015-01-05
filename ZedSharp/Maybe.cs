@@ -19,7 +19,7 @@ namespace ZedSharp
 
         public static Maybe<A> Some<A>(A val)
         {
-            if (val.IsNotNull())
+            if (val.IsNull())
                 throw new ArgumentNullException("Can't create Maybe.Some<" + typeof(A) + "> with null value");
 
             return new Maybe<A>(val);
@@ -81,7 +81,18 @@ namespace ZedSharp
 
         public static Maybe<A> FirstMaybe<A>(this IEnumerable<A> seq)
         {
-            return Try(seq.First);
+            foreach (var item in seq)
+                return Some(item);
+
+            return Maybe<A>.None;
+        }
+
+        public static Maybe<A> FirstMaybe<A>(this IEnumerable<A> seq, Func<A, bool> predicate)
+        {
+            foreach (var item in seq.Where(predicate))
+                return Some(item);
+
+            return Maybe<A>.None;
         }
 
         public static Maybe<A> LastMaybe<A>(this IEnumerable<A> seq)
@@ -112,6 +123,16 @@ namespace ZedSharp
         public static IEnumerable<B> SelectMany<A, B>(this IEnumerable<A> seq, Func<A, Maybe<B>> f)
         {
             return seq.Select(f).Flatten();
+        }
+
+        public static Maybe<C> Join<A, B, C>(this Maybe<A> outer, Maybe<B> inner, Func<A, B, C> resultSelector)
+        {
+            return outer.Join(inner, _ => 0, _ => 0, resultSelector, EqualityComparer<int>.Default);
+        }
+
+        public static Maybe<C> Join<A, B, C, K>(this Maybe<A> outer, Maybe<B> inner, Func<A, K> outerKeySelector, Func<B, K> innerKeySelector, Func<A, B, C> resultSelector)
+        {
+            return outer.Join(inner, outerKeySelector, innerKeySelector, resultSelector, EqualityComparer<K>.Default);
         }
 
         public static Maybe<IEnumerable<A>> Sequence<A>(this IEnumerable<Maybe<A>> seq)
@@ -242,6 +263,16 @@ namespace ZedSharp
             return x.OrElse(y);
         }
 
+        public static bool operator ==(Maybe<A> x, Maybe<A> y)
+        {
+            return Equals(x, y);
+        }
+
+        public static bool operator !=(Maybe<A> x, Maybe<A> y)
+        {
+            return !Equals(x, y);
+        }
+
         internal Maybe(A val) : this()
         {
             Value = val;
@@ -279,16 +310,6 @@ namespace ZedSharp
             return HasValue ? Maybe.If(Value, f) : this;
         }
 
-        public Maybe<C> Join<B, C>(Maybe<B> inner, Func<A, B, C> resultSelector)
-        {
-            return Join(inner, _ => 0, _ => 0, resultSelector, EqualityComparer<int>.Default);
-        }
-
-        public Maybe<C> Join<B, C, K>(Maybe<B> inner, Func<A, K> outerKeySelector, Func<B, K> innerKeySelector, Func<A, B, C> resultSelector)
-        {
-            return Join(inner, outerKeySelector, innerKeySelector, resultSelector, EqualityComparer<K>.Default);
-        }
-
         public Maybe<C> Join<B, C, K>(Maybe<B> inner, Func<A, K> outerKeySelector, Func<B, K> innerKeySelector, Func<A, B, C> resultSelector, IEqualityComparer<K> comparer)
         {
             return HasValue && inner.HasValue && comparer.Equals(outerKeySelector(Value), innerKeySelector(inner.Value))
@@ -296,7 +317,7 @@ namespace ZedSharp
                 : Maybe<C>.None;
         }
 
-        /// <summary>Attempts cast, returning Some or None.</summary>
+        /// <summary>Attempts cast. Propogates None and returns None if cast fails.</summary>
         public Maybe<B> Cast<B>()
         {
             return Maybe.If(Value, x => x is B, x => (B) (Object) x);
@@ -334,12 +355,12 @@ namespace ZedSharp
             return HasValue ? this : Maybe.Try(f);
         }
 
-        public Maybe<A> OrEval<B>(B key, Func<B, Maybe<A>> f)
+        public Maybe<A> OrEvalMany<B>(B key, Func<B, Maybe<A>> f)
         {
             return HasValue ? this : f(key);
         }
 
-        public Maybe<A> OrEval(Func<Maybe<A>> f)
+        public Maybe<A> OrEvalMany(Func<Maybe<A>> f)
         {
             return HasValue ? this : Maybe.Try(f).Flatten();
         }

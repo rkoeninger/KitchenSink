@@ -9,32 +9,29 @@ namespace ZedSharp.UnitTests
         public void DepsLookup()
         {
             var x = new WS();
-            var y = new DbRW();
+            var y = new DbW();
             var z = new DbR();
             var w = new UI();
 
-            var deps = Deps.Of(x, y, z, w);
+            var deps = new Deps();
+            deps.Set<IWebService>(x);
+            deps.Set<IDatabaseCommand>(y);
+            deps.Set<IDatabaseQuery>(z);
+            deps.Set<IUserInterface>(w);
 
-            Assert.AreEqual(y, deps.GetOrThrow<IDatabaseQuery>());
-            Assert.AreEqual(y, deps.GetOrThrow<IDatabaseCommand>());
-            Assert.AreEqual(w, deps.GetOrThrow<IUserInterface>());
-            Assert.AreEqual(x, deps.GetOrThrow<IWebService>());
+            Expect.Some(z, deps.Get<IDatabaseQuery>());
+            Expect.Some(y, deps.Get<IDatabaseCommand>());
+            Expect.Some(w, deps.Get<IUserInterface>());
+            Expect.Some(x, deps.Get<IWebService>());
         }
     }
 
-    class DbRW : IDatabaseQuery, IDatabaseCommand { }
-
+    class DbW : IDatabaseCommand { }
     class DbR : IDatabaseQuery { }
-
     class UI : IUserInterface { }
-
     class WS : IWebService { }
-
     public interface IDatabaseQuery { }
-
     public interface IDatabaseCommand { }
-
     public interface IUserInterface { }
-
     public interface IWebService { }
 }

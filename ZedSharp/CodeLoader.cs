@@ -26,7 +26,9 @@ namespace ZedSharp
 
         public void Load()
         {
+            // ReSharper disable UnusedVariable
             var x = LazyLoader.Value;
+            // ReSharper restore UnusedVariable
         }
 
         private T Compile()

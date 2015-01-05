@@ -10,20 +10,20 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void StringSeqTest()
         {
-            var s = "comma, separated, string with multiple, comma, separated, parts";
-            var seq = s.SplitSeq(",");
-            Assert.AreEqual(6, seq.Count());
-            Assert.IsTrue(seq.TrimAll().SequenceEqual(Seq.Of("comma", "separated", "string with multiple", "comma", "separated", "parts")));
+            const string s = "comma, separated, string with multiple, comma, separated, parts";
+            var splits = s.SplitSeq(",").ToList();
+            Assert.AreEqual(6, splits.Count);
+            Assert.IsTrue(splits.TrimAll().SequenceEqual(Seq.Of("comma", "separated", "string with multiple", "comma", "separated", "parts")));
         }
 
         [TestMethod]
         public void StringRegexSeq()
         {
             var usPhoneRegex = new Regex(@"(\x28?\d{3}\x29?[\x20\x2D\x2E])?(\d{3})[\x20\x2D\x2E](\d{4})");
-            var s = "some text that (123) 555-1234 contains some U.S. phone 432.6545 numbers of varying 654 234 1233 formats";
-            var seq = s.SplitSeq(usPhoneRegex);
-            Assert.AreEqual(3, seq.Count());
-            Assert.IsTrue(seq.SequenceEqual(Seq.Of("(123) 555-1234", "432.6545", "654 234 1233")));
+            const string s = "some text that (123) 555-1234 contains some U.S. phone 432.6545 numbers of varying 654 234 1233 formats";
+            var splits = s.SplitSeq(usPhoneRegex).ToList();
+            Assert.AreEqual(3, splits.Count);
+            Assert.IsTrue(splits.SequenceEqual(Seq.Of("(123) 555-1234", "432.6545", "654 234 1233")));
         }
 
         [TestMethod]

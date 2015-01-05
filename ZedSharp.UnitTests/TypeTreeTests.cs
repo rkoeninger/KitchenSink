@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 
 namespace ZedSharp.UnitTests
 {
@@ -19,14 +18,14 @@ namespace ZedSharp.UnitTests
             tree.Set<IRegular>(15);
             tree.Set<IEssential>(20);
 
-            Assert.AreEqual(1, tree.Get<Shape>());
-            Assert.AreEqual(6, tree.Get<Quad>());
-            Assert.AreEqual(1, tree.Get<Ellipse>());
-            Assert.AreEqual(11, tree.Get<Circle>());
-            Expect.Error<KeyNotFoundException>(() => tree.Get<Object>());
-            Expect.Error<KeyNotFoundException>(() => tree.Get<String>());
-            Assert.AreEqual(3, tree.Get<Rhombus>());
-            Assert.AreEqual(9, tree.Get<Equilateral>());
+            Expect.Some(1, tree.Get<Shape>());
+            Expect.Some(6, tree.Get<Quad>());
+            Expect.Some(1, tree.Get<Ellipse>());
+            Expect.Some(11, tree.Get<Circle>());
+            Expect.None(tree.Get<Object>());
+            Expect.None(tree.Get<String>());
+            Expect.Some(3, tree.Get<Rhombus>());
+            Expect.Some(9, tree.Get<Equilateral>());
         }
 
         public interface ISemiRegular { }

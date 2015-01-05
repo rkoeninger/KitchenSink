@@ -47,10 +47,10 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void CombinationsOfSet()
         {
-            var seq1 = Seq.Of(5, 6, 7, 8, 9);
+            var seq1 = Blob.Of(5, 6, 7, 8, 9);
             const int subsetSize = 3;
-            var combinations = seq1.Combinations(subsetSize);
-            var expectedCombinations = Seq.Of(
+            var combinations = seq1.Combinations(subsetSize).ToBlob();
+            var expectedCombinations = Blob.Of(
                 Seq.Of(5,6,7),
                 Seq.Of(5,6,8),
                 Seq.Of(5,6,9),
@@ -75,10 +75,10 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void PermutationsOfSet()
         {
-            var seq1 = Seq.Of(5, 6, 7, 8, 9);
+            var seq1 = Blob.Of(5, 6, 7, 8, 9);
             const int subsetSize = 2;
-            var permutations = seq1.Permutations(subsetSize);
-            var expectedPermutations = Seq.Of(
+            var permutations = seq1.Permutations(subsetSize).ToBlob();
+            var expectedPermutations = Blob.Of(
                 Seq.Of(5, 6),
                 Seq.Of(5, 7),
                 Seq.Of(5, 8),

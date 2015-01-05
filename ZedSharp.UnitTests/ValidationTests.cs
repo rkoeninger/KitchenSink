@@ -33,6 +33,8 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void ValidationPropertyChain()
         {
+            // Some of these verifications are purposely redundant to confirm that the expression destructuring process works
+            // ReSharper disable EqualExpressionComparison
             Assert.IsFalse(Verify.That(() => PersonA.Address.City));
             Assert.IsFalse(Verify.That(() => PersonB.Address.City));
             Assert.IsTrue(Verify.That(() => PersonC.Address.City));
@@ -42,6 +44,7 @@ namespace ZedSharp.UnitTests
             Assert.IsFalse(Verify.That(() => PersonA.Address.City == PersonA.Address.City));
             Assert.IsTrue(Verify.That(() => PersonB.Address.City.SkipVerify()));
             Assert.IsTrue(Verify.That(() => Person0.Address.City.NoVerify()));
+            // ReSharper restore EqualExpressionComparison
         }
 
         private static readonly Person Person0 = null;

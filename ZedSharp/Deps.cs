@@ -1,70 +1,48 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace ZedSharp
 {
-    /// <summary>
-    /// Mutable dependency collection builder.
-    /// </summary>
-    public class DepsBuilder
+    public class Deps
     {
-        public DepsBuilder()
+        public static Deps Of(params Object[] vals)
         {
-            Values = new List<Object>();
+            var deps = new Deps();
+
+            foreach (var val in vals)
+                deps.Tree.Set(val.GetType(), val);
+
+            return deps;
         }
 
-        private List<Object> Values { get; set; }
-
-        public DepsBuilder Add(Object val)
+        public Deps()
         {
-            Values.Add(val);
+            Tree = new TypeTree<Object>();
+        }
+
+        private readonly TypeTree<Object> Tree;
+
+        public Deps Set<T>(Object impl)
+        {
+            Tree.Set<T>(impl);
             return this;
         }
 
-        public Deps End()
-        {
-            try
-            {
-                return Deps.Of(Values);
-            }
-            finally
-            {
-                Values = null;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Immutable dependency dictionary.
-    /// </summary>
-    public struct Deps
-    {
-        public static Deps Of(params Object[] values)
-        {
-            return new Deps(values);
-        }
-
-        private Deps(IEnumerable<Object> values) : this()
-        {
-            Values = values.ToArray();
-        }
-
-        private Object[] Values { get; set; }
-
         public Maybe<T> Get<T>() where T : class
         {
-            return Maybe.Of(Values.FirstOrDefault(x => x is T) as T);
+            var t = typeof(T);
+            return Tree.Get(t)
+                .OrEvalMany(t, GetDefaultImpl)
+                .Cast<T>();
         }
 
-        public T GetOrThrow<T>(String item) where T : class
+        private static Maybe<Object> GetDefaultImpl(Type @interface)
         {
-            return Get<T>().OrElseThrow("No dependency registered for " + item);
-        }
-
-        public T GetOrThrow<T>() where T : class
-        {
-            return GetOrThrow<T>("type " + typeof(T).Name);
+            return @interface.GetAttribute<DefaultImplementationAttribute>()
+                .Select(x => x.ImplementingClass)
+                .OrEvalMany(() =>
+                    Types.All(t => t.GetAttribute<DefaultImplementationOfAttribute>(a => a.ImplementedInterface == @interface).HasValue)
+                    .SingleMaybe())
+                .Select(Activator.CreateInstance);
         }
     }
 }

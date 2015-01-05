@@ -51,6 +51,8 @@
     <Compile Include="Collections.cs" />
     <Compile Include="Dates.cs" />
     <Compile Include="DateTimeRange.cs" />
+    <Compile Include="DefaultImplementationAttribute.cs" />
+    <Compile Include="DefaultImplementationOfAttribute.cs" />
     <Compile Include="Deps.cs" />
     <Compile Include="Funcs.cs" />
     <Compile Include="GenericMethod.cs">
@@ -101,6 +103,7 @@
       <DependentUpon>Tuples.tt</DependentUpon>
     </Compile>
     <Compile Include="Maybe.cs" />
+    <Compile Include="Types.cs" />
     <Compile Include="TypeTree.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="Validation.cs" />
