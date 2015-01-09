@@ -90,6 +90,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sample.cs" />
     <Compile Include="Seq.cs" />
+    <Compile Include="Streams.cs" />
     <Compile Include="Strings.cs" />
     <Compile Include="Table.cs">
       <AutoGen>True</AutoGen>

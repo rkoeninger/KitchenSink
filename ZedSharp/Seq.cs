@@ -11,6 +11,22 @@ namespace ZedSharp
             return vals;
         }
 
+        public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, A seperator)
+        {
+            var itr = seq.GetEnumerator();
+
+            if (! itr.MoveNext())
+                yield break;
+
+            yield return itr.Current;
+
+            while (itr.MoveNext())
+            {
+                yield return seperator;
+                yield return itr.Current;
+            }
+        }
+
         /// <summary>Infinitely enumerates sequence.</summary>
         public static IEnumerable<A> Cycle<A>(this IEnumerable<A> seq)
         {
