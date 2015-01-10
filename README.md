@@ -1,30 +1,54 @@
 # zed-sharp
 
-A library for robust programming in C#/.Net
+A library for multi-paradigm programming in C#/.Net
 
-### Maybe, Validation, Lens
+### Basic Data Types
 
-Fundamental types for handling missing data (instead of using null), potentially invalid data and updating persistent data structures.
+  * Maybe - may or may not have a value and maps functions over a hypothetical value
+  * Unit - has only one meaningully unique value
+  * Void - has no values
+  * Idiot - every value is unique
 
-### Match
+### Function Composition
 
-Value matching construct that can be extended with additional types and extension methods.
+  * Match - extensible, immutable control-flow structure that branches on arbitrary predicates
+  * MultiMethod - mutable set of method overloads that are dispatched on the types of multiple arguments
+  * GenericMethod - mutable set of method overloads that are dispatched on arbitrary predicates
 
-### Table
+### Pure Functional Programming Facilities
 
-A relational data structure that supports Select and Where operations and composable Projections and Conditions.
+  * IO - a type for modeling and composing I/O and side effects
+  * Lens - composable get and set pair for immutable types
 
-### Natural, Tuple extensions
+### Testing and Validation
 
-Use of Tuples as static-length heterogenious lists. A series of singleton classes to model natural numbers for compile-time checking and abstraction of Tuple element access.
+  * Expect - testing for exceptions and invalid syntax; companion to Assert
+  * Check - property based testing
+  * Verify - structural examination of data
+  * Validation - appies a series of validation predicates to a value, collecting exceptions
+  * Rand - produces random test data
+  * Sample - provides common and edge-case test values
+  * All - enumerates all values of certain types
 
-### Zisp
+### Relational Data Structures
 
-An external DSL for writing Expression Trees based on Lisp syntax. Makes writing configuration code much easier.
+  * Table - a list/set of Rows
+  * Row - a typed series of named values in a Table
+  * Column - a typed, named list/set of values in a Table
+  * Projection - a conversion from one Table to another
 
-## Techniques
+### Improved Date and Time Facilities
 
-Built using:
-* T4 templates
-* Use of classes to model typestates
-* Type inference for Zisp
+  * ZonedDateTime - DateTime with explicit TimeZoneInfo
+  * DateTimeRange - a span of DateTimes that describes an entire day instead of midight the morning of that day
+  * Clock - overridable access to the system clock
+
+### Dependency Injection
+
+  * __DefaultImplementation__Attribute - placed on an interface to indicate the default implementation so an IoC container doesn't have to explicitly configured with it
+  * __DefaultImplementationOf__Attribute - placed on a class to indicate that it is the default implementation of the specified interface
+  * ConsoleDI, FileSystemDI - interfaces to Console and FileSystem that can be mocked out
+
+### Crazy XML Building Facility Based on Operator Overloading
+
+  * This was probably a mistake
