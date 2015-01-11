@@ -6,7 +6,7 @@ A library for multi-paradigm programming in C#/.Net
 
   * Maybe - may or may not have a value and maps functions over a hypothetical value
   * Unit - has only one meaningully unique value
-  * Void - has no values
+  * Void - no value can be constructed; is always null
   * Idiot - every value is unique
 
 ### Function Composition
@@ -45,10 +45,12 @@ A library for multi-paradigm programming in C#/.Net
 
 ### Dependency Injection
 
-  * __DefaultImplementation__Attribute - placed on an interface to indicate the default implementation so an IoC container doesn't have to explicitly configured with it
-  * __DefaultImplementationOf__Attribute - placed on a class to indicate that it is the default implementation of the specified interface
+  * DefaultImplementationAttribute - placed on an interface to indicate the default implementation so an IoC container doesn't have to explicitly configured with it
+  * DefaultImplementationOfAttribute - placed on a class to indicate that it is the default implementation of the specified interface
+  * Deps - a basic IoC container that uses the above attributes
   * ConsoleDI, FileSystemDI - interfaces to Console and FileSystem that can be mocked out
 
 ### Crazy XML Building Facility Based on Operator Overloading
 
   * This was probably a mistake
+  * Uses overloaded `<`, `>`, `<=` and `>=` operators to build XML
