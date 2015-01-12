@@ -55,7 +55,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>GenericMethod.tt</DependentUpon>
     </Compile>
-    <Compile Include="Idiot.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="Lens.cs" />
     <Compile Include="Month.cs" />
