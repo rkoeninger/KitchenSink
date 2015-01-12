@@ -48,9 +48,25 @@ A library for multi-paradigm programming in C#/.Net
   * DefaultImplementationAttribute - placed on an interface to indicate the default implementation so an IoC container doesn't have to explicitly configured with it
   * DefaultImplementationOfAttribute - placed on a class to indicate that it is the default implementation of the specified interface
   * Deps - a basic IoC container that uses the above attributes
-  * ConsoleDI, FileSystemDI - interfaces to Console and FileSystem that can be mocked out
+  * Mockable interfaces to common components: IConsole, IClock, IFileSystem
+  * Standard "live" implementations of those interfaces that pass-through to Console, DateTime, File, Directory, etc.
+  * Useful mock implementations of those interfaces like ScriptedConsole, StoppedClock and VirtualFileSystem
 
 ### Crazy XML Building Facility Based on Operator Overloading
 
-  * This was probably a mistake
+  * This was clearly a mistake
+  * I am so sorry
   * Uses overloaded `<`, `>`, `<=` and `>=` operators to build XML
+  * Lets you do this:
+
+```csharp
+Xml.Doc < "catalog"
+    < "book" >= "id" <= "bk101"
+        < "author" <= "Gambardella, Matthew"
+        < "title" <= "XML Developer's Guide"
+        < "price" <= "44.95" > Xml.End
+    < "book" >= "id" <= "bk102"
+        < "author" <= "Ralls, Kim"
+        < "title" <= "Midnight Rain"
+        < "price" <= "5.95" > Xml.EndDoc
+```
