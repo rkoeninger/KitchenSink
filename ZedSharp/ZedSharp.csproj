@@ -51,9 +51,7 @@
     <Compile Include="Collections.cs" />
     <Compile Include="Dates.cs" />
     <Compile Include="DateTimeRange.cs" />
-    <Compile Include="DefaultImplementationAttribute.cs" />
-    <Compile Include="DefaultImplementationOfAttribute.cs" />
-    <Compile Include="Deps.cs" />
+    <Compile Include="Needs.cs" />
     <Compile Include="Funcs.cs" />
     <Compile Include="GenericMethod.cs">
       <AutoGen>True</AutoGen>

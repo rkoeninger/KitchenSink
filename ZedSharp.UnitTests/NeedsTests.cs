@@ -3,7 +3,7 @@
 namespace ZedSharp.UnitTests
 {
     [TestClass]
-    public class DepsTests
+    public class NeedsTests
     {
         [TestMethod]
         public void DepsLookup()
@@ -13,7 +13,7 @@ namespace ZedSharp.UnitTests
             var z = new DbR();
             var w = new UI();
 
-            var deps = new Deps();
+            var deps = new Needs();
             deps.Set<IWebService>(x);
             deps.Set<IDatabaseCommand>(y);
             deps.Set<IDatabaseQuery>(z);

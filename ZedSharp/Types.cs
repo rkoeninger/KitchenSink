@@ -31,5 +31,15 @@ namespace ZedSharp
         {
             return type.GetCustomAttributes<A>().FirstMaybe(predicate);
         }
+
+        public static bool HasAttribute<A>(this Type type) where A : Attribute
+        {
+            return type.GetAttribute<A>().HasValue;
+        }
+
+        public static bool HasAttribute<A>(this Type type, Func<A, bool> predicate) where A : Attribute
+        {
+            return type.GetAttribute(predicate).HasValue;
+        }
     }
 }

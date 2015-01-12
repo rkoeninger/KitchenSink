@@ -40,7 +40,7 @@ namespace ZedSharp
             }
         }
 
-        public static readonly Deps StandardDeps = Deps.Of(
+        public static readonly Needs StandardDeps = Needs.Of(
             StandardConsole,
             StandardFileSystem);
     }
