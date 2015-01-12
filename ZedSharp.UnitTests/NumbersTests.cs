@@ -54,10 +54,10 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void CombinationsOfSet()
         {
-            var seq1 = Blob.Of(5, 6, 7, 8, 9);
+            var seq1 = ReadOnly.Collection(5, 6, 7, 8, 9);
             const int subsetSize = 3;
-            var combinations = seq1.Combinations(subsetSize).ToBlob();
-            var expectedCombinations = Blob.Of(
+            var combinations = seq1.Combinations(subsetSize).ToList();
+            var expectedCombinations = ReadOnly.Collection(
                 Seq.Of(5,6,7),
                 Seq.Of(5,6,8),
                 Seq.Of(5,6,9),
@@ -70,8 +70,8 @@ namespace ZedSharp.UnitTests
                 Seq.Of(7,8,9)
             );
 
-            Assert.AreEqual(seq1.Count().Combinations(subsetSize), combinations.Count());
-            Assert.AreEqual(expectedCombinations.Count(), combinations.Count());
+            Assert.AreEqual(seq1.Count.Combinations(subsetSize), combinations.Count);
+            Assert.AreEqual(expectedCombinations.Count, combinations.Count);
 
             foreach (var expected in expectedCombinations)
             {
@@ -82,10 +82,10 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void PermutationsOfSet()
         {
-            var seq1 = Blob.Of(5, 6, 7, 8, 9);
+            var seq1 = ReadOnly.Collection(5, 6, 7, 8, 9);
             const int subsetSize = 2;
-            var permutations = seq1.Permutations(subsetSize).ToBlob();
-            var expectedPermutations = Blob.Of(
+            var permutations = seq1.Permutations(subsetSize).ToList();
+            var expectedPermutations = ReadOnly.Collection(
                 Seq.Of(5, 6),
                 Seq.Of(5, 7),
                 Seq.Of(5, 8),
@@ -108,8 +108,8 @@ namespace ZedSharp.UnitTests
                 Seq.Of(9, 8)
             );
 
-            Assert.AreEqual(seq1.Count().Permutations(subsetSize), permutations.Count());
-            Assert.AreEqual(expectedPermutations.Count(), permutations.Count());
+            Assert.AreEqual(seq1.Count.Permutations(subsetSize), permutations.Count);
+            Assert.AreEqual(expectedPermutations.Count, permutations.Count);
 
             foreach (var expected in expectedPermutations)
             {

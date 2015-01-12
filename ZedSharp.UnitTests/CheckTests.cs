@@ -28,7 +28,7 @@ namespace ZedSharp.UnitTests
                 1994.Sep(16),
                 2023.Aug(27)));
 
-            Check.EqualsAndHashCode(Seq.Forever(() => Rand.Ints().Take(Rand.Int(64)).ToBlob()).Take(16));
+            Check.EqualsAndHashCode(Seq.Forever(() => Rand.Ints().Take(Rand.Int(64))).Take(16));
         }
 
         [TestMethod]

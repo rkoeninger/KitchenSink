@@ -126,11 +126,6 @@ namespace ZedSharp
             return Global.Pick(vals);
         }
 
-        public static A Pick<A>(Blob<A> blob)
-        {
-            return Global.Pick(blob);
-        }
-
         public static A Pick<A>(IEnumerable<A> seq)
         {
             return Global.Pick(seq);
@@ -139,11 +134,6 @@ namespace ZedSharp
         public static A Pick<A>(this Random rand, params A[] vals)
         {
             return vals[rand.Next(vals.Length)];
-        }
-
-        public static A Pick<A>(this Random rand, Blob<A> blob)
-        {
-            return blob[rand.Next(blob.Length)];
         }
 
         public static A Pick<A>(this Random rand, IEnumerable<A> seq)

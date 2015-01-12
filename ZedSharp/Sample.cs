@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ZedSharp
 {
@@ -7,7 +8,7 @@ namespace ZedSharp
         private const int Imax = int.MaxValue;
         private const int Imin = int.MinValue;
 
-        public static readonly Blob<int> Ints = Blob.Of(
+        public static readonly IReadOnlyCollection<int> Ints = ReadOnly.Collection(
             0,
             Imax - 2, Imax - 1, Imax,
             Imin + 2, Imin + 1, Imin,
@@ -31,7 +32,7 @@ namespace ZedSharp
         private const double Dmax = double.MaxValue;
         private const double Dmin = double.MinValue;
 
-        public static readonly Blob<double> Doubles = Blob.Of(
+        public static readonly IReadOnlyCollection<double> Doubles = ReadOnly.Collection(
             double.NaN,
             double.PositiveInfinity,
             double.NegativeInfinity,
@@ -42,7 +43,7 @@ namespace ZedSharp
             Dmin, Dmin + Dep, Dmin + (Dep * 2)
         );
 
-        public static readonly Blob<String> TopLevelDomains = Blob.Of(
+        public static readonly IReadOnlyCollection<String> TopLevelDomains = ReadOnly.Collection(
             "com", "org", "net", "gov", "edu", "uk", "ca", "jp", "au", "de", "fr", "us"
         );
     }

@@ -63,8 +63,6 @@
     <Compile Include="NeedsTests.cs" />
     <Compile Include="MultiMethodTests.cs" />
     <Compile Include="NumbersTests.cs" />
-    <Compile Include="BlobTests.cs" />
-    <Compile Include="ChainTests.cs" />
     <Compile Include="GenericMethodTests.cs" />
     <Compile Include="CheckTests.cs" />
     <Compile Include="TypeTreeTests.cs" />

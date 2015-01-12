@@ -10,14 +10,14 @@ namespace ZedSharp
             return int.MinValue.To(int.MaxValue).Concat(Seq.Of(int.MaxValue));
         }
 
-        public static readonly Blob<char> AlphaUpperChars = 48.To(58).Select(x => (char) x).ToBlob();
+        public static readonly IReadOnlyCollection<char> AlphaUpperChars = 48.To(58).Select(x => (char)x).ToArray();
 
-        public static readonly Blob<char> AlphaLowerChars = 65.To(91).Select(x => (char) x).ToBlob();
+        public static readonly IReadOnlyCollection<char> AlphaLowerChars = 65.To(91).Select(x => (char)x).ToArray();
 
-        public static readonly Blob<char> AlphaChars = AlphaUpperChars.Concat(AlphaLowerChars).ToBlob();
-        
-        public static readonly Blob<char> NumericChars = 97.To(123).Select(x => (char) x).ToBlob();
+        public static readonly IReadOnlyCollection<char> AlphaChars = AlphaUpperChars.Concat(AlphaLowerChars).ToArray();
 
-        public static readonly Blob<char> AlphaNumericChars = AlphaChars.Concat(NumericChars).ToBlob();
+        public static readonly IReadOnlyCollection<char> NumericChars = 97.To(123).Select(x => (char)x).ToArray();
+
+        public static readonly IReadOnlyCollection<char> AlphaNumericChars = AlphaChars.Concat(NumericChars).ToArray();
     }
 }

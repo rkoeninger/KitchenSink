@@ -42,9 +42,7 @@
   <ItemGroup>
     <Compile Include="All.cs" />
     <Compile Include="AnArray.cs" />
-    <Compile Include="Blob.cs" />
     <Compile Include="Booleans.cs" />
-    <Compile Include="Chain.cs" />
     <Compile Include="Check.cs" />
     <Compile Include="Clock.cs" />
     <Compile Include="CodeLoader.cs" />

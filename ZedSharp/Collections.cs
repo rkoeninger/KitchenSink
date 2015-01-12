@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace ZedSharp
 {
@@ -98,6 +99,19 @@ namespace ZedSharp
                 yield return temp[j];
                 temp[j] = temp[i];
             }
+        }
+    }
+
+    public static class ReadOnly
+    {
+        public static IReadOnlyList<A> List<A>(params A[] values)
+        {
+            return new List<A>(values);
+        }
+
+        public static IReadOnlyCollection<A> Collection<A>(params A[] values)
+        {
+            return values;
         }
     }
 }
