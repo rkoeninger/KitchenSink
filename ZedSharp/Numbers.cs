@@ -18,22 +18,12 @@ namespace ZedSharp
 
         public static bool IsEven(this int x)
         {
-            return x % 2 == 0;
+            return (x & 1) == 0;
         }
 
         public static bool IsOdd(this int x)
         {
-            return x % 2 != 0;
-        }
-
-        public static Func<int, int> Plus(this int i)
-        {
-            return x => x + i;
-        }
-
-        public static Func<int, int> Times(this int i)
-        {
-            return x => x * i;
+            return (x & 1) != 0;
         }
 
         public static bool IsDivisibleBy(this int x, int y)

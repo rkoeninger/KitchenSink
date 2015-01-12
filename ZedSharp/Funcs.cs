@@ -96,6 +96,11 @@ namespace ZedSharp
             return (a, r) => g(f(a, r), r);
         }
 
+        public static Func<A, A, C> On<A, B, C>(this Func<B, B, C> combine, Func<A, B> selector)
+        {
+            return (x, y) => combine(selector(x), selector(y));
+        }
+
         public static Func<A, Func<B, C>> Curry<A, B, C>(this Func<A, B, C> f)
         {
             return a => b => f(a, b);

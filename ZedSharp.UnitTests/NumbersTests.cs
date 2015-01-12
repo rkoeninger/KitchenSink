@@ -7,6 +7,13 @@ namespace ZedSharp.UnitTests
     public class NumbersTests
     {
         [TestMethod]
+        public void Divisibility()
+        {
+            Check.That(x => x.IsEven() == ((x / 2) * 2 == x), Sample.Ints);
+            Check.That(x => x.IsOdd() == ((x / 2) * 2 != x), Sample.Ints);
+        }
+
+        [TestMethod]
         public void Factorial()
         {
             Assert.AreEqual(1, 0.Factorial());

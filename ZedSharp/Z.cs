@@ -69,5 +69,10 @@ namespace ZedSharp
         {
             return y => x.CompareTo(y) >= 0;
         }
+
+        public static Func<A, A, int> Compare<A>() where A : IComparable<A>
+        {
+            return (x, y) => x.CompareTo(y);
+        }
     }
 }
