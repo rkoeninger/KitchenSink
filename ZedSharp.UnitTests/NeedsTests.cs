@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ZedSharp.UnitTests
 {
@@ -6,7 +7,7 @@ namespace ZedSharp.UnitTests
     public class NeedsTests
     {
         [TestMethod]
-        public void DepsLookup()
+        public void NeedsLookup()
         {
             var x = new WS();
             var y = new DbW();
@@ -23,6 +24,15 @@ namespace ZedSharp.UnitTests
             Expect.Some(y, deps.Get<IDatabaseCommand>());
             Expect.Some(w, deps.Get<IUserInterface>());
             Expect.Some(x, deps.Get<IWebService>());
+        }
+
+        [TestMethod]
+        public void NeedsDefaultImplLookup()
+        {
+            var clock = new Needs().Get<IClock>().OrElseThrow(() => new Exception("No clock impl found"));
+
+            // internal protection level, so we can't refer to typeof(LiveClock)
+            Assert.IsTrue(clock.GetType().Name.Contains("LiveClock"));
         }
     }
 

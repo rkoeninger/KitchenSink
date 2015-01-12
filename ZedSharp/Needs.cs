@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace ZedSharp
 {
@@ -19,12 +18,7 @@ namespace ZedSharp
             return needs;
         }
 
-        public Needs()
-        {
-            Tree = new TypeTree<Object>();
-        }
-
-        private readonly TypeTree<Object> Tree;
+        private readonly TypeTree<Object> Tree = new TypeTree<Object>();
 
         public Needs Set<T>(Object impl)
         {
@@ -131,6 +125,7 @@ namespace ZedSharp
             LiveFileSystem);
     }
 
+    [DefaultImplementation(typeof(LiveConsole))]
     public interface IConsole
     {
         String ReadLine();
@@ -183,6 +178,7 @@ namespace ZedSharp
         }
     }
 
+    [DefaultImplementation(typeof(LiveFileSystem))]
     public interface IFileSystem
     {
         String ReadAllText(String path);
@@ -224,6 +220,7 @@ namespace ZedSharp
         }
     }
 
+    [DefaultImplementation(typeof(LiveClock))]
     public interface IClock
     {
         ZonedDateTime Now { get; }
