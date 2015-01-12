@@ -375,6 +375,22 @@ namespace ZedSharp
             return HasValue ? this : maybe;
         }
 
+        public Maybe<A> OrThrow(String message)
+        {
+            if (HasValue)
+                return this;
+
+            throw new Exception(message);
+        }
+
+        public Maybe<A> OrThrow(Exception e)
+        {
+            if (HasValue)
+                return this;
+
+            throw e;
+        }
+
         public Maybe<A> OrThrow(Func<Exception> f)
         {
             if (HasValue)
@@ -385,26 +401,26 @@ namespace ZedSharp
 
         public A OrElseThrow(String message)
         {
-            if (! HasValue)
-                throw new Exception(message);
+            if (HasValue)
+                return Value;
 
-            return Value;
+            throw new Exception(message);
         }
 
         public A OrElseThrow(Exception e)
         {
-            if (!HasValue)
-                throw e;
+            if (HasValue)
+                return Value;
 
-            return Value;
+            throw e;
         }
 
         public A OrElseThrow(Func<Exception> f)
         {
-            if (!HasValue)
-                throw f();
+            if (HasValue)
+                return Value;
 
-            return Value;
+            throw f();
         }
 
         public Maybe<A> ForEach(Action<A> f)

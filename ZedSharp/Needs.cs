@@ -8,14 +8,9 @@ namespace ZedSharp
     /// <summary>Simple IoC container that makes use of DefaultImplementation and DefaultImplementationOf attributes.</summary>
     public class Needs
     {
-        public static Needs Of(params Object[] vals)
+        public static Maybe<T> GetDeclaredImplementation<T>()
         {
-            var needs = new Needs();
-
-            foreach (var val in vals)
-                needs.Tree.Set(val.GetType(), val);
-
-            return needs;
+            return GetDefaultImpl(typeof (T)).Cast<T>();
         }
 
         private readonly TypeTree<Object> Tree = new TypeTree<Object>();
@@ -119,10 +114,10 @@ namespace ZedSharp
             return new ScriptedConsole(input, output);
         }
 
-        public static readonly Needs StandardNeeds = Needs.Of(
-            LiveClock,
-            LiveConsole,
-            LiveFileSystem);
+        public static readonly Needs StandardNeeds = new Needs()
+            .Set<IClock>(LiveClock)
+            .Set<IConsole>(LiveConsole)
+            .Set<IFileSystem>(LiveFileSystem);
     }
 
     [DefaultImplementation(typeof(LiveConsole))]
