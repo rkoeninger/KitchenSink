@@ -44,7 +44,6 @@
     <Compile Include="AnArray.cs" />
     <Compile Include="Booleans.cs" />
     <Compile Include="Check.cs" />
-    <Compile Include="Clock.cs" />
     <Compile Include="CodeLoader.cs" />
     <Compile Include="Collections.cs" />
     <Compile Include="Dates.cs" />
@@ -57,7 +56,6 @@
       <DependentUpon>GenericMethod.tt</DependentUpon>
     </Compile>
     <Compile Include="Idiot.cs" />
-    <Compile Include="Inject.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="KeyValuePair.cs" />
     <Compile Include="Lens.cs" />

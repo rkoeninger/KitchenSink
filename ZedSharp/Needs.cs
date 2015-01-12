@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace ZedSharp
 {
@@ -98,6 +101,154 @@ namespace ZedSharp
         public bool IsProperlyDefinedOn(Type implementingClass)
         {
             return implementingClass.IsAssignableTo(ImplementedInterface);
+        }
+    }
+
+    public static class Inject
+    {
+        public static readonly IConsole LiveConsole = new LiveConsole();
+        public static readonly IFileSystem LiveFileSystem = new LiveFileSystem();
+        public static readonly IClock LiveClock = new LiveClock();
+
+        public static IClock StoppedClock(ZonedDateTime time)
+        {
+            return new StoppedClock(time);
+        }
+
+        public static IFileSystem VirtualFileSystem()
+        {
+            return new VirtualFileSystem();
+        }
+
+        public static IConsole ScriptedConsole(StringReader input, StringWriter output = null)
+        {
+            return new ScriptedConsole(input, output);
+        }
+
+        public static readonly Needs StandardNeeds = Needs.Of(
+            LiveClock,
+            LiveConsole,
+            LiveFileSystem);
+    }
+
+    public interface IConsole
+    {
+        String ReadLine();
+        void WriteLine(Object s);
+        void WriteLine(String format, params Object[] args);
+    }
+
+    internal class LiveConsole : IConsole
+    {
+        public String ReadLine()
+        {
+            return Console.ReadLine();
+        }
+
+        public void WriteLine(Object s)
+        {
+            Console.WriteLine(s);
+        }
+
+        public void WriteLine(String format, params Object[] args)
+        {
+            Console.WriteLine(format, args);
+        }
+    }
+
+    internal class ScriptedConsole : IConsole
+    {
+        public ScriptedConsole(StringReader input, StringWriter output)
+        {
+            Input = input;
+            Output = output;
+        }
+
+        private readonly StringReader Input;
+        private readonly StringWriter Output;
+
+        public String ReadLine()
+        {
+            return Input.ReadLine();
+        }
+
+        public void WriteLine(Object s)
+        {
+            Output.WriteLine(s);
+        }
+
+        public void WriteLine(String format, params Object[] args)
+        {
+            Output.WriteLine(format, args);
+        }
+    }
+
+    public interface IFileSystem
+    {
+        String ReadAllText(String path);
+        void WriteAllText(String path, String contents);
+    }
+
+    internal class LiveFileSystem : IFileSystem
+    {
+        public String ReadAllText(String path)
+        {
+            return File.ReadAllText(path);
+        }
+
+        public void WriteAllText(String path, String contents)
+        {
+            File.WriteAllText(path, contents);
+        }
+    }
+
+    internal class VirtualFileSystem : IFileSystem
+    {
+        private readonly Dictionary<String, String> Files = new Dictionary<String, String>();
+
+        public String ReadAllText(String path)
+        {
+            try
+            {
+                return Files[path];
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new FileNotFoundException(path);
+            }
+        }
+
+        public void WriteAllText(String path, String contents)
+        {
+            Files[path] = contents;
+        }
+    }
+
+    public interface IClock
+    {
+        ZonedDateTime Now { get; }
+    }
+
+    internal class LiveClock : IClock
+    {
+        public ZonedDateTime Now
+        {
+            get { return new ZonedDateTime(DateTime.UtcNow, TimeZoneInfo.Utc); }
+        }
+    }
+
+    internal class StoppedClock : IClock
+    {
+        public StoppedClock(ZonedDateTime time)
+        {
+            Time = time;
+        }
+
+        private readonly ZonedDateTime Time;
+
+        public ZonedDateTime Now
+        {
+            get { return Time; }
         }
     }
 }
