@@ -11,44 +11,6 @@ namespace ZedSharp
         {
             return (A)Convert.ChangeType(obj, typeof(A));
         }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsLessThan<A>(this A val, A that) where A : IComparable<A>
-        {
-            return val.CompareTo(that) < 0;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsLessThanOrEquals<A>(this A val, A that) where A : IComparable<A>
-        {
-            return val.CompareTo(that) < 0;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsGreaterThan<A>(this A val, A that) where A : IComparable<A>
-        {
-            return val.CompareTo(that) > 0;
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsGreaterThanOrEquals<A>(this A val, A that) where A : IComparable<A>
-        {
-            return val.CompareTo(that) >= 0;
-        }
-        
-        /// <summary>Inclusive on lower bound, exclusive on upper bound.</summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsBetween<A>(this A val, A lower, A upper) where A : IComparable<A>
-        {
-            return val.IsGreaterThanOrEquals(lower) && val.IsLessThan(upper);
-        }
-        
-        /// <summary>Inclusive on lower bound, exclusive on upper bound.</summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsNotBetween<A>(this A val, A lower, A upper) where A : IComparable<A>
-        {
-            return ! val.IsBetween(lower, upper);
-        }
 
         public static bool IsIn<A>(this A val, params A[] vals)
         {

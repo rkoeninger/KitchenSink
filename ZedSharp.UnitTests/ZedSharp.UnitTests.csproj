@@ -67,6 +67,7 @@
     <Compile Include="CheckTests.cs" />
     <Compile Include="TypeTreeTests.cs" />
     <Compile Include="StreamTests.cs" />
+    <Compile Include="ComparableTests.cs" />
     <Compile Include="ValidationTests.cs" />
     <Compile Include="XmlTests.cs" />
   </ItemGroup>

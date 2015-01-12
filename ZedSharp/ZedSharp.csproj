@@ -46,6 +46,7 @@
     <Compile Include="Check.cs" />
     <Compile Include="CodeLoader.cs" />
     <Compile Include="Collections.cs" />
+    <Compile Include="Comparables.cs" />
     <Compile Include="Dates.cs" />
     <Compile Include="DateTimeRange.cs" />
     <Compile Include="Needs.cs" />

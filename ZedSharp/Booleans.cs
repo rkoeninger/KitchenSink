@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace ZedSharp
 {
@@ -28,6 +27,11 @@ namespace ZedSharp
         public static Func<A, bool> Or<A>(this Func<A, bool> f, Func<A, bool> g)
         {
             return x => f(x) || g(x);
+        }
+
+        public static Func<A, bool> Xor<A>(this Func<A, bool> f, Func<A, bool> g)
+        {
+            return x => f(x) ^ g(x);
         }
     }
 }
