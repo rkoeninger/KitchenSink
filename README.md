@@ -7,7 +7,6 @@ A library for multi-paradigm programming in C#/.Net
   * Maybe - may or may not have a value and maps functions over a hypothetical value
   * Unit - has only one meaningully unique value
   * Void - no value can be constructed; is always null
-  * Idiot - every value is unique
 
 ### Function Composition
 
