@@ -240,4 +240,37 @@ namespace ZedSharp
             return seq.ToArray();
         }
     }
+
+    public static class EnumeratorLinq
+    {
+        public static IEnumerator<B> Select<A, B>(this IEnumerator<A> e, Func<A, B> f)
+        {
+            while (e.MoveNext())
+                yield return f(e.Current);
+        }
+
+        public static IEnumerator<B> SelectMany<A, B>(this IEnumerator<A> e, Func<A, IEnumerator<B>> f)
+        {
+            while (e.MoveNext())
+            {
+                var ee = f(e.Current);
+
+                while (ee.MoveNext())
+                    yield return ee.Current;
+            }
+        }
+
+        public static IEnumerator<A> Where<A>(this IEnumerator<A> e, Func<A, bool> f)
+        {
+            while (e.MoveNext())
+                if (f(e.Current))
+                    yield return e.Current;
+        }
+
+        public static IEnumerable<A> ToEnumerable<A>(this IEnumerator<A> e)
+        {
+            while (e.MoveNext())
+                yield return e.Current;
+        }
+    }
 }
