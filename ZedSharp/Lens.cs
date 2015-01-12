@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ZedSharp
 {
@@ -14,6 +15,20 @@ namespace ZedSharp
         public static LensBuilder<A> From<A>()
         {
             return new LensBuilder<A>();
+        }
+
+        public static Lens<A, B> Gen<A, B>(Expression<Func<A, B>> expr)
+        {
+            if (! (expr.Body is MemberExpression))
+                throw new ArgumentException();
+
+            var mexpr = (MemberExpression) expr.Body;
+
+            if (mexpr.Member.MemberType != MemberTypes.Property)
+                throw new ArgumentException();
+
+            var propInfo = (PropertyInfo) mexpr.Member;
+            return Gen<A, B>(propInfo.Name);
         }
 
         public static Lens<A, B> Gen<A, B>(String propertyName)

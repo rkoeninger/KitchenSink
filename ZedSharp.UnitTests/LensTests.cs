@@ -41,11 +41,27 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
-        public void LensGenPartialSpec()
+        public void GenFromGetterExprUsingBuilder()
         {
             var fn = Lens.From<Person>().Gen(x => x.FirstName);
             var ln = Lens.From<Person>().Gen(x => x.LastName);
             var ct = Lens.From<Address>().Gen(x => x.City);
+
+            var address = new Address("123 Fake Street", "Anytown");
+            var person = new Person("John", "Doe", address);
+
+            Assert.AreEqual("Anytown", ct.Get(address));
+            Assert.AreEqual("Doe", ln.Get(person));
+            Assert.AreEqual("Someville", ct.Set(address, "Someville").City);
+            Assert.AreEqual("John", fn.Set(person, "John").FirstName);
+        }
+
+        [TestMethod]
+        public void GenFromGetterExpr()
+        {
+            var fn = Lens.Gen((Person x) => x.FirstName);
+            var ln = Lens.Gen((Person x) => x.LastName);
+            var ct = Lens.Gen((Address x) => x.City);
 
             var address = new Address("123 Fake Street", "Anytown");
             var person = new Person("John", "Doe", address);
