@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace ZedSharp
 {
@@ -32,36 +31,14 @@ namespace ZedSharp
             return ! IsIn(val, coll);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNull(this Object obj)
         {
             return obj == null;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNotNull(this Object obj)
         {
             return obj != null;
-        }
-
-        public static bool EqualsAny<A>(this A obj, params A[] vals)
-        {
-            return EqualsAny(obj, (IEnumerable<A>) vals);
-        }
-
-        public static bool EqualsAny<A>(this A obj, IEnumerable<A> vals)
-        {
-            return vals.Any(obj.Eq());
-        }
-
-        public static bool EqualsNone<A>(this A obj, params A[] vals)
-        {
-            return ! EqualsAny(obj, (IEnumerable<A>) vals);
-        }
-
-        public static bool EqualsNone<A>(this A obj, IEnumerable<A> vals)
-        {
-            return ! EqualsAny(obj, vals);
         }
 
         public static Func<A, bool> Eq<A>(this A x)
@@ -72,26 +49,6 @@ namespace ZedSharp
         public static Func<A, bool> Same<A>(this A x)
         {
             return y => ReferenceEquals(x, y);
-        }
-
-        public static bool Is<A>(this Object x)
-        {
-            return x is A;
-        }
-
-        public static Func<Object, bool> Is<A>()
-        {
-            return x => x is A;
-        }
-
-        public static A As<A>(this Object x)
-        {
-            return (A)x;
-        }
-
-        public static Func<Object, A> As<A>()
-        {
-            return x => (A)x;
         }
 
         public static B With<A, B>(this A x, Func<A, B> f)

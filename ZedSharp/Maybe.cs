@@ -39,7 +39,7 @@ namespace ZedSharp
 
         public static Maybe<A> If<A>(A val, Func<A, bool> f)
         {
-            return If(val, f, Funcs.Id);
+            return If(val, f, x => x);
         }
 
         public static Maybe<B> If<A, B>(A val, Func<A, bool> f, Func<A, B> convert)

@@ -36,6 +36,7 @@ namespace ZedSharp
             return x % y != 0;
         }
 
+        /// <summary>Inclusive on start value, exclusive on end value.</summary>
         public static IEnumerable<int> To(this int start, int end)
         {
             return Enumerable.Range(start, end - start);

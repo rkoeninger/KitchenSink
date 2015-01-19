@@ -88,7 +88,8 @@ namespace ZedSharp
 
         public Lens<A, B> Gen<B>(Expression<Func<A, B>> get)
         {
-            var propertyName = get.Body.As<MemberExpression>().Member.Name;
+            var mexpr = (MemberExpression) get.Body;
+            var propertyName = mexpr.Member.Name;
             return Lens.Gen<A, B>(propertyName);
         }
     }

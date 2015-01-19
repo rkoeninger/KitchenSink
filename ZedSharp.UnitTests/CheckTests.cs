@@ -22,11 +22,11 @@ namespace ZedSharp.UnitTests
                 Sample.Ints.Where(x => x != int.MinValue));
 
             Check.EqualsAndHashCode(Seq.Of(
-                2001.Apr(13),
-                1947.Feb(20),
-                2030.Nov(9),
-                1994.Sep(16),
-                2023.Aug(27)));
+                Date.On(2001, 4, 13),
+                Date.On(1947, 1, 20),
+                Date.On(2030, 11, 9),
+                Date.On(1994, 9, 16),
+                Date.On(2023, 8, 27)));
 
             Check.EqualsAndHashCode(Seq.Forever(() => Rand.Ints().Take(Rand.Int(64))).Take(16));
         }

@@ -8,22 +8,22 @@ namespace ZedSharp
     {
         public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq) where A : IComparable
         {
-            return seq.OrderBy(Funcs.Id);
+            return seq.OrderBy(x => x);
         }
 
         public static IEnumerable<A> SortDesc<A>(this IEnumerable<A> seq) where A : IComparable
         {
-            return seq.OrderByDescending(Funcs.Id);
+            return seq.OrderByDescending(x => x);
         }
 
         public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, IComparer<A> comp)
         {
-            return seq.OrderBy(Funcs.Id, comp);
+            return seq.OrderBy(x => x, comp);
         }
 
         public static IEnumerable<A> SortDesc<A>(this IEnumerable<A> seq, IComparer<A> comp)
         {
-            return seq.OrderByDescending(Funcs.Id, comp);
+            return seq.OrderByDescending(x => x, comp);
         }
 
         public static IEnumerable<IEnumerable<A>> Partition<A>(this IEnumerable<A> seq, int count)
@@ -46,12 +46,12 @@ namespace ZedSharp
 
         public static IEnumerable<List<A>> Partition<A>(this List<A> list, int count)
         {
-            return Partition(list.As<IEnumerable<A>>(), count).Select(x => x.ToList());
+            return Partition(list.AsEnumerable(), count).Select(x => x.ToList());
         }
 
         public static IEnumerable<A[]> Partition<A>(this A[] array, int count)
         {
-            return Partition(array.As<IEnumerable<A>>(), count).Select(x => x.ToArray());
+            return Partition(array.AsEnumerable(), count).Select(x => x.ToArray());
         }
 
         public static HashSet<A> Set<A>(params A[] vals)
