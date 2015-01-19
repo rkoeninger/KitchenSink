@@ -113,10 +113,5 @@ namespace ZedSharp
         {
             return dateTime.Date + time;
         }
-
-        public static ZonedDateTime In(this DateTime dateTime, TimeZoneInfo timeZoneInfo)
-        {
-            return new ZonedDateTime(dateTime, timeZoneInfo);
-        }
     }
 }

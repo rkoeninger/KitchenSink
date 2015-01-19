@@ -97,12 +97,6 @@ namespace ZedSharp
     {
         public static readonly IConsole LiveConsole = new LiveConsole();
         public static readonly IFileSystem LiveFileSystem = new LiveFileSystem();
-        public static readonly IClock LiveClock = new LiveClock();
-
-        public static IClock StoppedClock(ZonedDateTime time)
-        {
-            return new StoppedClock(time);
-        }
 
         public static IFileSystem VirtualFileSystem()
         {
@@ -115,7 +109,6 @@ namespace ZedSharp
         }
 
         public static readonly Needs StandardNeeds = new Needs()
-            .Set<IClock>(LiveClock)
             .Set<IConsole>(LiveConsole)
             .Set<IFileSystem>(LiveFileSystem);
     }
@@ -212,35 +205,6 @@ namespace ZedSharp
         public void WriteAllText(String path, String contents)
         {
             Files[path] = contents;
-        }
-    }
-
-    [DefaultImplementation(typeof(LiveClock))]
-    public interface IClock
-    {
-        ZonedDateTime Now { get; }
-    }
-
-    internal class LiveClock : IClock
-    {
-        public ZonedDateTime Now
-        {
-            get { return new ZonedDateTime(DateTime.UtcNow, TimeZoneInfo.Utc); }
-        }
-    }
-
-    internal class StoppedClock : IClock
-    {
-        public StoppedClock(ZonedDateTime time)
-        {
-            Time = time;
-        }
-
-        private readonly ZonedDateTime Time;
-
-        public ZonedDateTime Now
-        {
-            get { return Time; }
         }
     }
 }
