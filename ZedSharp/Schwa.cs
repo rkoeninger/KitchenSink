@@ -37,15 +37,15 @@ namespace ZedSharp
                 return new Syntax(reader, path).ReadAllTokens();
         }
 
-        private readonly String _source;
+        private readonly String _sourceUnit;
         private int _line = 1;
         private int _column = 1;
         private readonly TextReader _reader;
 
-        public Syntax(TextReader reader, String source = "Unknown")
+        public Syntax(TextReader reader, String sourceUnit = "Unknown")
         {
             _reader = reader;
-            _source = source;
+            _sourceUnit = sourceUnit;
         }
 
         public List<Token> ReadAllTokens()
@@ -209,7 +209,7 @@ namespace ZedSharp
 
         private Location CurrentLocation
         {
-            get { return new Location(_source, _line, _column); }
+            get { return new Location(_sourceUnit, _line, _column); }
         }
 
         private void Fail(String message)
@@ -247,6 +247,12 @@ namespace ZedSharp
         public Location Location { get; private set; }
 
         public abstract Expression Parse();
+
+        internal static readonly ConstantExpression Zero = Expression.Constant(0);
+        internal static readonly ConstantExpression Null = Expression.Constant(null);
+        internal static readonly ConstantExpression False = Expression.Constant(false);
+        internal static readonly ConstantExpression True = Expression.Constant(true);
+
     }
 
     internal class Atom : Token
@@ -263,25 +269,53 @@ namespace ZedSharp
             return Literal;
         }
 
-        private static readonly Regex NumberRegex = new Regex(@"^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$");
+        private static readonly Regex IntRegex = new Regex(@"^[-+]?[0-9]+u?l?$");
+        private static readonly Regex FloatRegex = new Regex(@"^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?[fm]?$");
+
+        private static String ButLast(String str, int len)
+        {
+            return str.Substring(0, str.Length - len);
+        }
 
         public override Expression Parse()
         {
-            if (NumberRegex.IsMatch(Literal))
-                return Expression.Constant(Decimal.Parse(Literal));
-
             if (Literal[0] == '\"') return Expression.Constant(Literal.Substring(1, Literal.Length - 2));
-            if (Literal == "true") return Expression.Constant(true);
-            if (Literal == "false") return Expression.Constant(false);
+            if (Literal == "null")  return Null;
+            if (Literal == "true")  return True;
+            if (Literal == "false") return False;
 
-            return Expression.Constant(Literal);
+            if (IntRegex.IsMatch(Literal))
+            {
+                if (Literal.EndsWith("ul")) return Expression.Constant(UInt64.Parse(ButLast(Literal, 2)));
+                if (Literal.EndsWith("u"))  return Expression.Constant(UInt32.Parse(ButLast(Literal, 1)));
+                if (Literal.EndsWith("l"))  return Expression.Constant(Int64.Parse(ButLast(Literal, 1)));
+
+                return Expression.Constant(Int32.Parse(Literal));
+            }
+
+            if (FloatRegex.IsMatch(Literal))
+            {
+                if (Literal.EndsWith("f")) return Expression.Constant(Single.Parse(ButLast(Literal, 1)));
+                if (Literal.EndsWith("m")) return Expression.Constant(Decimal.Parse(ButLast(Literal, 1)));
+
+                return Expression.Constant(Double.Parse(Literal));
+            }
+
+            if (Literal.Contains("."))
+            {
+                var parts = Literal.Split(new[] { "." }, StringSplitOptions.RemoveEmptyEntries);
+
+                // identify parts[0] as variable or class
+                // identify each item in the chain as property, field or method
+            }
+
+            return Expression.Variable(typeof(object), Literal);
         }
     }
 
     internal class Combo : Token
     {
-        public Combo(List<Token> tokens, Location location)
-            : base(location)
+        public Combo(List<Token> tokens, Location location) : base(location)
         {
             Tokens = tokens;
         }
@@ -316,22 +350,28 @@ namespace ZedSharp
                     case "??": return BinaryOp(Tokens, Expression.Coalesce);
                     case "==": return BinaryOp(Tokens, Expression.Equal);
                     case "!=": return BinaryOp(Tokens, Expression.NotEqual);
+                    case "if":
+                    case "?:": return TeraryOp(Tokens, Expression.Condition);
                     case "&":  return NaryOp(Tokens, Expression.And);
-                    case "&&": return NaryOp(Tokens, Expression.AndAlso);
                     case "|":  return NaryOp(Tokens, Expression.Or);
+                    case "and":
+                    case "&&": return NaryOp(Tokens, Expression.AndAlso);
+                    case "or":
                     case "||": return NaryOp(Tokens, Expression.OrElse);
+                    case "xor":
+                    case "^":  return NaryOp(Tokens, Expression.ExclusiveOr);
                     case "+":  return NaryOp(Tokens, Expression.Add);
                     case "-":  return NaryOp(Tokens, Expression.Subtract);
                     case "*":  return NaryOp(Tokens, Expression.Multiply);
                     case "/":  return NaryOp(Tokens, Expression.Divide);
                     case "%":  return NaryOp(Tokens, Expression.Modulo);
-                    case "if": return TeraryOp(Tokens, Expression.Condition);
-                    // [] operator?
+                    // case "[]": ??? do we also want [x y z] list syntax? collection initializers?
                     case "=>":
                         var paramsToken = (Combo) Tokens[1];
                         var paramsExprs = paramsToken.Tokens.Select(x => x.Parse()).ToArray();
                         var bodyExpr = Tokens[2].Parse();
                         //return Expression.Lambda(bodyExpr, paramsExprs);
+                        //needs type spec syntax
                         return null;
                     case ".":
                     case "is":
@@ -342,18 +382,15 @@ namespace ZedSharp
                     case "new":
                         throw new NotImplementedException();
                     // select, where, orderby, groupby, distinct
-
-                        // void instance methods return target object
+                    // static methods
+                    // instance methods
+                    // property access chains
+                    // void instance methods return target object
                 }
             }
 
             return null;
         }
-
-        private static readonly ConstantExpression Zero = Expression.Constant(0);
-        private static readonly ConstantExpression Null = Expression.Constant(null);
-        private static readonly ConstantExpression False = Expression.Constant(false);
-        private static readonly ConstantExpression True = Expression.Constant(true);
 
         private static Expression NaryOp(IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)
         {
@@ -388,15 +425,6 @@ namespace ZedSharp
                 throw new ParseException(Location, "Binary operator requires exactly 1 arguments");
 
             return f(array[0].Parse());
-        }
-
-        private static void CheckArity(Token t, int count, String form)
-        {
-            var combo = (Combo) t;
-            var tokenCount = combo.Tokens.Count;
-
-            if (tokenCount != count)
-                throw new ParseException(t.Location, String.Format("{0} expression should have {1} parts but found {2}", form, count, tokenCount));
         }
     }
 
