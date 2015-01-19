@@ -13,7 +13,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace ZedSharp
 {
@@ -89,17 +88,9 @@ namespace ZedSharp
         }
 <# } #>
     
-        private bool hashComputed = false;
-        private int hash = 0;
-
         public override int GetHashCode()
         {
-            if (hashComputed)
-                return hash;
-
-            hash = String.Join("", Rows).GetHashCode();
-            hashComputed = true;
-            return hash;
+            return String.Join("", Rows).GetHashCode();
         }
 
         public override bool Equals(Object obj)
@@ -119,9 +110,9 @@ namespace ZedSharp
     /// <code>
     /// public static class MyColumns
     /// {
-    ///     public static readonly Col<String> FirstName = new Col<String>("FirstName");
-    ///     public static readonly Col<String> LastName = new Col<String>("LastName");
-    ///     public static readonly Col<Datetime> Birthday = new Col<DateTime>("Birthday");
+    ///     public static readonly Col&lt;String&gt; FirstName = new Col&lt;String&gt;("FirstName");
+    ///     public static readonly Col&lt;String&gt; LastName = new Col&lt;String&gt;("LastName");
+    ///     public static readonly Col&lt;Datetime&gt; Birthday = new Col&lt;DateTime&gt;("Birthday");
     /// }
     /// </code>
     /// </remarks>
@@ -141,14 +132,11 @@ namespace ZedSharp
 
         public override bool Equals(Object obj)
         {
-            if (ReferenceEquals(obj, this))
-                return true;
-
-            if (obj == null || !(obj is Col<A>))
+            if (!(obj is Col<A>))
                 return false;
 
             var that = (Col<A>) obj;
-            return that.Name == this.Name;
+            return that.Name == Name;
         }
 
         public override String ToString()
@@ -185,10 +173,7 @@ namespace ZedSharp
 
         public override bool Equals(Object obj)
         {
-            if (ReferenceEquals(obj, this))
-                return true;
-
-            if (obj == null || !(obj is <#= className #>))
+            if (!(obj is <#= className #>))
                 return false;
 
             var that = (<#= className #>) obj;
