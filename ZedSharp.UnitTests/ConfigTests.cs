@@ -7,6 +7,8 @@ namespace ZedSharp.UnitTests
     {
         String BrandName { get; }
 
+        String BrandNameWithTradeMark { get; }
+
         String FormatName(String name);
     }
 
@@ -18,6 +20,8 @@ namespace ZedSharp.UnitTests
             public class Config : ZedSharp.UnitTests.IConfig
             {
 	            public String BrandName { get { return ""Brand Name""; } }
+
+                public String BrandNameWithTradeMark { get { return BrandName + "" TM""; } }
 
 	            public String FormatName(String name)
 	            {
@@ -37,6 +41,7 @@ namespace ZedSharp.UnitTests
         {
             App.LoadConfig();
             Assert.AreEqual("Brand Name", App.Config.BrandName);
+            Assert.AreEqual("Brand Name TM", App.Config.BrandNameWithTradeMark);
             Assert.AreEqual("BOB", App.Config.FormatName("bob"));
         }
     }

@@ -78,11 +78,6 @@
       <Name>ZedSharp</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Test.csconfig">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
