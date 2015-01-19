@@ -12,7 +12,18 @@ namespace ZedSharp.UnitTests
 
     public static class App
     {
-        private const String Path = "Test.csconfig";
+        private const String Path = @"
+            using System;
+
+            public class Config : ZedSharp.UnitTests.IConfig
+            {
+	            public String BrandName { get { return ""Brand Name""; } }
+
+	            public String FormatName(String name)
+	            {
+		            return name.ToUpper();
+	            }
+            }";
         private static readonly CodeLoader<IConfig> Loader = new CodeLoader<IConfig>(Path);
         public static void LoadConfig() { Loader.Load(); }
         public static IConfig Config { get { return Loader.Value; } }

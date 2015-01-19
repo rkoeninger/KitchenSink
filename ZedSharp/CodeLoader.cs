@@ -8,9 +8,9 @@ namespace ZedSharp
 {
     public class CodeLoader<T>
     {
-        public CodeLoader(String path)
+        public CodeLoader(String source)
         {
-            Path = path;
+            Source = source;
             LazyLoader = new Lazy<T>(Compile);
             StandardAssemblies = new [] {
                 "mscorlib.dll",
@@ -19,7 +19,7 @@ namespace ZedSharp
             };
         }
 
-        private readonly String Path;
+        private readonly String Source;
         private readonly Lazy<T> LazyLoader;
         private readonly String[] StandardAssemblies;
         public T Value { get { return LazyLoader.Value; } }
@@ -41,7 +41,7 @@ namespace ZedSharp
                 GenerateInMemory = true,
                 IncludeDebugInformation = true
             };
-            var results = provider.CompileAssemblyFromFile(parameters, new [] {Path});
+            var results = provider.CompileAssemblyFromSource(parameters, new [] {Source});
 
             if (results.Errors.HasErrors)
                 throw new Exception("");
