@@ -30,5 +30,13 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(typeof(double), Schwa.Parse("-3454.5453").Type);
             Assert.AreEqual(typeof(decimal), Schwa.Parse("4573945723849579.2345m").Type);
         }
+
+        [TestMethod]
+        public void PrimitiveTypeChecks()
+        {
+            Assert.IsTrue(Schwa.Eval<bool>("(is int 0)"));
+            Assert.IsNotNull(Schwa.Eval<object>("(as object \"\")"));
+            Assert.AreEqual(1, Schwa.Eval<int>("(cast int 1.34)"));
+        }
     }
 }

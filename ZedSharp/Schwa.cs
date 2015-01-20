@@ -15,6 +15,13 @@ namespace ZedSharp
             var syntax = Syntax.Read(source);
             return syntax.Parse();
         }
+
+        public static A Eval<A>(String source)
+        {
+            var expr = Parse(source);
+            var lambda = Expression.Lambda<Func<A>>(expr);
+            return lambda.Compile().Invoke();
+        }
     }
 
     internal class Syntax
@@ -305,7 +312,7 @@ namespace ZedSharp
             {
                 var parts = Literal.Split(new[] { "." }, StringSplitOptions.RemoveEmptyEntries);
 
-                // identify parts[0] as variable or class
+                // TODO: identify parts[0] as variable or class
                 // identify each item in the chain as property, field or method
             }
 
@@ -351,7 +358,7 @@ namespace ZedSharp
                     case "==": return BinaryOp(Tokens, Expression.Equal);
                     case "!=": return BinaryOp(Tokens, Expression.NotEqual);
                     case "if":
-                    case "?:": return TeraryOp(Tokens, Expression.Condition);
+                    case "?:": return TernaryOp(Tokens, Expression.Condition);
                     case "&":  return NaryOp(Tokens, Expression.And);
                     case "|":  return NaryOp(Tokens, Expression.Or);
                     case "and":
@@ -365,39 +372,87 @@ namespace ZedSharp
                     case "*":  return NaryOp(Tokens, Expression.Multiply);
                     case "/":  return NaryOp(Tokens, Expression.Divide);
                     case "%":  return NaryOp(Tokens, Expression.Modulo);
-                    // case "[]": ??? do we also want [x y z] list syntax? collection initializers?
+                    // TODO: case "[]": ??? do we also want [x y z] list syntax? collection initializers?
+                    case "is":
+                    {
+                        var typeAtom = (Atom) Tokens[1];
+                        var type = ParseType(typeAtom.Literal);
+                        return Expression.TypeIs(Tokens[2].Parse(), type);
+                    }
+                    case "as":
+                    {
+                        var typeAtom = (Atom) Tokens[1];
+                        var type = ParseType(typeAtom.Literal);
+                        return Expression.TypeAs(Tokens[2].Parse(), type);
+                    }
+                    case "cast":
+                    {
+                        var typeAtom = (Atom) Tokens[1];
+                        var type = ParseType(typeAtom.Literal);
+                        return Expression.Convert(Tokens[2].Parse(), type);
+                    }
+                    case "typeof":
+                    {
+                        var typeAtom = (Atom) Tokens[1];
+                        var type = ParseType(typeAtom.Literal);
+                        return Expression.Constant(type);
+                    }
+                    case "default":
+                    {
+                        var typeAtom = (Atom) Tokens[1];
+                        var type = ParseType(typeAtom.Literal);
+                        return Expression.Default(type);
+                    }
+                    case "new":
+                    {
+                        var typeAtom = (Atom) Tokens[1];
+                        var type = ParseType(typeAtom.Literal);
+                        var args = Tokens.Skip(2).Select(x => x.Parse()).ToArray();
+                        var ctor = type.GetConstructor(args.Select(x => x.Type).ToArray());
+                        return Expression.New(ctor, args);
+                    }
                     case "=>":
                         var paramsToken = (Combo) Tokens[1];
                         var paramsExprs = paramsToken.Tokens.Select(x => x.Parse()).ToArray();
                         var bodyExpr = Tokens[2].Parse();
                         //return Expression.Lambda(bodyExpr, paramsExprs);
                         //needs type spec syntax
-                        return null;
-                    case ".":
-                    case "is":
-                    case "as":
-                    case "cast":
-                    case "typeof":
-                    case "default":
-                    case "new":
                         throw new NotImplementedException();
-                    // select, where, orderby, groupby, distinct
-                    // static methods
-                    // instance methods
-                    // property access chains
-                    // void instance methods return target object
+                    case ".":
+                        throw new NotImplementedException();
+                    // TODO: select, where, orderby, groupby, distinct
+                    // TODO: static methods
+                    // TODO: instance methods
+                    // TODO: property access chains
+                    // TODO: void instance methods return target object
                 }
             }
 
             return null;
         }
 
+        private static Type ParseType(String str)
+        {
+            return TypeKeywords.GetMaybe(str).OrElse(null);
+        }
+
+        private static readonly Dictionary<string, Type> TypeKeywords = Dictionary.Of(
+            "bool", typeof (bool),
+            "char", typeof (char),
+            "int", typeof (int),
+            "long", typeof (long),
+            "byte", typeof (byte),
+            "double", typeof (double),
+            "decimal", typeof (decimal),
+            "string", typeof (string),
+            "object", typeof (object));
+
         private static Expression NaryOp(IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)
         {
             return tokens.Skip(1).Select(x => x.Parse()).Aggregate(f);
         }
 
-        private Expression TeraryOp(IEnumerable<Token> tokens, Func<Expression, Expression, Expression, Expression> f)
+        private Expression TernaryOp(IEnumerable<Token> tokens, Func<Expression, Expression, Expression, Expression> f)
         {
             var array = tokens.Skip(1).ToArray();
 
