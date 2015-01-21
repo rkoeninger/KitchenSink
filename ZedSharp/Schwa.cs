@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -83,6 +84,7 @@ namespace ZedSharp
                     Fail("Unexpected end of file");
                     return null;
                 case '(':
+                {
                     Skip(); // Pull '(' off the reader
                     var tokens = new List<Token>();
 
@@ -95,8 +97,41 @@ namespace ZedSharp
                     }
 
                     return new Combo(tokens, location);
+                }
+                case '[':
+                {
+                    Skip(); // Pull '[' off the reader
+                    var tokens = new List<Token>();
+
+                    for (var token = ReadToken(); !(token is ComboEnd); token = ReadToken())
+                    {
+                        if (token == null)
+                            Fail("Unexpected end of combo");
+
+                        tokens.Add(token);
+                    }
+
+                    return new SquareCombo(tokens, location);
+                }
+                case '{':
+                {
+                    Skip(); // Pull '{' off the reader
+                    var tokens = new List<Token>();
+
+                    for (var token = ReadToken(); !(token is ComboEnd); token = ReadToken())
+                    {
+                        if (token == null)
+                            Fail("Unexpected end of combo");
+
+                        tokens.Add(token);
+                    }
+
+                    return new CurlyCombo(tokens, location);
+                }
                 case ')':
-                    Skip(); // Pull ')' off the reader
+                case ']':
+                case '}':
+                    Skip(); // Pull ')' or ']' off the reader
                     return new ComboEnd(location);
                 case '\"':
                     return new Atom(ReadStringLiteral(), location);
@@ -172,7 +207,7 @@ namespace ZedSharp
                     _column = 1;
                 }
 
-                if (Char.IsWhiteSpace(ch) || ch == ')' || ch == '(')
+                if (Char.IsWhiteSpace(ch) || ch.IsIn(')', '(', ']', '[', '}', '{'))
                     break;
 
                 builder.Append(ch);
@@ -286,10 +321,10 @@ namespace ZedSharp
 
         public override Expression Parse()
         {
-            if (Literal[0] == '\"') return Expression.Constant(Literal.Substring(1, Literal.Length - 2));
             if (Literal == "null")  return Null;
             if (Literal == "true")  return True;
             if (Literal == "false") return False;
+            if (Literal[0] == '\"') return Expression.Constant(String.Intern(Literal.Substring(1, Literal.Length - 2)));
 
             if (IntRegex.IsMatch(Literal))
             {
@@ -320,6 +355,62 @@ namespace ZedSharp
         }
     }
 
+    internal class CurlyCombo : Token
+    {
+        public CurlyCombo(List<Token> tokens, Location location) : base(location)
+        {
+            Tokens = tokens;
+        }
+
+        public List<Token> Tokens { get; private set; }
+
+        public override string ToString()
+        {
+            return "{" + String.Join(" ", Tokens) + "}";
+        }
+
+        public override Expression Parse()
+        {
+            var keyType = Combo.ParseType(((Atom)Tokens[0]).Literal);
+            var valType = Combo.ParseType(((Atom)Tokens[1]).Literal);
+            var dictType = typeof(Dictionary<object, object>).GetGenericTypeDefinition().MakeGenericType(keyType, valType);
+            var ctor = dictType.GetConstructor(new Type[0]);
+            if (ctor == null) throw new Exception("Dictionary doesn't have a no-arg constructor somehow");
+            var addMethod = dictType.GetMethod("Add");
+            if (addMethod == null) throw new Exception("Dictionary doesn't have an Add method somehow");
+            var elementExprs = Tokens.Skip(2).Select(x => x.Parse()).ToArray();
+            return Expression.ListInit(
+                Expression.New(ctor),
+                elementExprs.Partition(2)
+                    .Select(x => Expression.ElementInit(addMethod, x.ElementAt(0), x.ElementAt(1))));
+        }
+    }
+
+    internal class SquareCombo : Token
+    {
+        public SquareCombo(List<Token> tokens, Location location) : base(location)
+        {
+            Tokens = tokens;
+        }
+
+        public List<Token> Tokens { get; private set; }
+
+        public override string ToString()
+        {
+            return "[" + String.Join(" ", Tokens) + "]";
+        }
+
+        public override Expression Parse()
+        {
+            var elementType = Combo.ParseType(((Atom) Tokens[0]).Literal);
+            var listType = typeof(List<>).MakeGenericType(elementType);
+            var ctor = listType.GetConstructor(new Type[0]);
+            if (ctor == null) throw new Exception("List doesn't have no-arg constructor somehow");
+            var elementExprs = Tokens.Skip(1).Select(x => x.Parse()).ToArray();
+            return Expression.ListInit(Expression.New(ctor), elementExprs);
+        }
+    }
+
     internal class Combo : Token
     {
         public Combo(List<Token> tokens, Location location) : base(location)
@@ -340,98 +431,127 @@ namespace ZedSharp
 
             if (Tokens[0] is Atom)
             {
-                var atom = (Atom) Tokens[0];
-
-                switch (atom.Literal)
-                {
-                    case "!":  return UnaryOp(Tokens, Expression.Not);
-                    case "~":  return UnaryOp(Tokens, Expression.OnesComplement);
-                    case "++": return UnaryOp(Tokens, Expression.Increment);
-                    case "--": return UnaryOp(Tokens, Expression.Decrement);
-                    case "<":  return BinaryOp(Tokens, Expression.LessThan);
-                    case "<=": return BinaryOp(Tokens, Expression.LessThanOrEqual);
-                    case ">":  return BinaryOp(Tokens, Expression.GreaterThan);
-                    case ">=": return BinaryOp(Tokens, Expression.GreaterThanOrEqual);
-                    case "<<": return BinaryOp(Tokens, Expression.LeftShift);
-                    case ">>": return BinaryOp(Tokens, Expression.RightShift);
-                    case "??": return BinaryOp(Tokens, Expression.Coalesce);
-                    case "==": return BinaryOp(Tokens, Expression.Equal);
-                    case "!=": return BinaryOp(Tokens, Expression.NotEqual);
-                    case "if":
-                    case "?:": return TernaryOp(Tokens, Expression.Condition);
-                    case "&":  return NaryOp(Tokens, Expression.And);
-                    case "|":  return NaryOp(Tokens, Expression.Or);
-                    case "and":
-                    case "&&": return NaryOp(Tokens, Expression.AndAlso);
-                    case "or":
-                    case "||": return NaryOp(Tokens, Expression.OrElse);
-                    case "xor":
-                    case "^":  return NaryOp(Tokens, Expression.ExclusiveOr);
-                    case "+":  return NaryOp(Tokens, Expression.Add);
-                    case "-":  return NaryOp(Tokens, Expression.Subtract);
-                    case "*":  return NaryOp(Tokens, Expression.Multiply);
-                    case "/":  return NaryOp(Tokens, Expression.Divide);
-                    case "%":  return NaryOp(Tokens, Expression.Modulo);
-                    // TODO: case "[]": ??? do we also want [x y z] list syntax? collection initializers?
-                    case "is":
-                    {
-                        var typeAtom = (Atom) Tokens[1];
-                        var type = ParseType(typeAtom.Literal);
-                        return Expression.TypeIs(Tokens[2].Parse(), type);
-                    }
-                    case "as":
-                    {
-                        var typeAtom = (Atom) Tokens[1];
-                        var type = ParseType(typeAtom.Literal);
-                        return Expression.TypeAs(Tokens[2].Parse(), type);
-                    }
-                    case "cast":
-                    {
-                        var typeAtom = (Atom) Tokens[1];
-                        var type = ParseType(typeAtom.Literal);
-                        return Expression.Convert(Tokens[2].Parse(), type);
-                    }
-                    case "typeof":
-                    {
-                        var typeAtom = (Atom) Tokens[1];
-                        var type = ParseType(typeAtom.Literal);
-                        return Expression.Constant(type);
-                    }
-                    case "default":
-                    {
-                        var typeAtom = (Atom) Tokens[1];
-                        var type = ParseType(typeAtom.Literal);
-                        return Expression.Default(type);
-                    }
-                    case "new":
-                    {
-                        var typeAtom = (Atom) Tokens[1];
-                        var type = ParseType(typeAtom.Literal);
-                        var args = Tokens.Skip(2).Select(x => x.Parse()).ToArray();
-                        var ctor = type.GetConstructor(args.Select(x => x.Type).ToArray());
-                        return Expression.New(ctor, args);
-                    }
-                    case "=>":
-                        var paramsToken = (Combo) Tokens[1];
-                        var paramsExprs = paramsToken.Tokens.Select(x => x.Parse()).ToArray();
-                        var bodyExpr = Tokens[2].Parse();
-                        //return Expression.Lambda(bodyExpr, paramsExprs);
-                        //needs type spec syntax
-                        throw new NotImplementedException();
-                    case ".":
-                        throw new NotImplementedException();
-                    // TODO: select, where, orderby, groupby, distinct
-                    // TODO: static methods
-                    // TODO: instance methods
-                    // TODO: property access chains
-                    // TODO: void instance methods return target object
-                }
+                return ParseAtom((Atom) Tokens[0]);
             }
 
-            return null;
+            throw new NotImplementedException();
         }
 
-        private static Type ParseType(String str)
+        private Expression ParseAtom(Atom atom)
+        {
+            switch (atom.Literal)
+            {
+                case "!": return UnaryOp(Tokens, Expression.Not);
+                case "~": return UnaryOp(Tokens, Expression.OnesComplement);
+                case "++": return UnaryOp(Tokens, Expression.Increment);
+                case "--": return UnaryOp(Tokens, Expression.Decrement);
+                case "<": return BinaryOp(Tokens, Expression.LessThan);
+                case "<=": return BinaryOp(Tokens, Expression.LessThanOrEqual);
+                case ">": return BinaryOp(Tokens, Expression.GreaterThan);
+                case ">=": return BinaryOp(Tokens, Expression.GreaterThanOrEqual);
+                case "<<": return BinaryOp(Tokens, Expression.LeftShift);
+                case ">>": return BinaryOp(Tokens, Expression.RightShift);
+                case "??": return BinaryOp(Tokens, Expression.Coalesce);
+                case "==": return BinaryOp(Tokens, Expression.Equal);
+                case "!=": return BinaryOp(Tokens, Expression.NotEqual);
+                case "if":
+                case "?:": return TernaryOp(Tokens, Expression.Condition);
+                case "&": return NaryOp(Tokens, Expression.And);
+                case "|": return NaryOp(Tokens, Expression.Or);
+                case "and":
+                case "&&": return NaryOp(Tokens, Expression.AndAlso);
+                case "or":
+                case "||": return NaryOp(Tokens, Expression.OrElse);
+                case "xor":
+                case "^": return NaryOp(Tokens, Expression.ExclusiveOr);
+                case "+": return NaryOp(Tokens, Expression.Add);
+                case "-": return NaryOp(Tokens, Expression.Subtract);
+                case "*": return NaryOp(Tokens, Expression.Multiply);
+                case "/": return NaryOp(Tokens, Expression.Divide);
+                case "%": return NaryOp(Tokens, Expression.Modulo);
+                case "#": // use for indexer access (get only, set not supported)
+                {
+                    var target = Tokens[1].Parse();
+                    var args = Tokens.Skip(2).Select(x => x.Parse());
+                    var type = target.Type;
+                    var indexer = type.GetProperties()
+                        .Where(x => x.GetIndexParameters().Any())
+                        .FirstMaybe(x => ParamsMatch(x.GetIndexParameters(), args))
+                        .OrElseThrow("No indexer found that matches those arguments");
+                    return Expression.Call(target, indexer.GetMethod, args);
+                }
+                case "is":
+                {
+                    var typeAtom = (Atom)Tokens[1];
+                    var type = ParseType(typeAtom.Literal);
+                    return Expression.TypeIs(Tokens[2].Parse(), type);
+                }
+                case "as":
+                {
+                    var typeAtom = (Atom)Tokens[1];
+                    var type = ParseType(typeAtom.Literal);
+                    return Expression.TypeAs(Tokens[2].Parse(), type);
+                }
+                case "cast":
+                {
+                    var typeAtom = (Atom)Tokens[1];
+                    var type = ParseType(typeAtom.Literal);
+                    return Expression.Convert(Tokens[2].Parse(), type);
+                }
+                case "typeof":
+                {
+                    var typeAtom = (Atom)Tokens[1];
+                    var type = ParseType(typeAtom.Literal);
+                    return Expression.Constant(type);
+                }
+                case "default":
+                {
+                    var typeAtom = (Atom)Tokens[1];
+                    var type = ParseType(typeAtom.Literal);
+                    return Expression.Default(type);
+                }
+                case "new":
+                {
+                    var typeAtom = (Atom)Tokens[1];
+                    var type = ParseType(typeAtom.Literal);
+                    var args = Tokens.Skip(2).Select(x => x.Parse()).ToArray();
+                    var ctor = type.GetConstructor(args.Select(x => x.Type).ToArray());
+                    if (ctor == null) throw new Exception("Type \"" + type + "\" does not have that constructor");
+                    return Expression.New(ctor, args);
+                }
+                case "=>":
+                {
+                    var paramsToken = (Combo)Tokens[1];
+                    var paramsExprs = paramsToken.Tokens.Select(x => x.Parse()).ToArray();
+                    var bodyExpr = Tokens[2].Parse();
+                    //return Expression.Lambda(bodyExpr, paramsExprs);
+                    //needs type spec syntax
+                    throw new NotImplementedException();
+                }
+                case ".":
+                {
+                    throw new NotImplementedException();
+                }
+                // TODO: select, where, orderby, groupby, distinct
+                // TODO: static methods
+                // TODO: instance methods
+                // TODO: property access chains
+                // TODO: void instance methods return target object
+            }
+
+            throw new NotImplementedException();
+        }
+
+        private static bool ParamsMatch(IEnumerable<ParameterInfo> paramz, IEnumerable<Expression> args)
+        {
+            var paramArray = paramz.ToArray();
+            var argArray = args.ToArray();
+
+            return paramArray.Zip(argArray, Tuple.Create)
+                .All(x => x.Item2.Type.IsAssignableTo(x.Item1.ParameterType));
+        }
+
+        public static Type ParseType(String str)
         {
             return TypeKeywords.GetMaybe(str).OrElse(null);
         }
@@ -457,7 +577,7 @@ namespace ZedSharp
             var array = tokens.Skip(1).ToArray();
 
             if (array.Length != 3)
-                throw new ParseException(Location, "Binary operator requires exactly 3 arguments");
+                throw new ParseException(Location, "Ternary operator requires exactly 3 arguments");
 
             return f(array[0].Parse(), array[1].Parse(), array[2].Parse());
         }
@@ -477,7 +597,7 @@ namespace ZedSharp
             var array = tokens.Skip(1).ToArray();
 
             if (array.Length != 1)
-                throw new ParseException(Location, "Binary operator requires exactly 1 arguments");
+                throw new ParseException(Location, "Unary operator requires exactly 1 arguments");
 
             return f(array[0].Parse());
         }
