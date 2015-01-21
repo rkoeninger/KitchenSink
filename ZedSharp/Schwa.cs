@@ -373,18 +373,17 @@ namespace ZedSharp
 
         public override Expression Parse(SymbolEnvironment env)
         {
-            var keyType = Combo.ParseType(((Atom)Tokens[0]).Literal);
-            var valType = Combo.ParseType(((Atom)Tokens[1]).Literal);
+            var elementExprs = Tokens.Select(x => x.Parse(env)).Partition(2).Select(x => x.ToArray()).ToArray();
+            var keyType = Combo.GetCommonBaseType(elementExprs.Select(x => x.ElementAt(0).Type).ToArray());
+            var valType = Combo.GetCommonBaseType(elementExprs.Select(x => x.ElementAt(1).Type).ToArray());
             var dictType = typeof(Dictionary<object, object>).GetGenericTypeDefinition().MakeGenericType(keyType, valType);
             var ctor = dictType.GetConstructor(new Type[0]);
             if (ctor == null) throw new Exception("Dictionary doesn't have a no-arg constructor somehow");
             var addMethod = dictType.GetMethod("Add");
             if (addMethod == null) throw new Exception("Dictionary doesn't have an Add method somehow");
-            var elementExprs = Tokens.Skip(2).Select(x => x.Parse(env)).ToArray();
             return Expression.ListInit(
                 Expression.New(ctor),
-                elementExprs.Partition(2)
-                    .Select(x => Expression.ElementInit(addMethod, x.ElementAt(0), x.ElementAt(1))));
+                elementExprs.Select(x => Expression.ElementInit(addMethod, x[0], x[1])));
         }
     }
 
@@ -404,11 +403,11 @@ namespace ZedSharp
 
         public override Expression Parse(SymbolEnvironment env)
         {
-            var elementType = Combo.ParseType(((Atom) Tokens[0]).Literal);
+            var elementExprs = Tokens.Select(x => x.Parse(env)).ToArray();
+            var elementType = Combo.GetCommonBaseType(elementExprs.Select(x => x.Type).ToArray());
             var listType = typeof(List<>).MakeGenericType(elementType);
             var ctor = listType.GetConstructor(new Type[0]);
             if (ctor == null) throw new Exception("List doesn't have no-arg constructor somehow");
-            var elementExprs = Tokens.Skip(1).Select(x => x.Parse(env)).ToArray();
             return Expression.ListInit(Expression.New(ctor), elementExprs);
         }
     }
@@ -605,6 +604,28 @@ namespace ZedSharp
                 throw new ParseException(Location, "Unary operator requires exactly 1 arguments");
 
             return f(array[0].Parse(env));
+        }
+
+        public static Type GetCommonBaseType(Type[] types)
+        {
+            if (types.Length == 0)
+                throw new Exception("Explicit type declaration required");
+
+            if (types.Length == 1)
+                return types[0];
+
+            return types.Aggregate(GetCommonBaseType);
+        }
+
+        public static Type GetCommonBaseType(Type x, Type y)
+        {
+            if (x == y || y.IsAssignableTo(x))
+                return x;
+
+            if (x.IsAssignableTo(y))
+                return y;
+
+            return GetCommonBaseType(y, x.BaseType);
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -72,10 +73,17 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
+        public void CollectionInitializerTypeInference()
+        {
+            Assert.IsInstanceOfType(Schwa.Eval<object>("[1 2 3]"), typeof(List<int>));
+            Assert.IsInstanceOfType(Schwa.Eval<object>("{\"one\" 1 \"two\" 2 \"three\" 3}"), typeof(Dictionary<string, int>));
+        }
+
+        [TestMethod]
         public void CollectionInitializerAndIndexerAccess()
         {
-            Assert.AreEqual(3, Schwa.Eval<int>("(# [int 1 2 3 4 5] 2)"));
-            Assert.AreEqual(2, Schwa.Eval<int>("(# {string int \"one\" 1 \"two\" 2 \"three\" 3} \"two\")"));
+            Assert.AreEqual(3, Schwa.Eval<int>("(# [1 2 3 4 5] 2)"));
+            Assert.AreEqual(2, Schwa.Eval<int>("(# {\"one\" 1 \"two\" 2 \"three\" 3} \"two\")"));
         }
 
         [TestMethod]
