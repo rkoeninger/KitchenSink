@@ -77,6 +77,8 @@ namespace ZedSharp.UnitTests
         {
             Assert.IsInstanceOfType(Schwa.Eval<object>("[1 2 3]"), typeof(List<int>));
             Assert.IsInstanceOfType(Schwa.Eval<object>("{\"one\" 1 \"two\" 2 \"three\" 3}"), typeof(Dictionary<string, int>));
+            Expect.Error(() => Schwa.Eval<object>("[]"));
+            Expect.Error(() => Schwa.Eval<object>("{}"));
         }
 
         [TestMethod]
@@ -91,6 +93,15 @@ namespace ZedSharp.UnitTests
         {
             var f = Schwa.Eval<Func<int, int>>("(=> ((int x)) (+ 1 x))");
             Check.That(x => f(x) == x + 1, Rand.Ints().Where(x => x != Int32.MaxValue).Take(100));
+        }
+
+        [TestMethod]
+        public void SyntaxNestingDepth()
+        {
+            const int depth = 256;
+            Syntax.Read(
+                  Enumerable.Repeat("(", depth).Concat()
+                + Enumerable.Repeat(")", depth).Concat());
         }
     }
 }

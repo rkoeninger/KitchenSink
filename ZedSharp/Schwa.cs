@@ -27,7 +27,7 @@ namespace ZedSharp
         }
     }
 
-    internal class Syntax
+    public class Syntax
     {
         public static Token Read(String str)
         {
@@ -262,7 +262,7 @@ namespace ZedSharp
         }
     }
 
-    internal class Location
+    public class Location
     {
         public Location(String file, int line, int column)
         {
@@ -281,7 +281,7 @@ namespace ZedSharp
         }
     }
 
-    internal abstract class Token
+    public abstract class Token
     {
         protected Token(Location location)
         {
