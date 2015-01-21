@@ -355,6 +355,11 @@ namespace ZedSharp
             return HasValue ? this : Maybe.Try(f);
         }
 
+        public Maybe<A> OrEval(Func<Maybe<A>> f)
+        {
+            return HasValue ? this : f();
+        }
+
         public Maybe<A> OrEvalMany<B>(B key, Func<B, Maybe<A>> f)
         {
             return HasValue ? this : f(key);
@@ -368,6 +373,11 @@ namespace ZedSharp
         public Maybe<A> OrIf<B>(B key, Func<B, bool> p, Func<B, A> f)
         {
             return HasValue ? this : p(key) ? Maybe.Of(f(key)) : None;
+        }
+
+        public Maybe<A> OrIf<B>(B key, Func<B, bool> p, Func<B, Maybe<A>> f)
+        {
+            return HasValue ? this : p(key) ? f(key) : None;
         }
 
         public Maybe<A> Or(Maybe<A> maybe)

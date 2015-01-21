@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ZedSharp.UnitTests
@@ -54,7 +55,7 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
-        public void BooleanOperations()
+        public void NaryOperators()
         {
             Assert.IsTrue(Schwa.Eval<bool>("(! false)"));
             Assert.IsTrue(Schwa.Eval<bool>("(&& true true true true)"));
@@ -64,10 +65,24 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
+        public void ConditionalOperator()
+        {
+            Assert.AreEqual(5, Schwa.Eval<int>("(?: true 5 3)"));
+            Assert.AreEqual(3, Schwa.Eval<int>("(?: false 5 3)"));
+        }
+
+        [TestMethod]
         public void CollectionInitializerAndIndexerAccess()
         {
             Assert.AreEqual(3, Schwa.Eval<int>("(# [int 1 2 3 4 5] 2)"));
             Assert.AreEqual(2, Schwa.Eval<int>("(# {string int \"one\" 1 \"two\" 2 \"three\" 3} \"two\")"));
+        }
+
+        [TestMethod]
+        public void LambdaDeclaration()
+        {
+            var f = Schwa.Eval<Func<int, int>>("(=> ((int x)) (+ 1 x))");
+            Check.That(x => f(x) == x + 1, Rand.Ints().Where(x => x != Int32.MaxValue).Take(100));
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +15,8 @@ namespace ZedSharp
         public static Expression Parse(String source)
         {
             var syntax = Syntax.Read(source);
-            return syntax.Parse();
+            var env = new SymbolEnvironment();
+            return syntax.Parse(env);
         }
 
         public static A Eval<A>(String source)
@@ -146,7 +148,7 @@ namespace ZedSharp
             {
             }
 
-            public override Expression Parse()
+            public override Expression Parse(SymbolEnvironment env)
             {
                 throw new Exception("ComboEnd cannot be parsed");
             }
@@ -288,7 +290,7 @@ namespace ZedSharp
 
         public Location Location { get; private set; }
 
-        public abstract Expression Parse();
+        public abstract Expression Parse(SymbolEnvironment env);
 
         internal static readonly ConstantExpression Zero = Expression.Constant(0);
         internal static readonly ConstantExpression Null = Expression.Constant(null);
@@ -319,7 +321,7 @@ namespace ZedSharp
             return str.Substring(0, str.Length - len);
         }
 
-        public override Expression Parse()
+        public override Expression Parse(SymbolEnvironment env)
         {
             if (Literal == "null")  return Null;
             if (Literal == "true")  return True;
@@ -351,7 +353,7 @@ namespace ZedSharp
                 // identify each item in the chain as property, field or method
             }
 
-            return Expression.Variable(typeof(object), Literal);
+            return env.Get(Literal).OrElseThrow("Variable not defined");
         }
     }
 
@@ -369,7 +371,7 @@ namespace ZedSharp
             return "{" + String.Join(" ", Tokens) + "}";
         }
 
-        public override Expression Parse()
+        public override Expression Parse(SymbolEnvironment env)
         {
             var keyType = Combo.ParseType(((Atom)Tokens[0]).Literal);
             var valType = Combo.ParseType(((Atom)Tokens[1]).Literal);
@@ -378,7 +380,7 @@ namespace ZedSharp
             if (ctor == null) throw new Exception("Dictionary doesn't have a no-arg constructor somehow");
             var addMethod = dictType.GetMethod("Add");
             if (addMethod == null) throw new Exception("Dictionary doesn't have an Add method somehow");
-            var elementExprs = Tokens.Skip(2).Select(x => x.Parse()).ToArray();
+            var elementExprs = Tokens.Skip(2).Select(x => x.Parse(env)).ToArray();
             return Expression.ListInit(
                 Expression.New(ctor),
                 elementExprs.Partition(2)
@@ -400,13 +402,13 @@ namespace ZedSharp
             return "[" + String.Join(" ", Tokens) + "]";
         }
 
-        public override Expression Parse()
+        public override Expression Parse(SymbolEnvironment env)
         {
             var elementType = Combo.ParseType(((Atom) Tokens[0]).Literal);
             var listType = typeof(List<>).MakeGenericType(elementType);
             var ctor = listType.GetConstructor(new Type[0]);
             if (ctor == null) throw new Exception("List doesn't have no-arg constructor somehow");
-            var elementExprs = Tokens.Skip(1).Select(x => x.Parse()).ToArray();
+            var elementExprs = Tokens.Skip(1).Select(x => x.Parse(env)).ToArray();
             return Expression.ListInit(Expression.New(ctor), elementExprs);
         }
     }
@@ -425,54 +427,54 @@ namespace ZedSharp
             return "(" + String.Join(" ", Tokens) + ")";
         }
 
-        public override Expression Parse()
+        public override Expression Parse(SymbolEnvironment env)
         {
             if (Tokens.Count == 0) throw new ParseException(Location, "Empty parens don't mean anything");
 
             if (Tokens[0] is Atom)
             {
-                return ParseAtom((Atom) Tokens[0]);
+                return ParseAtom((Atom) Tokens[0], env);
             }
 
             throw new NotImplementedException();
         }
 
-        private Expression ParseAtom(Atom atom)
+        private Expression ParseAtom(Atom atom, SymbolEnvironment env)
         {
             switch (atom.Literal)
             {
-                case "!": return UnaryOp(Tokens, Expression.Not);
-                case "~": return UnaryOp(Tokens, Expression.OnesComplement);
-                case "++": return UnaryOp(Tokens, Expression.Increment);
-                case "--": return UnaryOp(Tokens, Expression.Decrement);
-                case "<": return BinaryOp(Tokens, Expression.LessThan);
-                case "<=": return BinaryOp(Tokens, Expression.LessThanOrEqual);
-                case ">": return BinaryOp(Tokens, Expression.GreaterThan);
-                case ">=": return BinaryOp(Tokens, Expression.GreaterThanOrEqual);
-                case "<<": return BinaryOp(Tokens, Expression.LeftShift);
-                case ">>": return BinaryOp(Tokens, Expression.RightShift);
-                case "??": return BinaryOp(Tokens, Expression.Coalesce);
-                case "==": return BinaryOp(Tokens, Expression.Equal);
-                case "!=": return BinaryOp(Tokens, Expression.NotEqual);
+                case "!": return UnaryOp(env, Tokens, Expression.Not);
+                case "~": return UnaryOp(env, Tokens, Expression.OnesComplement);
+                case "++": return UnaryOp(env, Tokens, Expression.Increment);
+                case "--": return UnaryOp(env, Tokens, Expression.Decrement);
+                case "<": return BinaryOp(env, Tokens, Expression.LessThan);
+                case "<=": return BinaryOp(env, Tokens, Expression.LessThanOrEqual);
+                case ">": return BinaryOp(env, Tokens, Expression.GreaterThan);
+                case ">=": return BinaryOp(env, Tokens, Expression.GreaterThanOrEqual);
+                case "<<": return BinaryOp(env, Tokens, Expression.LeftShift);
+                case ">>": return BinaryOp(env, Tokens, Expression.RightShift);
+                case "??": return BinaryOp(env, Tokens, Expression.Coalesce);
+                case "==": return BinaryOp(env, Tokens, Expression.Equal);
+                case "!=": return BinaryOp(env, Tokens, Expression.NotEqual);
                 case "if":
-                case "?:": return TernaryOp(Tokens, Expression.Condition);
-                case "&": return NaryOp(Tokens, Expression.And);
-                case "|": return NaryOp(Tokens, Expression.Or);
+                case "?:": return TernaryOp(env, Tokens, Expression.Condition);
+                case "&": return NaryOp(env, Tokens, Expression.And);
+                case "|": return NaryOp(env, Tokens, Expression.Or);
                 case "and":
-                case "&&": return NaryOp(Tokens, Expression.AndAlso);
+                case "&&": return NaryOp(env, Tokens, Expression.AndAlso);
                 case "or":
-                case "||": return NaryOp(Tokens, Expression.OrElse);
+                case "||": return NaryOp(env, Tokens, Expression.OrElse);
                 case "xor":
-                case "^": return NaryOp(Tokens, Expression.ExclusiveOr);
-                case "+": return NaryOp(Tokens, Expression.Add);
-                case "-": return NaryOp(Tokens, Expression.Subtract);
-                case "*": return NaryOp(Tokens, Expression.Multiply);
-                case "/": return NaryOp(Tokens, Expression.Divide);
-                case "%": return NaryOp(Tokens, Expression.Modulo);
+                case "^": return NaryOp(env, Tokens, Expression.ExclusiveOr);
+                case "+": return NaryOp(env, Tokens, Expression.Add);
+                case "-": return NaryOp(env, Tokens, Expression.Subtract);
+                case "*": return NaryOp(env, Tokens, Expression.Multiply);
+                case "/": return NaryOp(env, Tokens, Expression.Divide);
+                case "%": return NaryOp(env, Tokens, Expression.Modulo);
                 case "#": // use for indexer access (get only, set not supported)
                 {
-                    var target = Tokens[1].Parse();
-                    var args = Tokens.Skip(2).Select(x => x.Parse());
+                    var target = Tokens[1].Parse(env);
+                    var args = Tokens.Skip(2).Select(x => x.Parse(env));
                     var type = target.Type;
                     var indexer = type.GetProperties()
                         .Where(x => x.GetIndexParameters().Any())
@@ -484,19 +486,19 @@ namespace ZedSharp
                 {
                     var typeAtom = (Atom)Tokens[1];
                     var type = ParseType(typeAtom.Literal);
-                    return Expression.TypeIs(Tokens[2].Parse(), type);
+                    return Expression.TypeIs(Tokens[2].Parse(env), type);
                 }
                 case "as":
                 {
                     var typeAtom = (Atom)Tokens[1];
                     var type = ParseType(typeAtom.Literal);
-                    return Expression.TypeAs(Tokens[2].Parse(), type);
+                    return Expression.TypeAs(Tokens[2].Parse(env), type);
                 }
                 case "cast":
                 {
                     var typeAtom = (Atom)Tokens[1];
                     var type = ParseType(typeAtom.Literal);
-                    return Expression.Convert(Tokens[2].Parse(), type);
+                    return Expression.Convert(Tokens[2].Parse(env), type);
                 }
                 case "typeof":
                 {
@@ -514,7 +516,7 @@ namespace ZedSharp
                 {
                     var typeAtom = (Atom)Tokens[1];
                     var type = ParseType(typeAtom.Literal);
-                    var args = Tokens.Skip(2).Select(x => x.Parse()).ToArray();
+                    var args = Tokens.Skip(2).Select(x => x.Parse(env)).ToArray();
                     var ctor = type.GetConstructor(args.Select(x => x.Type).ToArray());
                     if (ctor == null) throw new Exception("Type \"" + type + "\" does not have that constructor");
                     return Expression.New(ctor, args);
@@ -522,11 +524,14 @@ namespace ZedSharp
                 case "=>":
                 {
                     var paramsToken = (Combo)Tokens[1];
-                    var paramsExprs = paramsToken.Tokens.Select(x => x.Parse()).ToArray();
-                    var bodyExpr = Tokens[2].Parse();
-                    //return Expression.Lambda(bodyExpr, paramsExprs);
-                    //needs type spec syntax
-                    throw new NotImplementedException();
+                    var paramsExprs = paramsToken.Tokens
+                        .Select(x => ((Combo) x).With(y =>
+                            env.Define(
+                                ((Atom)y.Tokens[1]).Literal,
+                                ParseType(((Atom)y.Tokens[0]).Literal))))
+                        .ToArray();
+                    var bodyExpr = Tokens[2].Parse(env);
+                    return Expression.Lambda(bodyExpr, paramsExprs);
                 }
                 case ".":
                 {
@@ -567,39 +572,74 @@ namespace ZedSharp
             "string",  typeof(string),
             "object",  typeof(object));
 
-        private static Expression NaryOp(IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)
+        private static Expression NaryOp(SymbolEnvironment env, IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)
         {
-            return tokens.Skip(1).Select(x => x.Parse()).Aggregate(f);
+            return tokens.Skip(1).Select(x => x.Parse(env)).Aggregate(f);
         }
 
-        private Expression TernaryOp(IEnumerable<Token> tokens, Func<Expression, Expression, Expression, Expression> f)
+        private Expression TernaryOp(SymbolEnvironment env, IEnumerable<Token> tokens, Func<Expression, Expression, Expression, Expression> f)
         {
             var array = tokens.Skip(1).ToArray();
 
             if (array.Length != 3)
                 throw new ParseException(Location, "Ternary operator requires exactly 3 arguments");
 
-            return f(array[0].Parse(), array[1].Parse(), array[2].Parse());
+            return f(array[0].Parse(env), array[1].Parse(env), array[2].Parse(env));
         }
 
-        private Expression BinaryOp(IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)
+        private Expression BinaryOp(SymbolEnvironment env, IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)
         {
             var array = tokens.Skip(1).ToArray();
 
             if (array.Length != 2)
                 throw new ParseException(Location, "Binary operator requires exactly 2 arguments");
 
-            return f(array[0].Parse(), array[1].Parse());
+            return f(array[0].Parse(env), array[1].Parse(env));
         }
 
-        private Expression UnaryOp(IEnumerable<Token> tokens, Func<Expression, Expression> f)
+        private Expression UnaryOp(SymbolEnvironment env, IEnumerable<Token> tokens, Func<Expression, Expression> f)
         {
             var array = tokens.Skip(1).ToArray();
 
             if (array.Length != 1)
                 throw new ParseException(Location, "Unary operator requires exactly 1 arguments");
 
-            return f(array[0].Parse());
+            return f(array[0].Parse(env));
+        }
+    }
+
+    public class SymbolEnvironment
+    {
+        private readonly ConcurrentDictionary<String, ParameterExpression> Symbols = new ConcurrentDictionary<String, ParameterExpression>();
+        private readonly Maybe<SymbolEnvironment> ContainingScope;
+
+        public SymbolEnvironment()
+        {
+            ContainingScope = Maybe<SymbolEnvironment>.None;
+        }
+
+        public SymbolEnvironment(SymbolEnvironment parent)
+        {
+            ContainingScope = Maybe.Some(parent);
+        }
+
+        public Maybe<ParameterExpression> Get(String name)
+        {
+            return Symbols.GetMaybe(name).OrEval(() => ContainingScope.Select(x => x.Get(name)).Flatten());
+        }
+
+        public ParameterExpression Define(String name, Type type)
+        {
+            // TODO: what if it's already defined?
+            //       already defined in this scope? parent scope?
+            return Symbols.GetOrAdd(name, _ => Expression.Variable(type, name));
+        }
+
+        public bool IsDefined(String name)
+        {
+            return Symbols.GetMaybe(name)
+                .OrEval(() => ContainingScope.Select(x => x.Symbols.GetMaybe(name)).Flatten())
+                .HasValue;
         }
     }
 
