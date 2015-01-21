@@ -557,15 +557,15 @@ namespace ZedSharp
         }
 
         private static readonly Dictionary<string, Type> TypeKeywords = Dictionary.Of(
-            "bool", typeof (bool),
-            "char", typeof (char),
-            "int", typeof (int),
-            "long", typeof (long),
-            "byte", typeof (byte),
-            "double", typeof (double),
-            "decimal", typeof (decimal),
-            "string", typeof (string),
-            "object", typeof (object));
+            "bool",    typeof(bool),
+            "char",    typeof(char),
+            "int",     typeof(int),
+            "long",    typeof(long),
+            "byte",    typeof(byte),
+            "double",  typeof(double),
+            "decimal", typeof(decimal),
+            "string",  typeof(string),
+            "object",  typeof(object));
 
         private static Expression NaryOp(IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)
         {

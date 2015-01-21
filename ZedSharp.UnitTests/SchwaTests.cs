@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ZedSharp.UnitTests
@@ -10,12 +9,7 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void ConstantExpressions()
         {
-            var expr = Schwa.Parse("(+ 3 5)");
-            Assert.AreEqual(ExpressionType.Add, expr.NodeType);
-            Assert.AreEqual(typeof(int), expr.Type);
-
-            var lambda = Expression.Lambda<Func<int>>(expr);
-            Assert.AreEqual(8, lambda.Compile().Invoke());
+            Assert.AreEqual(8, Schwa.Eval<int>("(+ 3 5)"));
         }
 
         [TestMethod]
@@ -32,13 +26,31 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
+        public void DefaultOperator()
+        {
+            Assert.IsNull(Schwa.Eval<string>("(default string)"));
+            Assert.AreEqual(0, Schwa.Eval<int>("(default int)"));
+        }
+
+        [TestMethod]
+        public void TypeOfOperator()
+        {
+            Assert.AreEqual(typeof(string), Schwa.Eval<Type>("(typeof string)"));
+        }
+
+        [TestMethod]
+        public void CastAndAsOperators()
+        {
+            Assert.IsNotNull(Schwa.Eval<object>("(as object \"\")"));
+            Assert.AreEqual(1, Schwa.Eval<int>("(cast int 1.34)"));
+        }
+
+        [TestMethod]
         public void PrimitiveTypeChecks()
         {
             Assert.IsTrue(Schwa.Eval<bool>("(is int 0)"));
             Assert.IsTrue(Schwa.Eval<bool>("(is string \"asdfds\")"));
             Assert.IsTrue(Schwa.Eval<bool>("(is string \"\")"));
-            Assert.IsNotNull(Schwa.Eval<object>("(as object \"\")"));
-            Assert.AreEqual(1, Schwa.Eval<int>("(cast int 1.34)"));
         }
 
         [TestMethod]
@@ -46,6 +58,7 @@ namespace ZedSharp.UnitTests
         {
             Assert.IsTrue(Schwa.Eval<bool>("(! false)"));
             Assert.IsTrue(Schwa.Eval<bool>("(&& true true true true)"));
+            Assert.IsFalse(Schwa.Eval<bool>("(&& true true false true)"));
             Assert.IsTrue(Schwa.Eval<bool>("(|| true false true true)"));
             Assert.IsTrue(Schwa.Eval<bool>("(|| false false true false)"));
         }
