@@ -9,12 +9,6 @@ namespace ZedSharp.UnitTests
     public class SchwaTests
     {
         [TestMethod]
-        public void ConstantExpressions()
-        {
-            Assert.AreEqual(8, Schwa.Eval<int>("(+ 3 5)"));
-        }
-
-        [TestMethod]
         public void NumericExpressionTypes()
         {
             Assert.AreEqual(typeof(int), Schwa.Parse("143").Type);
@@ -56,13 +50,23 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
-        public void NaryOperators()
+        public void UnaryOperators()
         {
             Assert.IsTrue(Schwa.Eval<bool>("(! false)"));
+            Assert.AreEqual(0, Schwa.Eval<int>("(~ -1)"));
+            Assert.AreEqual(4, Schwa.Eval<int>("(-- 5)"));
+            Assert.AreEqual(9, Schwa.Eval<int>("(++ 8)"));
+        }
+
+        [TestMethod]
+        public void NaryOperators()
+        {
             Assert.IsTrue(Schwa.Eval<bool>("(&& true true true true)"));
             Assert.IsFalse(Schwa.Eval<bool>("(&& true true false true)"));
             Assert.IsTrue(Schwa.Eval<bool>("(|| true false true true)"));
             Assert.IsTrue(Schwa.Eval<bool>("(|| false false true false)"));
+            Assert.AreEqual(8, Schwa.Eval<int>("(+ 3 5)"));
+            Assert.AreEqual(new [] {6, 4, -2, 3, -9, 5}.Sum(), Schwa.Eval<int>("(+ 6 4 -2 3 -9 5)"));
         }
 
         [TestMethod]
@@ -92,7 +96,7 @@ namespace ZedSharp.UnitTests
         public void LambdaDeclaration()
         {
             var f = Schwa.Eval<Func<int, int>>("(=> ((int x)) (+ 1 x))");
-            Check.That(x => f(x) == x + 1, Rand.Ints().Where(x => x != Int32.MaxValue).Take(100));
+            Check.That(x => f(x) == x + 1, Sample.Ints.Where(x => x != Int32.MaxValue));
         }
 
         [TestMethod]

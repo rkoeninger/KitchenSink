@@ -75,6 +75,21 @@ namespace ZedSharp
             return tokens;
         }
 
+        private List<Token> ReadUntilComboEnd()
+        {
+            var tokens = new List<Token>();
+
+            for (var token = ReadToken(); !(token is ComboEnd); token = ReadToken())
+            {
+                if (token == null)
+                    Fail("Unexpected end of combo");
+
+                tokens.Add(token);
+            }
+
+            return tokens;
+        }
+
         public Token ReadToken()
         {
             SkipWhiteSpace();
@@ -86,54 +101,18 @@ namespace ZedSharp
                     Fail("Unexpected end of file");
                     return null;
                 case '(':
-                {
                     Skip(); // Pull '(' off the reader
-                    var tokens = new List<Token>();
-
-                    for (var token = ReadToken(); !(token is ComboEnd); token = ReadToken())
-                    {
-                        if (token == null)
-                            Fail("Unexpected end of combo");
-
-                        tokens.Add(token);
-                    }
-
-                    return new Combo(tokens, location);
-                }
+                    return new Combo(ReadUntilComboEnd(), location);
                 case '[':
-                {
                     Skip(); // Pull '[' off the reader
-                    var tokens = new List<Token>();
-
-                    for (var token = ReadToken(); !(token is ComboEnd); token = ReadToken())
-                    {
-                        if (token == null)
-                            Fail("Unexpected end of combo");
-
-                        tokens.Add(token);
-                    }
-
-                    return new SquareCombo(tokens, location);
-                }
+                    return new SquareCombo(ReadUntilComboEnd(), location);
                 case '{':
-                {
                     Skip(); // Pull '{' off the reader
-                    var tokens = new List<Token>();
-
-                    for (var token = ReadToken(); !(token is ComboEnd); token = ReadToken())
-                    {
-                        if (token == null)
-                            Fail("Unexpected end of combo");
-
-                        tokens.Add(token);
-                    }
-
-                    return new CurlyCombo(tokens, location);
-                }
+                    return new CurlyCombo(ReadUntilComboEnd(), location);
                 case ')':
                 case ']':
                 case '}':
-                    Skip(); // Pull ')' or ']' off the reader
+                    Skip(); // Pull ')' or ']' or '}' off the reader
                     return new ComboEnd(location);
                 case '\"':
                     return new Atom(ReadStringLiteral(), location);
@@ -174,13 +153,14 @@ namespace ZedSharp
                 if (!Char.IsWhiteSpace(ch))
                     break;
 
-                if (ch != '\r')
-                    _column++;
-
                 if (ch == '\n')
                 {
                     _line++;
                     _column = 1;
+                }
+                else if (ch != '\r')
+                {
+                    _column++;
                 }
 
                 _reader.Read();
@@ -200,13 +180,14 @@ namespace ZedSharp
 
                 var ch = (char)b;
 
-                if (ch != '\r')
-                    _column++;
-
                 if (ch == '\n')
                 {
                     _line++;
                     _column = 1;
+                }
+                else if (ch != '\r')
+                {
+                    _column++;
                 }
 
                 if (Char.IsWhiteSpace(ch) || ch.IsIn(')', '(', ']', '[', '}', '{'))
@@ -233,13 +214,14 @@ namespace ZedSharp
 
                 var ch = (char)b;
 
-                if (ch != '\r')
-                    _column++;
-
                 if (ch == '\n')
                 {
                     _line++;
                     _column = 1;
+                }
+                else if (ch != '\r')
+                {
+                    _column++;
                 }
 
                 builder.Append(ch);
