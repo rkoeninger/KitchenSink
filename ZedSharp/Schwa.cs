@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -51,6 +52,7 @@ namespace ZedSharp
         private int _line = 1;
         private int _column = 1;
         private readonly TextReader _reader;
+        private readonly char[] _unicodeHex = new char[8];
 
         public Syntax(TextReader reader, String sourceUnit = "Unknown")
         {
@@ -75,27 +77,13 @@ namespace ZedSharp
             return tokens;
         }
 
-        private List<Token> ReadUntilComboEnd()
-        {
-            var tokens = new List<Token>();
-
-            for (var token = ReadToken(); !(token is ComboEnd); token = ReadToken())
-            {
-                if (token == null)
-                    Fail("Unexpected end of combo");
-
-                tokens.Add(token);
-            }
-
-            return tokens;
-        }
-
         public Token ReadToken()
         {
             SkipWhiteSpace();
             var location = CurrentLocation;
+            var peekByte = _reader.Peek();
 
-            switch (_reader.Peek())
+            switch (peekByte)
             {
                 case -1:
                     Fail("Unexpected end of file");
@@ -115,7 +103,8 @@ namespace ZedSharp
                     Skip(); // Pull ')' or ']' or '}' off the reader
                     return new ComboEnd(location);
                 case '\"':
-                    return new Atom(ReadStringLiteral(), location);
+                case '\'':
+                    return new Atom(ReadStringLiteral((char) peekByte), location);
                 default:
                     return new Atom(ReadLiteral(), location);
             }
@@ -129,7 +118,7 @@ namespace ZedSharp
 
             public override Expression Parse(SymbolEnvironment env)
             {
-                throw new Exception("ComboEnd cannot be parsed");
+                throw new InvalidOperationException("ComboEnd cannot be parsed");
             }
         }
 
@@ -171,7 +160,7 @@ namespace ZedSharp
         {
             var builder = new StringBuilder();
 
-            for (; ; )
+            for (;;)
             {
                 var b = _reader.Peek();
 
@@ -200,20 +189,26 @@ namespace ZedSharp
             return builder.ToString();
         }
 
-        private String ReadStringLiteral()
+        private String ReadStringLiteral(char quoteChar)
         {
             var builder = new StringBuilder();
             builder.Append((char)_reader.Read()); // pull the opening qoute
 
-            for (; ; )
+            for (;;)
             {
                 var b = _reader.Read();
 
                 if (b == -1)
-                    Fail("Uncompleted string literal");
+                    Fail("Incomplete string literal");
 
                 var ch = (char)b;
 
+                if (ch == '\\')
+                {
+                    builder.Append(ReadEscapeSequence());
+                    continue;
+                }
+                
                 if (ch == '\n')
                 {
                     _line++;
@@ -226,11 +221,107 @@ namespace ZedSharp
 
                 builder.Append(ch);
 
-                if (ch == '\"')
+                if (ch == quoteChar)
                     break;
             }
 
             return builder.ToString();
+        }
+
+        private String ReadEscapeSequence()
+        {
+            // Backslash that starts the escape sequence has already been read at this point
+            // Full escape sequence should be read off of the reader when this method returns
+            var escapeChar = (char)_reader.Read();
+
+            switch (escapeChar)
+            {
+                case '\\': return "\\";
+                case '0':  return "\0";
+                case '\'': return "\'";
+                case '\"': return "\"";
+                case 'n':  return "\n";
+                case 'r':  return "\r";
+                case 't':  return "\t";
+                case 'v':  return "\v";
+                case 'b':  return "\b";
+                case 'f':  return "\f";
+                case 'a':  return "\a";
+                case 'u':  return new String(ReadUnicode16BitEscapeSequence(), 1);
+                case 'U':  return ReadUnicode32BitEscapeSequence();
+                case 'x':  return new String(ReadUnicodeVariableLengthEscapeSequence(), 1);
+            }
+
+            Fail("Invalid character escape sequence: \"\\" + escapeChar + "\"");
+            return null;
+        }
+
+        private char ReadUnicode16BitEscapeSequence()
+        {
+            if (_reader.Read(_unicodeHex, 0, 4) != 4)
+                Fail("Incomplete 16-bit unicode code point escape sequence");
+
+            var utf16Bits = Int16.Parse(new String(_unicodeHex, 0, 4), NumberStyles.HexNumber);
+            return (char)utf16Bits;
+        }
+
+        private String ReadUnicode32BitEscapeSequence()
+        {
+            if (_reader.Read(_unicodeHex, 0, 8) != 8)
+                Fail("Incomplete 32-bit unicode code point escape sequence");
+
+            var utf32Bits = Int32.Parse(new String(_unicodeHex, 0, 8), NumberStyles.HexNumber);
+            return Char.ConvertFromUtf32(utf32Bits);
+        }
+
+        private char ReadUnicodeVariableLengthEscapeSequence()
+        {
+            _unicodeHex.Fill((char) 0);
+            var len = 0;
+
+            while (len < 4)
+            {
+                var digitByte = _reader.Peek();
+
+                if (digitByte == -1)
+                    Fail("Incomplete unicode code point escape sequence");
+
+                var digitChar = (char)digitByte;
+
+                if (!IsHexDigit(digitChar))
+                    break;
+
+                // Pull char off reader now that we're sure we need it
+                _unicodeHex[len++] = (char)_reader.Read();
+            }
+
+            if (len == 0)
+                Fail("No hex chars following \\x escape sequence");
+
+            var utf16Bits = Int16.Parse(new String(_unicodeHex, 0, len), NumberStyles.HexNumber);
+            return (char)utf16Bits;
+        }
+
+        private static bool IsHexDigit(char ch)
+        {
+            return Char.IsDigit(ch)
+                   || (ch >= 'A' && ch <= 'F')
+                   || (ch >= 'a' && ch <= 'f');
+        }
+
+        private List<Token> ReadUntilComboEnd()
+        {
+            var tokens = new List<Token>();
+
+            for (var token = ReadToken(); !(token is ComboEnd); token = ReadToken())
+            {
+                if (token == null)
+                    Fail("Unexpected end of combo");
+
+                tokens.Add(token);
+            }
+
+            return tokens;
         }
 
         private Location CurrentLocation
@@ -240,7 +331,7 @@ namespace ZedSharp
 
         private void Fail(String message)
         {
-            throw new LexException(CurrentLocation, message);
+            throw new SchwaLexException(CurrentLocation, message);
         }
     }
 
@@ -410,7 +501,7 @@ namespace ZedSharp
 
         public override Expression Parse(SymbolEnvironment env)
         {
-            if (Tokens.Count == 0) throw new ParseException(Location, "Empty parens don't mean anything");
+            if (Tokens.Count == 0) throw new SchwaParseException(Location, "Empty parens don't mean anything");
 
             if (Tokens[0] is Atom)
             {
@@ -424,13 +515,13 @@ namespace ZedSharp
         {
             switch (atom.Literal)
             {
-                case "!": return UnaryOp(env, Tokens, Expression.Not);
-                case "~": return UnaryOp(env, Tokens, Expression.OnesComplement);
+                case "!":  return UnaryOp(env, Tokens, Expression.Not);
+                case "~":  return UnaryOp(env, Tokens, Expression.OnesComplement);
                 case "++": return UnaryOp(env, Tokens, Expression.Increment);
                 case "--": return UnaryOp(env, Tokens, Expression.Decrement);
-                case "<": return BinaryOp(env, Tokens, Expression.LessThan);
+                case "<":  return BinaryOp(env, Tokens, Expression.LessThan);
                 case "<=": return BinaryOp(env, Tokens, Expression.LessThanOrEqual);
-                case ">": return BinaryOp(env, Tokens, Expression.GreaterThan);
+                case ">":  return BinaryOp(env, Tokens, Expression.GreaterThan);
                 case ">=": return BinaryOp(env, Tokens, Expression.GreaterThanOrEqual);
                 case "<<": return BinaryOp(env, Tokens, Expression.LeftShift);
                 case ">>": return BinaryOp(env, Tokens, Expression.RightShift);
@@ -439,20 +530,20 @@ namespace ZedSharp
                 case "!=": return BinaryOp(env, Tokens, Expression.NotEqual);
                 case "if":
                 case "?:": return TernaryOp(env, Tokens, Expression.Condition);
-                case "&": return NaryOp(env, Tokens, Expression.And);
-                case "|": return NaryOp(env, Tokens, Expression.Or);
+                case "&":  return NaryOp(env, Tokens, Expression.And);
+                case "|":  return NaryOp(env, Tokens, Expression.Or);
                 case "and":
                 case "&&": return NaryOp(env, Tokens, Expression.AndAlso);
                 case "or":
                 case "||": return NaryOp(env, Tokens, Expression.OrElse);
                 case "xor":
-                case "^": return NaryOp(env, Tokens, Expression.ExclusiveOr);
-                case "+": return NaryOp(env, Tokens, Expression.Add);
-                case "-": return NaryOp(env, Tokens, Expression.Subtract);
-                case "*": return NaryOp(env, Tokens, Expression.Multiply);
-                case "/": return NaryOp(env, Tokens, Expression.Divide);
-                case "%": return NaryOp(env, Tokens, Expression.Modulo);
-                case "#": // use for indexer access (get only, set not supported)
+                case "^":  return NaryOp(env, Tokens, Expression.ExclusiveOr);
+                case "+":  return NaryOp(env, Tokens, Expression.Add);
+                case "-":  return NaryOp(env, Tokens, Expression.Subtract);
+                case "*":  return NaryOp(env, Tokens, Expression.Multiply);
+                case "/":  return NaryOp(env, Tokens, Expression.Divide);
+                case "%":  return NaryOp(env, Tokens, Expression.Modulo);
+                case "#":  // use for indexer access (get only, set not supported)
                 {
                     var target = Tokens[1].Parse(env);
                     var args = Tokens.Skip(2).Select(x => x.Parse(env));
@@ -563,7 +654,7 @@ namespace ZedSharp
             var array = tokens.Skip(1).ToArray();
 
             if (array.Length != 3)
-                throw new ParseException(Location, "Ternary operator requires exactly 3 arguments");
+                throw new SchwaParseException(Location, "Ternary operator requires exactly 3 arguments");
 
             return f(array[0].Parse(env), array[1].Parse(env), array[2].Parse(env));
         }
@@ -573,7 +664,7 @@ namespace ZedSharp
             var array = tokens.Skip(1).ToArray();
 
             if (array.Length != 2)
-                throw new ParseException(Location, "Binary operator requires exactly 2 arguments");
+                throw new SchwaParseException(Location, "Binary operator requires exactly 2 arguments");
 
             return f(array[0].Parse(env), array[1].Parse(env));
         }
@@ -583,7 +674,7 @@ namespace ZedSharp
             var array = tokens.Skip(1).ToArray();
 
             if (array.Length != 1)
-                throw new ParseException(Location, "Unary operator requires exactly 1 arguments");
+                throw new SchwaParseException(Location, "Unary operator requires exactly 1 arguments");
 
             return f(array[0].Parse(env));
         }
@@ -646,9 +737,9 @@ namespace ZedSharp
         }
     }
 
-    internal class LexException : ApplicationException
+    public class SchwaLexException : ApplicationException
     {
-        public LexException(Location location, String message) : base(message)
+        public SchwaLexException(Location location, String message) : base(message)
         {
             Location = location;
         }
@@ -656,9 +747,9 @@ namespace ZedSharp
         public Location Location { get; private set; }
     }
 
-    internal class ParseException : ApplicationException
+    public class SchwaParseException : ApplicationException
     {
-        public ParseException(Location location, String message) : base(message)
+        public SchwaParseException(Location location, String message) : base(message)
         {
             Location = location;
         }

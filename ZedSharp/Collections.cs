@@ -99,6 +99,14 @@ namespace ZedSharp
                 temp[j] = temp[i];
             }
         }
+
+        public static A[] Fill<A>(this A[] array, A value)
+        {
+            for (var i = 0; i < array.Length; ++i)
+                array[i] = value;
+
+            return array;
+        }
     }
 
     public static class ReadOnly

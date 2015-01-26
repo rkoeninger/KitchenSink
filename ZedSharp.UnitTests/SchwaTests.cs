@@ -22,6 +22,21 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
+        public void UnicodeParsing()
+        {
+            Assert.AreEqual("\u0000", Schwa.Eval<string>("\"\\u0000\""));
+            Assert.AreEqual("\u0065", Schwa.Eval<string>("\"\\u0065\""));
+            Assert.AreEqual("\uffff", Schwa.Eval<string>("\"\\uffff\""));
+            Assert.AreEqual("\U00000000", Schwa.Eval<string>("\"\\U00000000\""));
+            Assert.AreEqual("\U00000065", Schwa.Eval<string>("\"\\U00000065\""));
+            Assert.AreEqual("\U0002a601", Schwa.Eval<string>("\"\\U0002a601\""));
+            Assert.AreEqual("\x0000", Schwa.Eval<string>("\"\\x0000\""));
+            Assert.AreEqual("\t", Schwa.Eval<string>("\"\\x9\""));
+            Assert.AreEqual("\xffff", Schwa.Eval<string>("\"\\xffff\""));
+            Expect.Error<SchwaLexException>(() => Schwa.Eval<string>("\"\\x\""));
+        }
+
+        [TestMethod]
         public void DefaultOperator()
         {
             Assert.IsNull(Schwa.Eval<string>("(default string)"));
