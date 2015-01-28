@@ -41,6 +41,7 @@ namespace ZedSharp.UnitTests
         {
             Assert.IsNull(Schwa.Eval<string>("(default string)"));
             Assert.AreEqual(0, Schwa.Eval<int>("(default int)"));
+            Assert.AreEqual(null, Schwa.Eval<int?>("(default int?)"));
         }
 
         [TestMethod]
@@ -48,6 +49,12 @@ namespace ZedSharp.UnitTests
         {
             Assert.AreEqual(typeof(string), Schwa.Eval<Type>("(typeof string)"));
             Assert.AreEqual(typeof(int?), Schwa.Eval<Type>("(typeof int?)"));
+        }
+
+        [TestMethod]
+        public void NullableTypeLiterals()
+        {
+            Expect.Error<ArgumentException>(() => Schwa.Eval<Type>("(typeof int??)"));
         }
 
         [TestMethod]
@@ -75,6 +82,9 @@ namespace ZedSharp.UnitTests
         public void UnaryOperators()
         {
             Assert.IsTrue(Schwa.Eval<bool>("(! false)"));
+            Assert.IsFalse(Schwa.Eval<bool>("(! true)"));
+            Expect.Error<InvalidOperationException>(() => Schwa.Eval<bool>("(! null)"));
+
             Assert.AreEqual(0, Schwa.Eval<int>("(~ -1)"));
             Assert.AreEqual(4, Schwa.Eval<int>("(-- 5)"));
             Assert.AreEqual(9, Schwa.Eval<int>("(++ 8)"));
@@ -89,6 +99,7 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(Schwa.Eval<bool>("(|| false false true false)"));
             Assert.AreEqual(8, Schwa.Eval<int>("(+ 3 5)"));
             Assert.AreEqual(new [] {6, 4, -2, 3, -9, 5}.Sum(), Schwa.Eval<int>("(+ 6 4 -2 3 -9 5)"));
+            Assert.AreEqual(false, Schwa.Eval<bool>("(?? (cast bool? null) false)"));
         }
 
         [TestMethod]

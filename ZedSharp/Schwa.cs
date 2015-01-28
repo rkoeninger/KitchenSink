@@ -642,7 +642,7 @@ namespace ZedSharp
             return TypeKeywords.GetMaybe(str).OrElse(null);
         }
 
-        private static readonly Dictionary<string, Type> TypeKeywords = Dictionary.Of(
+        public static readonly IReadOnlyDictionary<string, Type> TypeKeywords = Dictionary.Of(
             "bool",    typeof(bool),
             "char",    typeof(char),
             "byte",    typeof(byte),

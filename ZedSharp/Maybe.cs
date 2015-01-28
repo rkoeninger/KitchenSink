@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -69,12 +70,17 @@ namespace ZedSharp
             return Try(() => XDocument.Parse(s));
         }
 
-        public static Maybe<A> GetMaybe<A>(this IList<A> list, int index)
+        public static Maybe<A> GetMaybe<A>(this IReadOnlyList<A> list, int index)
         {
             return Try(() => list[index]);
         }
 
-        public static Maybe<B> GetMaybe<A, B>(this IDictionary<A, B> dict, A key)
+        public static Maybe<B> GetMaybe<A, B>(this IReadOnlyDictionary<A, B> dict, A key)
+        {
+            return Try(() => dict[key]);
+        }
+
+        public static Maybe<B> GetMaybe<A, B>(this ConcurrentDictionary<A, B> dict, A key)
         {
             return Try(() => dict[key]);
         }
