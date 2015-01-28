@@ -505,13 +505,13 @@ namespace ZedSharp
 
             if (Tokens[0] is Atom)
             {
-                return ParseAtom((Atom) Tokens[0], env);
+                return ParseOp((Atom) Tokens[0], env);
             }
 
             throw new NotImplementedException();
         }
 
-        private Expression ParseAtom(Atom atom, SymbolEnvironment env)
+        private Expression ParseOp(Atom atom, SymbolEnvironment env)
         {
             switch (atom.Literal)
             {
@@ -628,17 +628,32 @@ namespace ZedSharp
                 .All(x => x.Item2.Type.IsAssignableTo(x.Item1.ParameterType));
         }
 
+        private static readonly Type Nullable = typeof (Nullable<>);
+
         public static Type ParseType(String str)
         {
+            if (str.EndsWith("?"))
+            {
+                str = str.Substring(0, str.Length - 1);
+                var type = ParseType(str);
+                return Nullable.MakeGenericType(type);
+            }
+
             return TypeKeywords.GetMaybe(str).OrElse(null);
         }
 
         private static readonly Dictionary<string, Type> TypeKeywords = Dictionary.Of(
             "bool",    typeof(bool),
             "char",    typeof(char),
-            "int",     typeof(int),
-            "long",    typeof(long),
             "byte",    typeof(byte),
+            "sbyte",   typeof(sbyte),
+            "short",   typeof(short),
+            "ushort",  typeof(ushort),
+            "int",     typeof(int),
+            "uint",    typeof(uint),
+            "long",    typeof(long),
+            "ulong",   typeof(ulong),
+            "float",   typeof(float),
             "double",  typeof(double),
             "decimal", typeof(decimal),
             "string",  typeof(string),

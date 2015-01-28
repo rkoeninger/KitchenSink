@@ -47,6 +47,13 @@ namespace ZedSharp.UnitTests
         public void TypeOfOperator()
         {
             Assert.AreEqual(typeof(string), Schwa.Eval<Type>("(typeof string)"));
+            Assert.AreEqual(typeof(int?), Schwa.Eval<Type>("(typeof int?)"));
+        }
+
+        [TestMethod]
+        public void NewOperator()
+        {
+            Assert.AreEqual(0, Schwa.Eval<int?>("(new int? 0)"));
         }
 
         [TestMethod]
