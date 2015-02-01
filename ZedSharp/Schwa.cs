@@ -105,6 +105,10 @@ namespace ZedSharp
                 case '\"':
                 case '\'':
                     return new Atom(ReadStringLiteral((char) peekByte), location);
+                case '«':
+                    return new Atom(ReadNestedStringLiteral(), location);
+                case '»':
+                    throw new SchwaLexException(location, "Closing nested string character unexpected");
                 default:
                     return new Atom(ReadLiteral(), location);
             }
@@ -179,7 +183,7 @@ namespace ZedSharp
                     _column++;
                 }
 
-                if (Char.IsWhiteSpace(ch) || ch.IsIn(')', '(', ']', '[', '}', '{'))
+                if (Char.IsWhiteSpace(ch) || ch.IsIn(')', '(', ']', '[', '}', '{', '\"', '\'', '«', '»'))
                     break;
 
                 builder.Append(ch);
@@ -223,6 +227,55 @@ namespace ZedSharp
 
                 if (ch == quoteChar)
                     break;
+            }
+
+            return builder.ToString();
+        }
+
+        private String ReadNestedStringLiteral()
+        {
+            var builder = new StringBuilder();
+            builder.Append((char)_reader.Read()); // pull the opening qoute
+            var nestDepth = 1;
+
+            for (;;)
+            {
+                var b = _reader.Read();
+
+                if (b == -1)
+                    Fail("Incomplete string literal");
+
+                var ch = (char)b;
+
+                if (ch == '\\')
+                {
+                    builder.Append(ReadEscapeSequence());
+                    continue;
+                }
+                
+                if (ch == '\n')
+                {
+                    _line++;
+                    _column = 1;
+                }
+                else if (ch != '\r')
+                {
+                    _column++;
+                }
+
+                builder.Append(ch);
+
+                if (ch == '«')
+                {
+                    nestDepth++;
+                }
+                else if (ch == '»')
+                {
+                    nestDepth--;
+
+                    if (nestDepth == 0)
+                        break;
+                }
             }
 
             return builder.ToString();
@@ -396,10 +449,11 @@ namespace ZedSharp
 
         public override Expression Parse(SymbolEnvironment env)
         {
-            if (Literal == "null")  return Null;
-            if (Literal == "true")  return True;
-            if (Literal == "false") return False;
-            if (Literal[0] == '\"') return Expression.Constant(String.Intern(Literal.Substring(1, Literal.Length - 2)));
+            if (Literal == "null")           return Null;
+            if (Literal == "true")           return True;
+            if (Literal == "false")          return False;
+            if (Literal[0].IsIn('\"', '\'')) return Expression.Constant(StripQuotes(Literal, false));
+            if (Literal[0] == '«')           return Expression.Constant(StripQuotes(Literal, true));
 
             if (IntRegex.IsMatch(Literal))
             {
@@ -427,6 +481,16 @@ namespace ZedSharp
             }
 
             return env.Get(Literal).OrElseThrow("Variable not defined");
+        }
+
+        private static String StripQuotes(String str, bool stripNestedQuotes)
+        {
+            str = str.Substring(1, str.Length - 2);
+
+            if (stripNestedQuotes)
+                str = str.Replace('«', '\"').Replace('»', '\"');
+
+            return String.Intern(str);
         }
     }
 

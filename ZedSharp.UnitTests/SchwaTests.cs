@@ -140,5 +140,15 @@ namespace ZedSharp.UnitTests
                   Enumerable.Repeat("(", depth).Concat()
                 + Enumerable.Repeat(")", depth).Concat());
         }
+
+        [TestMethod]
+        public void NestedString()
+        {
+            var stringList = Schwa.Eval<IReadOnlyList<String>>("[\"abc\" \'\"def\"\' «\"sdf«345\'«fgh\"»678»\'yui»]");
+            Assert.AreEqual(3, stringList.Count);
+            Assert.AreEqual("abc", stringList[0]);
+            Assert.AreEqual("\"def\"", stringList[1]);
+            Assert.AreEqual("\"sdf\"345\'\"fgh\"\"678\"\'yui", stringList[2]);
+        }
     }
 }
