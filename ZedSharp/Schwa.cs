@@ -541,11 +541,17 @@ namespace ZedSharp
         public override Expression Parse(SymbolEnvironment env)
         {
             var elementExprs = Tokens.Select(x => x.Parse(env)).ToArray();
-            var elementType = Combo.GetCommonBaseType(elementExprs.Select(x => x.Type).ToArray());
+            return BuildListExpression(elementExprs);
+        }
+
+        public static Expression BuildListExpression(IEnumerable<Expression> exprs)
+        {
+            var exprArray = exprs.ToArray();
+            var elementType = Combo.GetCommonBaseType(exprArray.Select(x => x.Type).ToArray());
             var listType = typeof(List<>).MakeGenericType(elementType);
             var ctor = listType.GetConstructor(new Type[0]);
             if (ctor == null) throw new Exception("List doesn't have no-arg constructor somehow");
-            return Expression.ListInit(Expression.New(ctor), elementExprs);
+            return Expression.ListInit(Expression.New(ctor), exprArray);
         }
     }
 
@@ -583,15 +589,15 @@ namespace ZedSharp
                 case "~":  return UnaryOp(env, Tokens, Expression.OnesComplement);
                 case "++": return UnaryOp(env, Tokens, Expression.Increment);
                 case "--": return UnaryOp(env, Tokens, Expression.Decrement);
-                case "<":  return BinaryOp(env, Tokens, Expression.LessThan);
-                case "<=": return BinaryOp(env, Tokens, Expression.LessThanOrEqual);
-                case ">":  return BinaryOp(env, Tokens, Expression.GreaterThan);
-                case ">=": return BinaryOp(env, Tokens, Expression.GreaterThanOrEqual);
+                case "<":  return CompareOp(env, Tokens, Expression.LessThan);
+                case "<=": return CompareOp(env, Tokens, Expression.LessThanOrEqual);
+                case ">":  return CompareOp(env, Tokens, Expression.GreaterThan);
+                case ">=": return CompareOp(env, Tokens, Expression.GreaterThanOrEqual);
                 case "<<": return BinaryOp(env, Tokens, Expression.LeftShift);
                 case ">>": return BinaryOp(env, Tokens, Expression.RightShift);
                 case "??": return BinaryOp(env, Tokens, Expression.Coalesce);
-                case "==": return BinaryOp(env, Tokens, Expression.Equal);
-                case "!=": return BinaryOp(env, Tokens, Expression.NotEqual);
+                case "==": return EqualityOp(env, Tokens);
+                case "!=": return InequalityOp(env, Tokens);
                 case "if":
                 case "?:": return TernaryOp(env, Tokens, Expression.Condition);
                 case "&":  return NaryOp(env, Tokens, Expression.And);
@@ -722,6 +728,61 @@ namespace ZedSharp
             "decimal", typeof(decimal),
             "string",  typeof(string),
             "object",  typeof(object));
+
+        private static bool AllEqual(IEnumerable<object> vals)
+        {
+            var array = vals.ToArray();
+
+            if (array.Length < 2)
+                throw new Exception();
+
+            var set = new HashSet<object> { array.First() };
+            return array.Skip(1).All(val => !set.Add(val));
+        }
+
+        private static bool AllInequal(IEnumerable<object> vals)
+        {
+            var array = vals.ToArray();
+
+            if (array.Length < 2)
+                throw new Exception();
+
+            var set = new HashSet<object>();
+            return array.All(set.Add);
+        }
+
+        public static Expression BuildListExpression(IEnumerable<Expression> exprs)
+        {
+            var exprArray = exprs.ToArray();
+            var elementType = Combo.GetCommonBaseType(exprArray.Select(x => x.Type).ToArray());
+            var listType = typeof(List<>).MakeGenericType(elementType);
+            var ctor = listType.GetConstructor(new Type[0]);
+            if (ctor == null) throw new Exception("List doesn't have no-arg constructor somehow");
+            var listExpr = Expression.ListInit(Expression.New(ctor), exprArray);
+            var castMethod = typeof (Enumerable).GetMethod("Cast", new[] {typeof (IEnumerable<>)}).MakeGenericMethod(typeof(object));
+            var asEnumerableMethod = typeof (Enumerable).GetMethod("AsEnumerable").MakeGenericMethod(elementType);
+            return Expression.Call(castMethod, listExpr);
+        }
+
+        private static Expression EqualityOp(SymbolEnvironment env, IEnumerable<Token> tokens)
+        {
+            Expression<Func<IEnumerable<object>, bool>> f = xs => AllEqual(xs);
+            var exprs = tokens.Skip(1).Select(x => x.Parse(env));
+            return Expression.Invoke(f, Seq.Of(BuildListExpression(exprs)));
+        }
+
+        private static Expression InequalityOp(SymbolEnvironment env, IEnumerable<Token> tokens)
+        {
+            Expression<Func<IEnumerable<object>, bool>> f = xs => AllInequal(xs);
+            var exprs = tokens.Skip(1).Select(x => x.Parse(env));
+            return Expression.Invoke(f, Seq.Of(BuildListExpression(exprs)));
+        }
+
+        private static Expression CompareOp(SymbolEnvironment env, IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)
+        {
+            var exprs = tokens.Skip(1).Select(x => x.Parse(env));
+            return exprs.OverlappingPartition2().Select(x => f(x.Item1, x.Item2)).Aggregate(Expression.AndAlso);
+        }
 
         private static Expression NaryOp(SymbolEnvironment env, IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)
         {

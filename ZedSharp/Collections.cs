@@ -54,6 +54,16 @@ namespace ZedSharp
             return Partition(array.AsEnumerable(), count).Select(x => x.ToArray());
         }
 
+        public static IEnumerable<Tuple<A, A>> OverlappingPartition2<A>(this IEnumerable<A> seq)
+        {
+            var array = seq.ToArray();
+
+            if (array.Length < 2)
+                throw new Exception("too few elements");
+
+            return Enumerable.Range(0, array.Length - 1).Select(i => Tuple.Create(array[i], array[i + 1]));
+        }
+
         public static HashSet<A> Set<A>(params A[] vals)
         {
             return new HashSet<A>(vals);

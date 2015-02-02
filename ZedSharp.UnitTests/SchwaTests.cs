@@ -103,6 +103,34 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
+        public void NaryCompareOperators()
+        {
+            Assert.IsTrue(Schwa.Eval<bool>("(< 1 3 6 7)"));
+            Assert.IsFalse(Schwa.Eval<bool>("(< 1 5 4 7)"));
+            Assert.IsFalse(Schwa.Eval<bool>("(< 1 4 4 8)"));
+            Assert.IsTrue(Schwa.Eval<bool>("(> 8 7 6 -4)"));
+            Assert.IsTrue(Schwa.Eval<bool>("(>= 9 5 5 2)"));
+            Assert.IsTrue(Schwa.Eval<bool>("(<= 1 4 4 8)"));
+            Assert.IsFalse(Schwa.Eval<bool>("(>= 9 5 6 2)"));
+        }
+
+        [TestMethod]
+        public void NaryEqualityOperators()
+        {
+            Expect.Error(() => Schwa.Eval<bool>("(==)"));
+            Expect.Error(() => Schwa.Eval<bool>("(== 1)"));
+            Assert.IsTrue(Schwa.Eval<bool>("(== 1 1)"));
+            Assert.IsTrue(Schwa.Eval<bool>("(== 1 1 1)"));
+            Assert.IsFalse(Schwa.Eval<bool>("(== 1 1 1 2 1)"));
+            Expect.Error(() => Schwa.Eval<bool>("(!=)"));
+            Expect.Error(() => Schwa.Eval<bool>("(!= 1)"));
+            Assert.IsFalse(Schwa.Eval<bool>("(!= 1 1)"));
+            Assert.IsFalse(Schwa.Eval<bool>("(!= 1 1 1)"));
+            Assert.IsFalse(Schwa.Eval<bool>("(!= 1 1 1 2 1)"));
+            Assert.IsTrue(Schwa.Eval<bool>("(!= 4 2 7 5)"));
+        }
+
+        [TestMethod]
         public void ConditionalOperator()
         {
             Assert.AreEqual(5, Schwa.Eval<int>("(?: true 5 3)"));
