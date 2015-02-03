@@ -734,7 +734,7 @@ namespace ZedSharp
             var array = vals.ToArray();
 
             if (array.Length < 2)
-                throw new Exception();
+                throw new ArgumentException("Requires at least 2 arguments");
 
             var set = new HashSet<object> { array.First() };
             return array.Skip(1).All(val => !set.Add(val));
@@ -742,13 +742,7 @@ namespace ZedSharp
 
         private static bool AllInequal(IEnumerable<object> vals)
         {
-            var array = vals.ToArray();
-
-            if (array.Length < 2)
-                throw new Exception();
-
-            var set = new HashSet<object>();
-            return array.All(set.Add);
+            return ! AllEqual(vals);
         }
 
         public static Expression BuildListExpression(IEnumerable<Expression> exprs)
@@ -766,15 +760,25 @@ namespace ZedSharp
 
         private static Expression EqualityOp(SymbolEnvironment env, IEnumerable<Token> tokens)
         {
+            var tokensArray = tokens.ToArray();
+
+            if (tokensArray.Length < 2)
+                throw new ArgumentException("Requires at least 2 arguments");
+
             Expression<Func<IEnumerable<object>, bool>> f = xs => AllEqual(xs);
-            var exprs = tokens.Skip(1).Select(x => x.Parse(env));
+            var exprs = tokensArray.Skip(1).Select(x => x.Parse(env));
             return Expression.Invoke(f, Seq.Of(BuildListExpression(exprs)));
         }
 
         private static Expression InequalityOp(SymbolEnvironment env, IEnumerable<Token> tokens)
         {
+            var tokensArray = tokens.ToArray();
+
+            if (tokensArray.Length < 2)
+                throw new ArgumentException("Requires at least 2 arguments");
+
             Expression<Func<IEnumerable<object>, bool>> f = xs => AllInequal(xs);
-            var exprs = tokens.Skip(1).Select(x => x.Parse(env));
+            var exprs = tokensArray.Skip(1).Select(x => x.Parse(env));
             return Expression.Invoke(f, Seq.Of(BuildListExpression(exprs)));
         }
 

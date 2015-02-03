@@ -117,16 +117,16 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void NaryEqualityOperators()
         {
-            Expect.Error(() => Schwa.Eval<bool>("(==)"));
-            Expect.Error(() => Schwa.Eval<bool>("(== 1)"));
+            Expect.Error<ArgumentException>(() => Schwa.Eval<bool>("(==)"));
+            Expect.Error<ArgumentException>(() => Schwa.Eval<bool>("(== 1)"));
             Assert.IsTrue(Schwa.Eval<bool>("(== 1 1)"));
             Assert.IsTrue(Schwa.Eval<bool>("(== 1 1 1)"));
             Assert.IsFalse(Schwa.Eval<bool>("(== 1 1 1 2 1)"));
-            Expect.Error(() => Schwa.Eval<bool>("(!=)"));
-            Expect.Error(() => Schwa.Eval<bool>("(!= 1)"));
+            Expect.Error<ArgumentException>(() => Schwa.Eval<bool>("(!=)"));
+            Expect.Error<ArgumentException>(() => Schwa.Eval<bool>("(!= 1)"));
             Assert.IsFalse(Schwa.Eval<bool>("(!= 1 1)"));
             Assert.IsFalse(Schwa.Eval<bool>("(!= 1 1 1)"));
-            Assert.IsFalse(Schwa.Eval<bool>("(!= 1 1 1 2 1)"));
+            Assert.IsTrue(Schwa.Eval<bool>("(!= 1 1 1 2 1)"));
             Assert.IsTrue(Schwa.Eval<bool>("(!= 4 2 7 5)"));
         }
 
