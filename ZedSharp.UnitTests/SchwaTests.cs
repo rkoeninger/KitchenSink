@@ -128,6 +128,11 @@ namespace ZedSharp.UnitTests
             Assert.IsFalse(Schwa.Eval<bool>("(!= 1 1 1)"));
             Assert.IsTrue(Schwa.Eval<bool>("(!= 1 1 1 2 1)"));
             Assert.IsTrue(Schwa.Eval<bool>("(!= 4 2 7 5)"));
+            Check.That((IEnumerable<int> xs) =>
+            {
+                var vals = String.Join(" ", xs);
+                return Schwa.Eval<bool>(String.Format("(== (== {0}) (! (!= {0})))", vals));
+            }, Rand.Lists(Rand.Ints()).Where(x => x.Count >= 2).Take(100));
         }
 
         [TestMethod]

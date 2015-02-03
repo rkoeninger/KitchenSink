@@ -39,7 +39,9 @@ namespace ZedSharp
                             throw new AssertFailedException("Property refuted with (" + arg0 + ", " + arg1 + ", " + arg2 + ")");
         }
 
-        private static readonly Dictionary<Type, IEnumerable> DefaultInputs = Dictionary.Of<Type, IEnumerable>(typeof(int), Sample.Ints);
+        private static readonly Dictionary<Type, IEnumerable> DefaultInputs = Dictionary.Of<Type, IEnumerable>(
+            typeof(int), Sample.Ints,
+            typeof(IEnumerable<int>), Rand.Lists(Rand.Ints()));
 
         public static void That<A>(Func<A, bool> f)
         {

@@ -106,6 +106,17 @@ namespace ZedSharp
             return Seq.Forever(Email);
         }
 
+        public static List<A> List<A>(IEnumerable<A> elements)
+        {
+            var length = Int(0, 32);
+            return elements.Take(length).ToList();
+        }
+
+        public static IEnumerable<List<A>> Lists<A>(IEnumerable<A> elements)
+        {
+            return Seq.Forever(() => List(elements));
+        }
+
         public static bool Bool()
         {
             return Global.NextBoolean();
