@@ -37,18 +37,14 @@ A library for multi-paradigm programming in C#/.Net
   * `Column` - a typed, named list/set of values in a Table
   * `Projection` - a conversion from one Table to another
 
-### Improved Date and Time Facilities
-
-  * `DateTimeRange` - a span of DateTimes that describes an entire day instead of midight the morning of that day
-
 ### Dependency Injection
 
   * `Needs` - a basic IoC container that uses the following attributes
   * `DefaultImplementationAttribute` - placed on an interface to indicate the default implementation so an IoC container doesn't have to explicitly configured with it
   * `DefaultImplementationOfAttribute` - placed on a class to indicate that it is the default implementation of the specified interface
-  * Mockable interfaces to common components: IConsole, IClock, IFileSystem
-  * Standard "live" implementations of those interfaces that pass-through to Console, DateTime, File, Directory, etc.
-  * Useful mock implementations of those interfaces like ScriptedConsole, StoppedClock and VirtualFileSystem
+  * Mockable interfaces to common components: IConsole, IFileSystem
+  * Standard "live" implementations of those interfaces that pass-through to Console, File, Directory, etc.
+  * Useful mock implementations of those interfaces like ScriptedConsole and VirtualFileSystem
 
 ### Crazy XML Building Facility Based on Operator Overloading
 
@@ -68,3 +64,38 @@ Xml.Doc < "catalog"
         < "title" <= "Midnight Rain"
         < "price" <= "5.95" > Xml.EndDoc
 ```
+
+### Slang, an External Expression Language
+
+  * Parsed into expression trees
+  * Allows snippets of code to be declared in config files or database tables
+  * Doesn't support declaring classes or methods
+  * Type inference and collection literals:
+
+```csharp
+new List<int> { 1, 2, 3, 4, 5 }
+new Dictionary<string, int> {
+  {"one", 1}, {"two", 2}, {"three", 3}
+}
+```
+
+```
+[1 2 3 4 5]
+{"one" 1 "two" 2 "three" 3}
+```
+
+  * Largely uses symbolic expression syntax that allows more terse expression of code:
+
+```csharp
+x + y + z + w
+(x >= y) && (y >= z) && (z >= w)
+(x == y) && (x == z) && (x == w)
+```
+
+```
+(+ x y z)
+(>= x y z)
+(== x y z)
+```
+
+  * Nestable string characters: `« »`
