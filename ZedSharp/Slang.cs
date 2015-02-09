@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace ZedSharp
 {
-    public static class Schwa
+    public static class Slang
     {
         public static Expression Parse(String source)
         {
@@ -108,7 +108,7 @@ namespace ZedSharp
                 case '«':
                     return new Atom(ReadNestedStringLiteral(), location);
                 case '»':
-                    throw new SchwaLexException(location, "Closing nested string character unexpected");
+                    throw new SlangLexException(location, "Closing nested string character unexpected");
                 default:
                     return new Atom(ReadLiteral(), location);
             }
@@ -384,7 +384,7 @@ namespace ZedSharp
 
         private void Fail(String message)
         {
-            throw new SchwaLexException(CurrentLocation, message);
+            throw new SlangLexException(CurrentLocation, message);
         }
     }
 
@@ -571,7 +571,7 @@ namespace ZedSharp
 
         public override Expression Parse(SymbolEnvironment env)
         {
-            if (Tokens.Count == 0) throw new SchwaParseException(Location, "Empty parens don't mean anything");
+            if (Tokens.Count == 0) throw new SlangParseException(Location, "Empty parens don't mean anything");
 
             if (Tokens[0] is Atom)
             {
@@ -798,7 +798,7 @@ namespace ZedSharp
             var array = tokens.Skip(1).ToArray();
 
             if (array.Length != 3)
-                throw new SchwaParseException(Location, "Ternary operator requires exactly 3 arguments");
+                throw new SlangParseException(Location, "Ternary operator requires exactly 3 arguments");
 
             return f(array[0].Parse(env), array[1].Parse(env), array[2].Parse(env));
         }
@@ -808,7 +808,7 @@ namespace ZedSharp
             var array = tokens.Skip(1).ToArray();
 
             if (array.Length != 2)
-                throw new SchwaParseException(Location, "Binary operator requires exactly 2 arguments");
+                throw new SlangParseException(Location, "Binary operator requires exactly 2 arguments");
 
             return f(array[0].Parse(env), array[1].Parse(env));
         }
@@ -818,7 +818,7 @@ namespace ZedSharp
             var array = tokens.Skip(1).ToArray();
 
             if (array.Length != 1)
-                throw new SchwaParseException(Location, "Unary operator requires exactly 1 arguments");
+                throw new SlangParseException(Location, "Unary operator requires exactly 1 arguments");
 
             return f(array[0].Parse(env));
         }
@@ -881,9 +881,9 @@ namespace ZedSharp
         }
     }
 
-    public class SchwaLexException : ApplicationException
+    public class SlangLexException : ApplicationException
     {
-        public SchwaLexException(Location location, String message) : base(message)
+        public SlangLexException(Location location, String message) : base(message)
         {
             Location = location;
         }
@@ -891,9 +891,9 @@ namespace ZedSharp
         public Location Location { get; private set; }
     }
 
-    public class SchwaParseException : ApplicationException
+    public class SlangParseException : ApplicationException
     {
-        public SchwaParseException(Location location, String message) : base(message)
+        public SlangParseException(Location location, String message) : base(message)
         {
             Location = location;
         }

@@ -69,7 +69,7 @@
     <Compile Include="StreamTests.cs" />
     <Compile Include="ComparableTests.cs" />
     <Compile Include="SequenceTests.cs" />
-    <Compile Include="SchwaTests.cs" />
+    <Compile Include="SlangTests.cs" />
     <Compile Include="ValidationTests.cs" />
     <Compile Include="XmlTests.cs" />
   </ItemGroup>
