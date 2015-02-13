@@ -58,11 +58,28 @@ Xml.Doc < "catalog"
     < "book" >= "id" <= "bk101"
         < "author" <= "Gambardella, Matthew"
         < "title" <= "XML Developer's Guide"
-        < "price" <= "44.95" > Xml.End
+        < "price" >= "currency" <= "USD" <= "44.95" > Xml.End
     < "book" >= "id" <= "bk102"
         < "author" <= "Ralls, Kim"
         < "title" <= "Midnight Rain"
-        < "price" <= "5.95" > Xml.EndDoc
+        < "price" >= "currency" <= "USD" <= "5.95" > Xml.EndDoc
+```
+
+which generates
+
+```xml
+<catalog>
+  <book id="bk101">
+    <author>Gambardella, Matthew</author>
+    <title>XML Developer's Guide</title>
+    <price currency="USD">44.95</price>
+  </book>
+  <book id="bk102">
+    <author>Ralls, Kim</author>
+    <title>Midnight Rain</title>
+    <price currency="USD">5.95</price>
+  </book>
+</catalog>
 ```
 
 ### Slang, an External Expression Language
