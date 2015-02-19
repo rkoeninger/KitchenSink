@@ -585,34 +585,36 @@ namespace ZedSharp
         {
             switch (atom.Literal)
             {
-                case "!":  return UnaryOp(env, Tokens, Expression.Not);
-                case "~":  return UnaryOp(env, Tokens, Expression.OnesComplement);
-                case "++": return UnaryOp(env, Tokens, Expression.Increment);
-                case "--": return UnaryOp(env, Tokens, Expression.Decrement);
-                case "<":  return CompareOp(env, Tokens, Expression.LessThan);
-                case "<=": return CompareOp(env, Tokens, Expression.LessThanOrEqual);
-                case ">":  return CompareOp(env, Tokens, Expression.GreaterThan);
-                case ">=": return CompareOp(env, Tokens, Expression.GreaterThanOrEqual);
-                case "<<": return BinaryOp(env, Tokens, Expression.LeftShift);
-                case ">>": return BinaryOp(env, Tokens, Expression.RightShift);
-                case "??": return BinaryOp(env, Tokens, Expression.Coalesce);
-                case "==": return EqualityOp(env, Tokens);
-                case "!=": return InequalityOp(env, Tokens);
+                case "!":   return UnaryOp(env, Tokens, Expression.Not);
+                case "~":   return UnaryOp(env, Tokens, Expression.OnesComplement);
+                case "++":  return UnaryOp(env, Tokens, Expression.Increment);
+                case "--":  return UnaryOp(env, Tokens, Expression.Decrement);
+                case "<":   return CompareOp(env, Tokens, Expression.LessThan);
+                case "<=":  return CompareOp(env, Tokens, Expression.LessThanOrEqual);
+                case ">":   return CompareOp(env, Tokens, Expression.GreaterThan);
+                case ">=":  return CompareOp(env, Tokens, Expression.GreaterThanOrEqual);
+                case "<<":  return BinaryOp(env, Tokens, Expression.LeftShift);
+                case ">>":  return BinaryOp(env, Tokens, Expression.RightShift);
+                case "??":  return NaryOp(env, Tokens, Expression.Coalesce);
+                case "==":  return EqualityOp(env, Tokens);
+                case "!=":  return InequalityOp(env, Tokens);
                 case "if":
-                case "?:": return TernaryOp(env, Tokens, Expression.Condition);
-                case "&":  return NaryOp(env, Tokens, Expression.And);
-                case "|":  return NaryOp(env, Tokens, Expression.Or);
+                case "?:":  return TernaryOp(env, Tokens, Expression.Condition);
+                case "&":   return NaryOp(env, Tokens, Expression.And);
+                case "|":   return NaryOp(env, Tokens, Expression.Or);
                 case "and":
-                case "&&": return NaryOp(env, Tokens, Expression.AndAlso);
+                case "&&":  return NaryOp(env, Tokens, Expression.AndAlso);
                 case "or":
-                case "||": return NaryOp(env, Tokens, Expression.OrElse);
+                case "||":  return NaryOp(env, Tokens, Expression.OrElse);
                 case "xor":
-                case "^":  return NaryOp(env, Tokens, Expression.ExclusiveOr);
-                case "+":  return NaryOp(env, Tokens, Expression.Add);
-                case "-":  return NaryOp(env, Tokens, Expression.Subtract);
-                case "*":  return NaryOp(env, Tokens, Expression.Multiply);
-                case "/":  return NaryOp(env, Tokens, Expression.Divide);
-                case "%":  return NaryOp(env, Tokens, Expression.Modulo);
+                case "^":   return NaryOp(env, Tokens, Expression.ExclusiveOr);
+                case "+":   return NaryOp(env, Tokens, Expression.Add);
+                case "-":   return NaryOp(env, Tokens, Expression.Subtract);
+                case "*":   return NaryOp(env, Tokens, Expression.Multiply);
+                case "/":   return NaryOp(env, Tokens, Expression.Divide);
+                case "%":   return NaryOp(env, Tokens, Expression.Modulo);
+                case "min": return MinOp(env, Tokens);
+                case "max": return MaxOp(env, Tokens);
                 case "#":  // use for indexer access (get only, set not supported)
                 {
                     var target = Tokens[1].Parse(env);
@@ -736,8 +738,8 @@ namespace ZedSharp
             if (array.Length < 2)
                 throw new ArgumentException("Requires at least 2 arguments");
 
-            var set = new HashSet<object> { array.First() };
-            return array.Skip(1).All(val => !set.Add(val));
+            var first = array[0];
+            return array.All(val => Equals(first, val));
         }
 
         private static bool AllInequal(IEnumerable<object> vals)
@@ -748,37 +750,60 @@ namespace ZedSharp
         public static Expression BuildListExpression(IEnumerable<Expression> exprs)
         {
             var exprArray = exprs.ToArray();
-            var elementType = Combo.GetCommonBaseType(exprArray.Select(x => x.Type).ToArray());
+            var elementType = GetCommonBaseType(exprArray.Select(x => x.Type).ToArray());
             var listType = typeof(List<>).MakeGenericType(elementType);
             var ctor = listType.GetConstructor(new Type[0]);
             if (ctor == null) throw new Exception("List doesn't have no-arg constructor somehow");
             var listExpr = Expression.ListInit(Expression.New(ctor), exprArray);
             var castMethod = typeof (Enumerable).GetMethod("Cast", new[] {typeof (IEnumerable<>)}).MakeGenericMethod(typeof(object));
-            var asEnumerableMethod = typeof (Enumerable).GetMethod("AsEnumerable").MakeGenericMethod(elementType);
             return Expression.Call(castMethod, listExpr);
+        }
+
+        private static Expression MinOp(SymbolEnvironment env, IEnumerable<Token> tokens)
+        {
+            var args = tokens.Skip(1).Select(x => x.Parse(env));
+            return args.Aggregate(Min);
+        }
+
+        private static Expression Min(Expression x, Expression y)
+        {
+            var method = typeof(Math).GetMethod("Min", new[] { x.Type, y.Type });
+            return Expression.Call(method, x, y);
+        }
+
+        private static Expression MaxOp(SymbolEnvironment env, IEnumerable<Token> tokens)
+        {
+            var args = tokens.Skip(1).Select(x => x.Parse(env));
+            return args.Aggregate(Max);
+        }
+
+        private static Expression Max(Expression x, Expression y)
+        {
+            var method = typeof(Math).GetMethod("Max", new[] { x.Type, y.Type });
+            return Expression.Call(method, x, y);
         }
 
         private static Expression EqualityOp(SymbolEnvironment env, IEnumerable<Token> tokens)
         {
-            var tokensArray = tokens.ToArray();
+            var tokensArray = tokens.Skip(1).ToArray();
 
             if (tokensArray.Length < 2)
                 throw new ArgumentException("Requires at least 2 arguments");
 
             Expression<Func<IEnumerable<object>, bool>> f = xs => AllEqual(xs);
-            var exprs = tokensArray.Skip(1).Select(x => x.Parse(env));
+            var exprs = tokensArray.Select(x => x.Parse(env));
             return Expression.Invoke(f, Seq.Of(BuildListExpression(exprs)));
         }
 
         private static Expression InequalityOp(SymbolEnvironment env, IEnumerable<Token> tokens)
         {
-            var tokensArray = tokens.ToArray();
+            var tokensArray = tokens.Skip(1).ToArray();
 
             if (tokensArray.Length < 2)
                 throw new ArgumentException("Requires at least 2 arguments");
 
             Expression<Func<IEnumerable<object>, bool>> f = xs => AllInequal(xs);
-            var exprs = tokensArray.Skip(1).Select(x => x.Parse(env));
+            var exprs = tokensArray.Select(x => x.Parse(env));
             return Expression.Invoke(f, Seq.Of(BuildListExpression(exprs)));
         }
 

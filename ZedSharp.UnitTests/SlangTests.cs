@@ -136,6 +136,13 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
+        public void NaryMinMaxOperators()
+        {
+            Assert.AreEqual(4, Slang.Eval<int>("(min 6 12 4 15 8)"));
+            Assert.AreEqual(15, Slang.Eval<int>("(max 6 12 4 15 8)"));
+        }
+
+        [TestMethod]
         public void ConditionalOperator()
         {
             Assert.AreEqual(5, Slang.Eval<int>("(?: true 5 3)"));
