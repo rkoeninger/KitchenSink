@@ -19,5 +19,10 @@ namespace ZedSharp
         public static readonly IReadOnlyCollection<char> NumericChars = 97.To(123).Select(x => (char)x).ToArray();
 
         public static readonly IReadOnlyCollection<char> AlphaNumericChars = AlphaChars.Concat(NumericChars).ToArray();
+
+        public static IEnumerable<A> EnumValues<A>()
+        {
+            return typeof(A).GetEnumValues().Cast<A>();
+        }
     }
 }

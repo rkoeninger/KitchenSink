@@ -5,13 +5,12 @@ namespace ZedSharp
 {
     public static class Sample
     {
-        private const int Imax = int.MaxValue;
-        private const int Imin = int.MinValue;
+        public static readonly IReadOnlyCollection<bool> Booleans = ReadOnly.Collection(true, false);
 
         public static readonly IReadOnlyCollection<int> Ints = ReadOnly.Collection(
             0,
-            Imax - 2, Imax - 1, Imax,
-            Imin + 2, Imin + 1, Imin,
+            int.MinValue, int.MinValue + 1, int.MinValue + 2,
+            int.MaxValue, int.MaxValue - 1, int.MaxValue - 2,
             1, 2, 3,
             -1, -2, -3,
             9, 10, 11,
@@ -28,19 +27,27 @@ namespace ZedSharp
             -65535, -65536, -65537
         );
 
-        private const double Dep = double.Epsilon;
-        private const double Dmax = double.MaxValue;
-        private const double Dmin = double.MinValue;
+        public static readonly IReadOnlyCollection<uint> UnsignedInts = ReadOnly.Collection<uint>(
+            0,
+            uint.MaxValue, uint.MaxValue - 1, uint.MaxValue - 2,
+            1, 2, 3,
+            9, 10, 11,
+            99, 100, 101,
+            255, 256, 257,
+            999, 1000, 1001,
+            9999, 10000, 10001,
+            65535, 65536, 65537
+        );
 
         public static readonly IReadOnlyCollection<double> Doubles = ReadOnly.Collection(
             double.NaN,
             double.PositiveInfinity,
             double.NegativeInfinity,
             0.0,
-            Dep, Dep * 2, Dep * 3,
-            -Dep, -Dep * 2, -Dep * 3,
-            Dmax, Dmax - Dep, Dmax - (Dep * 2),
-            Dmin, Dmin + Dep, Dmin + (Dep * 2)
+            double.MaxValue, double.MaxValue - double.Epsilon, double.MaxValue - (double.Epsilon * 2),
+            double.MinValue, double.MinValue + double.Epsilon, double.MinValue + (double.Epsilon * 2),
+            double.Epsilon, double.Epsilon * 2, double.Epsilon * 3,
+            -double.Epsilon, -double.Epsilon * 2, -double.Epsilon * 3
         );
 
         public static readonly IReadOnlyCollection<String> TopLevelDomains = ReadOnly.Collection(
