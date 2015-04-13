@@ -39,7 +39,15 @@ namespace ZedSharp
         /// <summary>Inclusive on start value, exclusive on end value.</summary>
         public static IEnumerable<int> To(this int start, int end)
         {
-            return Enumerable.Range(start, end - start);
+            for (var i = start; i < end; ++i)
+                yield return i;
+        }
+
+        /// <summary>Inclusive on start and end value.</summary>
+        public static IEnumerable<int> ToIncluding(this int start, int end)
+        {
+            for (var i = start; i <= end; ++i)
+                yield return i;
         }
 
         public static int Factorial(this int n)
@@ -50,7 +58,7 @@ namespace ZedSharp
             if (n == 0 || n == 1)
                 return 1;
 
-            int result = 2;
+            var result = 2;
 
             for (var i = 3; i <= n; ++i)
                 result *= i;
@@ -71,7 +79,7 @@ namespace ZedSharp
             if (n == r)
                 return Factorial(n);
 
-            int result = 1;
+            var result = 1;
 
             for (var i = n - r + 1; i <= n; ++i)
                 result *= i;
@@ -126,7 +134,7 @@ namespace ZedSharp
             if (r == 0 || n == r)
                 return 1;
 
-            int result = 1;
+            var result = 1;
 
             for (var i = n - r + 1; i <= n; ++i)
                 result *= i;

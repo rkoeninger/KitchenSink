@@ -95,5 +95,15 @@ namespace ZedSharp
             var list0 = testData0.ToList();
             That((x, y) => Equals(x, y).Implies(Hash(x) == Hash(y)), list0, list0);
         }
+
+        public static void Idempotent<A>(Func<A, A> f)
+        {
+            Idempotent((IEnumerable<A>) DefaultInputs[typeof(A)], f);
+        }
+
+        public static void Idempotent<A>(IEnumerable<A> testData0, Func<A, A> f)
+        {
+            That(x => Equals(f(x), f(f(x))), testData0);
+        }
     }
 }

@@ -41,6 +41,11 @@ namespace ZedSharp
             throw toThrow ?? new AssertFailedException(typeof(E).Name + " expected");
         }
 
+        public static AssertFailedException FailedAssert(Action f)
+        {
+            return Error<AssertFailedException>(f);
+        }
+
         /// <summary>Throws exception if code can't compile.</summary>
         public static void Compile(String source, params String[] assemblies)
         {

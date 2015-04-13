@@ -5,9 +5,9 @@ namespace ZedSharp
 {
     public static class All
     {
-        public static IEnumerable<int> Ints()
+        public static IEnumerable<int> Ints
         {
-            return int.MinValue.To(int.MaxValue).Concat(Seq.Of(int.MaxValue));
+            get { return int.MinValue.ToIncluding(int.MaxValue); }
         }
 
         public static readonly IReadOnlyCollection<char> AlphaUpperChars = 48.To(58).Select(x => (char)x).ToArray();

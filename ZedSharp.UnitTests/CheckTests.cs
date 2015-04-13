@@ -37,5 +37,12 @@ namespace ZedSharp.UnitTests
             Check.Comparable(Sample.Ints);
             Check.CompareOperators(Sample.Ints);
         }
+
+        [TestMethod]
+        public void Idempotence()
+        {
+            Check.Idempotent(Sample.Ints.Where(x => x != int.MinValue), Math.Abs);
+            Expect.FailedAssert(() => Check.Idempotent(Z.Inc));
+        }
     }
 }
