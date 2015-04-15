@@ -8,14 +8,14 @@ namespace ZedSharp
 {
     public static class Check
     {
-        public static void That<A>(Func<A, bool> f, IEnumerable<A> testData0)
+        public static void That<A>(IEnumerable<A> testData0, Func<A, bool> f)
         {
             foreach (var arg0 in testData0)
                 if (! f(arg0))
                     throw new AssertFailedException("Property refuted with (" + arg0 + ")");
         }
 
-        public static void That<A, B>(Func<A, B, bool> f, IEnumerable<A> testData0, IEnumerable<B> testData1)
+        public static void That<A, B>(IEnumerable<A> testData0, IEnumerable<B> testData1, Func<A, B, bool> f)
         {
             var list0 = testData0.ToList();
             var list1 = testData1.ToList();
@@ -26,7 +26,7 @@ namespace ZedSharp
                         throw new AssertFailedException("Property refuted with (" + arg0 + ", " + arg1 + ")");
         }
 
-        public static void That<A, B, C>(Func<A, B, C, bool> f, IEnumerable<A> testData0, IEnumerable<B> testData1, IEnumerable<C> testData2)
+        public static void That<A, B, C>(IEnumerable<A> testData0, IEnumerable<B> testData1, IEnumerable<C> testData2, Func<A, B, C, bool> f)
         {
             var list0 = testData0.ToList();
             var list1 = testData1.ToList();
@@ -46,20 +46,20 @@ namespace ZedSharp
         public static void That<A>(Func<A, bool> f)
         {
             var testData0 = (IEnumerable<A>) DefaultInputs[typeof(A)];
-            That(f, testData0);
+            That(testData0, f);
         }
 
         public static void That<A, B>(Func<A, B, bool> f)
         {
             var testData0 = (IEnumerable<A>) DefaultInputs[typeof(A)];
             var testData1 = (IEnumerable<B>) DefaultInputs[typeof(B)];
-            That(f, testData0, testData1);
+            That(testData0, testData1, f);
         }
 
         public static void ReflexiveEquality<A>(IEnumerable<A> testData0)
         {
             var list0 = testData0.ToList();
-            That((x, y) => Equals(x, y) == Equals(y, x), list0, list0);
+            That(list0, list0, (x, y) => Equals(x, y) == Equals(y, x));
         }
 
         public static void ReflexiveEquality<A>()
@@ -71,18 +71,18 @@ namespace ZedSharp
         public static void Comparable<A>(IEnumerable<A> testData0) where A : IComparable<A>
         {
             var list0 = testData0.ToList();
-            That((x, y) => x.CompareTo(y) == -(y.CompareTo(x)), list0, list0);
+            That(list0, list0, (x, y) => x.CompareTo(y) == -(y.CompareTo(x)));
         }
 
         public static void CompareOperators<A>(IEnumerable<A> testData0)
         {
             var list0 = testData0.ToList();
-            That((x, y) =>
+            That(list0, list0, (x, y) =>
             {
                 dynamic dx = x;
                 dynamic dy = y;
                 return (dx > dy) == !(dx <= dy) && (dx < dy) == !(dx >= dy);
-            }, list0, list0);
+            });
         }
 
         private static int Hash<A>(A x)
@@ -93,7 +93,7 @@ namespace ZedSharp
         public static void EqualsAndHashCode<A>(IEnumerable<A> testData0)
         {
             var list0 = testData0.ToList();
-            That((x, y) => Equals(x, y).Implies(Hash(x) == Hash(y)), list0, list0);
+            That(list0, list0, (x, y) => Equals(x, y).Implies(Hash(x) == Hash(y)));
         }
 
         public static void Idempotent<A>(Func<A, A> f)
@@ -103,7 +103,7 @@ namespace ZedSharp
 
         public static void Idempotent<A>(IEnumerable<A> testData0, Func<A, A> f)
         {
-            That(x => Equals(f(x), f(f(x))), testData0);
+            That(testData0, x => Equals(f(x), f(f(x))));
         }
     }
 }

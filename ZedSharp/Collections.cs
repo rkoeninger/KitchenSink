@@ -64,6 +64,12 @@ namespace ZedSharp
             return Enumerable.Range(0, array.Length - 1).Select(i => Tuple.Create(array[i], array[i + 1]));
         }
 
+        public static IEnumerable<A> Except<A>(this IEnumerable<A> seq, params A[] excludes)
+        {
+            var excludeSet = Set(excludes);
+            return seq.Where(x => !excludeSet.Contains(x));
+        }
+
         public static HashSet<A> Set<A>(params A[] vals)
         {
             return new HashSet<A>(vals);

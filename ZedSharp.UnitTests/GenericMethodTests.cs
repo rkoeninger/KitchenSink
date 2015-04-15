@@ -17,6 +17,8 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(5, method(-5));
             Assert.AreEqual(2, method(2));
             Assert.AreEqual(0, method(0));
+            Check.That(Sample.Ints.Except(int.MinValue), x => method(x) >= 0);
+            Check.Idempotent(method);
         }
 
         [TestMethod]

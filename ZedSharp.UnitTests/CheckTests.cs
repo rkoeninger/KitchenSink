@@ -18,8 +18,8 @@ namespace ZedSharp.UnitTests
         public void CheckWithProvidedInputs()
         {
             Check.That(
-                x => Math.Abs(x) >= 0,
-                Sample.Ints.Where(x => x != int.MinValue));
+                Sample.Ints.Except(int.MinValue),
+                x => Math.Abs(x) >= 0);
 
             Check.EqualsAndHashCode(Seq.Of(
                 Date.On(2001, 4, 13),

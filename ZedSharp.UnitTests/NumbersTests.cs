@@ -9,8 +9,8 @@ namespace ZedSharp.UnitTests
         [TestMethod]
         public void Divisibility()
         {
-            Check.That(x => x.IsEven() == ((x / 2) * 2 == x), Sample.Ints);
-            Check.That(x => x.IsOdd() == ((x / 2) * 2 != x), Sample.Ints);
+            Check.That(Sample.Ints, x => x.IsEven() == ((x / 2) * 2 == x));
+            Check.That(Sample.Ints, x => x.IsOdd() == ((x / 2) * 2 != x));
         }
 
         [TestMethod]

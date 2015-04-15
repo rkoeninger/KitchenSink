@@ -128,11 +128,12 @@ namespace ZedSharp.UnitTests
             Assert.IsFalse(Slang.Eval<bool>("(!= 1 1 1)"));
             Assert.IsTrue(Slang.Eval<bool>("(!= 1 1 1 2 1)"));
             Assert.IsTrue(Slang.Eval<bool>("(!= 4 2 7 5)"));
-            Check.That((IEnumerable<int> xs) =>
+            Check.That(Rand.Lists(Rand.Ints()).Where(x => x.Count >= 2).Take(100),
+            (IEnumerable<int> xs) =>
             {
                 var vals = String.Join(" ", xs);
                 return Slang.Eval<bool>(String.Format("(== (== {0}) (! (!= {0})))", vals));
-            }, Rand.Lists(Rand.Ints()).Where(x => x.Count >= 2).Take(100));
+            });
         }
 
         [TestMethod]
@@ -169,7 +170,7 @@ namespace ZedSharp.UnitTests
         public void LambdaDeclaration()
         {
             var f = Slang.Eval<Func<int, int>>("(=> ((int x)) (+ 1 x))");
-            Check.That(x => f(x) == x + 1, Sample.Ints.Where(x => x != Int32.MaxValue));
+            Check.That(Sample.Ints.Where(x => x != Int32.MaxValue), x => f(x) == x + 1);
         }
 
         [TestMethod]
