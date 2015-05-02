@@ -2,14 +2,14 @@
 
 # zed-sharp
 
-A library for multi-paradigm programming in C#/.Net
+A library for multi-paradigm programming in C#/.Net.
 
 ### Basic Data Types
 
-  * `Maybe<A>` - may or may not have a value and maps functions over a hypothetical value
+  * `Maybe<A>` - may or may not have a value and maps functions over missing value
   * `Unit` - has only one meaningully unique value
   * `Void` - no value can be constructed; is always null
-  * `ISequence<A>` - lazy, one-time iteration of values
+  * `ISequence<A>` - lazy, persistent, one-time iteration of values
 
 ### Function Composition
 
@@ -19,7 +19,7 @@ A library for multi-paradigm programming in C#/.Net
 
 ### Pure Functional Programming Facilities
 
-  * `IO` - a type for modeling and composing I/O and side effects
+  * `IO` - a type for modeling and composing I/O operations and side effects
   * `Lens` - composable get and set pair for immutable types
 
 ### Testing and Validation
@@ -103,7 +103,7 @@ new Dictionary<string, int> {
 {"one" 1 "two" 2 "three" 3}
 ```
 
-  * Largely uses symbolic expression syntax that allows more terse expression of code:
+  * Largely uses symbolic expression syntax and variadic functions that allow more terse expression of code:
 
 ```csharp
 x + y + z + w
