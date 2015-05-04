@@ -41,6 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="All.cs" />
+    <Compile Include="Bag.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Bag.tt</DependentUpon>
+    </Compile>
     <Compile Include="Booleans.cs" />
     <Compile Include="Check.cs" />
     <Compile Include="CodeLoader.cs" />
@@ -98,6 +103,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Bag.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Bag.cs</LastGenOutput>
+    </None>
     <None Include="GenericMethod.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>GenericMethod.cs</LastGenOutput>

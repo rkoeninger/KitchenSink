@@ -75,7 +75,17 @@ namespace ZedSharp
             return Try(() => list[index]);
         }
 
+        public static Maybe<A> GetMaybe<A>(this IList<A> list, int index)
+        {
+            return Try(() => list[index]);
+        }
+
         public static Maybe<B> GetMaybe<A, B>(this IReadOnlyDictionary<A, B> dict, A key)
+        {
+            return Try(() => dict[key]);
+        }
+
+        public static Maybe<B> GetMaybe<A, B>(this IDictionary<A, B> dict, A key)
         {
             return Try(() => dict[key]);
         }

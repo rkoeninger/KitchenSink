@@ -1,0 +1,133 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#    var arityMin = 0; #>
+<#    var arityMax = 21; #>using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace ZedSharp
+{
+    /// <summary>Utility methods for building Bags.</summary>
+    public static class Bag
+    {
+		/// <summary>Creates a new Bag from a sequence of values.</summary>
+        public static Bag<A> ToBag<A>(this IEnumerable<A> seq)
+        {
+			return seq.ToBag(EqualityComparer<A>.Default);
+        }
+
+		public static Bag<A> ToBag<A>(this IEnumerable<A> seq, IEqualityComparer<A> comparer)
+		{
+            return new Bag<A>(seq.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count()));
+		}
+
+<#  foreach (var arity in Enumerable.Range(arityMin, arityMax)) {
+		var argsWithTypes = String.Join(", ", Enumerable.Range(0, arity).Select(arg => "A key" + arg + ", int val" + arg));
+		var initializer = arity == 0 ? "()" : " {" + String.Join(", ", Enumerable.Range(0, arity).Select(x => "{ key" + x +", val" + x + " }")) + "}"; #>
+		/// <summary>Creates a new Bag from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
+		/// <remarks>Key type can be inferred.</remarks>
+        public static Bag<A> Of<A>(<#= argsWithTypes #>)
+        {
+            return new Bag<A>(new Dictionary<A, int><#= initializer #>);
+        }
+
+<#  } #>
+    }
+	
+    /// <summary>Keeps counts of values that have been added to the Bag.</summary>
+	public class Bag<A>
+	{
+		public Bag()
+        {
+            inner = new Dictionary<A, int>();
+        }
+
+        public Bag(IEqualityComparer<A> comparer)
+        {
+            inner = new Dictionary<A, int>(comparer);
+        }
+
+        public Bag(IDictionary<A, int> inner)
+        {
+            this.inner = inner;
+        }
+
+        private readonly IDictionary<A, int> inner;
+
+        public int Add(A item)
+        {
+            return Add(item, 1);
+        }
+
+        public int Add(A item, int n)
+        {
+            if (inner.ContainsKey(item))
+            {
+                var newCount = Math.Max(0, inner[item] + n);
+
+                if (newCount == 0)
+                {
+                    inner.Remove(item);
+                }
+                else
+                {
+                    inner[item] = newCount;
+                }
+
+                return newCount;
+            }
+            
+			if (n > 0)
+            {
+                inner.Add(item, n);
+                return n;
+            }
+                        
+            return 0;
+        }
+
+        public int Remove(A item)
+        {
+			return Remove(item, 1);
+        }
+
+        public int Remove(A item, int n)
+        {
+            return Add(item, -n);
+        }
+
+        public void RemoveAll(A item)
+        {
+            inner.Remove(item);
+        }
+
+        public void Clear()
+        {
+            inner.Clear();
+        }
+
+        public int Count(A item)
+        {
+            return inner.ContainsKey(item) ? inner[item] : 0;
+        }
+
+		public int this[A key]
+		{
+			get { return inner.GetMaybe(key).OrElse(0); }
+		}
+
+        public int ItemCount
+        {
+            get { return inner.Count; }
+        }
+
+        public int TotalCount
+        {
+            get { return inner.Values.Sum(); }
+        }
+	}
+}
