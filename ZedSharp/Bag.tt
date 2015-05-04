@@ -19,10 +19,24 @@ namespace ZedSharp
         {
 			return seq.ToBag(EqualityComparer<A>.Default);
         }
-
+		
+        /// <summary>Creates a new Bag from a sequence of values.</summary>
 		public static Bag<A> ToBag<A>(this IEnumerable<A> seq, IEqualityComparer<A> comparer)
 		{
-            return new Bag<A>(seq.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count()));
+			var bag = new Bag<A>(comparer);
+
+			foreach (var item in seq)
+			{
+				bag.Add(item);
+			}
+
+            return bag;
+		}
+
+		/// <summary>Creates a new Bag from the following values.</summary>
+		public static Bag<A> Of<A>(params A[] items)
+		{
+			return ToBag(items);
 		}
 
 <#  foreach (var arity in Enumerable.Range(arityMin, arityMax)) {
