@@ -48,6 +48,7 @@
     <Compile Include="Comparables.cs" />
     <Compile Include="Dates.cs" />
     <Compile Include="DateTimeRange.cs" />
+    <Compile Include="MultiKeyDictionary.cs" />
     <Compile Include="Needs.cs" />
     <Compile Include="Funcs.cs" />
     <Compile Include="GenericMethod.cs">
