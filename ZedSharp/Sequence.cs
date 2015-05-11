@@ -4,10 +4,20 @@ using System.Collections.Generic;
 
 namespace ZedSharp
 {
+    /// <summary>
+    /// Like an IEnumerator, but persistent.
+    /// Like a List, but lazily-evaluated.
+    /// </summary>
     public interface ISequence<A> : IEnumerable<A>
     {
+        /// <summary>
+        /// The current value in this Sequence. Will be None if the Sequence is exhausted.
+        /// </summary>
         Maybe<A> Current { get; }
 
+        /// <summary>
+        /// The next node in this Sequence. If this node is None, then the next is gauranteed to be.
+        /// </summary>
         ISequence<A> Next { get; }
     }
 
@@ -20,13 +30,27 @@ namespace ZedSharp
 
         public static ISequence<A> ToSequence<A>(this IEnumerable<A> values)
         {
-            return new EnumeratorSequence<A>(values.GetEnumerator());
+            return Match.On(values).Return<ISequence<A>>()
+                .Case<IReadOnlyList<A>>(x => new ListSequence<A>(x))
+                .Else(x => new EnumeratorSequence<A>(x.GetEnumerator()));
         }
 
         public static ISequence<A> Empty<A>()
         {
             return EmptySequence<A>.It;
         }
+    }
+
+    internal struct SequencePair<A>
+    {
+        public SequencePair(Maybe<A> current, ISequence<A> next)
+        {
+            Current = current;
+            Next = next;
+        }
+
+        internal Maybe<A> Current;
+        internal ISequence<A> Next;
     }
 
     internal struct EmptySequence<A> : ISequence<A>
@@ -54,13 +78,18 @@ namespace ZedSharp
         }
     }
 
+    internal static class EmptySequencePair<A>
+    {
+        internal static SequencePair<A> It = new SequencePair<A>(Maybe<A>.None, EmptySequence<A>.It);
+    }
+
     internal struct EnumeratorSequence<A> : ISequence<A>
     {
         public EnumeratorSequence(IEnumerator<A> e)
         {
             LazyPair = new Lazy<SequencePair<A>>(() => e.MoveNext()
                 ? new SequencePair<A>(Maybe.Some(e.Current), new EnumeratorSequence<A>(e))
-                : new SequencePair<A>(Maybe<A>.None, EmptySequence<A>.It));
+                : EmptySequencePair<A>.It);
         }
 
         private readonly Lazy<SequencePair<A>> LazyPair;
@@ -90,18 +119,6 @@ namespace ZedSharp
         {
             return GetEnumerator();
         }
-    }
-
-    internal struct SequencePair<A>
-    {
-        public SequencePair(Maybe<A> current, ISequence<A> next)
-        {
-            Current = current;
-            Next = next;
-        }
-
-        internal Maybe<A> Current;
-        internal ISequence<A> Next;
     }
 
     internal struct ListSequence<A> : ISequence<A>
