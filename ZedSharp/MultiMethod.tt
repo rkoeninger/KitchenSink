@@ -36,6 +36,10 @@ namespace ZedSharp
           var dictType = "Dictionary<Tuple<" + String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => (char) (x + 'A') + "Target")) + ">, Func<" + funcTypeArgs + ">>";
           var args = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "arg" + x));
           var targets = String.Join(", ", Enumerable.Range(0, arity - 1).Select(x => "target" + x)); #>
+	/// <summary>
+	/// Intermediate value used to track partial type inference.
+	/// Call Return&lt;B&gt;() to specify return type for MultiMethod.
+	/// </summary>
     public struct MultiMethodBuilder<<#= butLastTypeArgs #>>
     {
         internal MultiMethodBuilder(<#= selectors #>) : this()
@@ -55,6 +59,10 @@ namespace ZedSharp
         }
     }
 
+	/// <summary>
+	/// Clojure-style multimethod that choses an overload based on
+	/// the result<#= arity == 2 ? "" : "s" #> of the provided selector function<#= arity == 2 ? "" : "s" #>.
+	/// </summary>
     public class MultiMethod<<#= allTypeArgs #>>
     {
         public MultiMethod(<#= selectors #>)

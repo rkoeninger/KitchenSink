@@ -149,7 +149,12 @@ namespace ZedSharp
             return new Xml(rootTagName, start.Settings);
         }
 
-        /// <summary>Undefined. Throws InvalidOperationException.</summary>
+        /// <summary>
+        /// Undefined. Throws InvalidOperationException.
+        /// 
+        /// This operator is completely unnecessary but the compiler requires
+        /// a matching &gt; operator for the defined &lt; operator.
+        /// </summary>
         public static Xml operator >(XmlStart start, String rootTagName)
         {
             throw new InvalidOperationException();

@@ -40,6 +40,15 @@ namespace ZedSharp
           var funcType = "Func<" + typeArgsCsv + ">";
           var keyValuePairType = "KeyValuePair<" + predicateType + ", " + funcType + ">";
 #>
+	/// <summary>
+	/// Essentially an extensible if-statement that can be used to
+	/// implement ad-hoc method dispatch behaviors and a-la-carte polymorphism.
+	/// </summary>
+	/// <remarks>
+	/// The order in which overloads are added is relevant. They can be added on
+	/// either end, but they should usually be mutually-exclusive conditions
+	/// except for the final default overload.
+	/// </remarks>
     public class <#= genericMethodType #>
     {
         public static implicit operator <#= funcType #>(<#= genericMethodType #> method)

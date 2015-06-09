@@ -9,6 +9,18 @@ namespace ZedSharp.UnitTests
         public sealed class ProductCode : NewType<string> { public ProductCode(string x) : base(x) {} }
 
         [TestMethod]
+        public void NewTypeTypeChecking()
+        {
+            Expect.CompileFail(
+                @"using ZedSharp;
+                public sealed class CustomerId : NewType<int> { public CustomerId(int x) : base(x) {} }
+                public static class TestClass {
+                    static void SomethingWithCustomer(CustomerId x) { }
+                    static void Test() { SomethingWithCustomer(123); }
+                }", Common.ZedDll);
+        }
+
+        [TestMethod]
         public void NewTypeEquality()
         {
             var c1 = new CustomerId(453);
