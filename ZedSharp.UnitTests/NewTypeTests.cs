@@ -14,10 +14,22 @@ namespace ZedSharp.UnitTests
             Expect.CompileFail(
                 @"using ZedSharp;
                 public sealed class CustomerId : NewType<int> { public CustomerId(int x) : base(x) {} }
-                public static class TestClass {
-                    static void SomethingWithCustomer(CustomerId x) { }
-                    static void Test() { SomethingWithCustomer(123); }
-                }", Common.ZedDll);
+                public static class TestClass
+                {
+                    static void SomethingWithCustomer(CustomerId x)
+                    {
+                    }
+                    static void Test()
+                    {
+                        SomethingWithCustomer(123);
+                    }
+                }",
+                new [] {Common.ZedDll},
+                new []
+                {
+                    "CS1502", // SomethingWithCustomer has some invalid arguments
+                    "CS1503"  // Cannot convert from int to CustomerId
+                });
         }
 
         [TestMethod]

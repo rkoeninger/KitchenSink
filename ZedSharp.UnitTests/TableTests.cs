@@ -64,7 +64,13 @@ namespace ZedSharp.UnitTests
             Expect.Error(() => Table.Of<string, int>("asd", 1, 3, "wer"));
             Expect.Error(() => Table.Of<string, int>("col1", "col2", "asd", 1, 3, "wer"));
 
-            Expect.CompileFail(Common.Wrap(@"Table.Of(Row.Of(""asc"", 1), Row.Of(2, ""wer""))"), Common.ZedDll);
+            Expect.CompileFail(
+                Common.Wrap(@"Table.Of(Row.Of(""asc"", 1), Row.Of(2, ""wer""))"),
+                new [] {Common.ZedDll},
+                new []
+                {
+                    "CS0411" // type arguments cannot be inferred from usage
+                });
         }
 
         [TestMethod]

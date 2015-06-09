@@ -1,6 +1,7 @@
 ﻿using Microsoft.CSharp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Linq;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 
@@ -46,33 +47,46 @@ namespace ZedSharp
             return Error<AssertFailedException>(f);
         }
 
-        /// <summary>Throws exception if code can't compile.</summary>
-        public static void Compile(String source, params String[] assemblies)
+        private static CompilerResults DoCompile(String source, params String[] assemblies)
         {
-            var options = new Dictionary<String, String> {{"CompilerVersion", "v4.0"}};
+            var options = new Dictionary<String, String> { { "CompilerVersion", "v4.0" } };
             var provider = new CSharpCodeProvider(options);
             var parameters = new CompilerParameters(assemblies);
             parameters.ReferencedAssemblies.Add("mscorlib.dll");
             parameters.ReferencedAssemblies.Add("System.dll");
             parameters.ReferencedAssemblies.Add("System.Core.dll");
             parameters.GenerateInMemory = true;
+            return provider.CompileAssemblyFromSource(parameters, source);
+        }
 
-            var results = provider.CompileAssemblyFromSource(parameters, source);
+        /// <summary>
+        /// Throws exception if code doesn't fail to compile due to given errors.
+        /// </summary>
+        public static void CompileFail(String source, String[] assemblies, string[] errorCodes)
+        {
+            var results = DoCompile(source, assemblies);
 
             if (results.Errors.HasErrors)
             {
                 foreach (var e in results.Errors)
+                {
                     Console.WriteLine(e);
+                }
 
-                throw new AssertFailedException("Script compiler failed.");
+                var errorNumbers = results.Errors.GetEnumerator()
+                    .AsEnumerable<CompilerError>()
+                    .Select(x => x.ErrorNumber)
+                    .OrderBy(x => x);
+
+                if (! errorNumbers.SequenceEqual(errorCodes.OrderBy(x => x)))
+                {
+                    throw new AssertFailedException("Unexpected compiler errors present / Expected compiler errors present - check standard out");
+                }
             }
-        }
-
-        /// <summary>Throws exception if code compiles (it shouldn't).</summary>
-        /// <remarks>This is used to test that type-level programming will invalidate certain uses.</remarks>
-        public static void CompileFail(String source, params String[] assemblies)
-        {
-            Error(() => Compile(source, assemblies), new AssertFailedException("Compile should have failed"));
+            else
+            {
+                throw new AssertFailedException("Expected compilation failure");
+            }
         }
 
         /// <summary>Asserts that the actual maybe has a value and the value is equal to the expected value.</summary>
@@ -85,14 +99,18 @@ namespace ZedSharp
         public static void Some<A>(Maybe<A> maybe)
         {
             if (! maybe.HasValue)
+            {
                 throw new AssertFailedException("Maybe was supposed to have a value");
+            }
         }
 
         /// <summary>Asserts that the given maybe does not have a value.</summary>
         public static void None<A>(Maybe<A> maybe)
         {
             if (maybe.HasValue)
+            {
                 throw new AssertFailedException("Maybe was not supposed to have a value, but does: " + maybe);
+            }
         }
     }
 }

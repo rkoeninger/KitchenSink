@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,6 +7,47 @@ namespace ZedSharp
 {
     public static class Collections
     {
+        /// <summary>
+        /// Adapter for specialized collections that do not implement IEnumerable&lt;A&gt;.
+        /// Eagerly reads enumerator results into list.
+        /// Result can be enumerated multiple times.
+        /// </summary>
+        public static IEnumerable<A> AsEnumerable<A>(this IEnumerator e)
+        {
+            var list = new List<A>();
+
+            while (e.MoveNext())
+            {
+                list.Add((A) e.Current);
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Adapter for specialized collections that do not implement IEnumerable&lt;A&gt;.
+        /// </summary>
+        public static IEnumerable<A> AsEnumerable<A>(this IEnumerator<A> e)
+        {
+            while (e.MoveNext())
+            {
+                yield return e.Current;
+            }
+        }
+
+        /// <summary>
+        /// Adapter for specialized collections that do not implement IEnumerable&lt;A&gt;.
+        /// Lazily reads enumerator results and returns them.
+        /// Result can be enumerated only once.
+        /// </summary>
+        public static IEnumerable<A> AsEnumerableNonRepeatable<A>(this IEnumerator e)
+        {
+            while (e.MoveNext())
+            {
+                yield return (A) e.Current;
+            }
+        }
+
         public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq) where A : IComparable
         {
             return seq.OrderBy(x => x);
