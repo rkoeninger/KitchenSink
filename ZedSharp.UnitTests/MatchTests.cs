@@ -30,27 +30,12 @@ namespace ZedSharp.UnitTests
         {
             // Result type is inferred from first Then() to be an Int32 so false, a Boolean, in the second Then() is invalid
             Expect.CompileFail(
-                Common.Wrap(@"Match.On("""").Case(""x"").Then(0).Case(""y"").Then(false).End()"),
+                Common.Wrap(@"Match.On("""").Case(""x"", 0).Case(""y"", false).End()"),
                 new [] {Common.ZedDll},
                 new []
                 {
-                    "CS1501" // no overload for Case takes 1 argument
-                });
-
-            // Can't call Case or Then twice in a row
-            Expect.CompileFail(
-                Common.Wrap(@"Match.On("""").Case(""x"").Case(""z"").Then(0).End()"),
-                new[] { Common.ZedDll },
-                new[]
-                {
-                    "CS1501" // no overload for Case takes 1 argument
-                });
-            Expect.CompileFail(
-                Common.Wrap(@"Match.On("""").Case(""x"").Then(1).Then(0).End()"),
-                new[] { Common.ZedDll },
-                new[]
-                {
-                    "CS1501" // no overload for Case takes 1 argument
+                    "CS1502", // Case has some invalid arguments
+                    "CS1503"  // Cannot convert from bool to Func<string, int> in second Case
                 });
         }
 
