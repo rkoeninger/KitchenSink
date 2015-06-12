@@ -71,6 +71,7 @@ namespace ZedSharp
                 foreach (var e in results.Errors)
                 {
                     Console.WriteLine(e);
+                    Console.WriteLine();
                 }
 
                 var errorNumbers = results.Errors.GetEnumerator()
