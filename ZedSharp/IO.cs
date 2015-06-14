@@ -58,6 +58,11 @@ namespace ZedSharp
             return Of<Func<A, B>>(() => a => f(a).Eval());
         }
 
+        public static Func<A, IO<B>> Demote<A, B>(IO<Func<A, B>> f)
+        {
+            return x => Of(() => f.Eval().Invoke(x));
+        }
+
         public static readonly IO<DateTime> Now = Of(() => DateTime.Now);
         public static readonly IO<DateTime> UtcNow = Of(() => DateTime.UtcNow);
 
@@ -69,6 +74,11 @@ namespace ZedSharp
         private static IO<B> Then<A, B>(IO<A> a, IO<B> b)
         {
             return a.Then(b);
+        }
+
+        private static IO<A> Also<A, B>(IO<A> a, IO<B> b)
+        {
+            return a.Also(b);
         }
     }
 
@@ -101,9 +111,18 @@ namespace ZedSharp
         public IO<B> Then<B>(IO<B> io)
         {
             var me = this;
-            return IO.Of(() => { me.Eval(); return io.Eval(); });
+            return IO.Of(() =>
+            {
+                me.Eval();
+                return io.Eval();
+            });
         }
-        
+
+        public IO<A> Also<B>(IO<B> io)
+        {
+            return io.Then(this);
+        }
+
         public IO<C> Join<B, C>(IO<B> other, Func<A, B, C> f)
         {
             var me = this;
