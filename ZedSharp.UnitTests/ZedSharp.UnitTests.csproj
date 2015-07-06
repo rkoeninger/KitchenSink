@@ -69,6 +69,7 @@
     <Compile Include="SlangTests.cs" />
     <Compile Include="NewTypeTests.cs" />
     <Compile Include="IOTests.cs" />
+    <Compile Include="FilePathTests.cs" />
     <Compile Include="ValidationTests.cs" />
     <Compile Include="XmlTests.cs" />
   </ItemGroup>
