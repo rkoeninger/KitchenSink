@@ -63,6 +63,18 @@ namespace ZedSharp.UnitTests
         }
 
         [TestMethod]
+        public void MaybeAllTests()
+        {
+            var result = Maybe.All(
+                    Maybe.Some("hello"),
+                    Maybe<String>.None,
+                    Maybe.Some("world!"),
+                    (x, y, z) => x + y + z)
+                .OrElse("something missing");
+            Assert.AreEqual("something missing", result);
+        }
+
+        [TestMethod]
         public void ValidationTests()
         {
             var v = Validation.Of("abcdefg")
