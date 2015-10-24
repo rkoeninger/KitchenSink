@@ -8,6 +8,16 @@ namespace ZedSharp.UnitTests
     public class MaybeTests
     {
         [TestMethod]
+        public void AllDefined()
+        {
+            var a = Maybe.Some(0);
+            var b = Maybe.Some(1);
+            var c = Maybe.Some(2);
+            Assert.AreEqual(Maybe.Some(3), Maybe.All(a, b, c, (x, y, z) => x + y + z));
+            Assert.AreEqual(Maybe<int>.None, Maybe.All(a, b, Maybe<int>.None, (x, y, z) => x + y + z));
+        }
+
+        [TestMethod]
         public void MaybeWrappers()
         {
             const String s = "";
