@@ -130,6 +130,10 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Table.cs</LastGenOutput>
     </None>
+    <Content Include="Tuples.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Tuples.cs</LastGenOutput>
+    </Content>
     <None Include="Dictionary.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Dictionary.cs</LastGenOutput>
@@ -137,12 +141,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Tuples.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Tuples.cs</LastGenOutput>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
