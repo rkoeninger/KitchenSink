@@ -130,10 +130,10 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Table.cs</LastGenOutput>
     </None>
-    <Content Include="Tuples.tt">
+    <None Include="Tuples.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Tuples.cs</LastGenOutput>
-    </Content>
+    </None>
     <None Include="Dictionary.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Dictionary.cs</LastGenOutput>
