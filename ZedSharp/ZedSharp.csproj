@@ -91,6 +91,11 @@
     </Compile>
     <Compile Include="Expect.cs" />
     <Compile Include="Maybe.cs" />
+    <Compile Include="Tuples.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Tuples.tt</DependentUpon>
+    </Compile>
     <Compile Include="Types.cs" />
     <Compile Include="TypeTree.cs" />
     <Compile Include="Unit.cs" />
@@ -132,6 +137,12 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Tuples.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Tuples.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
