@@ -1,6 +1,6 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/tdqkpf9pfgno6ip2?svg=true)](https://ci.appveyor.com/project/rkoeninger/zed-sharp)
 
-# zed-sharp
+# ZedSharp
 
 A library for multi-paradigm programming in C#/.Net.
 
