@@ -161,6 +161,7 @@
     <!-- Future proof 'til VS2013+2 -->
     <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\13.0\TextTransform.exe"</_TransformExe>
     <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\14.0\TextTransform.exe"</_TransformExe>
+    <_TransformExe Condition="!Exists('$(_TransformExe)')">"mono $(SolutionDir)/t4/mono.texttransform.1.0.0/tools/TextTransform.exe"</_TransformExe>
   </PropertyGroup>
   <Target Name="TransformOnBuild" AfterTargets="BeforeBuild">
     <Error Text="Failed to find TextTransform.exe tool at '$(_TransformExe)." Condition="!Exists('$(_TransformExe)')" />
