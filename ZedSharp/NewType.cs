@@ -19,7 +19,7 @@ namespace ZedSharp
         /// </summary>
         public override String ToString()
         {
-            return Value.IsNull() ? "" : Value.ToString();
+            return Z.Str(Value);
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace ZedSharp
         /// </summary>
         public override int GetHashCode()
         {
-            return Value.IsNull() ? 0 : Value.GetHashCode();
+            return Z.Hash(Value);
         }
 
         /// <summary>
