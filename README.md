@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/tdqkpf9pfgno6ip2?svg=true)](https://ci.appveyor.com/project/rkoeninger/zed-sharp)
+[![Build Status](https://travis-ci.org/rkoeninger/ZedSharp.svg?branch=master)](https://travis-ci.org/rkoeninger/ZedSharp)
 
 # ZedSharp
 

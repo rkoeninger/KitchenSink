@@ -1,0 +1,10 @@
+notifications:
+  email: false
+language: csharp
+solution: ZedSharp.sln
+install:
+  - nuget restore ZedSharp.sln
+  - nuget install NUnit.Runners -Version 3.2.0 -OutputDirectory testrunner
+script:
+  - xbuild /p:Configuration=Release ZedSharp.sln
+  - mono ./testrunner/NUnit.ConsoleRunner.3.2.0/tools/nunit3-console.exe ./ZedSharp.UnitTests/bin/Release/ZedSharp.UnitTests.dll
