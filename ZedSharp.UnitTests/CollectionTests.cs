@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class CollectionTests
     {
-        [TestMethod]
+        [Test]
         public void ListCreateWithOfMethod()
         {
             var xs = List.Of(1, 2, 3, 4, 5);
@@ -16,7 +16,7 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(xs.SequenceEqual(ys));
         }
 
-        [TestMethod]
+        [Test]
         public void DictionaryCreateLongArgList()
         {
             var dict = Dictionary.Of(
@@ -43,7 +43,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(6, dict["f"]);
         }
 
-        [TestMethod]
+        [Test]
         public void DictionaryCreateByAnonObject()
         {
             var dict2 = Dictionary.Of(new
@@ -65,7 +65,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(ConsoleColor.Green, dict2["Green"]);
             Assert.AreEqual("blue", dict2["blue"]);
             Assert.AreEqual(Tuple.Create(255, 255, 0), dict2["Color_Yellow"]);
-            Assert.IsInstanceOfType(dict2["Func1"], typeof(Func<int, int>));
+            Assert.IsInstanceOf<Func<int, int>>(dict2["Func1"]);
 
             // Can actually be any object
             var dict3 = Dictionary.Of(new Color(12, 23, 34));
@@ -78,7 +78,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(34, dict3["B"]);
         }
 
-        [TestMethod]
+        [Test]
         public void DictionaryCreateByArgList()
         {
             var dict = Dictionary.Of(
@@ -107,7 +107,7 @@ namespace ZedSharp.UnitTests
             public Color(int r, int g, int b) { R = r; G = g; B = b; }
         }
 
-        [TestMethod]
+        [Test]
         public void EnumerableForce()
         {
             /*
@@ -137,7 +137,7 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(z == 3);
         }
 
-        [TestMethod]
+        [Test]
         public void EnumerablePartition()
         {
             var p = Seq.Of(1, 2, 3, 4, 5, 6, 7, 8);

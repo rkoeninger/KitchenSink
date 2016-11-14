@@ -1,11 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ComparableTests
     {
-        [TestMethod]
+        [Test]
         public void IsBetween()
         {
             Assert.IsTrue(5.IsBetween(3, 10));

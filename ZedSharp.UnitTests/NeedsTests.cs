@@ -1,12 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class NeedsTests
     {
-        [TestMethod]
+        [Test]
         public void LookupAllExplicit()
         {
             var x = new WS();
@@ -35,12 +35,12 @@ namespace ZedSharp.UnitTests
         public interface IUserInterface { }
         public interface IWebService { }
 
-        [TestMethod]
+        [Test]
         public void DefaultImplLookup()
         {
             var needs = new Needs();
             var thing = needs.Get<IAnInterface>().OrElseThrow(() => new Exception("No impl found"));
-            Assert.IsInstanceOfType(thing, typeof(AnImplementation));
+            Assert.IsInstanceOf<AnImplementation>(thing);
         }
 
         [DefaultImplementation(typeof(AnImplementation))]
@@ -48,12 +48,12 @@ namespace ZedSharp.UnitTests
 
         public class AnImplementation : IAnInterface { }
 
-        [TestMethod]
+        [Test]
         public void DefaultImplOfLookup()
         {
             var needs = new Needs();
             var thing = needs.Get<ISomeInterface>().OrElseThrow(() => new Exception("No impl found"));
-            Assert.IsInstanceOfType(thing, typeof(SomeImplementation));
+            Assert.IsInstanceOf<SomeImplementation>(thing);
         }
 
         public interface ISomeInterface { }
@@ -61,7 +61,7 @@ namespace ZedSharp.UnitTests
         [DefaultImplementationOf(typeof(ISomeInterface))]
         public class SomeImplementation : ISomeInterface { }
 
-        [TestMethod]
+        [Test]
         public void MultipleDefaultImplsLookup()
         {
             var needs = new Needs();
@@ -76,7 +76,7 @@ namespace ZedSharp.UnitTests
         [DefaultImplementationOf(typeof(IMyInterface))]
         public class MyImpl2 : IMyInterface { }
 
-        [TestMethod]
+        [Test]
         public void NoImplAvailable()
         {
             var needs = new Needs();

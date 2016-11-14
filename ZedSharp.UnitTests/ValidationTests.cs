@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class ValidationTests
     {
-        [TestMethod]
+        [Test]
         public void ValidationIses()
         {
             Assert.IsTrue(Verify.That(PersonA)
@@ -30,7 +30,7 @@ namespace ZedSharp.UnitTests
                 .HasErrors);
         }
 
-        [TestMethod]
+        [Test]
         public void ValidationPropertyChain()
         {
             // Some of these verifications are purposely redundant to confirm that the expression destructuring process works

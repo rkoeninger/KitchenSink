@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class CheckTests
     {
-        [TestMethod]
+        [Test]
         public void CheckWithDefaultInputs()
         {
             Check.That((int x, int y) => (x == y) == (y == x));
             Check.ReflexiveEquality<int>();
         }
 
-        [TestMethod]
+        [Test]
         public void CheckWithProvidedInputs()
         {
             Check.That(
@@ -31,14 +31,14 @@ namespace ZedSharp.UnitTests
             Check.EqualsAndHashCode(Seq.Forever(() => Rand.Ints().Take(Rand.Int(64))).Take(16));
         }
 
-        [TestMethod]
+        [Test]
         public void CheckComparableAndOperators()
         {
             Check.Comparable(Sample.Ints);
             Check.CompareOperators(Sample.Ints);
         }
 
-        [TestMethod]
+        [Test]
         public void Idempotence()
         {
             Check.Idempotent(Sample.Ints.Where(x => x != int.MinValue), Math.Abs);

@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class MatchTests
     {
-        [TestMethod]
+        [Test]
         public void MatchBasics()
         {
             Assert.IsFalse(Match.On("").Return<int>().End.HasValue);
@@ -25,7 +25,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(31, Match.On("abc").Case("def", 23).Else(31));
         }
 
-        [TestMethod]
+        [Test]
         public void MatchTypeCorrectness()
         {
             // Result type is inferred from first Then() to be an Int32 so false, a Boolean, in the second Then() is invalid
@@ -39,7 +39,7 @@ namespace ZedSharp.UnitTests
                 });
         }
 
-        [TestMethod]
+        [Test]
         public void MatchTrackingEvalOrder()
         {
             var l = new List<String>();
@@ -54,7 +54,7 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(l.SequenceEqual(Seq.Of("case1", "case2", "case3", "case4", "then4")));
         }
 
-        [TestMethod]
+        [Test]
         public void MatchDefault()
         {
             Assert.AreEqual("whatever", Match.On(3).Default("whatever").End);
@@ -62,7 +62,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("fgjh", Match.On(3).Default("whatever").Case(5, "asdf").Case(3, "fgjh").Case(2, "awert").End);
         }
 
-        [TestMethod]
+        [Test]
         public void MatchDefaultTrackingEvalOrder()
         {
             var l = new List<String>();
@@ -87,7 +87,7 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(l.SequenceEqual(Seq.Of("case1", "case2", "case3", "case4", "default")));
         }
 
-        [TestMethod]
+        [Test]
         public void MatchFunc()
         {
             var f = Match<int>.Case(1, "qwerty").Case(4, "lkjhg").Case(7, "zxcvb").Else("poiuy");
@@ -101,14 +101,14 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("poiuy", g(3));
         }
 
-        [TestMethod]
+        [Test]
         public void MatchEvalOrder()
         {
             var res = Match.On(3).Case(1, "a").Case(3, "b").Case(3, "c").Else("d");
             Assert.AreEqual("b", res);
         }
 
-        [TestMethod]
+        [Test]
         public void MatchFuncEvalOrder()
         {
             var res = Match.From<int>().Case(1, "a").Case(3, "b").Case(3, "c").Else("d");

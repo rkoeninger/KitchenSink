@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class MaybeTests
     {
-        [TestMethod]
+        [Test]
         public void AllDefined()
         {
             var a = Maybe.Some(0);
@@ -17,7 +17,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(Maybe<int>.None, Maybe.All(a, b, Maybe<int>.None, (x, y, z) => x + y + z));
         }
 
-        [TestMethod]
+        [Test]
         public void MaybeWrappers()
         {
             const String s = "";
@@ -26,7 +26,7 @@ namespace ZedSharp.UnitTests
             Expect.None(Maybe<String>.None);
         }
 
-        [TestMethod]
+        [Test]
         public void MaybeParsing()
         {
             Expect.Some(123, "123".ToInt());
@@ -37,7 +37,7 @@ namespace ZedSharp.UnitTests
             Expect.Some(123.123, "123.123".ToDouble());
         }
 
-        [TestMethod]
+        [Test]
         public void MaybeJoining()
         {
             Expect.Some(3, Maybe.Of(1).Join(Maybe.Of(2), Z.Add));
@@ -46,7 +46,7 @@ namespace ZedSharp.UnitTests
             Expect.None(Maybe<int>.None.Join(Maybe<int>.None, Z.Add));
         }
 
-        [TestMethod]
+        [Test]
         public void MaybeCasting()
         {
             Assert.IsTrue(Maybe.Of("").Cast<string>().HasValue); // same-type
@@ -55,7 +55,7 @@ namespace ZedSharp.UnitTests
             Assert.IsFalse(Maybe.Of("").Cast<int>().HasValue); // casting to unrelated type
         }
 
-        [TestMethod]
+        [Test]
         public void MaybeEnumerableExtensions()
         {
             Expect.Some(0, new[] { 0 }.FirstMaybe());
@@ -72,7 +72,7 @@ namespace ZedSharp.UnitTests
             Expect.Some(new[] { "9", "3", "2", "1", "6", "3", "5", "3" }.Select(Maybe.ToInt).Sequence());
         }
 
-        [TestMethod]
+        [Test]
         public void MaybeAllTests()
         {
             var result = Maybe.All(
@@ -84,7 +84,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("something missing", result);
         }
 
-        [TestMethod]
+        [Test]
         public void ValidationTests()
         {
             var v = Validation.Of("abcdefg")

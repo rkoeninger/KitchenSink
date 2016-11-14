@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class SlangTests
     {
-        [TestMethod]
+        [Test]
         public void NumericExpressionTypes()
         {
             Assert.AreEqual(typeof(int), Slang.Parse("143").Type);
@@ -21,7 +21,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(typeof(decimal), Slang.Parse("4573945723849579.2345m").Type);
         }
 
-        [TestMethod]
+        [Test]
         public void UnicodeParsing()
         {
             Assert.AreEqual("\u0000", Slang.Eval<string>("\"\\u0000\""));
@@ -36,7 +36,7 @@ namespace ZedSharp.UnitTests
             Expect.Error<SlangLexException>(() => Slang.Eval<string>("\"\\x\""));
         }
 
-        [TestMethod]
+        [Test]
         public void DefaultOperator()
         {
             Assert.IsNull(Slang.Eval<string>("(default string)"));
@@ -44,33 +44,33 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(null, Slang.Eval<int?>("(default int?)"));
         }
 
-        [TestMethod]
+        [Test]
         public void TypeOfOperator()
         {
             Assert.AreEqual(typeof(string), Slang.Eval<Type>("(typeof string)"));
             Assert.AreEqual(typeof(int?), Slang.Eval<Type>("(typeof int?)"));
         }
 
-        [TestMethod]
+        [Test]
         public void NullableTypeLiterals()
         {
             Expect.Error<ArgumentException>(() => Slang.Eval<Type>("(typeof int??)"));
         }
 
-        [TestMethod]
+        [Test]
         public void NewOperator()
         {
             Assert.AreEqual(0, Slang.Eval<int?>("(new int? 0)"));
         }
 
-        [TestMethod]
+        [Test]
         public void CastAndAsOperators()
         {
             Assert.IsNotNull(Slang.Eval<object>("(as object \"\")"));
             Assert.AreEqual(1, Slang.Eval<int>("(cast int 1.34)"));
         }
 
-        [TestMethod]
+        [Test]
         public void PrimitiveTypeChecks()
         {
             Assert.IsTrue(Slang.Eval<bool>("(is int 0)"));
@@ -78,7 +78,7 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(Slang.Eval<bool>("(is string \"\")"));
         }
 
-        [TestMethod]
+        [Test]
         public void UnaryOperators()
         {
             Assert.IsTrue(Slang.Eval<bool>("(! false)"));
@@ -90,7 +90,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(9, Slang.Eval<int>("(++ 8)"));
         }
 
-        [TestMethod]
+        [Test]
         public void NaryOperators()
         {
             Assert.IsTrue(Slang.Eval<bool>("(&& true true true true)"));
@@ -102,7 +102,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(false, Slang.Eval<bool>("(?? (cast bool? null) false)"));
         }
 
-        [TestMethod]
+        [Test]
         public void NaryCompareOperators()
         {
             Assert.IsTrue(Slang.Eval<bool>("(< 1 3 6 7)"));
@@ -114,7 +114,7 @@ namespace ZedSharp.UnitTests
             Assert.IsFalse(Slang.Eval<bool>("(>= 9 5 6 2)"));
         }
 
-        [TestMethod]
+        [Test]
         public void NaryEqualityOperators()
         {
             Expect.Error<ArgumentException>(() => Slang.Eval<bool>("(==)"));
@@ -136,44 +136,44 @@ namespace ZedSharp.UnitTests
             });
         }
 
-        [TestMethod]
+        [Test]
         public void NaryMinMaxOperators()
         {
             Assert.AreEqual(4, Slang.Eval<int>("(min 6 12 4 15 8)"));
             Assert.AreEqual(15, Slang.Eval<int>("(max 6 12 4 15 8)"));
         }
 
-        [TestMethod]
+        [Test]
         public void ConditionalOperator()
         {
             Assert.AreEqual(5, Slang.Eval<int>("(?: true 5 3)"));
             Assert.AreEqual(3, Slang.Eval<int>("(?: false 5 3)"));
         }
 
-        [TestMethod]
+        [Test]
         public void CollectionInitializerTypeInference()
         {
-            Assert.IsInstanceOfType(Slang.Eval<object>("[1 2 3]"), typeof(List<int>));
-            Assert.IsInstanceOfType(Slang.Eval<object>("{\"one\" 1 \"two\" 2 \"three\" 3}"), typeof(Dictionary<string, int>));
+            Assert.IsInstanceOf<List<int>>(Slang.Eval<object>("[1 2 3]"));
+            Assert.IsInstanceOf<Dictionary<string, int>>(Slang.Eval<object>("{\"one\" 1 \"two\" 2 \"three\" 3}"));
             Expect.Error(() => Slang.Eval<object>("[]"));
             Expect.Error(() => Slang.Eval<object>("{}"));
         }
 
-        [TestMethod]
+        [Test]
         public void CollectionInitializerAndIndexerAccess()
         {
             Assert.AreEqual(3, Slang.Eval<int>("(# [1 2 3 4 5] 2)"));
             Assert.AreEqual(2, Slang.Eval<int>("(# {\"one\" 1 \"two\" 2 \"three\" 3} \"two\")"));
         }
 
-        [TestMethod]
+        [Test]
         public void LambdaDeclaration()
         {
             var f = Slang.Eval<Func<int, int>>("(=> ((int x)) (+ 1 x))");
             Check.That(Sample.Ints.Where(x => x != Int32.MaxValue), x => f(x) == x + 1);
         }
 
-        [TestMethod]
+        [Test]
         public void SyntaxNestingDepth()
         {
             const int depth = 256;
@@ -182,7 +182,7 @@ namespace ZedSharp.UnitTests
                 + Enumerable.Repeat(")", depth).Concat());
         }
 
-        [TestMethod]
+        [Test]
         public void NestedString()
         {
             var stringList = Slang.Eval<IReadOnlyList<String>>("[\"abc\" \'\"def\"\' «\"sdf«345\'«fgh\"»678»\'yui»]");

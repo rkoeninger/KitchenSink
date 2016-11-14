@@ -1,13 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Linq;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class StringTests
     {
-        [TestMethod]
+        [Test]
         public void StringSeqTest()
         {
             const string s = "comma, separated, string with multiple, comma, separated, parts";
@@ -16,7 +16,7 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(splits.TrimAll().SequenceEqual(Seq.Of("comma", "separated", "string with multiple", "comma", "separated", "parts")));
         }
 
-        [TestMethod]
+        [Test]
         public void StringRegexSeq()
         {
             var usPhoneRegex = new Regex(@"(\x28?\d{3}\x29?[\x20\x2D\x2E])?(\d{3})[\x20\x2D\x2E](\d{4})");
@@ -26,7 +26,7 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(splits.SequenceEqual(Seq.Of("(123) 555-1234", "432.6545", "654 234 1233")));
         }
 
-        [TestMethod]
+        [Test]
         public void CollapseWhiteSpace()
         {
             Assert.AreEqual("asd fdjkv sdfv fsv as4 '", " asd   fdjkv sdfv \nfsv \r\ras4 '  ".CollapseSpace());

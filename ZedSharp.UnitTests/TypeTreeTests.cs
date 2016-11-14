@@ -1,12 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class TypeTreeTests
     {
-        [TestMethod]
+        [Test]
         public void TypeTreeLookups()
         {
             var tree = new TypeTree<int>();

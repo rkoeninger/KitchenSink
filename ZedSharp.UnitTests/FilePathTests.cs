@@ -1,24 +1,24 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class FilePathTests
     {
-        [TestMethod]
+        [Test]
         public void ConcatPaths()
         {
             Assert.AreEqual(
                 @"C:\Program Files (x86)\Microsoft Visual Studio 2013",
-                Drive.C / "Program Files (x86)" / "Microsoft Visual Studio 2013");
+                (Drive.C / "Program Files (x86)" / "Microsoft Visual Studio 2013").Value);
 
             Assert.AreEqual(
                 @"\\somemachine\someshare\subpath\file.txt",
-                UNC.Host("somemachine").Share("someshare") / "subpath" / "file.txt");
+                (UNC.Host("somemachine").Share("someshare") / "subpath" / "file.txt").Value);
         }
 
-        [TestMethod]
+        [Test]
         public void TryOutSpecialFolders()
         {
             Console.WriteLine(Folder.AppData);

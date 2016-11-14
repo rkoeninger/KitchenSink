@@ -1,14 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class NewTypeTests
     {
         public sealed class CustomerId : NewType<int> { public CustomerId(int x) : base(x) {} }
         public sealed class ProductCode : NewType<string> { public ProductCode(string x) : base(x) {} }
 
-        [TestMethod]
+        [Test]
         public void NewTypeTypeChecking()
         {
             Expect.CompileFail(
@@ -32,7 +32,7 @@ namespace ZedSharp.UnitTests
                 });
         }
 
-        [TestMethod]
+        [Test]
         public void NewTypeEquality()
         {
             var c1 = new CustomerId(453);
@@ -45,7 +45,7 @@ namespace ZedSharp.UnitTests
             Assert.AreNotEqual(c1, x1); // NewType<A> and A are never equal
         }
 
-        [TestMethod]
+        [Test]
         public void NewTypeHashCode()
         {
             var c1 = new CustomerId(946);
@@ -54,7 +54,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(x1.GetHashCode(), c1.GetHashCode());
         }
 
-        [TestMethod]
+        [Test]
         public void NewTypeToString()
         {
             Assert.AreEqual("", new ProductCode(null).ToString());

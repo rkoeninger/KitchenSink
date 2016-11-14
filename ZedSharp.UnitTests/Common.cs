@@ -5,7 +5,7 @@ namespace ZedSharp.UnitTests
 {
     public static class Common
     {
-        public static String ZedDll = Path.GetFileName(typeof(Table).Assembly.CodeBase);
+        public static String ZedDll = new Uri(typeof(Table).Assembly.CodeBase).AbsolutePath;
 
         public static String Wrap(String source)
         {

@@ -1,11 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class IOTests
     {
-        [TestMethod]
+        [Test]
         public void IOChaining()
         {
             Assert.AreEqual(1, IO.Of(1).Eval());
@@ -13,7 +13,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(3, IO.Of(1).Join(IO.Of(2), Z.Add).Eval());
         }
 
-        [TestMethod]
+        [Test]
         public void IOTransforms()
         {
             Assert.AreEqual(3, IO.Demote(IO.Of(() => Z.Add.Apply(1))).Invoke(2).Eval());

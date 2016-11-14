@@ -1,11 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class TableTests
     {
-        [TestMethod]
+        [Test]
         public void OfAndEqualsMethods()
         {
             var x = Row.Of("ZXC", 2);
@@ -73,7 +73,7 @@ namespace ZedSharp.UnitTests
                 });
         }
 
-        [TestMethod]
+        [Test]
         public void WhereMethods()
         {
             var t = Table.Of(

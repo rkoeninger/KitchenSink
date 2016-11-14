@@ -1,12 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class LensTests
     {
-        [TestMethod]
+        [Test]
         public void LensComposition()
         {
             var addr = Lens.From<Person>().Of(x => x.Address, (x, y) => new Person(x.FirstName, x.LastName, y));
@@ -21,7 +21,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("Someville", addrCt.Set(person, "Someville").Address.City);
         }
 
-        [TestMethod]
+        [Test]
         public void LensGen()
         {
             var fn = Lens.Gen<Person, String>("FirstName");
@@ -40,7 +40,7 @@ namespace ZedSharp.UnitTests
             Expect.Error(() => Lens.Gen<Address, int>("Street"));
         }
 
-        [TestMethod]
+        [Test]
         public void GenFromGetterExprUsingBuilder()
         {
             var fn = Lens.From<Person>().Gen(x => x.FirstName);
@@ -56,7 +56,7 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual("John", fn.Set(person, "John").FirstName);
         }
 
-        [TestMethod]
+        [Test]
         public void GenFromGetterExpr()
         {
             var fn = Lens.Gen((Person x) => x.FirstName);

@@ -1,12 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class MultiMethodTests
     {
-        [TestMethod]
+        [Test]
         public void SimpleDispatchTest()
         {
             var multi = MultiMethod.For(Z.Even).Return<String>()

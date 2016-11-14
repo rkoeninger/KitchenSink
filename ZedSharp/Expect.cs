@@ -1,5 +1,4 @@
 ﻿using Microsoft.CSharp;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
 using System.CodeDom.Compiler;
@@ -7,6 +6,13 @@ using System.Collections.Generic;
 
 namespace ZedSharp
 {
+    public class ExpectationFailedException : Exception
+    {
+        public ExpectationFailedException(String message) : base(message)
+        {
+        }
+    }
+
     /// <summary>
     /// Expect contains methods that are used to assert failures,
     /// like exception throwing and failed compiliation/type-checking.
@@ -39,12 +45,12 @@ namespace ZedSharp
                 return e;
             }
 
-            throw toThrow ?? new AssertFailedException(typeof(E).Name + " expected");
+            throw toThrow ?? new ExpectationFailedException(typeof(E).Name + " expected");
         }
 
-        public static AssertFailedException FailedAssert(Action f)
+        public static ExpectationFailedException FailedAssert(Action f)
         {
-            return Error<AssertFailedException>(f);
+            return Error<ExpectationFailedException>(f);
         }
 
         private static CompilerResults DoCompile(String source, params String[] assemblies)
@@ -81,19 +87,22 @@ namespace ZedSharp
 
                 if (! errorNumbers.SequenceEqual(errorCodes.OrderBy(x => x)))
                 {
-                    throw new AssertFailedException("Unexpected compiler errors present / Expected compiler errors present - check standard out");
+                    throw new ExpectationFailedException("Unexpected compiler errors present / Expected compiler errors present - check standard out");
                 }
             }
             else
             {
-                throw new AssertFailedException("Expected compilation failure");
+                throw new ExpectationFailedException("Expected compilation failure");
             }
         }
 
         /// <summary>Asserts that the actual maybe has a value and the value is equal to the expected value.</summary>
         public static void Some<A>(A expected, Maybe<A> actual)
         {
-            Assert.AreEqual(Maybe.Some(expected), actual);
+            if (Maybe.Some(expected) != actual)
+            {
+                throw new Exception();
+            }
         }
 
         /// <summary>Asserts that the given maybe has a value.</summary>
@@ -101,7 +110,7 @@ namespace ZedSharp
         {
             if (! maybe.HasValue)
             {
-                throw new AssertFailedException("Maybe was supposed to have a value");
+                throw new ExpectationFailedException("Maybe was supposed to have a value");
             }
         }
 
@@ -110,7 +119,7 @@ namespace ZedSharp
         {
             if (maybe.HasValue)
             {
-                throw new AssertFailedException("Maybe was not supposed to have a value, but does: " + maybe);
+                throw new ExpectationFailedException("Maybe was not supposed to have a value, but does: " + maybe);
             }
         }
     }

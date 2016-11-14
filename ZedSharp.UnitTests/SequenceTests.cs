@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class SequenceTests
     {
-        [TestMethod]
+        [Test]
         public void ListIteration()
         {
             var list = List.Of(1, 2, 3, 4, 5, 6, 7, 8);
@@ -15,7 +15,7 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(list.SequenceEqual(seq));
         }
 
-        [TestMethod]
+        [Test]
         public void EnumerableIteration()
         {
             var list = List.Of(1, 2, 3, 4, 5, 6, 7, 8);
@@ -23,7 +23,7 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(list.SequenceEqual(seq));
         }
 
-        [TestMethod]
+        [Test]
         public void OverlappingPartition()
         {
             var list = List.Of(1, 2, 3, 4, 5);

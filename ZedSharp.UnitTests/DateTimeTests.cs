@@ -1,12 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class DateTimeTests
     {
-        [TestMethod]
+        [Test]
         public void DateRangeTests()
         {
             Assert.IsTrue(DateTimeRange.GetEntireMonth(2000, Month.April).Contains(new DateTime(2000, 4, 5, 13, 24, 53)));

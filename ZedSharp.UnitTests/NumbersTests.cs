@@ -1,19 +1,19 @@
 ﻿using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class NumbersTests
     {
-        [TestMethod]
+        [Test]
         public void Divisibility()
         {
             Check.That(Sample.Ints, x => x.IsEven() == ((x / 2) * 2 == x));
             Check.That(Sample.Ints, x => x.IsOdd() == ((x / 2) * 2 != x));
         }
 
-        [TestMethod]
+        [Test]
         public void Factorial()
         {
             Assert.AreEqual(1, 0.Factorial());
@@ -25,7 +25,7 @@ namespace ZedSharp.UnitTests
             Expect.Error(() => (-2).Factorial());
         }
 
-        [TestMethod]
+        [Test]
         public void Permutations()
         {
             Assert.AreEqual(1, 0.Permutations(0));
@@ -38,7 +38,7 @@ namespace ZedSharp.UnitTests
             Expect.Error(() => 4.Permutations(-1));
         }
 
-        [TestMethod]
+        [Test]
         public void Combinations()
         {
             Assert.AreEqual(1, 0.Combinations(0));
@@ -51,7 +51,7 @@ namespace ZedSharp.UnitTests
             Expect.Error(() => 4.Combinations(-1));
         }
 
-        [TestMethod]
+        [Test]
         public void CombinationsOfSet()
         {
             var seq1 = ReadOnly.Collection(5, 6, 7, 8, 9);
@@ -79,7 +79,7 @@ namespace ZedSharp.UnitTests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PermutationsOfSet()
         {
             var seq1 = ReadOnly.Collection(5, 6, 7, 8, 9);

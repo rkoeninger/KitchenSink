@@ -1,6 +1,7 @@
 bin/
 obj/
 TestResults/
+packages/
 *.suo
 *.user
 ZedSharp/Natural.cs

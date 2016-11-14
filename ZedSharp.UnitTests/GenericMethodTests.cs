@@ -1,12 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class GenericMethodTests
     {
-        [TestMethod]
+        [Test]
         public void PredicateDispatchTest()
         {
             var method = new GenericMethod<int, int>()
@@ -21,7 +21,7 @@ namespace ZedSharp.UnitTests
             Check.Idempotent(method);
         }
 
-        [TestMethod]
+        [Test]
         public void SubtypeDispatchTest()
         {
             var speak = new GenericMethod<IAnimal, String>()

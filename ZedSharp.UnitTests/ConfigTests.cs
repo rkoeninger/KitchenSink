@@ -1,5 +1,5 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ZedSharp.UnitTests
 {
@@ -14,7 +14,7 @@ namespace ZedSharp.UnitTests
 
     public static class App
     {
-        private const String Path = @"
+        private const String Contents = @"
             using System;
 
             public class Config : ZedSharp.UnitTests.IConfig
@@ -28,15 +28,15 @@ namespace ZedSharp.UnitTests
 		            return name.ToUpper();
 	            }
             }";
-        private static readonly CodeLoader<IConfig> Loader = new CodeLoader<IConfig>(Path);
+        private static readonly CodeLoader<IConfig> Loader = new CodeLoader<IConfig>(Contents);
         public static void LoadConfig() { Loader.Load(); }
         public static IConfig Config { get { return Loader.Value; } }
     }
 
-    [TestClass]
+    [TestFixture]
     public class ConfigTests
     {
-        [TestMethod]
+        [Test]
         public void TestConfigLoading()
         {
             App.LoadConfig();

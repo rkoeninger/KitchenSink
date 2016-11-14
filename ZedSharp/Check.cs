@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ namespace ZedSharp
         {
             foreach (var arg0 in testData0)
                 if (! f(arg0))
-                    throw new AssertFailedException("Property refuted with (" + arg0 + ")");
+                    throw new ExpectationFailedException("Property refuted with (" + arg0 + ")");
         }
 
         public static void That<A, B>(IEnumerable<A> testData0, IEnumerable<B> testData1, Func<A, B, bool> f)
@@ -23,7 +22,7 @@ namespace ZedSharp
             foreach (var arg0 in list0)
                 foreach (var arg1 in list1)
                     if (! f(arg0, arg1))
-                        throw new AssertFailedException("Property refuted with (" + arg0 + ", " + arg1 + ")");
+                        throw new ExpectationFailedException("Property refuted with (" + arg0 + ", " + arg1 + ")");
         }
 
         public static void That<A, B, C>(IEnumerable<A> testData0, IEnumerable<B> testData1, IEnumerable<C> testData2, Func<A, B, C, bool> f)
@@ -36,7 +35,7 @@ namespace ZedSharp
                 foreach (var arg1 in list1)
                     foreach (var arg2 in list2)
                         if (! f(arg0, arg1, arg2))
-                            throw new AssertFailedException("Property refuted with (" + arg0 + ", " + arg1 + ", " + arg2 + ")");
+                            throw new ExpectationFailedException("Property refuted with (" + arg0 + ", " + arg1 + ", " + arg2 + ")");
         }
 
         private static readonly Dictionary<Type, IEnumerable> DefaultInputs = Dictionary.Of<Type, IEnumerable>(
