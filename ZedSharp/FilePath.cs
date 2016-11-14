@@ -1,5 +1,6 @@
 ﻿using System;
-using P = System.IO.Path;
+using System.IO;
+using static System.Environment;
 
 namespace ZedSharp
 {
@@ -7,16 +8,62 @@ namespace ZedSharp
     {
         public static FilePath Letter(char letter)
         {
+            if (! char.IsLetter(letter))
+            {
+                throw new ArgumentException("Drive letter must be a letter, instead it was: " + letter);
+            }
+
             return new FilePath(letter + @":\");
         }
 
+        public static readonly FilePath A = Letter('A');
+        public static readonly FilePath B = Letter('B');
         public static readonly FilePath C = Letter('C');
         public static readonly FilePath D = Letter('D');
         public static readonly FilePath E = Letter('E');
+        public static readonly FilePath F = Letter('F');
+        public static readonly FilePath G = Letter('G');
 
-        // TODO Drive.Windows - looks up drive running OS is installed on
-        // class Folder, TODO Folder.Home, Folder.RecyclingBin, Folder.Programs...
-        // etc
+        public static readonly FilePath System = new FilePath(Path.GetPathRoot(GetFolderPath(SpecialFolder.System)));
+    }
+
+    public static class Folder
+    {
+        public static FilePath Profile
+        {
+            get { return new FilePath(GetFolderPath(SpecialFolder.UserProfile)); }
+        }
+
+        public static FilePath Desktop
+        {
+            get { return new FilePath(GetFolderPath(SpecialFolder.DesktopDirectory)); }
+        }
+
+        public static FilePath Documents
+        {
+            get { return new FilePath(GetFolderPath(SpecialFolder.MyDocuments)); }
+        }
+
+        public static FilePath AppData
+        {
+            get { return new FilePath(GetFolderPath(SpecialFolder.ApplicationData)); }
+        }
+
+        public static FilePath LocalAppData
+        {
+            get { return new FilePath(GetFolderPath(SpecialFolder.LocalApplicationData)); }
+        }
+
+        public static FilePath Programs
+        {
+            get { return new FilePath(GetFolderPath(SpecialFolder.ProgramFiles)); }
+        }
+
+        public static FilePath Current
+        {
+            get { return new FilePath(CurrentDirectory); }
+            set { CurrentDirectory = value; }
+        }
     }
 
     public static class UNC
@@ -38,7 +85,7 @@ namespace ZedSharp
 
         public FilePath Share(String share)
         {
-            return new FilePath(P.Combine(Value.StartsWith(@"\\") ? Value : @"\\" + Value, share));
+            return new FilePath(Path.Combine(Value.StartsWith(@"\\") ? Value : @"\\" + Value, share));
         }
 
         public static FilePath operator /(UNCHost host, FilePath end)
@@ -61,7 +108,7 @@ namespace ZedSharp
         /// </summary>
         public static FilePath operator /(FilePath begin, FilePath end)
         {
-            return new FilePath(P.Combine(begin.Value, end.Value));
+            return new FilePath(Path.Combine(begin.Value, end.Value));
         }
 
         /// <summary>
@@ -69,7 +116,7 @@ namespace ZedSharp
         /// </summary>
         public static FilePath operator /(FilePath begin, String end)
         {
-            return new FilePath(P.Combine(begin.Value, end));
+            return new FilePath(Path.Combine(begin.Value, end));
         }
 
         /// <summary>
@@ -77,7 +124,7 @@ namespace ZedSharp
         /// </summary>
         public static FilePath operator /(String begin, FilePath end)
         {
-            return new FilePath(P.Combine(begin, end.Value));
+            return new FilePath(Path.Combine(begin, end.Value));
         }
 
         public static implicit operator String(FilePath filePath)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace ZedSharp.UnitTests
 {
@@ -15,6 +16,19 @@ namespace ZedSharp.UnitTests
             Assert.AreEqual(
                 @"\\somemachine\someshare\subpath\file.txt",
                 UNC.Host("somemachine").Share("someshare") / "subpath" / "file.txt");
+        }
+
+        [TestMethod]
+        public void TryOutSpecialFolders()
+        {
+            Console.WriteLine(Folder.AppData);
+            Console.WriteLine(Folder.LocalAppData);
+            Console.WriteLine(Folder.Desktop);
+            Console.WriteLine(Folder.Documents);
+            Console.WriteLine(Folder.Profile);
+            Console.WriteLine(Folder.Current);
+            Console.WriteLine(Drive.System);
+            Console.WriteLine(Folder.Programs);
         }
     }
 }
