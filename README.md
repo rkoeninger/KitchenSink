@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/rkoeninger/ZedSharp.svg?branch=master)](https://travis-ci.org/rkoeninger/ZedSharp)
-[![Build status](https://ci.appveyor.com/api/projects/status/tdqkpf9pfgno6ip2?svg=true)](https://ci.appveyor.com/project/rkoeninger/ZedSharp)
+[![Build status](https://ci.appveyor.com/api/projects/status/a5brp2kgyueyvg1v?svg=true)](https://ci.appveyor.com/project/rkoeninger/zedsharp)
 
 # ZedSharp
 
