@@ -6,7 +6,7 @@ namespace ZedSharp.UnitTests
     [TestFixture]
     public class FilePathTests
     {
-        [Test]
+        [Test, Category("WindowsOnly")]
         public void ConcatPaths()
         {
             Assert.AreEqual(
@@ -18,7 +18,13 @@ namespace ZedSharp.UnitTests
                 (UNC.Host("somemachine").Share("someshare") / "subpath" / "file.txt").Value);
         }
 
-        [Test]
+        [Test, Category("WindowsOnly")]
+        public void TryOutSpecialDrives()
+        {
+            Console.WriteLine(Drive.System);
+        }
+
+        [Test, Category("WindowsOnly")]
         public void TryOutSpecialFolders()
         {
             Console.WriteLine(Folder.AppData);
@@ -27,7 +33,6 @@ namespace ZedSharp.UnitTests
             Console.WriteLine(Folder.Documents);
             Console.WriteLine(Folder.Profile);
             Console.WriteLine(Folder.Current);
-            Console.WriteLine(Drive.System);
             Console.WriteLine(Folder.Programs);
         }
     }

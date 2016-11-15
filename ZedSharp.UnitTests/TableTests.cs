@@ -5,7 +5,7 @@ namespace ZedSharp.UnitTests
     [TestFixture]
     public class TableTests
     {
-        [Test]
+        [Test, Category("WindowsOnly")] // TODO: Should be WindowsOnly?
         public void OfAndEqualsMethods()
         {
             var x = Row.Of("ZXC", 2);

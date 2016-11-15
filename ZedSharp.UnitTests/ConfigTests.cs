@@ -36,7 +36,7 @@ namespace ZedSharp.UnitTests
     [TestFixture]
     public class ConfigTests
     {
-        [Test]
+        [Test, Category("WindowsOnly")]
         public void TestConfigLoading()
         {
             App.LoadConfig();
