@@ -24,7 +24,7 @@ namespace ZedSharp.UnitTests
             Console.WriteLine(Drive.System);
         }
 
-        [Test, Category("WindowsOnly")]
+        [Test]
         public void TryOutSpecialFolders()
         {
             Console.WriteLine(Folder.AppData);
