@@ -158,7 +158,7 @@
     <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\13.0\TextTransform.exe"</_TransformExe>
     <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\14.0\TextTransform.exe"</_TransformExe>
     <!-- This one is for Travis-CI (see .travis.yml). Travis runs linux, so path is case-sensitive -->
-    <_TransformExe Condition="!Exists('$(_TransformExe)')">mono $(SolutionDir)t4/Mono.TextTransform.1.0.0/tools/TextTransform.exe"</_TransformExe>
+    <_TransformExe Condition="!Exists('$(_TransformExe)')">mono $(SolutionDir)t4/Mono.TextTransform.1.0.0/tools/TextTransform.exe</_TransformExe>
   </PropertyGroup>
   <Target Name="TransformOnBuild" AfterTargets="BeforeBuild">
     <Error Text="Failed to find TextTransform.exe tool at '$(_TransformExe)." Condition="!Exists('$(_TransformExe)')" />
