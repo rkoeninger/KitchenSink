@@ -7,5 +7,6 @@ install:
   - nuget install Mono.TextTransform -Version 1.0.0 -OutputDirectory t4
   - nuget install NUnit.Runners -Version 3.2.0 -OutputDirectory testrunner
 script:
+  - chmod a+x t4.sh
   - xbuild /p:Configuration=Release ZedSharp.sln
   - mono ./testrunner/NUnit.ConsoleRunner.3.2.0/tools/nunit3-console.exe ./ZedSharp.UnitTests/bin/Release/ZedSharp.UnitTests.dll
