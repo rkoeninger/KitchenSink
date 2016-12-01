@@ -49,7 +49,20 @@ A library for multi-paradigm programming in C#/.Net.
   * Standard "live" implementations of those interfaces that pass-through to Console, File, Directory, etc.
   * Useful mock implementations of those interfaces like ScriptedConsole and VirtualFileSystem
 
-### Crazy XML Building Facility Based on Operator Overloading
+### Questionable File Path Building Facility using Operator Overloading
+
+  * Looks weird
+  * But looks cool
+  * Uses overloaded `/` operator to build paths
+  * Works on .Net/Windows and Mono/Linux
+  
+```csharp
+Drive.C / "Folder1" / "Folder2" / "File.txt" => C:\Folder1\Folder2\File.txt
+
+Folder.AppData / "MyApp" / "Config.xml" => C:\Users\Me\AppData\MyApp\Config.xml
+```
+
+### Crazy XML Building Facility using Operator Overloading
 
   * This was clearly a mistake
   * I am so sorry
