@@ -43,7 +43,7 @@ A library for multi-paradigm programming in C#/.Net.
 ### Dependency Injection
 
   * `Needs` - a basic IoC container that uses the following attributes
-  * `DefaultImplementationAttribute` - placed on an interface to indicate the default implementation so an IoC container doesn't have to explicitly configured with it
+  * `DefaultImplementationAttribute` - placed on an interface to indicate the default implementation so an IoC container doesn't have to be explicitly configured with it
   * `DefaultImplementationOfAttribute` - placed on a class to indicate that it is the default implementation of the specified interface
   * Mockable interfaces to common components: IConsole, IFileSystem
   * Standard "live" implementations of those interfaces that pass-through to Console, File, Directory, etc.
