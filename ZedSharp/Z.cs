@@ -66,6 +66,9 @@ namespace ZedSharp
         /// <summary>Check if collection is non-empty.</summary>
         public static readonly Func<ICollection, bool> NonEmpty = x => x.Count > 0;
         
+        /// <summary>Starting point for a range comparison: <c>Z.Cmp - 0 &lt;= x &lt; 10</c></summary>
+        public static readonly RangeComparison0 Cmp = new RangeComparison0();
+        
         /// <summary>Identity function.</summary>
         public static A Id<A>(A val)
         {

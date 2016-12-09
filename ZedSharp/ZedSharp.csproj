@@ -78,6 +78,7 @@
     </Compile>
     <Compile Include="Rand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RangeComparison.cs" />
     <Compile Include="Sample.cs" />
     <Compile Include="Slang.cs" />
     <Compile Include="Sequence.cs" />

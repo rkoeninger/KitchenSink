@@ -57,9 +57,22 @@ A library for multi-paradigm programming in C#/.Net.
   * Works on .Net/Windows and Mono/Linux
   
 ```csharp
-Drive.C / "Folder1" / "Folder2" / "File.txt" => C:\Folder1\Folder2\File.txt
+Drive.C / "Folder1" / "Folder2" / "File.txt"
+    "C:\Folder1\Folder2\File.txt"
 
-Folder.AppData / "MyApp" / "Config.xml" => C:\Users\Me\AppData\MyApp\Config.xml
+Folder.AppData / "MyApp" / "Config.xml"
+    "C:\Users\Me\AppData\MyApp\Config.xml"
+	"/users/me/.config/"
+```
+
+### Bizarre Range Comparison Facility using Operator Overloading
+
+  * Can use `<`, `>`, `<=` and `>=`
+  * Not type safe, as you can't specify type parameters to operators
+  * Aside from the first `-` operator, looks pretty clean
+
+```csharp
+Z.Cmp- 0 <= x < 10
 ```
 
 ### Crazy XML Building Facility using Operator Overloading

@@ -12,5 +12,13 @@ namespace ZedSharp.UnitTests
             Assert.IsTrue(5.IsNotBetween(1, 5));
             Assert.IsTrue(5.IsBetween(5, 13));
         }
+
+        [Test]
+        public void RangeOperators()
+        {
+            Assert.IsTrue(Z.Cmp- 0 < 3 <= 5);
+            Assert.IsFalse(Z.Cmp- 0 < 3 >= 5);
+            Assert.IsTrue(Z.Cmp- 10 > 5 < 9);
+        }
     }
 }
