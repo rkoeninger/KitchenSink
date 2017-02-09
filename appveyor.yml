@@ -1,4 +1,4 @@
 build:
   project: ZedSharp.sln
 before_build:
-  - nuget restore
+  - nuget restore ZedSharp.sln
