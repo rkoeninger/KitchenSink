@@ -60,7 +60,7 @@ namespace ZedSharp
         public DefaultImplementationAttribute(Type @class)
         {
             if ((!(@class.IsClass || @class.IsValueType)) || @class.IsAbstract)
-                throw new ArgumentException(@class + " is not a concrete class or struct type");
+                throw new ArgumentException($"{@class} is not a concrete class or struct type");
 
             ImplementingClass = @class;
         }
@@ -96,12 +96,6 @@ namespace ZedSharp
     public static class Inject
     {
         public static readonly IConsole LiveConsole = new LiveConsole();
-        public static readonly IFileSystem LiveFileSystem = new LiveFileSystem();
-
-        public static IFileSystem VirtualFileSystem()
-        {
-            return new VirtualFileSystem();
-        }
 
         public static IConsole ScriptedConsole(StringReader input, StringWriter output = null)
         {
@@ -109,8 +103,7 @@ namespace ZedSharp
         }
 
         public static readonly Needs StandardNeeds = new Needs()
-            .Set<IConsole>(LiveConsole)
-            .Set<IFileSystem>(LiveFileSystem);
+            .Set<IConsole>(LiveConsole);
     }
 
     [DefaultImplementation(typeof(LiveConsole))]
@@ -163,48 +156,6 @@ namespace ZedSharp
         public void WriteLine(String format, params Object[] args)
         {
             Output.WriteLine(format, args);
-        }
-    }
-
-    [DefaultImplementation(typeof(LiveFileSystem))]
-    public interface IFileSystem
-    {
-        String ReadAllText(String path);
-        void WriteAllText(String path, String contents);
-    }
-
-    internal class LiveFileSystem : IFileSystem
-    {
-        public String ReadAllText(String path)
-        {
-            return File.ReadAllText(path);
-        }
-
-        public void WriteAllText(String path, String contents)
-        {
-            File.WriteAllText(path, contents);
-        }
-    }
-
-    internal class VirtualFileSystem : IFileSystem
-    {
-        private readonly Dictionary<String, String> Files = new Dictionary<String, String>();
-
-        public String ReadAllText(String path)
-        {
-            try
-            {
-                return Files[path];
-            }
-            catch (KeyNotFoundException)
-            {
-                throw new FileNotFoundException(path);
-            }
-        }
-
-        public void WriteAllText(String path, String contents)
-        {
-            Files[path] = contents;
         }
     }
 }
