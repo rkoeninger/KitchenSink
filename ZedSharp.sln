@@ -16,6 +16,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{EDCC3B85-0BAD-11DB-BC1A-00112FDE8B61}") = "KitchenSink.InternalMacros", "KitchenSink.InternalMacros\KitchenSink.InternalMacros.nproj", "{67307836-E091-4FB7-89EC-DE38DB70C773}"
+EndProject
+Project("{EDCC3B85-0BAD-11DB-BC1A-00112FDE8B61}") = "KitchenSink", "KitchenSink\KitchenSink.nproj", "{87B04190-3B88-41CC-A584-59303F5C5664}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +34,14 @@ Global
 		{833BBA2C-613E-4730-84B9-0D44DBA3AF55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{833BBA2C-613E-4730-84B9-0D44DBA3AF55}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{833BBA2C-613E-4730-84B9-0D44DBA3AF55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67307836-E091-4FB7-89EC-DE38DB70C773}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67307836-E091-4FB7-89EC-DE38DB70C773}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67307836-E091-4FB7-89EC-DE38DB70C773}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67307836-E091-4FB7-89EC-DE38DB70C773}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87B04190-3B88-41CC-A584-59303F5C5664}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87B04190-3B88-41CC-A584-59303F5C5664}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87B04190-3B88-41CC-A584-59303F5C5664}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87B04190-3B88-41CC-A584-59303F5C5664}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
