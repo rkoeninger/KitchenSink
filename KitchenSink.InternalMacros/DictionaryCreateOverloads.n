@@ -7,16 +7,36 @@ using Nemerle.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
-namespace KitchenSink.InternalMacros {
-  [MacroUsage(MacroPhase.BeforeInheritance, MacroTargets.Class)]
-  public macro DictionaryCreateOverloads (t: TypeBuilder) {
-    t.Define (<[ decl:
-      public static Of [A, B] (key0 : A, val0 : B) : IDictionary.[A, B] {
-        def d = Dictionary.[A, B] ();
-        d.Add (key0, val0);
-        d
-      }
-    ]>);
-  }
+namespace KitchenSink.InternalMacros
+{
+    [MacroUsage(MacroPhase.BeforeInheritance, MacroTargets.Class)]
+    public macro DictionaryCreateOverloads (t: TypeBuilder)
+    {
+        //foreach (n in [0 .. 20])
+        //{
+            //mutable paramz = [];
+
+            //foreach (i in [0 .. n])
+            //{
+            //    if (i == 0)
+            //    {
+            //        paramz = <[ key0 : A, val0 : B ]> :: paramz
+            //    }
+            //    else
+            //    {
+            //        paramz =  :: paramz
+            //    }
+            //}
+
+            t.Define (<[ decl:
+                public Of [A, B] (key0 : A, val0 : B) : IDictionary.[A, B] {
+                    def d = Dictionary.[A, B] ();
+                    d.Add (key0, val0);
+                    d
+                }
+            ]>);
+        //}
+    }
 }

@@ -6,12 +6,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using NUnit.Framework;
+
 namespace KitchenSink.Tests
 {
-  public class Class1
-  {
-    public Test1 () : IDictionary.[int, int] {
-      Dict.Of (1, 1)
+    [TestFixture]
+    public class Class1
+    {
+        [Test]
+        public Test1 () : void
+        {
+            def d = Dict.Of (1, 1);
+            Assert.AreEqual (1, d [1])
+        }
     }
-  }
 }
