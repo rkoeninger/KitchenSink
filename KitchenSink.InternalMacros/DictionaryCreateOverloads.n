@@ -9,7 +9,14 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace KitchenSink.InternalMacros {
-  public macro DictionaryCreateOverloads () {
-    <[ Nemerle.IO.printf ("run-time\n") ]>
+  [MacroUsage(MacroPhase.BeforeInheritance, MacroTargets.Class)]
+  public macro DictionaryCreateOverloads (t: TypeBuilder) {
+    t.Define (<[ decl:
+      public static Of [A, B] (key0 : A, val0 : B) : IDictionary.[A, B] {
+        def d = Dictionary.[A, B] ();
+        d.Add (key0, val0);
+        d
+      }
+    ]>);
   }
 }
