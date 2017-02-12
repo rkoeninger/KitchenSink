@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/rkoeninger/KitchenSink.svg?branch=master)](https://travis-ci.org/rkoeninger/KitchenSink)
-[![Build status](https://ci.appveyor.com/api/projects/status/a5brp2kgyueyvg1v?svg=true)](https://ci.appveyor.com/project/rkoeninger/KitchenSink)
+[![Build status](https://ci.appveyor.com/api/projects/status/syn6oxnf0e2b357e/branch/master?svg=true)](https://ci.appveyor.com/project/rkoeninger/kitchensink/branch/master)
 
 # KitchenSink
 
