@@ -1,0 +1,223 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<# var alphabet = new [] {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"}; #>
+<# var alphabetPrime = alphabet.Select(x => x + "2").ToArray(); #>
+<# var arityMax = 16; #>
+<# var typeArgLists = Enumerable.Range(0, arityMax + 1).Select(a => String.Join(", ", alphabet.Take(a))).ToArray(); #>
+<# var typeArgPrimeLists = Enumerable.Range(0, arityMax + 1).Select(a => String.Join(", ", alphabetPrime.Take(a))).ToArray(); #>
+<# var colArgLists = Enumerable.Range(0, arityMax + 1).Select(a => String.Join(", ", alphabet.Take(a).Select(x => "Col<" + x + "> column" + (x[0] + 1 - 'A')))).ToArray(); #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace KitchenSink
+{
+	public class Table
+	{
+<# foreach (int arity in Enumerable.Range(1, arityMax)) { #>
+        public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(params Row<<#= typeArgLists[arity] #>>[] rows)
+        {
+            return new Table<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "new Col<" + x + ">(\"\")")) #>, rows);
+        }
+
+        public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "String colName" + x)) #>, params Row<<#= typeArgLists[arity] #>>[] rows)
+        {
+            return new Table<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "new Col<" + x + ">(colName" + x + ")")) #>, rows);
+        }
+
+        public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(params object[] values)
+        {
+            if (values.Length.IsNotDivisibleBy(<#= arity #>))
+                throw new ArgumentException("Number of values must be a multiple of <#= arity #>");
+
+            return new Table<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "new Col<" + x + ">(\"\")")) #>, values.Partition(<#= arity #>).Select(xs => Row.Of(<#= String.Join(", ", alphabet.Take(arity).Select((t, i) => "(" + t + ") xs[" + i + "]")) #>)));
+        }
+
+        public static Table<<#= typeArgLists[arity] #>> Of<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "String colName" + x)) #>, params object[] values)
+        {
+            if (values.Length.IsNotDivisibleBy(<#= arity #>))
+                throw new ArgumentException("Number of values must be a multiple of <#= arity #>");
+
+            return new Table<<#= typeArgLists[arity] #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => "new Col<" + x + ">(colName" + x + ")")) #>, values.Partition(<#= arity #>).Select(xs => Row.Of(<#= String.Join(", ", alphabet.Take(arity).Select((t, i) => "(" + t + ") xs[" + i + "]")) #>)));
+        }
+
+<# } #>
+    }
+<# foreach (int arity in Enumerable.Range(1, arityMax)) { 
+        var className = "Table<" + typeArgLists[arity] + ">";
+#>
+
+    /// <summary><#= arity #>-column table</summary>
+	public class <#= className #> : IEnumerable<Row<<#= typeArgLists[arity] #>>>
+	{
+        public Table(<#= colArgLists[arity] #>) : this(<#= String.Join(", ", Enumerable.Range(1, arity).Select(x => "column" + x)) #>, new List<Row<<#= typeArgLists[arity] #>>>()) {}
+
+        public Table(<#= colArgLists[arity] #>, IEnumerable<Row<<#= typeArgLists[arity] #>>> rows)
+        {
+            <# foreach (int c in Enumerable.Range(1, arity)) { #>Column<#= c #> = <#= ("column" + c) #>;
+            <# } #>Rows = rows.ToList();
+        }
+
+        <# foreach (int c in Enumerable.Range(1, arity)) { #>public Col<<#= alphabet[c - 1] #>> Column<#= c #> { get; private set; }
+        <# } #>
+
+        private List<Row<<#= typeArgLists[arity] #>>> Rows { get; set; }
+
+        public IEnumerator<Row<<#= typeArgLists[arity] #>>> GetEnumerator()
+        {
+            return Rows.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public <#= className #> Where(Func<<#= typeArgLists[arity] #>, bool> f)
+        {
+            return new <#= className #>(<#= String.Join(", ", Enumerable.Range(1, arity).Select(x => "Column" + x)) #>, Rows.Where(r => f(<#= String.Join(", ", Enumerable.Range(1, arity).Select(x => "r.Item" + x)) #>)));
+        }
+        <# foreach (int selectArity in Enumerable.Range(1, arity)) { #><# WriteLine(""); #>
+        public Table<<#= typeArgPrimeLists[selectArity] #>> Select<<#= typeArgPrimeLists[selectArity] #>>(Func<<#= typeArgLists[arity] #>, Row<<#= typeArgPrimeLists[selectArity] #>>> f)
+        {
+            return new Table<<#= typeArgPrimeLists[selectArity] #>>(<#= String.Join(", ", alphabetPrime.Take(selectArity).Select(x => "new Col<" + x + ">(\"\")")) #>, Rows.Select(r => f(<#= String.Join(", ", Enumerable.Range(1, arity).Select(x => "r.Item" + x)) #>)));
+        }
+<# } #>
+    
+        public override int GetHashCode()
+        {
+            return String.Join("", Rows).GetHashCode();
+        }
+
+        public override bool Equals(Object obj)
+        {
+            if (ReferenceEquals(obj, this))
+                return true;
+
+            var that = obj as <#= className #>;
+            return (that != null) && Rows.SequenceEqual(that.Rows);
+        }
+    }
+<# } #>
+
+    /// <summary>A typed table column</summary>
+    /// <remarks>
+    /// Suggested use:
+    /// <code>
+    /// public static class MyColumns
+    /// {
+    ///     public static readonly Col&lt;String&gt; FirstName = new Col&lt;String&gt;("FirstName");
+    ///     public static readonly Col&lt;String&gt; LastName = new Col&lt;String&gt;("LastName");
+    ///     public static readonly Col&lt;Datetime&gt; Birthday = new Col&lt;DateTime&gt;("Birthday");
+    /// }
+    /// </code>
+    /// </remarks>
+    public struct Col<A>
+    {
+        public Col(String name) : this()
+        {
+            Name = name ?? "";
+        }
+
+        public String Name { get; private set; }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode() ^ typeof(A).GetHashCode();
+        }
+
+        public override bool Equals(Object obj)
+        {
+            if (!(obj is Col<A>))
+                return false;
+
+            var that = (Col<A>) obj;
+            return that.Name == Name;
+        }
+
+        public override String ToString()
+        {
+            return Name + " " + typeof(A).Name;
+        }
+    }
+
+    public class Row
+    {
+<# foreach (int arity in Enumerable.Range(1, arityMax)) {
+        var typeArgCsv = typeArgLists[arity];
+        var className = "Row<" + typeArgCsv + ">"; #>
+        public static <#= className #> Of<<#= typeArgCsv #>>(<#= String.Join(", ", alphabet.Take(arity).Select(x => x + " " + x.ToLower())) #>)
+        {
+            return new <#= className #>(<#= String.Join(", ", alphabet.Take(arity).Select(x => x.ToLower())) #>);
+        }
+
+<# } #>
+    }
+<# foreach (int arity in Enumerable.Range(1, arityMax)) {
+        var typeArgCsv = typeArgLists[arity];
+        var className = "Row<" + typeArgCsv + ">"; #>
+
+	public struct <#= className #>
+	{
+		internal Row(<#= String.Join(", ", alphabet.Take(arity).Select(x => x + " " + x.ToLower())) #>) : this()
+        {
+        <# foreach (int item in Enumerable.Range(1, arity)) { #>    Item<#= item #> = <#= alphabet[item - 1].ToLower() #>;
+        <# } #>}
+
+        <# foreach (int item in Enumerable.Range(1, arity)) { #>public <#= alphabet[item - 1] #> Item<#= item #> { get; private set; }
+        <# } #>
+
+        public override bool Equals(Object obj)
+        {
+            if (!(obj is <#= className #>))
+                return false;
+
+            var that = (<#= className #>) obj;
+            return <#= String.Join(" && ", Enumerable.Range(1, arity).Select(x => "Equals(Item" + x + ", that.Item" + x + ")")) #>;
+        }
+
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+
+        public override String ToString()
+        {
+            return "(" + <#= String.Join(" + \", \" + ", Enumerable.Range(1, arity).Select(x => "Item" + x)) #> + ")";
+        }
+    }
+<# } #>
+
+    public static class Projection
+    {
+<# foreach (int arity in Enumerable.Range(1, arityMax)) {
+        var typeArgCsv = typeArgLists[arity]; #>
+        public static Projection<<#= typeArgCsv #>, A2> Of<<#= typeArgCsv #>, A2>(<#= String.Join(", ", Enumerable.Range(1, arity).Select(x => "Col<" + (char)((x - 1) + 'A') + "> column" + x)) #>, Func<<#= typeArgCsv #>, A2> selector)
+        {
+            return new Projection<<#= typeArgCsv #>, A2>(<#= String.Join(", ", Enumerable.Range(1, arity).Select(x => "column" + x)) #>, selector);
+        }
+
+<# } #>
+    }
+<# foreach (int arity in Enumerable.Range(1, arityMax)) {
+        var typeArgCsv = typeArgLists[arity]; #>
+
+    public struct Projection<<#= typeArgCsv #>, A2>
+    {
+        internal Projection(<#= colArgLists[arity] #>, Func<<#= typeArgCsv #>, A2> selector) : this()
+        {
+<# foreach (int c in Enumerable.Range(1, arity)) { #>            Column<#= c #> = <#= ("column" + c) #>;
+<# } #>
+            Selector = selector;
+        }
+
+<# foreach (int c in Enumerable.Range(1, arity)) { #>        public Col<<#= alphabet[c - 1] #>> Column<#= c #> { get; private set; }
+<# } #>
+        public Func<<#= typeArgCsv #>, A2> Selector { get; private set; }
+    }
+<# } #>
+}

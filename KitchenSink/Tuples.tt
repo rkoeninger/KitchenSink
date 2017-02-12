@@ -1,0 +1,29 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#    var arityMin = 1; #>
+<#    var arityMax = 6; #>using System;
+
+namespace KitchenSink
+{
+    public static class Tuples
+    {
+<#    foreach (var arity in Enumerable.Range(arityMin, arityMax - arityMin + 1)) {
+          var typeParamsCsv = String.Join(", ", Enumerable.Range(0, arity).Select(x => ((char)('A' + x)).ToString()));
+          var itemsCsv = String.Join(", ", Enumerable.Range(1, arity).Select(x => "t.Item" + x)); #>
+        public static Tuple<<#= typeParamsCsv #>, A2> Append<<#= typeParamsCsv #>, A2>(this Tuple<<#= typeParamsCsv #>> t, A2 x)
+        {
+            return Tuple.Create(<#= itemsCsv #>, x);
+        }
+
+        public static Tuple<A2, <#= typeParamsCsv #>> Prepend<<#= typeParamsCsv #>, A2>(this Tuple<<#= typeParamsCsv #>> t, A2 x)
+        {
+            return Tuple.Create(x, <#= itemsCsv #>);
+        }
+
+<#    } #>
+    }
+}

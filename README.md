@@ -1,7 +1,7 @@
-[![Build Status](https://travis-ci.org/rkoeninger/ZedSharp.svg?branch=master)](https://travis-ci.org/rkoeninger/ZedSharp)
-[![Build status](https://ci.appveyor.com/api/projects/status/a5brp2kgyueyvg1v?svg=true)](https://ci.appveyor.com/project/rkoeninger/zedsharp)
+[![Build Status](https://travis-ci.org/rkoeninger/KitchenSink.svg?branch=master)](https://travis-ci.org/rkoeninger/KitchenSink)
+[![Build status](https://ci.appveyor.com/api/projects/status/a5brp2kgyueyvg1v?svg=true)](https://ci.appveyor.com/project/rkoeninger/KitchenSink)
 
-# ZedSharp
+# KitchenSink
 
 A library for multi-paradigm programming in C#/.Net.
 

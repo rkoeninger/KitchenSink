@@ -1,4 +1,4 @@
 build:
-  project: ZedSharp.sln
+  project: KitchenSink.sln
 before_build:
-  - nuget restore ZedSharp.sln
+  - nuget restore KitchenSink.sln

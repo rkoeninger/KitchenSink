@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E993D487-E0D8-44EF-87D8-D335ECAA6CFA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>KitchenSink</RootNamespace>
+    <AssemblyName>KitchenSink</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="All.cs" />
+    <Compile Include="Bag.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Bag.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Booleans.cs" />
+    <Compile Include="Check.cs" />
+    <Compile Include="CodeLoader.cs" />
+    <Compile Include="Collections.cs" />
+    <Compile Include="Comparables.cs" />
+    <Compile Include="Dates.cs" />
+    <Compile Include="DateTimeRange.cs" />
+    <Compile Include="FilePath.cs" />
+    <Compile Include="HList.cs" />
+    <Compile Include="MultiKeyDictionary.cs" />
+    <Compile Include="Needs.cs" />
+    <Compile Include="Funcs.cs" />
+    <Compile Include="GenericMethod.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GenericMethod.tt</DependentUpon>
+    </Compile>
+    <Compile Include="IO.cs" />
+    <Compile Include="Lens.cs" />
+    <Compile Include="MultiMethod.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MultiMethod.tt</DependentUpon>
+    </Compile>
+    <Compile Include="NewType.cs" />
+    <Compile Include="Numbers.cs" />
+    <Compile Include="Objects.cs" />
+    <Compile Include="Match.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Match.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Rand.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RangeComparison.cs" />
+    <Compile Include="Sample.cs" />
+    <Compile Include="Slang.cs" />
+    <Compile Include="Sequence.cs" />
+    <Compile Include="Streams.cs" />
+    <Compile Include="Strings.cs" />
+    <Compile Include="Table.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Table.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Expect.cs" />
+    <Compile Include="Maybe.cs" />
+    <Compile Include="Tuples.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Tuples.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Types.cs" />
+    <Compile Include="TypeTree.cs" />
+    <Compile Include="Unit.cs" />
+    <Compile Include="Validation.cs" />
+    <Compile Include="Void.cs" />
+    <Compile Include="Xml.cs" />
+    <Compile Include="Z.cs" />
+    <Compile Include="Dictionary.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Dictionary.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Bag.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Bag.cs</LastGenOutput>
+    </None>
+    <None Include="GenericMethod.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>GenericMethod.cs</LastGenOutput>
+    </None>
+    <None Include="MultiMethod.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MultiMethod.cs</LastGenOutput>
+    </None>
+    <None Include="Match.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Match.cs</LastGenOutput>
+    </None>
+    <None Include="Table.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Table.cs</LastGenOutput>
+    </None>
+    <None Include="Tuples.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Tuples.cs</LastGenOutput>
+    </None>
+    <None Include="Dictionary.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Dictionary.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <_TransformExe>$(CommonProgramFiles)\Microsoft Shared\TextTemplating\10.0\TextTransform.exe</_TransformExe>
+    <_TransformExe Condition="'$(VisualStudioVersion)' != ''">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\$(VisualStudioVersion)\TextTransform.exe</_TransformExe>
+    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\10.0\TextTransform.exe"</_TransformExe>
+    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\11.0\TextTransform.exe"</_TransformExe>
+    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\12.0\TextTransform.exe"</_TransformExe>
+    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\13.0\TextTransform.exe"</_TransformExe>
+    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\14.0\TextTransform.exe"</_TransformExe>
+    <!-- This one is for Travis-CI (see .travis.yml) -->
+    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(SolutionDir)t4.sh</_TransformExe>
+  </PropertyGroup>
+  <Target Name="TransformOnBuild" AfterTargets="BeforeBuild">
+    <Error Text="Failed to find TextTransform.exe tool at '$(_TransformExe)." Condition="!Exists('$(_TransformExe)')" />
+    <ItemGroup>
+      <_TextTransform Include="@(None)" Condition="'%(None.Generator)' == 'TextTemplatingFilePreprocessor' Or '%(None.Generator)' == 'TextTemplatingFileGenerator'" />
+    </ItemGroup>
+    <Exec Command="&quot;$(_TransformExe)&quot; &quot;@(_TextTransform)&quot;" Condition="'%(Identity)' != ''" />
+  </Target>
+</Project>
