@@ -4,7 +4,6 @@ TestResults/
 packages/
 *.suo
 *.user
-KitchenSink/Table.cs
 KitchenSink/MultiMethod.cs
 KitchenSink/GenericMethod.cs
 KitchenSink/Match.cs

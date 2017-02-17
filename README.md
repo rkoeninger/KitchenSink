@@ -33,13 +33,6 @@ A library for multi-paradigm programming in C#/.Net.
   * `Sample` - provides common and edge-case test values
   * `All` - enumerates all values of certain types
 
-### Relational Data Structures
-
-  * `Table` - a list/set of Rows
-  * `Row` - a typed series of named values in a Table
-  * `Column` - a typed, named list/set of values in a Table
-  * `Projection` - a conversion from one Table to another
-
 ### Dependency Injection
 
   * `Needs` - a basic IoC container that uses the following attributes

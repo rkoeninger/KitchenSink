@@ -81,11 +81,6 @@
     <Compile Include="Sequence.cs" />
     <Compile Include="Streams.cs" />
     <Compile Include="Strings.cs" />
-    <Compile Include="Table.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Table.tt</DependentUpon>
-    </Compile>
     <Compile Include="Expect.cs" />
     <Compile Include="Maybe.cs" />
     <Compile Include="Types.cs" />
@@ -108,10 +103,6 @@
     <None Include="Match.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Match.cs</LastGenOutput>
-    </None>
-    <None Include="Table.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Table.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>
