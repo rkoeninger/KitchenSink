@@ -31,7 +31,7 @@ namespace KitchenSink.Tests
             // Result type is inferred from first Then() to be an Int32 so false, a Boolean, in the second Then() is invalid
             Expect.CompileFail(
                 Common.Wrap(@"Match.On("""").Case(""x"", 0).Case(""y"", false).End()"),
-                new [] {Common.ZedDll},
+                new [] {Common.KsDll},
                 new []
                 {
                     "CS1502", // Case has some invalid arguments

@@ -1,11 +1,10 @@
 ﻿using System;
-using System.IO;
 
 namespace KitchenSink.Tests
 {
     public static class Common
     {
-        public static String ZedDll = new Uri(typeof(Table).Assembly.CodeBase).AbsolutePath;
+        public static String KsDll = new Uri(typeof(Maybe).Assembly.CodeBase).AbsolutePath;
 
         public static String Wrap(String source)
         {

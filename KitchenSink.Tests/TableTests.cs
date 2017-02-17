@@ -66,7 +66,7 @@ namespace KitchenSink.Tests
 
             Expect.CompileFail(
                 Common.Wrap(@"Table.Of(Row.Of(""asc"", 1), Row.Of(2, ""wer""))"),
-                new [] {Common.ZedDll},
+                new [] {Common.KsDll},
                 new []
                 {
                     "CS0411" // type arguments cannot be inferred from usage

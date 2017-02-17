@@ -24,7 +24,7 @@ namespace KitchenSink.Tests
                         SomethingWithCustomer(123);
                     }
                 }",
-                new [] {Common.ZedDll},
+                new [] {Common.KsDll},
                 new []
                 {
                     "CS1502", // SomethingWithCustomer has some invalid arguments
