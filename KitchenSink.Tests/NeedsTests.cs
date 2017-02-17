@@ -1,5 +1,4 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
@@ -15,15 +14,15 @@ namespace KitchenSink.Tests
             var w = new UI();
 
             var needs = new Needs();
-            needs.Set<IWebService>(x);
-            needs.Set<IDatabaseCommand>(y);
-            needs.Set<IDatabaseQuery>(z);
-            needs.Set<IUserInterface>(w);
+            needs.Add<IWebService>(x);
+            needs.Add<IDatabaseCommand>(y);
+            needs.Add<IDatabaseQuery>(z);
+            needs.Add<IUserInterface>(w);
 
-            Expect.Some(z, needs.Get<IDatabaseQuery>());
-            Expect.Some(y, needs.Get<IDatabaseCommand>());
-            Expect.Some(w, needs.Get<IUserInterface>());
-            Expect.Some(x, needs.Get<IWebService>());
+            Assert.AreEqual(z, needs.Get<IDatabaseQuery>());
+            Assert.AreEqual(y, needs.Get<IDatabaseCommand>());
+            Assert.AreEqual(w, needs.Get<IUserInterface>());
+            Assert.AreEqual(x, needs.Get<IWebService>());
         }
 
         class DbW : IDatabaseCommand { }
@@ -39,11 +38,11 @@ namespace KitchenSink.Tests
         public void DefaultImplLookup()
         {
             var needs = new Needs();
-            var thing = needs.Get<IAnInterface>().OrElseThrow(() => new Exception("No impl found"));
+            needs.Refer(typeof(NeedsTests));
+            var thing = needs.Get<IAnInterface>();
             Assert.IsInstanceOf<AnImplementation>(thing);
         }
-
-        [DefaultImplementation(typeof(AnImplementation))]
+        
         public interface IAnInterface { }
 
         public class AnImplementation : IAnInterface { }
@@ -52,13 +51,13 @@ namespace KitchenSink.Tests
         public void DefaultImplOfLookup()
         {
             var needs = new Needs();
-            var thing = needs.Get<ISomeInterface>().OrElseThrow(() => new Exception("No impl found"));
+            needs.Refer(typeof(NeedsTests));
+            var thing = needs.Get<ISomeInterface>();
             Assert.IsInstanceOf<SomeImplementation>(thing);
         }
 
         public interface ISomeInterface { }
-
-        [DefaultImplementationOf(typeof(ISomeInterface))]
+        
         public class SomeImplementation : ISomeInterface { }
 
         [Test]
@@ -69,18 +68,16 @@ namespace KitchenSink.Tests
         }
 
         public interface IMyInterface { }
-
-        [DefaultImplementationOf(typeof(IMyInterface))]
+        
         public class MyImpl1 : IMyInterface { }
-
-        [DefaultImplementationOf(typeof(IMyInterface))]
+        
         public class MyImpl2 : IMyInterface { }
 
         [Test]
         public void NoImplAvailable()
         {
             var needs = new Needs();
-            Expect.None(needs.Get<IOtherInterface>());
+            Expect.Error(() => needs.Get<IOtherInterface>());
         }
 
         public interface IOtherInterface { }

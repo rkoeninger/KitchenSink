@@ -1,160 +1,140 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace KitchenSink
 {
-    /// <summary>Simple IoC container that makes use of DefaultImplementation and DefaultImplementationOf attributes.</summary>
+    /// <summary>
+    /// Indicates that a class/component is not thread safe
+    /// and is only good for one time use.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public class SingleUseAttribute : Attribute
+    {
+    }
+
     public class Needs
     {
-        public static Maybe<T> GetDeclaredImplementation<T>()
+        public delegate Type Source(Type type);
+
+        private readonly Dictionary<Type, Func<object>> resolvers = new Dictionary<Type, Func<object>>();
+        private readonly List<Source> sources = new List<Source>();
+
+        public void Add<T>(T instance)
         {
-            return GetDefaultImpl(typeof (T)).Cast<T>();
+            Add(typeof(T), instance);
         }
 
-        private readonly TypeTree<object> Tree = new TypeTree<object>();
-
-        public Needs Set<T>(object impl)
+        public void Add(Type type, object instance)
         {
-            Tree.Set<T>(impl);
-            return this;
+            resolvers[type] = () => instance;
         }
 
-        public Maybe<T> Get<T>() where T : class
+        public void Refer(Type parent)
         {
-            var t = typeof(T);
-            return Tree.Get(t)
-                .OrEvalMany(t, GetDefaultImpl)
-                .Cast<T>();
+            Refer(ParentSouce(parent));
         }
 
-        private static Maybe<object> GetDefaultImpl(Type @interface)
+        public void Refer(Assembly assembly)
         {
-            return GetDeclaredImplementingClass(@interface)
-                .OrEvalMany(@interface, FindDeclaringImplementingClass)
-                .Select(Activator.CreateInstance);
+            Refer(AssemblySource(assembly));
         }
 
-        private static Maybe<Type> GetDeclaredImplementingClass(Type @interface)
+        public void Refer(Source source)
         {
-            return @interface.GetAttribute<DefaultImplementationAttribute>()
-                .Select(x => x.ImplementingClass);
+            sources.Add(source);
         }
 
-        private static Maybe<Type> FindDeclaringImplementingClass(Type @interface)
+        private static Source ParentSouce(Type parent)
         {
-            var impls = Types.All(t => t.HasAttribute<DefaultImplementationOfAttribute>(a => a.ImplementedInterface == @interface)).ToList();
-
-            if (impls.Count > 1)
-                throw new Exception("Multiple implementations found: " + impls.Concat(", "));
-
-            return impls.SingleMaybe();
-        }
-    }
-
-    /// <summary>Declares the default implementation of this interface.</summary>
-    [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
-    public class DefaultImplementationAttribute : Attribute
-    {
-        public DefaultImplementationAttribute(Type @class)
-        {
-            if ((!(@class.IsClass || @class.IsValueType)) || @class.IsAbstract)
-                throw new ArgumentException($"{@class} is not a concrete class or struct type");
-
-            ImplementingClass = @class;
+            return type => FindImpl(type, parent.GetNestedTypes());
         }
 
-        public Type ImplementingClass { get; }
-
-        public bool IsProperlyDefinedOn(Type implementedInterface)
+        private static Source AssemblySource(Assembly assembly)
         {
-            return ImplementingClass.IsAssignableTo(implementedInterface);
-        }
-    }
-
-    /// <summary>Declares that this class or struct type is the default implementation of the specified interface type.</summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true, Inherited = false)]
-    public class DefaultImplementationOfAttribute : Attribute
-    {
-        public DefaultImplementationOfAttribute(Type @interface)
-        {
-            if (!@interface.IsInterface)
-                throw new ArgumentException(@interface + " is not an interface type");
-
-            ImplementedInterface = @interface;
+            return type => FindImpl(type, assembly.GetExportedTypes());
         }
 
-        public Type ImplementedInterface { get; }
-
-        public bool IsProperlyDefinedOn(Type implementingClass)
+        private static Type FindImpl(Type type, IEnumerable<Type> types)
         {
-            return implementingClass.IsAssignableTo(ImplementedInterface);
-        }
-    }
-
-    public static class Inject
-    {
-        public static readonly IConsole LiveConsole = new LiveConsole();
-
-        public static IConsole ScriptedConsole(StringReader input, StringWriter output = null)
-        {
-            return new ScriptedConsole(input, output);
+            return types.FirstOrDefault(t => t.GetInterfaces().Any(x => x == type));
         }
 
-        public static readonly Needs StandardNeeds = new Needs()
-            .Set<IConsole>(LiveConsole);
-    }
-
-    [DefaultImplementation(typeof(LiveConsole))]
-    public interface IConsole
-    {
-        string ReadLine();
-        void WriteLine(object s);
-        void WriteLine(string format, params object[] args);
-    }
-
-    internal class LiveConsole : IConsole
-    {
-        public string ReadLine()
+        public T Get<T>()
         {
-            return Console.ReadLine();
+            return (T) Get(typeof(T));
         }
 
-        public void WriteLine(object s)
+        public object Get(Type type)
         {
-            Console.WriteLine(s);
+            return GetInternal(type, !IsSingleUse(type));
         }
 
-        public void WriteLine(string format, params object[] args)
+        private object GetInternal(Type type, bool multiUse)
         {
-            Console.WriteLine(format, args);
-        }
-    }
+            Func<object> resolver;
 
-    internal class ScriptedConsole : IConsole
-    {
-        public ScriptedConsole(StringReader input, StringWriter output)
-        {
-            Input = input;
-            Output = output;
-        }
+            if (resolvers.TryGetValue(type, out resolver))
+            {
+                return resolver();
+            }
 
-        private readonly StringReader Input;
-        private readonly StringWriter Output;
+            var implType = sources.Select(s => s(type)).FirstOrDefault();
 
-        public string ReadLine()
-        {
-            return Input.ReadLine();
+            if (implType != null)
+            {
+                return Persist(type, implType, multiUse);
+            }
+
+            throw new Exception($"No implementation found for {type}");
         }
 
-        public void WriteLine(object s)
+        private object Persist(Type type, Type implType, bool multiUse)
         {
-            Output.WriteLine(s);
+            if (IsSingleUse(implType))
+            {
+                Func<object> resolver = () => New(implType, multiUse);
+                resolvers[type] = resolver;
+                return resolver();
+            }
+
+            var obj = New(implType, multiUse);
+            resolvers[type] = () => obj;
+            return obj;
         }
 
-        public void WriteLine(string format, params object[] args)
+        private object New(Type type, bool multiUse)
         {
-            Output.WriteLine(format, args);
+            var ctors = type.GetConstructors();
+
+            if (ctors.Length != 1)
+            {
+                throw new Exception($"Type {type} must have exactly 1 constructor, but has {ctors.Length}");
+            }
+
+            var ctor = ctors[0];
+            var args = ctor.GetParameters()
+                .Select(p => GetInternal(p.ParameterType, multiUse))
+                .ToArray();
+
+            if (multiUse)
+            {
+                foreach (var argType in args.Select(x => x.GetType()))
+                {
+                    if (IsSingleUse(argType))
+                    {
+                        throw new Exception($"Non-SingleUse object ({type}) cannot depend on SingleUse object ({argType})");
+                    }
+                }
+            }
+
+            return ctor.Invoke(args);
+        }
+
+        private static bool IsSingleUse(MemberInfo type)
+        {
+            return type.GetCustomAttribute(typeof(SingleUseAttribute)) != null;
         }
     }
 }
