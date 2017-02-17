@@ -4,9 +4,9 @@ namespace KitchenSink.Tests
 {
     public static class Common
     {
-        public static String KsDll = new Uri(typeof(Maybe).Assembly.CodeBase).AbsolutePath;
+        public static string KsDll = new Uri(typeof(Maybe).Assembly.CodeBase).AbsolutePath;
 
-        public static String Wrap(String source)
+        public static string Wrap(string source)
         {
             return @"
                 using KitchenSink;

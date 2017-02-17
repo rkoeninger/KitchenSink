@@ -212,7 +212,7 @@ namespace KitchenSink
             }
         }
 
-        public Validation<A> Is(bool cond, String message = null)
+        public Validation<A> Is(bool cond, string message = null)
         {
             if (Done)
                 return this;
@@ -220,7 +220,7 @@ namespace KitchenSink
             return new Validation<A>(Value, cond ? ErrorList : ErrorList.Add(new ApplicationException(message ?? "")));
         }
 
-        public Validation<A> Is(Func<A, bool> f, String message = null)
+        public Validation<A> Is(Func<A, bool> f, string message = null)
         {
             if (Done)
                 return this;

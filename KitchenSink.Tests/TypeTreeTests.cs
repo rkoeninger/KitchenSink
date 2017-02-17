@@ -1,5 +1,4 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
@@ -22,8 +21,8 @@ namespace KitchenSink.Tests
             Expect.Some(6, tree.Get<Quad>());
             Expect.Some(1, tree.Get<Ellipse>());
             Expect.Some(11, tree.Get<Circle>());
-            Expect.None(tree.Get<Object>());
-            Expect.None(tree.Get<String>());
+            Expect.None(tree.Get<object>());
+            Expect.None(tree.Get<string>());
             Expect.Some(3, tree.Get<Rhombus>());
             Expect.Some(9, tree.Get<Equilateral>());
         }

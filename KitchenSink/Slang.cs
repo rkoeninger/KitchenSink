@@ -13,14 +13,14 @@ namespace KitchenSink
 {
     public static class Slang
     {
-        public static Expression Parse(String source)
+        public static Expression Parse(string source)
         {
             var syntax = Syntax.Read(source);
             var env = new SymbolEnvironment();
             return syntax.Parse(env);
         }
 
-        public static A Eval<A>(String source)
+        public static A Eval<A>(string source)
         {
             var expr = Parse(source);
             var lambda = Expression.Lambda<Func<A>>(expr);
@@ -30,31 +30,31 @@ namespace KitchenSink
 
     public class Syntax
     {
-        public static Token Read(String str)
+        public static Token Read(string str)
         {
             using (var reader = new StringReader(str))
                 return new Syntax(reader).ReadToken();
         }
 
-        public static List<Token> ReadAll(String str)
+        public static List<Token> ReadAll(string str)
         {
             using (var reader = new StringReader(str))
                 return new Syntax(reader).ReadAllTokens();
         }
 
-        public static List<Token> ReadFile(String path)
+        public static List<Token> ReadFile(string path)
         {
             using (var reader = File.OpenText(path))
                 return new Syntax(reader, path).ReadAllTokens();
         }
 
-        private readonly String _sourceUnit;
+        private readonly string _sourceUnit;
         private int _line = 1;
         private int _column = 1;
         private readonly TextReader _reader;
         private readonly char[] _unicodeHex = new char[8];
 
-        public Syntax(TextReader reader, String sourceUnit = "Unknown")
+        public Syntax(TextReader reader, string sourceUnit = "Unknown")
         {
             _reader = reader;
             _sourceUnit = sourceUnit;
@@ -143,7 +143,7 @@ namespace KitchenSink
 
                 var ch = (char)b;
 
-                if (!Char.IsWhiteSpace(ch))
+                if (!char.IsWhiteSpace(ch))
                     break;
 
                 if (ch == '\n')
@@ -160,7 +160,7 @@ namespace KitchenSink
             }
         }
 
-        private String ReadLiteral()
+        private string ReadLiteral()
         {
             var builder = new StringBuilder();
 
@@ -183,7 +183,7 @@ namespace KitchenSink
                     _column++;
                 }
 
-                if (Char.IsWhiteSpace(ch) || ch.IsIn(')', '(', ']', '[', '}', '{', '\"', '\'', '«', '»'))
+                if (char.IsWhiteSpace(ch) || ch.IsIn(')', '(', ']', '[', '}', '{', '\"', '\'', '«', '»'))
                     break;
 
                 builder.Append(ch);
@@ -193,7 +193,7 @@ namespace KitchenSink
             return builder.ToString();
         }
 
-        private String ReadStringLiteral(char quoteChar)
+        private string ReadStringLiteral(char quoteChar)
         {
             var builder = new StringBuilder();
             builder.Append((char)_reader.Read()); // pull the opening qoute
@@ -232,7 +232,7 @@ namespace KitchenSink
             return builder.ToString();
         }
 
-        private String ReadNestedStringLiteral()
+        private string ReadNestedStringLiteral()
         {
             var builder = new StringBuilder();
             builder.Append((char)_reader.Read()); // pull the opening qoute
@@ -281,7 +281,7 @@ namespace KitchenSink
             return builder.ToString();
         }
 
-        private String ReadEscapeSequence()
+        private string ReadEscapeSequence()
         {
             // Backslash that starts the escape sequence has already been read at this point
             // Full escape sequence should be read off of the reader when this method returns
@@ -300,9 +300,9 @@ namespace KitchenSink
                 case 'b':  return "\b";
                 case 'f':  return "\f";
                 case 'a':  return "\a";
-                case 'u':  return new String(ReadUnicode16BitEscapeSequence(), 1);
+                case 'u':  return new string(ReadUnicode16BitEscapeSequence(), 1);
                 case 'U':  return ReadUnicode32BitEscapeSequence();
-                case 'x':  return new String(ReadUnicodeVariableLengthEscapeSequence(), 1);
+                case 'x':  return new string(ReadUnicodeVariableLengthEscapeSequence(), 1);
             }
 
             Fail("Invalid character escape sequence: \"\\" + escapeChar + "\"");
@@ -314,17 +314,17 @@ namespace KitchenSink
             if (_reader.Read(_unicodeHex, 0, 4) != 4)
                 Fail("Incomplete 16-bit unicode code point escape sequence");
 
-            var utf16Bits = Int16.Parse(new String(_unicodeHex, 0, 4), NumberStyles.HexNumber);
+            var utf16Bits = short.Parse(new string(_unicodeHex, 0, 4), NumberStyles.HexNumber);
             return (char)utf16Bits;
         }
 
-        private String ReadUnicode32BitEscapeSequence()
+        private string ReadUnicode32BitEscapeSequence()
         {
             if (_reader.Read(_unicodeHex, 0, 8) != 8)
                 Fail("Incomplete 32-bit unicode code point escape sequence");
 
-            var utf32Bits = Int32.Parse(new String(_unicodeHex, 0, 8), NumberStyles.HexNumber);
-            return Char.ConvertFromUtf32(utf32Bits);
+            var utf32Bits = int.Parse(new string(_unicodeHex, 0, 8), NumberStyles.HexNumber);
+            return char.ConvertFromUtf32(utf32Bits);
         }
 
         private char ReadUnicodeVariableLengthEscapeSequence()
@@ -351,13 +351,13 @@ namespace KitchenSink
             if (len == 0)
                 Fail("No hex chars following \\x escape sequence");
 
-            var utf16Bits = Int16.Parse(new String(_unicodeHex, 0, len), NumberStyles.HexNumber);
+            var utf16Bits = short.Parse(new string(_unicodeHex, 0, len), NumberStyles.HexNumber);
             return (char)utf16Bits;
         }
 
         private static bool IsHexDigit(char ch)
         {
-            return Char.IsDigit(ch)
+            return char.IsDigit(ch)
                    || (ch >= 'A' && ch <= 'F')
                    || (ch >= 'a' && ch <= 'f');
         }
@@ -382,7 +382,7 @@ namespace KitchenSink
             get { return new Location(_sourceUnit, _line, _column); }
         }
 
-        private void Fail(String message)
+        private void Fail(string message)
         {
             throw new SlangLexException(CurrentLocation, message);
         }
@@ -390,20 +390,20 @@ namespace KitchenSink
 
     public class Location
     {
-        public Location(String file, int line, int column)
+        public Location(string file, int line, int column)
         {
             File = file;
             Line = line;
             Column = column;
         }
 
-        public String File { get; private set; }
-        public int Line { get; private set; }
-        public int Column { get; private set; }
+        public string File { get; }
+        public int Line { get; }
+        public int Column { get; }
 
         public override string ToString()
         {
-            return String.Format("Line {0}, Column {1} in {2}", Line, Column, File);
+            return string.Format("Line {0}, Column {1} in {2}", Line, Column, File);
         }
     }
 
@@ -414,7 +414,7 @@ namespace KitchenSink
             Location = location;
         }
 
-        public Location Location { get; private set; }
+        public Location Location { get; }
 
         public abstract Expression Parse(SymbolEnvironment env);
 
@@ -427,12 +427,12 @@ namespace KitchenSink
 
     internal class Atom : Token
     {
-        public Atom(String atom, Location location) : base(location)
+        public Atom(string atom, Location location) : base(location)
         {
             Literal = atom;
         }
 
-        public String Literal { get; private set; }
+        public string Literal { get; }
 
         public override string ToString()
         {
@@ -442,7 +442,7 @@ namespace KitchenSink
         private static readonly Regex IntRegex = new Regex(@"^[-+]?[0-9]+u?l?$");
         private static readonly Regex FloatRegex = new Regex(@"^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?[fm]?$");
 
-        private static String ButLast(String str, int len)
+        private static string ButLast(string str, int len)
         {
             return str.Substring(0, str.Length - len);
         }
@@ -457,19 +457,19 @@ namespace KitchenSink
 
             if (IntRegex.IsMatch(Literal))
             {
-                if (Literal.EndsWith("ul")) return Expression.Constant(UInt64.Parse(ButLast(Literal, 2)));
-                if (Literal.EndsWith("u"))  return Expression.Constant(UInt32.Parse(ButLast(Literal, 1)));
-                if (Literal.EndsWith("l"))  return Expression.Constant(Int64.Parse(ButLast(Literal, 1)));
+                if (Literal.EndsWith("ul")) return Expression.Constant(ulong.Parse(ButLast(Literal, 2)));
+                if (Literal.EndsWith("u"))  return Expression.Constant(uint.Parse(ButLast(Literal, 1)));
+                if (Literal.EndsWith("l"))  return Expression.Constant(long.Parse(ButLast(Literal, 1)));
 
-                return Expression.Constant(Int32.Parse(Literal));
+                return Expression.Constant(int.Parse(Literal));
             }
 
             if (FloatRegex.IsMatch(Literal))
             {
-                if (Literal.EndsWith("f")) return Expression.Constant(Single.Parse(ButLast(Literal, 1)));
-                if (Literal.EndsWith("m")) return Expression.Constant(Decimal.Parse(ButLast(Literal, 1)));
+                if (Literal.EndsWith("f")) return Expression.Constant(float.Parse(ButLast(Literal, 1)));
+                if (Literal.EndsWith("m")) return Expression.Constant(decimal.Parse(ButLast(Literal, 1)));
 
-                return Expression.Constant(Double.Parse(Literal));
+                return Expression.Constant(double.Parse(Literal));
             }
 
             if (Literal.Contains("."))
@@ -483,14 +483,14 @@ namespace KitchenSink
             return env.Get(Literal).OrElseThrow("Variable not defined");
         }
 
-        private static String StripQuotes(String str, bool stripNestedQuotes)
+        private static string StripQuotes(string str, bool stripNestedQuotes)
         {
             str = str.Substring(1, str.Length - 2);
 
             if (stripNestedQuotes)
                 str = str.Replace('«', '\"').Replace('»', '\"');
 
-            return String.Intern(str);
+            return string.Intern(str);
         }
     }
 
@@ -501,11 +501,11 @@ namespace KitchenSink
             Tokens = tokens;
         }
 
-        public List<Token> Tokens { get; private set; }
+        public List<Token> Tokens { get; }
 
         public override string ToString()
         {
-            return "{" + String.Join(" ", Tokens) + "}";
+            return "{" + string.Join(" ", Tokens) + "}";
         }
 
         public override Expression Parse(SymbolEnvironment env)
@@ -531,11 +531,11 @@ namespace KitchenSink
             Tokens = tokens;
         }
 
-        public List<Token> Tokens { get; private set; }
+        public List<Token> Tokens { get; }
 
         public override string ToString()
         {
-            return "[" + String.Join(" ", Tokens) + "]";
+            return "[" + string.Join(" ", Tokens) + "]";
         }
 
         public override Expression Parse(SymbolEnvironment env)
@@ -562,11 +562,11 @@ namespace KitchenSink
             Tokens = tokens;
         }
 
-        public List<Token> Tokens { get; private set; }
+        public List<Token> Tokens { get; }
 
         public override string ToString()
         {
-            return "(" + String.Join(" ", Tokens) + ")";
+            return "(" + string.Join(" ", Tokens) + ")";
         }
 
         public override Expression Parse(SymbolEnvironment env)
@@ -702,7 +702,7 @@ namespace KitchenSink
 
         private static readonly Type Nullable = typeof (Nullable<>);
 
-        public static Type ParseType(String str)
+        public static Type ParseType(string str)
         {
             if (str.EndsWith("?"))
             {
@@ -873,7 +873,7 @@ namespace KitchenSink
 
     public class SymbolEnvironment
     {
-        private readonly ConcurrentDictionary<String, ParameterExpression> Symbols = new ConcurrentDictionary<String, ParameterExpression>();
+        private readonly ConcurrentDictionary<string, ParameterExpression> Symbols = new ConcurrentDictionary<string, ParameterExpression>();
         private readonly Maybe<SymbolEnvironment> ContainingScope;
 
         public SymbolEnvironment()
@@ -886,19 +886,19 @@ namespace KitchenSink
             ContainingScope = Maybe.Some(parent);
         }
 
-        public Maybe<ParameterExpression> Get(String name)
+        public Maybe<ParameterExpression> Get(string name)
         {
             return Symbols.GetMaybe(name).OrEval(() => ContainingScope.Select(x => x.Get(name)).Flatten());
         }
 
-        public ParameterExpression Define(String name, Type type)
+        public ParameterExpression Define(string name, Type type)
         {
             // TODO: what if it's already defined?
             //       already defined in this scope? parent scope?
             return Symbols.GetOrAdd(name, _ => Expression.Variable(type, name));
         }
 
-        public bool IsDefined(String name)
+        public bool IsDefined(string name)
         {
             return Symbols.GetMaybe(name)
                 .OrEval(() => ContainingScope.Select(x => x.Symbols.GetMaybe(name)).Flatten())
@@ -908,7 +908,7 @@ namespace KitchenSink
 
     public class SlangLexException : ApplicationException
     {
-        public SlangLexException(Location location, String message) : base(message)
+        public SlangLexException(Location location, string message) : base(message)
         {
             Location = location;
         }
@@ -918,7 +918,7 @@ namespace KitchenSink
 
     public class SlangParseException : ApplicationException
     {
-        public SlangParseException(Location location, String message) : base(message)
+        public SlangParseException(Location location, string message) : base(message)
         {
             Location = location;
         }

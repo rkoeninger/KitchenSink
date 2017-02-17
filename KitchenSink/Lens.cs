@@ -31,14 +31,14 @@ namespace KitchenSink
             return Gen<A, B>(propInfo.Name);
         }
 
-        public static Lens<A, B> Gen<A, B>(String propertyName)
+        public static Lens<A, B> Gen<A, B>(string propertyName)
         {
             var objParam = Expression.Parameter(typeof(A));
             var propExpr = Expression.PropertyOrField(objParam, propertyName);
             var getter = Expression.Lambda<Func<A, B>>(propExpr, objParam).Compile();
 
             var valParam = Expression.Parameter(typeof(B));
-            var ctor = typeof(A).GetConstructors().OrderByDescending(x => x.GetParameters().Count()).FirstOrDefault();
+            var ctor = typeof(A).GetConstructors().OrderByDescending(x => x.GetParameters().Length).FirstOrDefault();
 
             if (ctor == null)
                 throw new ArgumentException("Type " + typeof(A) + " does not have an applicable constructor");
@@ -46,11 +46,11 @@ namespace KitchenSink
             var props = typeof(A).GetProperties();
             var argExprs = ctor.GetParameters().Select(param =>
             {
-                if (String.Equals(param.Name, propertyName, StringComparison.InvariantCultureIgnoreCase))
+                if (string.Equals(param.Name, propertyName, StringComparison.InvariantCultureIgnoreCase))
                     return (Expression) valParam;
 
                 var prop = props.Where(x => param.Name.EqualsIgnoreCase(x.Name)).FirstMaybe().OrElseThrow("No property has the same name as constructor parameter: " + param.Name);
-                return (Expression) Expression.PropertyOrField(objParam, prop.Name);
+                return Expression.PropertyOrField(objParam, prop.Name);
             }).ToArray();
             var newExpr = Expression.New(ctor, argExprs);
             var setter = Expression.Lambda<Func<A, B, A>>(newExpr, objParam, valParam).Compile();
@@ -67,8 +67,8 @@ namespace KitchenSink
             Set = set;
         }
 
-        public Func<A, B> Get { get; private set; }
-        public Func<A, B, A> Set { get; private set; }
+        public Func<A, B> Get { get; }
+        public Func<A, B, A> Set { get; }
 
         public Lens<A, C> Compose<C>(Lens<B, C> other)
         {

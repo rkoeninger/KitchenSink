@@ -1,13 +1,11 @@
-﻿using System;
-
-namespace KitchenSink
+﻿namespace KitchenSink
 {
     /// <summary>
     /// Used to specialize another type.
     /// </summary>
     public abstract class NewType<A>
     {
-        public A Value { get; private set; }
+        public A Value { get; }
 
         protected NewType(A value)
         {
@@ -17,7 +15,7 @@ namespace KitchenSink
         /// <summary>
         /// Returns string representation of wrapped value, "" for null.
         /// </summary>
-        public override String ToString()
+        public override string ToString()
         {
             return Z.Str(Value);
         }
@@ -37,7 +35,8 @@ namespace KitchenSink
         /// </summary>
         public override bool Equals(object obj)
         {
-            return obj is NewType<A> && Equals(Value, ((NewType<A>) obj).Value);
+            var that = obj as NewType<A>;
+            return that != null && Equals(Value, that.Value);
         }
     }
 }

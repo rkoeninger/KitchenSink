@@ -55,10 +55,10 @@ namespace KitchenSink
         public static readonly Func<object, object, bool> Same = ReferenceEquals;
 
         /// <summary>Get hash code for object.</summary>
-        public static readonly Func<object, int> Hash = x => x == null ? 0 : x.GetHashCode();
+        public static readonly Func<object, int> Hash = x => x?.GetHashCode() ?? 0;
 
         /// <summary>Get string for object.</summary>
-        public static readonly Func<object, string> Str = x => x == null ? "" : x.ToString();
+        public static readonly Func<object, string> Str = x => x?.ToString() ?? "";
 
         /// <summary>Check if collection is empty.</summary>
         public static readonly Func<ICollection, bool> Empty = x => x.Count == 0;
@@ -126,7 +126,7 @@ namespace KitchenSink
         /// <summary>Curried generic comparison function.</summary>
         public static Func<A, int> Compare<A>(A x) where A : IComparable<A>
         {
-            return y => x.CompareTo(y);
+            return x.CompareTo;
         }
     }
 }

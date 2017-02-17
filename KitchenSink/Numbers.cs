@@ -8,12 +8,12 @@ namespace KitchenSink
     {
         public static bool IsReal(this double x)
         {
-            return ! (Double.IsInfinity(x) || Double.IsNaN(x));
+            return ! (double.IsInfinity(x) || double.IsNaN(x));
         }
 
         public static bool IsNotReal(this double x)
         {
-            return Double.IsInfinity(x) || Double.IsNaN(x);
+            return double.IsInfinity(x) || double.IsNaN(x);
         }
 
         public static bool IsEven(this int x)

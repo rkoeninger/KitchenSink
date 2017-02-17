@@ -20,10 +20,10 @@ namespace KitchenSink.Tests
         [Test]
         public void MaybeWrappers()
         {
-            const String s = "";
+            const string s = "";
             Expect.None(Maybe.Of((string) null));
             Expect.Some(Maybe.Of(s));
-            Expect.None(Maybe<String>.None);
+            Expect.None(Maybe<string>.None);
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace KitchenSink.Tests
         {
             var result = Maybe.All(
                     Maybe.Some("hello"),
-                    Maybe<String>.None,
+                    Maybe<string>.None,
                     Maybe.Some("world!"),
                     (x, y, z) => x + y + z)
                 .OrElse("something missing");

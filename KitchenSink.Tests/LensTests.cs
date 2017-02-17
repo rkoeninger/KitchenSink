@@ -24,9 +24,9 @@ namespace KitchenSink.Tests
         [Test]
         public void LensGen()
         {
-            var fn = Lens.Gen<Person, String>("FirstName");
-            var ln = Lens.Gen<Person, String>("LastName");
-            var ct = Lens.Gen<Address, String>("City");
+            var fn = Lens.Gen<Person, string>("FirstName");
+            var ln = Lens.Gen<Person, string>("LastName");
+            var ct = Lens.Gen<Address, string>("City");
 
             var address = new Address("123 Fake Street", "Anytown");
             var person = new Person("John", "Doe", address);
@@ -74,28 +74,28 @@ namespace KitchenSink.Tests
 
         public class Person
         {
-            public Person(String firstName, String lastName, Address address)
+            public Person(string firstName, string lastName, Address address)
             {
                 FirstName = firstName;
                 LastName = lastName;
                 Address = address;
             }
 
-            public String FirstName { get; private set; }
-            public String LastName { get; private set; }
-            public Address Address { get; private set; }
+            public string FirstName { get; }
+            public string LastName { get; }
+            public Address Address { get; }
         }
 
         public class Address
         {
-            public Address(String street, String city)
+            public Address(string street, string city)
             {
                 Street = street;
                 City = city;
             }
 
-            public String Street { get; private set; }
-            public String City { get; private set; }
+            public string Street { get; }
+            public string City { get; }
         }
     }
 }

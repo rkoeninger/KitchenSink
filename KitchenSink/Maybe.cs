@@ -53,19 +53,19 @@ namespace KitchenSink
             return new Lazy<Maybe<B>>(() => If(val, f, selector));
         }
 
-        public static Maybe<Int32> ToInt(this String s)
+        public static Maybe<int> ToInt(this string s)
         {
             int i;
-            return Int32.TryParse(s, out i) ? Of(i) : Maybe<Int32>.None;
+            return int.TryParse(s, out i) ? Of(i) : Maybe<int>.None;
         }
 
-        public static Maybe<Double> ToDouble(this String s)
+        public static Maybe<double> ToDouble(this string s)
         {
             double d;
-            return Double.TryParse(s, out d) ? Of(d) : Maybe<Double>.None;
+            return double.TryParse(s, out d) ? Of(d) : Maybe<double>.None;
         }
 
-        public static Maybe<XDocument> ToXml(this String s)
+        public static Maybe<XDocument> ToXml(this string s)
         {
             return Try(() => XDocument.Parse(s));
         }
@@ -181,7 +181,7 @@ namespace KitchenSink
             return maybe.Where(Collections.NotEmpty);
         }
 
-        public static Maybe<String> IsNotBlank(Maybe<String> maybe)
+        public static Maybe<string> IsNotBlank(Maybe<string> maybe)
         {
             return maybe.Where(Strings.IsNotBlank);
         }
@@ -211,7 +211,7 @@ namespace KitchenSink
             return maybe.OrElse(0);
         }
 
-        public static String OrElseEmpty(this Maybe<String> maybe)
+        public static string OrElseEmpty(this Maybe<string> maybe)
         {
             return maybe.OrElse("");
         }
@@ -231,7 +231,7 @@ namespace KitchenSink
             return maybe.Or(Of(0));
         }
 
-        public static Maybe<String> OrEmpty(this Maybe<String> maybe)
+        public static Maybe<string> OrEmpty(this Maybe<string> maybe)
         {
             return maybe.Or(Of(""));
         }
@@ -336,7 +336,7 @@ namespace KitchenSink
         }
 
         internal A Value { get; set; }
-        public bool HasValue { get; private set; }
+        public bool HasValue { get; }
 
         public Type InnerType { get { return typeof(A); } }
 
@@ -376,7 +376,7 @@ namespace KitchenSink
         /// <summary>Attempts cast. Propogates None and returns None if cast fails.</summary>
         public Maybe<B> Cast<B>()
         {
-            return Maybe.If(Value, x => x is B, x => (B) (Object) x);
+            return Maybe.If(Value, x => x is B, x => (B) (object) x);
         }
 
         private static readonly Maybe<A> Default = Maybe.Of(default(A));
@@ -441,7 +441,7 @@ namespace KitchenSink
             return HasValue ? this : maybe;
         }
 
-        public Maybe<A> OrThrow(String message)
+        public Maybe<A> OrThrow(string message)
         {
             if (HasValue)
                 return this;
@@ -465,7 +465,7 @@ namespace KitchenSink
             throw f();
         }
 
-        public A OrElseThrow(String message)
+        public A OrElseThrow(string message)
         {
             if (HasValue)
                 return Value;

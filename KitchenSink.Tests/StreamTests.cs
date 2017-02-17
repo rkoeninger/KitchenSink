@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
@@ -36,8 +35,8 @@ namespace KitchenSink.Tests
 
         public class Person
         {
-            public String FirstName;
-            public String LastName;
+            public string FirstName;
+            public string LastName;
 
             public static IEnumerable<byte> ToBytes(Person p)
             {

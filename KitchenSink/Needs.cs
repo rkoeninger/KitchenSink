@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -13,9 +12,9 @@ namespace KitchenSink
             return GetDefaultImpl(typeof (T)).Cast<T>();
         }
 
-        private readonly TypeTree<Object> Tree = new TypeTree<Object>();
+        private readonly TypeTree<object> Tree = new TypeTree<object>();
 
-        public Needs Set<T>(Object impl)
+        public Needs Set<T>(object impl)
         {
             Tree.Set<T>(impl);
             return this;
@@ -29,7 +28,7 @@ namespace KitchenSink
                 .Cast<T>();
         }
 
-        private static Maybe<Object> GetDefaultImpl(Type @interface)
+        private static Maybe<object> GetDefaultImpl(Type @interface)
         {
             return GetDeclaredImplementingClass(@interface)
                 .OrEvalMany(@interface, FindDeclaringImplementingClass)
@@ -65,7 +64,7 @@ namespace KitchenSink
             ImplementingClass = @class;
         }
 
-        public Type ImplementingClass { get; private set; }
+        public Type ImplementingClass { get; }
 
         public bool IsProperlyDefinedOn(Type implementedInterface)
         {
@@ -85,7 +84,7 @@ namespace KitchenSink
             ImplementedInterface = @interface;
         }
 
-        public Type ImplementedInterface { get; private set; }
+        public Type ImplementedInterface { get; }
 
         public bool IsProperlyDefinedOn(Type implementingClass)
         {
@@ -109,24 +108,24 @@ namespace KitchenSink
     [DefaultImplementation(typeof(LiveConsole))]
     public interface IConsole
     {
-        String ReadLine();
-        void WriteLine(Object s);
-        void WriteLine(String format, params Object[] args);
+        string ReadLine();
+        void WriteLine(object s);
+        void WriteLine(string format, params object[] args);
     }
 
     internal class LiveConsole : IConsole
     {
-        public String ReadLine()
+        public string ReadLine()
         {
             return Console.ReadLine();
         }
 
-        public void WriteLine(Object s)
+        public void WriteLine(object s)
         {
             Console.WriteLine(s);
         }
 
-        public void WriteLine(String format, params Object[] args)
+        public void WriteLine(string format, params object[] args)
         {
             Console.WriteLine(format, args);
         }
@@ -143,17 +142,17 @@ namespace KitchenSink
         private readonly StringReader Input;
         private readonly StringWriter Output;
 
-        public String ReadLine()
+        public string ReadLine()
         {
             return Input.ReadLine();
         }
 
-        public void WriteLine(Object s)
+        public void WriteLine(object s)
         {
             Output.WriteLine(s);
         }
 
-        public void WriteLine(String format, params Object[] args)
+        public void WriteLine(string format, params object[] args)
         {
             Output.WriteLine(format, args);
         }

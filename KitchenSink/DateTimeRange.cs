@@ -48,7 +48,7 @@ namespace KitchenSink
             return new DateTimeRange(begin, begin.AddYears(1));
         }
 
-        public static DateTimeRange Parse(String s, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        public static DateTimeRange Parse(string s, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
             var i = s.IndexOf(DateTimeSeparator, comparison);
 
@@ -61,7 +61,7 @@ namespace KitchenSink
             return new DateTimeRange(DateTime.Parse(beginString), DateTime.Parse(endString));
         }
 
-        public static DateTimeRange ParseExact(String s, String format, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        public static DateTimeRange ParseExact(string s, string format, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
             var i = s.IndexOf(DateTimeSeparator, comparison);
 
@@ -76,7 +76,7 @@ namespace KitchenSink
                 DateTime.ParseExact(endString, format, CultureInfo.InvariantCulture));
         }
 
-        public static readonly String DateTimeSeparator = " to ";
+        public static readonly string DateTimeSeparator = " to ";
 
         public DateTimeRange(DateTime begin, DateTime end) : this()
         {
@@ -98,8 +98,8 @@ namespace KitchenSink
             Length = length;
         }
 
-        public DateTime Begin { get; private set; }
-        public DateTime End { get; private set; }
+        public DateTime Begin { get; }
+        public DateTime End { get; }
         public TimeSpan Length { get; private set; }
 
         public bool Contains(DateTime time)
@@ -119,7 +119,7 @@ namespace KitchenSink
                 || (Begin < that.End && End > that.Begin);
         }
 
-        public String ToString(String format)
+        public string ToString(string format)
         {
             return Begin.ToString(format) + DateTimeSeparator + End.ToString(format);
         }

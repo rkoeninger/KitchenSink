@@ -38,7 +38,7 @@ namespace KitchenSink
         }
         
         /// <summary>Opens new tag.</summary>
-        public static Xml operator <(Xml xml, String tagName)
+        public static Xml operator <(Xml xml, string tagName)
         {
             xml.Writer.WriteStartElement(tagName);
             xml.CurrentDepth++;
@@ -46,7 +46,7 @@ namespace KitchenSink
         }
 
         /// <summary>Closes current tag.</summary>
-        public static Xml operator >(Xml xml, String tagName)
+        public static Xml operator >(Xml xml, string tagName)
         {
             xml.Writer.WriteEndElement();
             xml.CurrentDepth--;
@@ -87,7 +87,7 @@ namespace KitchenSink
         }
 
         /// <summary>Inserts value into previous element/attribute and closes it.</summary>
-        public static Xml operator <=(Xml xml, String tagValue)
+        public static Xml operator <=(Xml xml, string tagValue)
         {
             // write value and close
             switch (xml.Writer.WriteState)
@@ -110,19 +110,19 @@ namespace KitchenSink
         }
 
         /// <summary>Starts an attribute. Value must next be specified with &lt;=.</summary>
-        public static Xml operator >=(Xml xml, String attrName)
+        public static Xml operator >=(Xml xml, string attrName)
         {
             xml.Writer.WriteStartAttribute(attrName);
             xml.CurrentDepth++;
             return xml;
         }
 
-        public static implicit operator String(Xml xml)
+        public static implicit operator string(Xml xml)
         {
             return xml.ToString();
         }
 
-        internal Xml(String rootTagName, XmlWriterSettings settings)
+        internal Xml(string rootTagName, XmlWriterSettings settings)
         {
             CurrentDepth = 1;
             Output = new StringBuilder();
@@ -144,7 +144,7 @@ namespace KitchenSink
     public struct XmlStart
     {
         /// <summary>Opens root tag.</summary>
-        public static Xml operator <(XmlStart start, String rootTagName)
+        public static Xml operator <(XmlStart start, string rootTagName)
         {
             return new Xml(rootTagName, start.Settings);
         }
@@ -155,7 +155,7 @@ namespace KitchenSink
         /// This operator is completely unnecessary but the compiler requires
         /// a matching &gt; operator for the defined &lt; operator.
         /// </summary>
-        public static Xml operator >(XmlStart start, String rootTagName)
+        public static Xml operator >(XmlStart start, string rootTagName)
         {
             throw new InvalidOperationException();
         }

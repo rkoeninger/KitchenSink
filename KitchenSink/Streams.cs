@@ -8,14 +8,14 @@ namespace KitchenSink
 {
     public static class Streams
     {
-        public static Stream ToStream(this String str, Encoding encoding = null)
+        public static Stream ToStream(this string str, Encoding encoding = null)
         {
             encoding = encoding ?? Encoding.UTF8;
             var bytes = encoding.GetBytes(str);
             return new MemoryStream(bytes);
         }
 
-        public static Stream ToStream(this IEnumerable<String> seq, Encoding encoding = null, String separator = null)
+        public static Stream ToStream(this IEnumerable<string> seq, Encoding encoding = null, string separator = null)
         {
             encoding = encoding ?? Encoding.UTF8;
             separator = separator ?? "";

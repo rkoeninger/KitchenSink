@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -55,7 +54,7 @@ namespace KitchenSink.Tests
 
         public class Person
         {
-            public Person(String firstName, String lastName, Address address, List<Person> friends = null)
+            public Person(string firstName, string lastName, Address address, List<Person> friends = null)
             {
                 FirstName = firstName;
                 LastName = lastName;
@@ -63,22 +62,22 @@ namespace KitchenSink.Tests
                 Friends = friends ?? new List<Person>();
             }
 
-            public String FirstName { get; private set; }
-            public String LastName { get; private set; }
-            public Address Address { get; private set; }
+            public string FirstName { get; private set; }
+            public string LastName { get; private set; }
+            public Address Address { get; }
             public List<Person> Friends { get; private set; }
         }
 
         public class Address
         {
-            public Address(String street, String city)
+            public Address(string street, string city)
             {
                 Street = street;
                 City = city;
             }
 
-            public String Street { get; private set; }
-            public String City { get; private set; }
+            public string Street { get; private set; }
+            public string City { get; }
         }
     }
 }

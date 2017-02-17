@@ -31,12 +31,12 @@ namespace KitchenSink
             return ! IsIn(val, coll);
         }
 
-        public static bool IsNull(this Object obj)
+        public static bool IsNull(this object obj)
         {
             return obj == null;
         }
 
-        public static bool IsNotNull(this Object obj)
+        public static bool IsNotNull(this object obj)
         {
             return obj != null;
         }

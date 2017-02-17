@@ -17,7 +17,7 @@ namespace KitchenSink
 
     public struct RangeComparison1
     {
-        public IComparable FirstBound { get; private set; }
+        public IComparable FirstBound { get; }
 
         public RangeComparison1(IComparable firstBound) : this()
         {
@@ -47,9 +47,9 @@ namespace KitchenSink
 
     public struct RangeComparison2
     {
-        public IComparable FirstBound { get; private set; }
-        public RangeComparisonOp FirstOp { get; private set; }
-        public IComparable Value { get; private set; }
+        public IComparable FirstBound { get; }
+        public RangeComparisonOp FirstOp { get; }
+        public IComparable Value { get; }
 
         public RangeComparison2(IComparable firstBound, RangeComparisonOp firstOp, IComparable value) : this()
         {
@@ -101,9 +101,8 @@ namespace KitchenSink
                 case RangeComparisonOp.LtEq: return z <= 0;
                 case RangeComparisonOp.Gt:   return z > 0;
                 case RangeComparisonOp.GtEq: return z >= 0;
+                default: throw new ArgumentException("Invalid comparison operator");
             }
-
-            throw new ArgumentException("Invalid comparison operator");
         }
     }
 }

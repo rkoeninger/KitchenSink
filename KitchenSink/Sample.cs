@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace KitchenSink
 {
@@ -50,7 +49,7 @@ namespace KitchenSink
             -double.Epsilon, -double.Epsilon * 2, -double.Epsilon * 3
         );
 
-        public static readonly IReadOnlyCollection<String> TopLevelDomains = ReadOnly.Collection(
+        public static readonly IReadOnlyCollection<string> TopLevelDomains = ReadOnly.Collection(
             "com", "org", "net", "gov", "edu", "uk", "ca", "jp", "au", "de", "fr", "us"
         );
     }

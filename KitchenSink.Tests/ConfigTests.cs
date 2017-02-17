@@ -1,20 +1,19 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
     public interface IConfig
     {
-        String BrandName { get; }
+        string BrandName { get; }
 
-        String BrandNameWithTradeMark { get; }
+        string BrandNameWithTradeMark { get; }
 
-        String FormatName(String name);
+        string FormatName(string name);
     }
 
     public static class App
     {
-        private const String Contents = @"
+        private const string Contents = @"
             using System;
 
             public class Config : KitchenSink.Tests.IConfig

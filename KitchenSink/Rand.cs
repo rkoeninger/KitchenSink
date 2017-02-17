@@ -48,17 +48,17 @@ namespace KitchenSink
             return Seq.Forever(Char);
         }
 
-        public static String UnicodeString()
+        public static string UnicodeString()
         {
             return Chars().Take(Int(256)).Concat();
         }
 
-        public static String UnicodeString(int length)
+        public static string UnicodeString(int length)
         {
             return Chars().Take(Int(length)).Concat();
         }
 
-        public static IEnumerable<String> UnicodeStrings()
+        public static IEnumerable<string> UnicodeStrings()
         {
             return Seq.Forever(UnicodeString);
         }
@@ -73,35 +73,32 @@ namespace KitchenSink
             return Seq.Forever(AsciiChar);
         }
 
-        public static String AsciiString()
+        public static string AsciiString()
         {
             return AsciiChars().Take(Int(256)).Concat();
         }
 
-        public static String AsciiString(int length)
+        public static string AsciiString(int length)
         {
             return AsciiChars().Take(Int(length)).Concat();
         }
 
-        public static String AsciiStringNoWhiteSpace(int minLength, int maxLength)
+        public static string AsciiStringNoWhiteSpace(int minLength, int maxLength)
         {
             return Chars().Where(x => ! char.IsWhiteSpace(x)).Take(Int(minLength, maxLength)).Concat();
         }
 
-        public static IEnumerable<String> AsciiStrings()
+        public static IEnumerable<string> AsciiStrings()
         {
             return Seq.Forever(AsciiString);
         }
 
-        public static String Email()
+        public static string Email()
         {
-            return String.Format("{0}@{1}.{2}",
-                AsciiStringNoWhiteSpace(16, 32),
-                AsciiStringNoWhiteSpace(8, 16),
-                Pick(Sample.TopLevelDomains));
+            return $"{AsciiStringNoWhiteSpace(16, 32)}@{AsciiStringNoWhiteSpace(8, 16)}.{Pick(Sample.TopLevelDomains)}";
         }
 
-        public static IEnumerable<String> Emails()
+        public static IEnumerable<string> Emails()
         {
             return Seq.Forever(Email);
         }

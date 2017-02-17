@@ -151,26 +151,26 @@ namespace KitchenSink
 
     public static class ConsoleIO
     {
-        public static readonly IO<String> ReadLine = IO.Of(Console.ReadLine);
-        public static readonly IO<Int32> ReadChar = IO.Of(Console.Read);
+        public static readonly IO<string> ReadLine = IO.Of(Console.ReadLine);
+        public static readonly IO<int> ReadChar = IO.Of(Console.Read);
         public static readonly IO<ConsoleKeyInfo> ReadKey = IO.Of(Console.ReadKey);
         
-        public static IO<Unit> Write(Object s)
+        public static IO<Unit> Write(object s)
         {
             return IO.Of_(() => Console.Write(s));
         }
 
-        public static IO<Unit> Write(String format, params Object[] args)
+        public static IO<Unit> Write(string format, params object[] args)
         {
             return IO.Of_(() => Console.Write(format, args));
         }
         
-        public static IO<Unit> WriteLine(Object s)
+        public static IO<Unit> WriteLine(object s)
         {
             return IO.Of_(() => Console.WriteLine(s));
         }
 
-        public static IO<Unit> WriteLine(String format, params Object[] args)
+        public static IO<Unit> WriteLine(string format, params object[] args)
         {
             return IO.Of_(() => Console.WriteLine(format, args));
         }
@@ -178,32 +178,32 @@ namespace KitchenSink
 
     public static class FileIO
     {
-        public static IO<String> ReadAllText(String path)
+        public static IO<string> ReadAllText(string path)
         {
             return IO.Of(() => File.ReadAllText(path));
         }
 
-        public static IO<String[]> ReadAllLines(String path)
+        public static IO<string[]> ReadAllLines(string path)
         {
             return IO.Of(() => File.ReadAllLines(path));
         }
 
-        public static IO<byte[]> ReadAllBytes(String path)
+        public static IO<byte[]> ReadAllBytes(string path)
         {
             return IO.Of(() => File.ReadAllBytes(path));
         }
 
-        public static IO<Unit> WriteAllText(String path, String contents)
+        public static IO<Unit> WriteAllText(string path, string contents)
         {
             return IO.Of_(() => File.WriteAllText(path, contents));
         }
 
-        public static IO<Unit> WriteAllLines(String path, String[] contents)
+        public static IO<Unit> WriteAllLines(string path, string[] contents)
         {
             return IO.Of_(() => File.WriteAllLines(path, contents));
         }
 
-        public static IO<Unit> WriteAllBytes(String path, byte[] bytes)
+        public static IO<Unit> WriteAllBytes(string path, byte[] bytes)
         {
             return IO.Of_(() => File.WriteAllBytes(path, bytes));
         }

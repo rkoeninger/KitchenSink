@@ -8,7 +8,7 @@ namespace KitchenSink
 {
     public class ExpectationFailedException : Exception
     {
-        public ExpectationFailedException(String message) : base(message)
+        public ExpectationFailedException(string message) : base(message)
         {
         }
     }
@@ -53,9 +53,9 @@ namespace KitchenSink
             return Error<ExpectationFailedException>(f);
         }
 
-        private static CompilerResults DoCompile(String source, params String[] assemblies)
+        private static CompilerResults DoCompile(string source, params string[] assemblies)
         {
-            var options = new Dictionary<String, String> { { "CompilerVersion", "v4.0" } };
+            var options = new Dictionary<string, string> { { "CompilerVersion", "v4.0" } };
             var provider = new CSharpCodeProvider(options);
             var parameters = new CompilerParameters(assemblies);
             parameters.ReferencedAssemblies.Add("mscorlib.dll");
@@ -68,7 +68,7 @@ namespace KitchenSink
         /// <summary>
         /// Throws exception if code doesn't fail to compile due to given errors.
         /// </summary>
-        public static void CompileFail(String source, String[] assemblies, string[] errorCodes)
+        public static void CompileFail(string source, string[] assemblies, string[] errorCodes)
         {
             var results = DoCompile(source, assemblies);
 

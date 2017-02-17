@@ -8,7 +8,7 @@ namespace KitchenSink
 {
     public class CodeLoader<T>
     {
-        public CodeLoader(String source)
+        public CodeLoader(string source)
         {
             Source = source;
             LazyLoader = new Lazy<T>(Compile);
@@ -19,9 +19,9 @@ namespace KitchenSink
             };
         }
 
-        private readonly String Source;
+        private readonly string Source;
         private readonly Lazy<T> LazyLoader;
-        private readonly String[] StandardAssemblies;
+        private readonly string[] StandardAssemblies;
         public T Value { get { return LazyLoader.Value; } }
 
         public void Load()
@@ -34,7 +34,7 @@ namespace KitchenSink
         private T Compile()
         {
             var referencingAssembly = typeof(T).Assembly;
-            var options = new Dictionary<String, String> {{"CompilerVersion", "v4.0"}};
+            var options = new Dictionary<string, string> {{"CompilerVersion", "v4.0"}};
             var provider = new CSharpCodeProvider(options);
             var parameters = new CompilerParameters(StandardAssemblies.Add(referencingAssembly.CodeBase.Replace("file:///", "")))
             {
@@ -56,7 +56,7 @@ namespace KitchenSink
             if (constructor == null)
                 throw new Exception("");
 
-            var configObj = constructor.Invoke(new Object[0]);
+            var configObj = constructor.Invoke(new object[0]);
 
             if (configObj == null)
                 throw new Exception("");

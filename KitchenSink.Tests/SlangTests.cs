@@ -131,8 +131,8 @@ namespace KitchenSink.Tests
             Check.That(Rand.Lists(Rand.Ints()).Where(x => x.Count >= 2).Take(100),
             (IEnumerable<int> xs) =>
             {
-                var vals = String.Join(" ", xs);
-                return Slang.Eval<bool>(String.Format("(== (== {0}) (! (!= {0})))", vals));
+                var vals = string.Join(" ", xs);
+                return Slang.Eval<bool>(string.Format("(== (== {0}) (! (!= {0})))", vals));
             });
         }
 
@@ -170,7 +170,7 @@ namespace KitchenSink.Tests
         public void LambdaDeclaration()
         {
             var f = Slang.Eval<Func<int, int>>("(=> ((int x)) (+ 1 x))");
-            Check.That(Sample.Ints.Where(x => x != Int32.MaxValue), x => f(x) == x + 1);
+            Check.That(Sample.Ints.Where(x => x != int.MaxValue), x => f(x) == x + 1);
         }
 
         [Test]
@@ -185,7 +185,7 @@ namespace KitchenSink.Tests
         [Test]
         public void NestedString()
         {
-            var stringList = Slang.Eval<IReadOnlyList<String>>("[\"abc\" \'\"def\"\' «\"sdf«345\'«fgh\"»678»\'yui»]");
+            var stringList = Slang.Eval<IReadOnlyList<string>>("[\"abc\" \'\"def\"\' «\"sdf«345\'«fgh\"»678»\'yui»]");
             Assert.AreEqual(3, stringList.Count);
             Assert.AreEqual("abc", stringList[0]);
             Assert.AreEqual("\"def\"", stringList[1]);

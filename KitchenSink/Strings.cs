@@ -8,22 +8,22 @@ namespace KitchenSink
 {
     public static class Strings
     {
-        public static String ToLF(this String s)
+        public static string ToLF(this string s)
         {
             return s.Replace("\r\n", "\n");
         }
 
-        public static String ToCRLF(this String s)
+        public static string ToCRLF(this string s)
         {
             return s.Replace("\r\n", "\n").Replace("\n", "\r\n");
         }
 
-        public static String Format(this String s, params Object[] args)
+        public static string Format(this string s, params object[] args)
         {
-            return String.Format(s, args);
+            return string.Format(s, args);
         }
 
-        public static IEnumerable<String> SplitSeq(this String s, Regex r)
+        public static IEnumerable<string> SplitSeq(this string s, Regex r)
         {
             var m = r.Match(s);
 
@@ -34,7 +34,7 @@ namespace KitchenSink
             }
         }
 
-        public static IEnumerable<String> SplitSeq(this String s, String sep, StringComparison comparison = StringComparison.InvariantCulture)
+        public static IEnumerable<string> SplitSeq(this string s, string sep, StringComparison comparison = StringComparison.InvariantCulture)
         {
             var i = 0;
             int j;
@@ -48,57 +48,57 @@ namespace KitchenSink
             yield return s.Substring(i, s.Length - i);
         }
 
-        public static bool EqualsIgnoreCase(this String x, String y)
+        public static bool EqualsIgnoreCase(this string x, string y)
         {
-            return String.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
+            return string.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
         }
 
-        public static Func<String, bool> EqualsIgnoreCase(this String x)
+        public static Func<string, bool> EqualsIgnoreCase(this string x)
         {
             return y => EqualsIgnoreCase(x, y);
         }
 
-        public static bool IsNotBlank(this String x)
+        public static bool IsNotBlank(this string x)
         {
-            return String.IsNullOrWhiteSpace(x).Not();
+            return string.IsNullOrWhiteSpace(x).Not();
         }
 
-        public static String IfEmpty(this String x, String y)
+        public static string IfEmpty(this string x, string y)
         {
-            return String.IsNullOrEmpty(x) ? y : x;
+            return string.IsNullOrEmpty(x) ? y : x;
         }
 
-        public static String IfBlank(this String x, String y)
+        public static string IfBlank(this string x, string y)
         {
-            return String.IsNullOrWhiteSpace(x) ? y : x;
+            return string.IsNullOrWhiteSpace(x) ? y : x;
         }
 
         public static readonly Regex WhiteSpaceRegex = new Regex("\\s+");
 
-        public static String CollapseSpace(this String x)
+        public static string CollapseSpace(this string x)
         {
             return WhiteSpaceRegex.Split(x.Trim()).Concat(" ");
         }
 
-        public static String ToTitleCase(this String x)
+        public static string ToTitleCase(this string x)
         {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x);
         }
 
-        public static String ToCurrencyString(this decimal x)
+        public static string ToCurrencyString(this decimal x)
         {
-            return String.Format("{0:c}", x);
+            return string.Format("{0:c}", x);
         }
 
-        public static IEnumerable<String> TrimAll(this IEnumerable<String> seq)
+        public static IEnumerable<string> TrimAll(this IEnumerable<string> seq)
         {
             return seq.Where(IsNotBlank).Select(x => x.Trim());
         }
 
         /// <summary>Joins the string representations of the elements in the sequence, separated by the given string (defaults to empty string).</summary>
-        public static String Concat<A>(this IEnumerable<A> seq, String sep = null)
+        public static string Concat<A>(this IEnumerable<A> seq, string sep = null)
         {
-            return String.Join(sep ?? "", seq);
+            return string.Join(sep ?? "", seq);
         }
     }
 }

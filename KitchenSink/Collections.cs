@@ -357,10 +357,10 @@ namespace KitchenSink
 
         /// <summary>Creates a new Dictionary from the properties of an object.</summary>
 		/// <remarks>Intended to be used with an anonymous object, but can be used with any object.</remarks>
-        public static Dictionary<String, Object> Of(Object obj)
+        public static Dictionary<string, object> Of(object obj)
         {
             if (obj == null)
-                return new Dictionary<String, Object>();
+                return new Dictionary<string, object>();
 
             return obj.GetType().GetProperties().Where(x => x.GetIndexParameters().Length == 0).ToDictionary(
                 x => x.Name, x => x.GetValue(obj, null));

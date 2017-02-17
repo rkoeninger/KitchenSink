@@ -29,35 +29,12 @@ namespace KitchenSink
 
     public static class Folder
     {
-        public static FilePath Profile
-        {
-            get { return new FilePath(GetFolderPath(SpecialFolder.UserProfile)); }
-        }
-
-        public static FilePath Desktop
-        {
-            get { return new FilePath(GetFolderPath(SpecialFolder.DesktopDirectory)); }
-        }
-
-        public static FilePath Documents
-        {
-            get { return new FilePath(GetFolderPath(SpecialFolder.MyDocuments)); }
-        }
-
-        public static FilePath AppData
-        {
-            get { return new FilePath(GetFolderPath(SpecialFolder.ApplicationData)); }
-        }
-
-        public static FilePath LocalAppData
-        {
-            get { return new FilePath(GetFolderPath(SpecialFolder.LocalApplicationData)); }
-        }
-
-        public static FilePath Programs
-        {
-            get { return new FilePath(GetFolderPath(SpecialFolder.ProgramFiles)); }
-        }
+        public static FilePath Profile => new FilePath(GetFolderPath(SpecialFolder.UserProfile));
+        public static FilePath Desktop => new FilePath(GetFolderPath(SpecialFolder.DesktopDirectory));
+        public static FilePath Documents => new FilePath(GetFolderPath(SpecialFolder.MyDocuments));
+        public static FilePath AppData => new FilePath(GetFolderPath(SpecialFolder.ApplicationData));
+        public static FilePath LocalAppData => new FilePath(GetFolderPath(SpecialFolder.LocalApplicationData));
+        public static FilePath Programs => new FilePath(GetFolderPath(SpecialFolder.ProgramFiles));
 
         public static FilePath Current
         {
@@ -68,22 +45,22 @@ namespace KitchenSink
 
     public static class UNC
     {
-        public static FilePath Path(String host, String share)
+        public static FilePath Path(string host, string share)
         {
             return Host(host).Share(share);
         }
 
-        public static UNCHost Host(String host)
+        public static UNCHost Host(string host)
         {
             return new UNCHost(host);
         }
     }
 
-    public sealed class UNCHost : NewType<String>
+    public sealed class UNCHost : NewType<string>
     {
-        internal UNCHost(String host) : base(host) {}
+        internal UNCHost(string host) : base(host) {}
 
-        public FilePath Share(String share)
+        public FilePath Share(string share)
         {
             return new FilePath(Path.Combine(Value.StartsWith(@"\\") ? Value : @"\\" + Value, share));
         }
@@ -93,15 +70,15 @@ namespace KitchenSink
             return host.Share(end.Value);
         }
 
-        public static FilePath operator /(UNCHost host, String end)
+        public static FilePath operator /(UNCHost host, string end)
         {
             return host.Share(end);
         }
     }
 
-    public sealed class FilePath : NewType<String>
+    public sealed class FilePath : NewType<string>
     {
-        internal FilePath(String path) : base(path) {}
+        internal FilePath(string path) : base(path) {}
 
         /// <summary>
         /// Concatenates two file paths.
@@ -114,7 +91,7 @@ namespace KitchenSink
         /// <summary>
         /// Concatenates two file paths.
         /// </summary>
-        public static FilePath operator /(FilePath begin, String end)
+        public static FilePath operator /(FilePath begin, string end)
         {
             return new FilePath(Path.Combine(begin.Value, end));
         }
@@ -122,12 +99,12 @@ namespace KitchenSink
         /// <summary>
         /// Concatenates two file paths.
         /// </summary>
-        public static FilePath operator /(String begin, FilePath end)
+        public static FilePath operator /(string begin, FilePath end)
         {
             return new FilePath(Path.Combine(begin, end.Value));
         }
 
-        public static implicit operator String(FilePath filePath)
+        public static implicit operator string(FilePath filePath)
         {
             return filePath.Value;
         }
