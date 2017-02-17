@@ -32,9 +32,6 @@ A library for multi-paradigm programming in C#/.Net.
   * `Needs` - a basic IoC container that uses the following attributes
   * `DefaultImplementationAttribute` - placed on an interface to indicate the default implementation so an IoC container doesn't have to be explicitly configured with it
   * `DefaultImplementationOfAttribute` - placed on a class to indicate that it is the default implementation of the specified interface
-  * Mockable interfaces to common components: IConsole, IFileSystem
-  * Standard "live" implementations of those interfaces that pass-through to Console, File, Directory, etc.
-  * Useful mock implementations of those interfaces like ScriptedConsole and VirtualFileSystem
 
 ### Questionable File Path Building Facility using Operator Overloading
 
