@@ -105,11 +105,6 @@
     <Compile Include="Void.cs" />
     <Compile Include="Xml.cs" />
     <Compile Include="Z.cs" />
-    <Compile Include="Dictionary.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Dictionary.tt</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Bag.tt">
@@ -135,10 +130,6 @@
     <None Include="Tuples.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Tuples.cs</LastGenOutput>
-    </None>
-    <None Include="Dictionary.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Dictionary.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>
