@@ -93,11 +93,6 @@
     </Compile>
     <Compile Include="Expect.cs" />
     <Compile Include="Maybe.cs" />
-    <Compile Include="Tuples.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Tuples.tt</DependentUpon>
-    </Compile>
     <Compile Include="Types.cs" />
     <Compile Include="TypeTree.cs" />
     <Compile Include="Unit.cs" />
@@ -126,10 +121,6 @@
     <None Include="Table.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Table.cs</LastGenOutput>
-    </None>
-    <None Include="Tuples.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Tuples.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

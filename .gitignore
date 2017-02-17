@@ -6,7 +6,6 @@ packages/
 *.user
 KitchenSink/Natural.cs
 KitchenSink/Table.cs
-KitchenSink/Tuples.cs
 KitchenSink/MultiMethod.cs
 KitchenSink/GenericMethod.cs
 KitchenSink/Match.cs
