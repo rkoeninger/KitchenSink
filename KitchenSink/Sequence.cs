@@ -30,9 +30,11 @@ namespace KitchenSink
 
         public static ISequence<A> ToSequence<A>(this IEnumerable<A> values)
         {
-            return Match.On(values).Return<ISequence<A>>()
-                .Case<IReadOnlyList<A>>(x => new ListSequence<A>(x))
-                .Else(x => new EnumeratorSequence<A>(x.GetEnumerator()));
+            var list = values as IReadOnlyList<A>;
+
+            return (list != null)
+                ? (ISequence<A>) new ListSequence<A>(list)
+                : new EnumeratorSequence<A>(values.GetEnumerator());
         }
 
         public static ISequence<A> Empty<A>()

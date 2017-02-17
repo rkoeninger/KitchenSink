@@ -12,12 +12,6 @@ A library for multi-paradigm programming in C#/.Net.
   * `Void` - no value can be constructed; is always null
   * `ISequence<A>` - lazy, persistent, one-time iteration of values
 
-### Function Composition
-
-  * `Match` - extensible, immutable control-flow structure that branches on arbitrary predicates
-  * `MultiMethod` - mutable set of method overloads that are dispatched on the types of multiple arguments
-  * `GenericMethod` - mutable set of method overloads that are dispatched on arbitrary predicates
-
 ### Pure Functional Programming Facilities
 
   * `IO` - a type for modeling and composing I/O operations and side effects

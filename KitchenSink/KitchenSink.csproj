@@ -53,26 +53,11 @@
     <Compile Include="MultiKeyDictionary.cs" />
     <Compile Include="Needs.cs" />
     <Compile Include="Funcs.cs" />
-    <Compile Include="GenericMethod.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>GenericMethod.tt</DependentUpon>
-    </Compile>
     <Compile Include="IO.cs" />
     <Compile Include="Lens.cs" />
-    <Compile Include="MultiMethod.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>MultiMethod.tt</DependentUpon>
-    </Compile>
     <Compile Include="NewType.cs" />
     <Compile Include="Numbers.cs" />
     <Compile Include="Objects.cs" />
-    <Compile Include="Match.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Match.tt</DependentUpon>
-    </Compile>
     <Compile Include="Rand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RangeComparison.cs" />
@@ -90,20 +75,6 @@
     <Compile Include="Void.cs" />
     <Compile Include="Xml.cs" />
     <Compile Include="Z.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="GenericMethod.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>GenericMethod.cs</LastGenOutput>
-    </None>
-    <None Include="MultiMethod.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>MultiMethod.cs</LastGenOutput>
-    </None>
-    <None Include="Match.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Match.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

@@ -1,4 +1,2 @@
-build:
-  project: KitchenSink.sln
 before_build:
-  - nuget restore KitchenSink.sln
+  - nuget restore

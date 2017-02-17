@@ -132,12 +132,13 @@ namespace KitchenSink
 
         private static Expression AndAlso(params Expression[] exprs)
         {
-            switch (exprs.Length)
-            {
-                case 0: return TrueExpr;
-                case 1: return exprs.Single();
-                default: return exprs.Aggregate(Expression.AndAlso);
-            }
+            if (exprs.Length == 0)
+                return TrueExpr;
+
+            if (exprs.Length == 1)
+                return exprs.Single();
+
+            return exprs.Aggregate(Expression.AndAlso);
         }
 
         private static Expression<Func<bool>> BoolThunk(Expression expr)
@@ -184,12 +185,19 @@ namespace KitchenSink
             Done = done;
         }
 
-        private A Value { get; }
-        private Exception[] ErrorList { get; }
-        private bool Done { get; }
+        private A Value { get; set; }
+        private Exception[] ErrorList { get; set; }
+        private bool Done { get; set; }
 
-        public IEnumerable<Exception> Errors => ErrorList.AsEnumerable();
-        public bool HasErrors => ErrorList.Length > 0;
+        public IEnumerable<Exception> Errors
+        {
+            get { return ErrorList.AsEnumerable(); }
+        }
+
+        public bool HasErrors
+        {
+            get { return ErrorList.Length > 0; }
+        }
 
         public Validation<A> Cut()
         {

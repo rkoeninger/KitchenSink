@@ -4,9 +4,7 @@ language: csharp
 solution: KitchenSink.sln
 install:
   - nuget restore KitchenSink.sln
-  - nuget install Mono.TextTransform -Version 1.0.0 -OutputDirectory t4
-  - nuget install NUnit.Runners -Version 3.2.0 -OutputDirectory testrunner
+  - nuget install NUnit.ConsoleRunner -Version 3.6.0 -OutputDirectory testrunner
 script:
-  - chmod a+x t4.sh
   - xbuild /p:Configuration=Release KitchenSink.sln
-  - mono ./testrunner/NUnit.ConsoleRunner.3.2.0/tools/nunit3-console.exe ./KitchenSink.Tests/bin/Release/KitchenSink.Tests.dll --where "cat != WindowsOnly"
+  - mono ./testrunner/NUnit.ConsoleRunner.3.6.0/tools/nunit3-console.exe ./KitchenSink.Tests/bin/Release/KitchenSink.Tests.dll --where "cat != WindowsOnly"
