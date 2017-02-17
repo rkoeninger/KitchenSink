@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/rkoeninger/KitchenSink.svg?branch=master)](https://travis-ci.org/rkoeninger/KitchenSink)
-[![Build status](https://ci.appveyor.com/api/projects/status/syn6oxnf0e2b357e/branch/master?svg=true)](https://ci.appveyor.com/project/rkoeninger/kitchensink/branch/master)
+[![.Net Build Status](https://img.shields.io/appveyor/ci/rkoeninger/KitchenSink/master.svg?label=.Net%20Build)](https://ci.appveyor.com/project/rkoeninger/kitchensink/branch/master)
+[![Mono Build Status](https://img.shields.io/travis/rkoeninger/KitchenSink/master.svg?label=Mono%20Build)](https://travis-ci.org/rkoeninger/KitchenSink)
 
 # KitchenSink
 
