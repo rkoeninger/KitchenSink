@@ -4,9 +4,7 @@ TestResults/
 packages/
 *.suo
 *.user
-KitchenSink/Natural.cs
 KitchenSink/Table.cs
 KitchenSink/MultiMethod.cs
 KitchenSink/GenericMethod.cs
 KitchenSink/Match.cs
-KitchenSink/Bag.cs
