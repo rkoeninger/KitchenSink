@@ -76,33 +76,5 @@
     <Compile Include="Xml.cs" />
     <Compile Include="Z.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <PropertyGroup>
-    <_TransformExe>$(CommonProgramFiles)\Microsoft Shared\TextTemplating\10.0\TextTransform.exe</_TransformExe>
-    <_TransformExe Condition="'$(VisualStudioVersion)' != ''">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\$(VisualStudioVersion)\TextTransform.exe</_TransformExe>
-    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\10.0\TextTransform.exe"</_TransformExe>
-    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\11.0\TextTransform.exe"</_TransformExe>
-    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\12.0\TextTransform.exe"</_TransformExe>
-    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\13.0\TextTransform.exe"</_TransformExe>
-    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(CommonProgramFiles)\Microsoft Shared\TextTemplating\14.0\TextTransform.exe"</_TransformExe>
-    <!-- This one is for Travis-CI (see .travis.yml) -->
-    <_TransformExe Condition="!Exists('$(_TransformExe)')">$(SolutionDir)t4.sh</_TransformExe>
-  </PropertyGroup>
-  <Target Name="TransformOnBuild" AfterTargets="BeforeBuild">
-    <Error Text="Failed to find TextTransform.exe tool at '$(_TransformExe)." Condition="!Exists('$(_TransformExe)')" />
-    <ItemGroup>
-      <_TextTransform Include="@(None)" Condition="'%(None.Generator)' == 'TextTemplatingFilePreprocessor' Or '%(None.Generator)' == 'TextTemplatingFileGenerator'" />
-    </ItemGroup>
-    <Exec Command="&quot;$(_TransformExe)&quot; &quot;@(_TextTransform)&quot;" Condition="'%(Identity)' != ''" />
-  </Target>
 </Project>
