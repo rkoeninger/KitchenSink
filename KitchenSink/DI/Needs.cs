@@ -115,7 +115,7 @@ namespace KitchenSink.DI
                 {
                     return needs.Get(contractType);
                 }
-                catch (NotImplementedException)
+                catch (ImplementationUnresolvedException)
                 {
                     return null;
                 }
