@@ -72,7 +72,6 @@
     <Compile Include="Testing\Expect.cs" />
     <Compile Include="Maybe.cs" />
     <Compile Include="Types.cs" />
-    <Compile Include="Collections\TypeTree.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="Validation.cs" />
     <Compile Include="Void.cs" />
