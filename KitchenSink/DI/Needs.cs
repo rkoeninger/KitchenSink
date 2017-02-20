@@ -3,23 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace KitchenSink
+namespace KitchenSink.DI
 {
-    /// <summary>
-    /// Indicates that a class/component is not thread safe, or has transient state
-    /// and is only good for one time use.
-    /// Multi-use classes cannot depend on single-use classes.
-    /// Classes are multi-use by default.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
-    public class SingleUse : Attribute
-    {
-        public static bool Is(Type implType)
-        {
-            return implType.HasAttribute<SingleUse>();
-        }
-    }
-
     /// <summary>
     /// A simple IoC container. Resolves dependencies that are explicity
     /// registered, by discovering them in assemblies and parent classes,
@@ -61,6 +46,23 @@ namespace KitchenSink
         public Needs Add(Type contractType, object impl)
         {
             return Add(contractType, () => impl);
+        }
+
+        /// <summary>
+        /// Specifies an implementing type for a given contract type.
+        /// </summary>
+        public Needs Add<Contract>(Type implType)
+        {
+            return Add(typeof(Contract), implType);
+        }
+
+        /// <summary>
+        /// Specifies an implementing type for a given contract type.
+        /// </summary>
+        public Needs Add(Type contractType, Type implType)
+        {
+            Persist(contractType, implType, !implType.HasAttribute<SingleUse>());
+            return this;
         }
 
         /// <summary>
@@ -145,9 +147,12 @@ namespace KitchenSink
         /// <exception cref="NotImplementedException">If no implementation found.</exception>
         public object Get(Type contractType)
         {
-            return GetInternal(contractType, !SingleUse.Is(contractType));
+            return GetInternal(contractType, !contractType.HasAttribute<SingleUse>());
         }
 
+        // Resolves dependency by checking for existing Factory,
+        // then checking list of Sources, then checking list of Backups.
+        // Throws NotImplementedException if impl is not found.
         private object GetInternal(Type contractType, bool multiUse)
         {
             Factory factory;
@@ -180,9 +185,11 @@ namespace KitchenSink
             throw new NotImplementedException($"No implementation found for {contractType}");
         }
 
+        // Create and store Factory. Factory returns singleton instance if
+        // implType is multi-use, returns new instance on each call if single-use.
         private object Persist(Type contractType, Type implType, bool multiUse)
         {
-            if (SingleUse.Is(implType))
+            if (implType.HasAttribute<SingleUse>())
             {
                 Factory factory = () => New(implType, multiUse);
                 factories[contractType] = factory;
@@ -194,6 +201,7 @@ namespace KitchenSink
             return impl;
         }
 
+        // Resolve all nested dependencies and create instance.
         private object New(Type implType, bool multiUse)
         {
             var ctors = implType.GetConstructors();
@@ -212,7 +220,7 @@ namespace KitchenSink
             {
                 foreach (var argType in args.Select(x => x.GetType()))
                 {
-                    if (SingleUse.Is(argType))
+                    if (argType.HasAttribute<SingleUse>())
                     {
                         throw new Exception($"MultiUse class ({implType}) cannot depend on SingleUse class ({argType})");
                     }

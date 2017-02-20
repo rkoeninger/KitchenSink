@@ -48,10 +48,11 @@
     <Compile Include="Comparables.cs" />
     <Compile Include="Dates.cs" />
     <Compile Include="DateTimeRange.cs" />
+    <Compile Include="DI\SingleUse.cs" />
     <Compile Include="FilePath.cs" />
     <Compile Include="HList.cs" />
     <Compile Include="MultiKeyDictionary.cs" />
-    <Compile Include="Needs.cs" />
+    <Compile Include="DI\Needs.cs" />
     <Compile Include="Funcs.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="Lens.cs" />
