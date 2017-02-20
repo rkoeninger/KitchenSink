@@ -29,9 +29,8 @@ A library for multi-paradigm programming in C#/.Net.
 
 ### Dependency Injection
 
-  * `Needs` - a basic IoC container that uses the following attributes
-  * `DefaultImplementationAttribute` - placed on an interface to indicate the default implementation so an IoC container doesn't have to be explicitly configured with it
-  * `DefaultImplementationOfAttribute` - placed on a class to indicate that it is the default implementation of the specified interface
+  * `Needs` - a minimal-configuration IoC container that can search assemblies and parent types and failover to other IoC containers
+  * `SingleUse` - an attribute indicating that a dependency implementation is not threadsafe or can only be used once
 
 ### Questionable File Path Building Facility using Operator Overloading
 
