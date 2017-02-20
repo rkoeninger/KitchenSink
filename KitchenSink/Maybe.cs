@@ -23,7 +23,7 @@ namespace KitchenSink
         public static Maybe<A> Some<A>(A val)
         {
             if (val.IsNull())
-                throw new ArgumentNullException("Can't create Maybe.Some<" + typeof(A) + "> with null value");
+                throw new ArgumentNullException("Can't create Maybe.IsSome<" + typeof(A) + "> with null value");
 
             return new Maybe<A>(val);
         }

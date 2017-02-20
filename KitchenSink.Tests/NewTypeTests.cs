@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using static NUnit.Framework.Assert;
 
 namespace KitchenSink.Tests
 {
@@ -16,9 +17,9 @@ namespace KitchenSink.Tests
             var c3 = new CustomerId(521);
             const int x1 = 453;
 
-            Assert.AreEqual(c1, c2);    // Same wrapped value
-            Assert.AreNotEqual(c1, c3); // Different values
-            Assert.AreNotEqual(c1, x1); // NewType<A> and A are never equal
+            AreEqual(c1, c2);    // Same wrapped value
+            AreNotEqual(c1, c3); // Different values
+            AreNotEqual(c1, x1); // NewType<A> and A are never equal
         }
 
         [Test]
@@ -27,15 +28,15 @@ namespace KitchenSink.Tests
             var c1 = new CustomerId(946);
             const int x1 = 946;
 
-            Assert.AreEqual(x1.GetHashCode(), c1.GetHashCode());
+            AreEqual(x1.GetHashCode(), c1.GetHashCode());
         }
 
         [Test]
         public void NewTypeToString()
         {
-            Assert.AreEqual("", new ProductCode(null).ToString());
-            Assert.AreEqual("54F23N", new ProductCode("54F23N").ToString());
-            Assert.AreEqual("123", new CustomerId(123).ToString());
+            AreEqual("", new ProductCode(null).ToString());
+            AreEqual("54F23N", new ProductCode("54F23N").ToString());
+            AreEqual("123", new CustomerId(123).ToString());
         }
     }
 }

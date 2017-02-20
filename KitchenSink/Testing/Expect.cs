@@ -50,7 +50,7 @@ namespace KitchenSink.Testing
         }
 
         /// <summary>Asserts that the actual maybe has a value and the value is equal to the expected value.</summary>
-        public static void Some<A>(A expected, Maybe<A> actual)
+        public static void IsSome<A>(A expected, Maybe<A> actual)
         {
             if (Maybe.Some(expected) != actual)
             {
@@ -59,7 +59,7 @@ namespace KitchenSink.Testing
         }
 
         /// <summary>Asserts that the given maybe has a value.</summary>
-        public static void Some<A>(Maybe<A> maybe)
+        public static void IsSome<A>(Maybe<A> maybe)
         {
             if (! maybe.HasValue)
             {
@@ -68,7 +68,7 @@ namespace KitchenSink.Testing
         }
 
         /// <summary>Asserts that the given maybe does not have a value.</summary>
-        public static void None<A>(Maybe<A> maybe)
+        public static void IsNone<A>(Maybe<A> maybe)
         {
             if (maybe.HasValue)
             {

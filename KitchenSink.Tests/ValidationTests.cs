@@ -33,7 +33,7 @@ namespace KitchenSink.Tests
         [Test]
         public void ValidationPropertyChain()
         {
-            // Some of these verifications are purposely redundant to confirm that the expression destructuring process works
+            // IsSome of these verifications are purposely redundant to confirm that the expression destructuring process works
             // ReSharper disable EqualExpressionComparison
             Assert.IsFalse(Verify.That(() => PersonA.Address.City));
             Assert.IsFalse(Verify.That(() => PersonB.Address.City));
