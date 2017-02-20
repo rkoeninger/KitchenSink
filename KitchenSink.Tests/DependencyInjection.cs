@@ -1,5 +1,4 @@
-﻿using System;
-using KitchenSink.DI;
+﻿using KitchenSink.DI;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -7,28 +6,35 @@ namespace KitchenSink.Tests
     [TestFixture]
     public class DependencyInjection
     {
-        public interface InterfaceX
-        {
-        }
-
-        public interface InterfaceY
-        {
-        }
+        public interface InterfaceX { }
+        public interface InterfaceY { }
 
         public class ParentClass
         {
-            public class ImplementationX : InterfaceX
-            {
-            }
-
-            public class ImplementationY : InterfaceY
-            {
-            }
+            public class ImplementationX : InterfaceX { }
+            public class ImplementationY : InterfaceY { }
         }
 
         public interface ISomeInterface { }
-
         public class SomeImplementation : ISomeInterface { }
+        
+        [SingleUse]
+        public class SingleUseImplementation : IWhateverInterface { }
+        public interface IWhateverInterface { }
+        public interface IAnotherInterface { }
+        public class DependentImplementation : IAnotherInterface
+        {
+            // ReSharper disable once UnusedParameter.Local
+            public DependentImplementation(IWhateverInterface whatever) { }
+        }
+
+        public interface IBlahInterface { }
+        public class BlahImplementation : IBlahInterface
+        {
+            public BlahImplementation() { }
+            // ReSharper disable once UnusedParameter.Local
+            public BlahImplementation(ISomeInterface some) { }
+        }
 
         [Test]
         public void ReferringToNestedClass()
@@ -86,7 +92,23 @@ namespace KitchenSink.Tests
         public void ImplementationNotAvailable()
         {
             var needs = new Needs();
-            Expect.Error<NotImplementedException>(() => needs.Get<ISomeInterface>());
+            Expect.Error<ImplementationUnresolvedException>(() => needs.Get<ISomeInterface>());
+        }
+
+        [Test]
+        public void MultiUseCantDependOnSingleUse()
+        {
+            var needs = new Needs();
+            needs.Refer(typeof(DependencyInjection));
+            Expect.Error<ImplementationReliabilityException>(() => needs.Get<IAnotherInterface>());
+        }
+
+        [Test]
+        public void ImplementationWithMultipleConstructors()
+        {
+            var needs = new Needs();
+            needs.Refer(typeof(DependencyInjection));
+            Expect.Error<MultipleConstructorsException>(() => needs.Get<IBlahInterface>());
         }
     }
 }

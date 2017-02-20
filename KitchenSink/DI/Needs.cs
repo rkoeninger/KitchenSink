@@ -135,7 +135,7 @@ namespace KitchenSink.DI
         /// <summary>
         /// Resolves an implementing object for the given contract type.
         /// </summary>
-        /// <exception cref="NotImplementedException">If no implementation found.</exception>
+        /// <exception cref="ImplementationUnresolvedException">If no implementation found.</exception>
         public Contract Get<Contract>()
         {
             return (Contract) Get(typeof(Contract));
@@ -144,7 +144,7 @@ namespace KitchenSink.DI
         /// <summary>
         /// Resolves an implementing object for the given contract type.
         /// </summary>
-        /// <exception cref="NotImplementedException">If no implementation found.</exception>
+        /// <exception cref="ImplementationUnresolvedException">If no implementation found.</exception>
         public object Get(Type contractType)
         {
             return GetInternal(contractType, !contractType.HasAttribute<SingleUse>());
@@ -182,7 +182,7 @@ namespace KitchenSink.DI
                 }
             }
 
-            throw new NotImplementedException($"No implementation found for {contractType}");
+            throw new ImplementationUnresolvedException(contractType);
         }
 
         // Create and store Factory. Factory returns singleton instance if
@@ -191,24 +191,24 @@ namespace KitchenSink.DI
         {
             if (implType.HasAttribute<SingleUse>())
             {
-                Factory factory = () => New(implType, multiUse);
+                Factory factory = () => New(contractType, implType, multiUse);
                 factories[contractType] = factory;
                 return factory();
             }
 
-            var impl = New(implType, multiUse);
+            var impl = New(contractType, implType, multiUse);
             factories[contractType] = () => impl;
             return impl;
         }
 
         // Resolve all nested dependencies and create instance.
-        private object New(Type implType, bool multiUse)
+        private object New(Type contractType, Type implType, bool multiUse)
         {
             var ctors = implType.GetConstructors();
 
             if (ctors.Length != 1)
             {
-                throw new Exception($"Type {implType} must have exactly 1 constructor, but has {ctors.Length}");
+                throw new MultipleConstructorsException(contractType, implType, ctors.Length);
             }
 
             var ctor = ctors[0];
@@ -218,11 +218,13 @@ namespace KitchenSink.DI
 
             if (multiUse)
             {
-                foreach (var argType in args.Select(x => x.GetType()))
+                foreach (var arg in args)
                 {
+                    var argType = arg.GetType();
+
                     if (argType.HasAttribute<SingleUse>())
                     {
-                        throw new Exception($"MultiUse class ({implType}) cannot depend on SingleUse class ({argType})");
+                        throw new ImplementationReliabilityException(contractType, implType, argType);
                     }
                 }
             }
