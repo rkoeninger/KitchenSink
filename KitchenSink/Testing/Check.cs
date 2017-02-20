@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using KitchenSink.Collections;
+using static KitchenSink.Collections.ConstructionOperators;
 
 namespace KitchenSink.Testing
 {
@@ -39,7 +39,7 @@ namespace KitchenSink.Testing
                             throw new ExpectationFailedException("Property refuted with (" + arg0 + ", " + arg1 + ", " + arg2 + ")");
         }
 
-        private static readonly Dictionary<Type, IEnumerable> DefaultInputs = Dictionary.Of<Type, IEnumerable>(
+        private static readonly Dictionary<Type, IEnumerable> DefaultInputs = dictof<Type, IEnumerable>(
             typeof(int), Sample.Ints,
             typeof(IEnumerable<int>), Rand.Lists(Rand.Ints()));
 

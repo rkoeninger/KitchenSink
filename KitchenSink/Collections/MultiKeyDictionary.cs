@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using static KitchenSink.Collections.ConstructionOperators;
 
 namespace KitchenSink.Collections
 {
@@ -15,7 +16,7 @@ namespace KitchenSink.Collections
 
         public bool ContainsKeys(TKey1 a, TKey2 b)
         {
-            return ContainsKey(Tuple.Create(a, b));
+            return ContainsKey(tupleof(a, b));
         }
 
         public bool ContainsKey1(TKey1 a)
@@ -33,31 +34,29 @@ namespace KitchenSink.Collections
 
         public void Add(TKey1 a, TKey2 b, TValue value)
         {
-            Add(Tuple.Create(a, b), value);
+            Add(tupleof(a, b), value);
         }
 
         public bool Remove(TKey1 a, TKey2 b)
         {
-            return Remove(Tuple.Create(a, b));
+            return Remove(tupleof(a, b));
         }
 
         public bool TryGetValue(TKey1 a, TKey2 b, out TValue value)
         {
-            return TryGetValue(Tuple.Create(a, b), out value);
+            return TryGetValue(tupleof(a, b), out value);
         }
 
         public TValue this[TKey1 a, TKey2 b]
         {
-            get { return this[Tuple.Create(a, b)]; }
-            set { this[Tuple.Create(a, b)] = value; }
+            get { return this[tupleof(a, b)]; }
+            set { this[tupleof(a, b)] = value; }
         }
 
         public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b)
         {
             TValue result;
-            return TryGetValue(Tuple.Create(a, b), out result)
-                ? Maybe.Some(result)
-                : Maybe<TValue>.None;
+            return TryGetValue(tupleof(a, b), out result) ? some(result) : none<TValue>();
         }
     }
 
@@ -72,7 +71,7 @@ namespace KitchenSink.Collections
 
         public bool ContainsKeys(TKey1 a, TKey2 b, TKey3 c)
         {
-            return ContainsKey(Tuple.Create(a, b, c));
+            return ContainsKey(tupleof(a, b, c));
         }
 
         public bool ContainsKey1(TKey1 a)
@@ -96,31 +95,29 @@ namespace KitchenSink.Collections
 
         public void Add(TKey1 a, TKey2 b, TKey3 c, TValue value)
         {
-            Add(Tuple.Create(a, b, c), value);
+            Add(tupleof(a, b, c), value);
         }
 
         public bool Remove(TKey1 a, TKey2 b, TKey3 c)
         {
-            return Remove(Tuple.Create(a, b, c));
+            return Remove(tupleof(a, b, c));
         }
 
         public bool TryGetValue(TKey1 a, TKey2 b, TKey3 c, out TValue value)
         {
-            return TryGetValue(Tuple.Create(a, b, c), out value);
+            return TryGetValue(tupleof(a, b, c), out value);
         }
 
         public TValue this[TKey1 a, TKey2 b, TKey3 c]
         {
-            get { return this[Tuple.Create(a, b, c)]; }
-            set { this[Tuple.Create(a, b, c)] = value; }
+            get { return this[tupleof(a, b, c)]; }
+            set { this[tupleof(a, b, c)] = value; }
         }
 
         public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b, TKey3 c)
         {
             TValue result;
-            return TryGetValue(Tuple.Create(a, b, c), out result)
-                ? Maybe.Some(result)
-                : Maybe<TValue>.None;
+            return TryGetValue(tupleof(a, b, c), out result) ? some(result) : none<TValue>();
         }
     }
 
@@ -135,7 +132,7 @@ namespace KitchenSink.Collections
 
         public bool ContainsKeys(TKey1 a, TKey2 b, TKey3 c, TKey4 d)
         {
-            return ContainsKey(Tuple.Create(a, b, c, d));
+            return ContainsKey(tupleof(a, b, c, d));
         }
 
         public bool ContainsKey1(TKey1 a)
@@ -165,31 +162,29 @@ namespace KitchenSink.Collections
 
         public void Add(TKey1 a, TKey2 b, TKey3 c, TKey4 d, TValue value)
         {
-            Add(Tuple.Create(a, b, c, d), value);
+            Add(tupleof(a, b, c, d), value);
         }
 
         public bool Remove(TKey1 a, TKey2 b, TKey3 c, TKey4 d)
         {
-            return Remove(Tuple.Create(a, b, c, d));
+            return Remove(tupleof(a, b, c, d));
         }
 
         public bool TryGetValue(TKey1 a, TKey2 b, TKey3 c, TKey4 d, out TValue value)
         {
-            return TryGetValue(Tuple.Create(a, b, c, d), out value);
+            return TryGetValue(tupleof(a, b, c, d), out value);
         }
 
         public TValue this[TKey1 a, TKey2 b, TKey3 c, TKey4 d]
         {
-            get { return this[Tuple.Create(a, b, c, d)]; }
-            set { this[Tuple.Create(a, b, c, d)] = value; }
+            get { return this[tupleof(a, b, c, d)]; }
+            set { this[tupleof(a, b, c, d)] = value; }
         }
 
         public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b, TKey3 c, TKey4 d)
         {
             TValue result;
-            return TryGetValue(Tuple.Create(a, b, c, d), out result)
-                ? Maybe.Some(result)
-                : Maybe<TValue>.None;
+            return TryGetValue(tupleof(a, b, c, d), out result) ? some(result) : none<TValue>();
         }
     }
 }

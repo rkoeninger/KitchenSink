@@ -59,15 +59,8 @@ namespace KitchenSink.Collections
     {
         internal static ISequence<A> It = new EmptySequence<A>();
 
-        public Maybe<A> Current
-        {
-            get { return Maybe<A>.None; }
-        }
-
-        public ISequence<A> Next
-        {
-            get { return this; }
-        }
+        public Maybe<A> Current => Maybe<A>.None;
+        public ISequence<A> Next => this;
 
         public IEnumerator<A> GetEnumerator()
         {
@@ -96,15 +89,8 @@ namespace KitchenSink.Collections
 
         private readonly Lazy<SequencePair<A>> LazyPair;
 
-        public Maybe<A> Current
-        {
-            get { return LazyPair.Value.Current; }
-        }
-
-        public ISequence<A> Next
-        {
-            get { return LazyPair.Value.Next; }
-        }
+        public Maybe<A> Current => LazyPair.Value.Current;
+        public ISequence<A> Next => LazyPair.Value.Next;
 
         public IEnumerator<A> GetEnumerator()
         {
@@ -136,15 +122,8 @@ namespace KitchenSink.Collections
         private readonly int Index;
         private readonly Lazy<ISequence<A>> LazyNext;
 
-        public Maybe<A> Current
-        {
-            get { return List[Index]; }
-        }
-
-        public ISequence<A> Next
-        {
-            get { return LazyNext.Value; }
-        }
+        public Maybe<A> Current => List[Index];
+        public ISequence<A> Next => LazyNext.Value;
 
         public IEnumerator<A> GetEnumerator()
         {

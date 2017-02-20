@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using KitchenSink.Collections;
+using static KitchenSink.Collections.ConstructionOperators;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -12,7 +12,7 @@ namespace KitchenSink.Tests
         [Test]
         public void StreamSerialization()
         {
-            var people = Seq.Of(
+            var people = seqof(
                 new Person
                 {
                     FirstName = "Rusty",

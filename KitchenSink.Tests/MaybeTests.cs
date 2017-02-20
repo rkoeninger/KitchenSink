@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using KitchenSink.Testing;
+using static KitchenSink.Collections.ConstructionOperators;
+using static KitchenSink.Z;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -11,20 +13,20 @@ namespace KitchenSink.Tests
         [Test]
         public void AllDefined()
         {
-            var a = Maybe.Some(0);
-            var b = Maybe.Some(1);
-            var c = Maybe.Some(2);
-            Assert.AreEqual(Maybe.Some(3), Maybe.All(a, b, c, (x, y, z) => x + y + z));
-            Assert.AreEqual(Maybe<int>.None, Maybe.All(a, b, Maybe<int>.None, (x, y, z) => x + y + z));
+            var a = some(0);
+            var b = some(1);
+            var c = some(2);
+            Assert.AreEqual(some(3), Maybe.All(a, b, c, (x, y, z) => x + y + z));
+            Assert.AreEqual(none<int>(), Maybe.All(a, b, none<int>(), (x, y, z) => x + y + z));
         }
 
         [Test]
         public void MaybeWrappers()
         {
             const string s = "";
-            Expect.None(Maybe.Of((string) null));
-            Expect.Some(Maybe.Of(s));
-            Expect.None(Maybe<string>.None);
+            Expect.None(maybeof((string) null));
+            Expect.Some(maybeof(s));
+            Expect.None(none<string>());
         }
 
         [Test]
@@ -41,45 +43,45 @@ namespace KitchenSink.Tests
         [Test]
         public void MaybeJoining()
         {
-            Expect.Some(3, Maybe.Of(1).Join(Maybe.Of(2), Z.Add));
-            Expect.None(Maybe<int>.None.Join(Maybe.Of(2), Z.Add));
-            Expect.None(Maybe.Of(1).Join(Maybe<int>.None, Z.Add));
-            Expect.None(Maybe<int>.None.Join(Maybe<int>.None, Z.Add));
+            Expect.Some(3, maybeof(1).Join(maybeof(2), Add));
+            Expect.None(none<int>().Join(maybeof(2), Add));
+            Expect.None(maybeof(1).Join(none<int>(), Add));
+            Expect.None(none<int>().Join(none<int>(), Add));
         }
 
         [Test]
         public void MaybeCasting()
         {
-            Assert.IsTrue(Maybe.Of("").Cast<string>().HasValue); // same-type
-            Assert.IsTrue(Maybe.Of("").Cast<object>().HasValue); // up-casting
-            Assert.IsFalse(Maybe.Of(new object()).Cast<string>().HasValue); // down-casting
-            Assert.IsFalse(Maybe.Of("").Cast<int>().HasValue); // casting to unrelated type
+            Assert.IsTrue(maybeof("").Cast<string>().HasValue); // same-type
+            Assert.IsTrue(maybeof("").Cast<object>().HasValue); // up-casting
+            Assert.IsFalse(maybeof(new object()).Cast<string>().HasValue); // down-casting
+            Assert.IsFalse(maybeof("").Cast<int>().HasValue); // casting to unrelated type
         }
 
         [Test]
         public void MaybeEnumerableExtensions()
         {
-            Expect.Some(0, new[] { 0 }.FirstMaybe());
-            Expect.None(new int[0].FirstMaybe());
-            Expect.Some(0, new[] { 0 }.LastMaybe());
-            Expect.None(new int[0].LastMaybe());
-            Expect.Some(0, new[] { 0 }.SingleMaybe());
-            Expect.None(new int[0].SingleMaybe());
-            Expect.Some(2, new[] { 0, 1, 2, 3 }.ElementAtMaybe(2));
-            Expect.None(new[] { 0, 1, 2, 3 }.ElementAtMaybe(5));
-            Expect.None(new[] { 0, 1, 2, 3 }.ElementAtMaybe(-1));
-            Assert.AreEqual(5, new [] {"#", "3", "2", "1", "e", "3", "r", "3"}.Select(Maybe.ToInt).Flatten().Count());
-            Expect.None(new[] { "#", "3", "2", "1", "e", "3", "r", "3" }.Select(Maybe.ToInt).Sequence());
-            Expect.Some(new[] { "9", "3", "2", "1", "6", "3", "5", "3" }.Select(Maybe.ToInt).Sequence());
+            Expect.Some(0, seqof(0).FirstMaybe());
+            Expect.None(seqof<int>().FirstMaybe());
+            Expect.Some(0, seqof(0).LastMaybe());
+            Expect.None(seqof<int>().LastMaybe());
+            Expect.Some(0, seqof(0).SingleMaybe());
+            Expect.None(seqof<int>().SingleMaybe());
+            Expect.Some(2, arrayof(0, 1, 2, 3).ElementAtMaybe(2));
+            Expect.None(arrayof(0, 1, 2, 3).ElementAtMaybe(5));
+            Expect.None(arrayof(0, 1, 2, 3).ElementAtMaybe(-1));
+            Assert.AreEqual(5, arrayof("#", "3", "2", "1", "e", "3", "r", "3").Select(Maybe.ToInt).Flatten().Count());
+            Expect.None(arrayof("#", "3", "2", "1", "e", "3", "r", "3").Select(Maybe.ToInt).Sequence());
+            Expect.Some(arrayof("9", "3", "2", "1", "6", "3", "5", "3").Select(Maybe.ToInt).Sequence());
         }
 
         [Test]
         public void MaybeAllTests()
         {
             var result = Maybe.All(
-                    Maybe.Some("hello"),
-                    Maybe<string>.None,
-                    Maybe.Some("world!"),
+                    some("hello"),
+                    none<string>(),
+                    some("world!"),
                     (x, y, z) => x + y + z)
                 .OrElse("something missing");
             Assert.AreEqual("something missing", result);

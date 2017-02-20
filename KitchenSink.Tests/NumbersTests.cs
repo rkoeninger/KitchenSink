@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using KitchenSink.Collections;
+using static KitchenSink.Collections.ConstructionOperators;
 using KitchenSink.Testing;
 using NUnit.Framework;
 
@@ -60,16 +61,16 @@ namespace KitchenSink.Tests
             const int subsetSize = 3;
             var combinations = seq1.Combinations(subsetSize).ToList();
             var expectedCombinations = ReadOnly.Collection(
-                Seq.Of(5,6,7),
-                Seq.Of(5,6,8),
-                Seq.Of(5,6,9),
-                Seq.Of(5,7,8),
-                Seq.Of(5,7,9),
-                Seq.Of(5,8,9),
-                Seq.Of(6,7,8),
-                Seq.Of(6,7,9),
-                Seq.Of(6,8,9),
-                Seq.Of(7,8,9)
+                seqof(5, 6, 7),
+                seqof(5, 6, 8),
+                seqof(5, 6, 9),
+                seqof(5, 7, 8),
+                seqof(5, 7, 9),
+                seqof(5, 8, 9),
+                seqof(6, 7, 8),
+                seqof(6, 7, 9),
+                seqof(6, 8, 9),
+                seqof(7, 8, 9)
             );
 
             Assert.AreEqual(seq1.Count.Combinations(subsetSize), combinations.Count);
@@ -88,26 +89,26 @@ namespace KitchenSink.Tests
             const int subsetSize = 2;
             var permutations = seq1.Permutations(subsetSize).ToList();
             var expectedPermutations = ReadOnly.Collection(
-                Seq.Of(5, 6),
-                Seq.Of(5, 7),
-                Seq.Of(5, 8),
-                Seq.Of(5, 9),
-                Seq.Of(6, 5),
-                Seq.Of(6, 7),
-                Seq.Of(6, 8),
-                Seq.Of(6, 9),
-                Seq.Of(7, 5),
-                Seq.Of(7, 6),
-                Seq.Of(7, 8),
-                Seq.Of(7, 9),
-                Seq.Of(8, 5),
-                Seq.Of(8, 6),
-                Seq.Of(8, 7),
-                Seq.Of(8, 9),
-                Seq.Of(9, 5),
-                Seq.Of(9, 6),
-                Seq.Of(9, 7),
-                Seq.Of(9, 8)
+                seqof(5, 6),
+                seqof(5, 7),
+                seqof(5, 8),
+                seqof(5, 9),
+                seqof(6, 5),
+                seqof(6, 7),
+                seqof(6, 8),
+                seqof(6, 9),
+                seqof(7, 5),
+                seqof(7, 6),
+                seqof(7, 8),
+                seqof(7, 9),
+                seqof(8, 5),
+                seqof(8, 6),
+                seqof(8, 7),
+                seqof(8, 9),
+                seqof(9, 5),
+                seqof(9, 6),
+                seqof(9, 7),
+                seqof(9, 8)
             );
 
             Assert.AreEqual(seq1.Count.Permutations(subsetSize), permutations.Count);

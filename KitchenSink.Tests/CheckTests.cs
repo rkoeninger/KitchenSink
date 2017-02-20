@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using KitchenSink.Collections;
+using static KitchenSink.Collections.ConstructionOperators;
 using KitchenSink.Testing;
 using NUnit.Framework;
 
@@ -23,7 +24,7 @@ namespace KitchenSink.Tests
                 Sample.Ints.Except(int.MinValue),
                 x => Math.Abs(x) >= 0);
 
-            Check.EqualsAndHashCode(Seq.Of(
+            Check.EqualsAndHashCode(seqof(
                 Date.On(2001, 4, 13),
                 Date.On(1947, 1, 20),
                 Date.On(2030, 11, 9),

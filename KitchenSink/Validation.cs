@@ -1,4 +1,5 @@
 ﻿using KitchenSink.Collections;
+using static KitchenSink.Collections.ConstructionOperators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -263,7 +264,7 @@ namespace KitchenSink
 
         public Maybe<A> ToMaybe()
         {
-            return HasErrors ? Maybe<A>.None : Maybe.Of(Value);
+            return HasErrors ? Maybe<A>.None : maybeof(Value);
         }
     }
 }

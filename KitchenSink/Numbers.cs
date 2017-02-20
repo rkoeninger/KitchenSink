@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KitchenSink.Collections;
+using static KitchenSink.Collections.ConstructionOperators;
 
 namespace KitchenSink
 {
@@ -107,7 +108,7 @@ namespace KitchenSink
             {
                 foreach (var item in array)
                 {
-                    yield return Seq.Of(item);
+                    yield return seqof(item);
                 }
 
                 yield break;
@@ -119,7 +120,7 @@ namespace KitchenSink
 
                 foreach (var subseq in Permutations(sublist, r - 1))
                 {
-                    yield return Seq.Of(array[i]).Concat(subseq);
+                    yield return seqof(array[i]).Concat(subseq);
                 }
             }
         }
@@ -183,13 +184,13 @@ namespace KitchenSink
             }
         }
 
-        private static readonly IEnumerable<bool> OneTrue = Seq.Of(true);
-        private static readonly IEnumerable<bool> OneFalse = Seq.Of(false);
-        private static readonly IEnumerable<bool> EmptyBoolSeq = Seq.Of<bool>();
+        private static readonly IEnumerable<bool> OneTrue = seqof(true);
+        private static readonly IEnumerable<bool> OneFalse = seqof(false);
+        private static readonly IEnumerable<bool> EmptyBoolSeq = seqof<bool>();
 
         private static Func<IEnumerable<bool>, IEnumerable<A>> ZipWhere<A>(IEnumerable<A> seq)
         {
-            return selectors => seq.Zip(selectors, Tuple.Create).Where(x => x.Item2).Select(x => x.Item1);
+            return selectors => seq.Zip(selectors, tupleof).Where(x => x.Item2).Select(x => x.Item1);
         }
     }
 }

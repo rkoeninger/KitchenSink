@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using static KitchenSink.Collections.ConstructionOperators;
 
 namespace KitchenSink.Collections
 {
@@ -188,13 +189,8 @@ namespace KitchenSink.Collections
         }
     }
 
-    public static class AList
+    public static class ListExtensions
     {
-        public static List<A> Of<A>(params A[] vals)
-        {
-            return new List<A>(vals);
-        }
-
         public static List<A> Concat<A>(this List<A> list, params A[] vals)
         {
             var result = new List<A>(list);
@@ -226,34 +222,22 @@ namespace KitchenSink.Collections
         }
     }
 
-    public static class AnArray
-    {
-        public static A[] Of<A>(params A[] vals)
-        {
-            return vals;
-        }
-    }
-
     public static class Seq
     {
-        public static IEnumerable<A> Of<A>(params A[] vals)
-        {
-            return vals;
-        }
-
         public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, A seperator)
         {
-            var itr = seq.GetEnumerator();
-
-            if (!itr.MoveNext())
-                yield break;
-
-            yield return itr.Current;
-
-            while (itr.MoveNext())
+            using (var itr = seq.GetEnumerator())
             {
-                yield return seperator;
+                if (!itr.MoveNext())
+                    yield break;
+
                 yield return itr.Current;
+
+                while (itr.MoveNext())
+                {
+                    yield return seperator;
+                    yield return itr.Current;
+                }
             }
         }
 
@@ -272,7 +256,7 @@ namespace KitchenSink.Collections
                 foreach (var item in list)
                     yield return item;
 
-            // ReSharper disable once FunctionNeverReturns
+            // ReSharper disable once IteratorNeverReturns
         }
 
         /// <summary>Infinitely repeats item(s).</summary>
@@ -287,7 +271,7 @@ namespace KitchenSink.Collections
             while (true)
                 yield return f();
 
-            // ReSharper disable once FunctionNeverReturns
+            // ReSharper disable once IteratorNeverReturns
         }
 
         /// <summary>Performs side-effecting Action on each item in sequence.</summary>
@@ -304,6 +288,11 @@ namespace KitchenSink.Collections
         public static IEnumerable<A> Force<A>(this IEnumerable<A> seq)
         {
             return seq.ToArray();
+        }
+
+        public static IEnumerable<Tuple<A, B>> Zip<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys)
+        {
+            return xs.Zip(ys, tupleof);
         }
     }
 
@@ -364,153 +353,6 @@ namespace KitchenSink.Collections
 
             return obj.GetType().GetProperties().Where(x => x.GetIndexParameters().Length == 0).ToDictionary(
                 x => x.Name, x => x.GetValue(obj, null));
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>()
-        {
-            return new Dictionary<A, B>();
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0)
-        {
-            return new Dictionary<A, B> { { key0, val0 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8, A key9, B val9)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 }, { key9, val9 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8, A key9, B val9, A key10, B val10)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 }, { key9, val9 }, { key10, val10 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8, A key9, B val9, A key10, B val10, A key11, B val11)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 }, { key9, val9 }, { key10, val10 }, { key11, val11 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8, A key9, B val9, A key10, B val10, A key11, B val11, A key12, B val12)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 }, { key9, val9 }, { key10, val10 }, { key11, val11 }, { key12, val12 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8, A key9, B val9, A key10, B val10, A key11, B val11, A key12, B val12, A key13, B val13)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 }, { key9, val9 }, { key10, val10 }, { key11, val11 }, { key12, val12 }, { key13, val13 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8, A key9, B val9, A key10, B val10, A key11, B val11, A key12, B val12, A key13, B val13, A key14, B val14)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 }, { key9, val9 }, { key10, val10 }, { key11, val11 }, { key12, val12 }, { key13, val13 }, { key14, val14 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8, A key9, B val9, A key10, B val10, A key11, B val11, A key12, B val12, A key13, B val13, A key14, B val14, A key15, B val15)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 }, { key9, val9 }, { key10, val10 }, { key11, val11 }, { key12, val12 }, { key13, val13 }, { key14, val14 }, { key15, val15 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8, A key9, B val9, A key10, B val10, A key11, B val11, A key12, B val12, A key13, B val13, A key14, B val14, A key15, B val15, A key16, B val16)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 }, { key9, val9 }, { key10, val10 }, { key11, val11 }, { key12, val12 }, { key13, val13 }, { key14, val14 }, { key15, val15 }, { key16, val16 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8, A key9, B val9, A key10, B val10, A key11, B val11, A key12, B val12, A key13, B val13, A key14, B val14, A key15, B val15, A key16, B val16, A key17, B val17)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 }, { key9, val9 }, { key10, val10 }, { key11, val11 }, { key12, val12 }, { key13, val13 }, { key14, val14 }, { key15, val15 }, { key16, val16 }, { key17, val17 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8, A key9, B val9, A key10, B val10, A key11, B val11, A key12, B val12, A key13, B val13, A key14, B val14, A key15, B val15, A key16, B val16, A key17, B val17, A key18, B val18)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 }, { key9, val9 }, { key10, val10 }, { key11, val11 }, { key12, val12 }, { key13, val13 }, { key14, val14 }, { key15, val15 }, { key16, val16 }, { key17, val17 }, { key18, val18 } };
-        }
-
-        /// <summary>Creates a new Dictionary from the provided arguments. Arguments are provided in key-value-key-value order.</summary>
-        /// <remarks>Key and value types can be inferred.</remarks>
-        public static Dictionary<A, B> Of<A, B>(A key0, B val0, A key1, B val1, A key2, B val2, A key3, B val3, A key4, B val4, A key5, B val5, A key6, B val6, A key7, B val7, A key8, B val8, A key9, B val9, A key10, B val10, A key11, B val11, A key12, B val12, A key13, B val13, A key14, B val14, A key15, B val15, A key16, B val16, A key17, B val17, A key18, B val18, A key19, B val19)
-        {
-            return new Dictionary<A, B> { { key0, val0 }, { key1, val1 }, { key2, val2 }, { key3, val3 }, { key4, val4 }, { key5, val5 }, { key6, val6 }, { key7, val7 }, { key8, val8 }, { key9, val9 }, { key10, val10 }, { key11, val11 }, { key12, val12 }, { key13, val13 }, { key14, val14 }, { key15, val15 }, { key16, val16 }, { key17, val17 }, { key18, val18 }, { key19, val19 } };
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KitchenSink.Collections;
+using static KitchenSink.Collections.ConstructionOperators;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -12,7 +13,7 @@ namespace KitchenSink.Tests
         [Test]
         public void ListCreateWithOfMethod()
         {
-            var xs = AList.Of(1, 2, 3, 4, 5);
+            var xs = listof(1, 2, 3, 4, 5);
             var ys = new List<int> { 1, 2, 3, 4, 5 };
             Assert.IsTrue(xs.SequenceEqual(ys));
         }
@@ -20,7 +21,7 @@ namespace KitchenSink.Tests
         [Test]
         public void DictionaryCreateLongArgList()
         {
-            var dict = Dictionary.Of(
+            var dict = dictof(
                 "a", 1,
                 "b", 2,
                 "c", 3,
@@ -53,7 +54,7 @@ namespace KitchenSink.Tests
                 Red = ConsoleColor.Red,
                 ConsoleColor.Green,
                 blue = "blue",
-                Color_Yellow = Tuple.Create(255, 255, 0),
+                Color_Yellow = tupleof(255, 255, 0),
                 Func1 = new Func<int, int>(x => x + 5)
             });
             Assert.AreEqual(5, dict2.Count);
@@ -65,7 +66,7 @@ namespace KitchenSink.Tests
             Assert.AreEqual(ConsoleColor.Red, dict2["Red"]);
             Assert.AreEqual(ConsoleColor.Green, dict2["Green"]);
             Assert.AreEqual("blue", dict2["blue"]);
-            Assert.AreEqual(Tuple.Create(255, 255, 0), dict2["Color_Yellow"]);
+            Assert.AreEqual(tupleof(255, 255, 0), dict2["Color_Yellow"]);
             Assert.IsInstanceOf<Func<int, int>>(dict2["Func1"]);
 
             // Can actually be any object
@@ -82,10 +83,10 @@ namespace KitchenSink.Tests
         [Test]
         public void DictionaryCreateByArgList()
         {
-            var dict = Dictionary.Of(
-                    "red", ConsoleColor.Red,
-                    "blue", ConsoleColor.Blue,
-                    "green", ConsoleColor.Green
+            var dict = dictof(
+                "red", ConsoleColor.Red,
+                "blue", ConsoleColor.Blue,
+                "green", ConsoleColor.Green
             );
             Assert.AreEqual(3, dict.Count);
             Assert.IsTrue(dict.ContainsKey("red"));
@@ -96,15 +97,11 @@ namespace KitchenSink.Tests
             Assert.AreEqual(ConsoleColor.Blue, dict["blue"]);
         }
 
-        class Color
+        public class Color
         {
-            // ReSharper disable MemberCanBePrivate.Local
-            // ReSharper disable UnusedAutoPropertyAccessor.Local
             public int R { get; set; }
             public int G { get; set; }
             public int B { get; set; }
-            // ReSharper restore UnusedAutoPropertyAccessor.Local
-            // ReSharper restore MemberCanBePrivate.Local
             public Color(int r, int g, int b) { R = r; G = g; B = b; }
         }
 
@@ -119,7 +116,7 @@ namespace KitchenSink.Tests
             var y = 0;
             var z = 0;
 
-            var e = Seq.Of<Func<Unit>>(
+            var e = seqof<Func<Unit>>(
                 () => { x = 1; return Unit.It; },
                 () => { y = 2; return Unit.It; },
                 () => { z = 3; return Unit.It; }).Select(f => f.Invoke());
@@ -141,13 +138,13 @@ namespace KitchenSink.Tests
         [Test]
         public void EnumerablePartition()
         {
-            var p = Seq.Of(1, 2, 3, 4, 5, 6, 7, 8);
+            var p = seqof(1, 2, 3, 4, 5, 6, 7, 8);
             var actual = p.Partition(3);
-            var expected = Seq.Of(
-                Seq.Of(1, 2, 3),
-                Seq.Of(4, 5, 6),
-                Seq.Of(7, 8));
-            Assert.IsTrue(actual.Zip(expected, Tuple.Create).All(t => t.Item1.SequenceEqual(t.Item2)));
+            var expected = seqof(
+                seqof(1, 2, 3),
+                seqof(4, 5, 6),
+                seqof(7, 8));
+            Assert.IsTrue(actual.Zip(expected, tupleof).All(t => t.Item1.SequenceEqual(t.Item2)));
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
-using KitchenSink.Collections;
+using static KitchenSink.Collections.ConstructionOperators;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -14,7 +14,7 @@ namespace KitchenSink.Tests
             const string s = "comma, separated, string with multiple, comma, separated, parts";
             var splits = s.SplitSeq(",").ToList();
             Assert.AreEqual(6, splits.Count);
-            Assert.IsTrue(splits.TrimAll().SequenceEqual(Seq.Of("comma", "separated", "string with multiple", "comma", "separated", "parts")));
+            Assert.IsTrue(splits.TrimAll().SequenceEqual(seqof("comma", "separated", "string with multiple", "comma", "separated", "parts")));
         }
 
         [Test]
@@ -24,7 +24,7 @@ namespace KitchenSink.Tests
             const string s = "some text that (123) 555-1234 contains some U.S. phone 432.6545 numbers of varying 654 234 1233 formats";
             var splits = s.SplitSeq(usPhoneRegex).ToList();
             Assert.AreEqual(3, splits.Count);
-            Assert.IsTrue(splits.SequenceEqual(Seq.Of("(123) 555-1234", "432.6545", "654 234 1233")));
+            Assert.IsTrue(splits.SequenceEqual(seqof("(123) 555-1234", "432.6545", "654 234 1233")));
         }
 
         [Test]

@@ -87,7 +87,7 @@ namespace KitchenSink
 
         public static string ToCurrencyString(this decimal x)
         {
-            return string.Format("{0:c}", x);
+            return $"{x:c}";
         }
 
         public static IEnumerable<string> TrimAll(this IEnumerable<string> seq)

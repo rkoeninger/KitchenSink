@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using KitchenSink.Collections;
+using static KitchenSink.Collections.ConstructionOperators;
 
 namespace KitchenSink
 {
@@ -219,7 +220,7 @@ namespace KitchenSink
 
         public static IEnumerable<A> OrElseEmpty<A>(this Maybe<IEnumerable<A>> maybe)
         {
-            return maybe.OrElse(Seq.Of<A>());
+            return maybe.OrElse(seqof<A>());
         }
 
         public static Maybe<bool> OrFalse(this Maybe<bool> maybe)
@@ -239,7 +240,7 @@ namespace KitchenSink
 
         public static Maybe<IEnumerable<A>> OrEmpty<A>(this Maybe<IEnumerable<A>> maybe)
         {
-            return maybe.Or(Of(Seq.Of<A>()));
+            return maybe.Or(Of(seqof<A>()));
         }
 
         public static int Compare<A>(Maybe<A> x, Maybe<A> y) where A : IComparable<A>
@@ -339,7 +340,7 @@ namespace KitchenSink
         internal A Value { get; set; }
         public bool HasValue { get; }
 
-        public Type InnerType { get { return typeof(A); } }
+        public Type InnerType => typeof(A);
 
         public Maybe<B> Select<B>(Func<A, B> f)
         {
@@ -500,12 +501,12 @@ namespace KitchenSink
 
         public List<A> ToList()
         {
-            return HasValue ? AList.Of(Value) : new List<A>();
+            return HasValue ? listof(Value) : new List<A>();
         }
 
         public A[] ToArray()
         {
-            return HasValue ? AnArray.Of(Value) : new A[0];
+            return HasValue ? arrayof(Value) : new A[0];
         }
 
         public override string ToString()

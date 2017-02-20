@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using KitchenSink.Collections;
+using static KitchenSink.Collections.ConstructionOperators;
 
 namespace KitchenSink
 {
@@ -697,7 +698,7 @@ namespace KitchenSink
             var paramArray = paramz.ToArray();
             var argArray = args.ToArray();
 
-            return paramArray.Zip(argArray, Tuple.Create)
+            return paramArray.Zip(argArray)
                 .All(x => x.Item2.Type.IsAssignableTo(x.Item1.ParameterType));
         }
 
@@ -715,7 +716,7 @@ namespace KitchenSink
             return TypeKeywords.GetMaybe(str).OrElse(null);
         }
 
-        public static readonly IReadOnlyDictionary<string, Type> TypeKeywords = Dictionary.Of(
+        public static readonly IReadOnlyDictionary<string, Type> TypeKeywords = dictof(
             "bool",    typeof(bool),
             "char",    typeof(char),
             "byte",    typeof(byte),
@@ -793,7 +794,7 @@ namespace KitchenSink
 
             Expression<Func<IEnumerable<object>, bool>> f = xs => AllEqual(xs);
             var exprs = tokensArray.Select(x => x.Parse(env));
-            return Expression.Invoke(f, Seq.Of(BuildListExpression(exprs)));
+            return Expression.Invoke(f, seqof(BuildListExpression(exprs)));
         }
 
         private static Expression InequalityOp(SymbolEnvironment env, IEnumerable<Token> tokens)
@@ -805,7 +806,7 @@ namespace KitchenSink
 
             Expression<Func<IEnumerable<object>, bool>> f = xs => AllInequal(xs);
             var exprs = tokensArray.Select(x => x.Parse(env));
-            return Expression.Invoke(f, Seq.Of(BuildListExpression(exprs)));
+            return Expression.Invoke(f, seqof(BuildListExpression(exprs)));
         }
 
         private static Expression CompareOp(SymbolEnvironment env, IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)
