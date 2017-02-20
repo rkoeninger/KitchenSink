@@ -24,75 +24,97 @@ namespace KitchenSink
         public delegate Type Source(Type contractType);
 
         /// <summary>
-        /// Returns an object implementing the given type.
+        /// Returns an object implementing an expected type.
         /// </summary>
-        public delegate object Factory(Type contractType);
+        public delegate object Factory();
+
+        public delegate object Backup(Type contractType);
 
         private readonly Dictionary<Type, Factory> factories = new Dictionary<Type, Factory>();
         private readonly List<Source> sources = new List<Source>();
+        private readonly List<Backup> backups = new List<Backup>();
 
         /// <summary>
         /// Specifies an implementing object for a given contract type.
         /// </summary>
-        public void Add<Contract>(Contract impl)
+        public Needs Add<Contract>(Contract impl)
         {
-            Add(typeof(Contract), impl);
+            return Add(typeof(Contract), impl);
         }
 
         /// <summary>
         /// Specifies an implementing object for a given contract type.
         /// </summary>
-        public void Add(Type contractType, object impl)
+        public Needs Add(Type contractType, object impl)
         {
-            Add(contractType, _ => impl);
+            return Add(contractType, () => impl);
         }
 
         /// <summary>
         /// Provides a factory for building an object implementing a given contract type.
         /// </summary>
-        public void Add(Type contractType, Factory factory)
+        public Needs Add(Type contractType, Factory factory)
         {
             factories[contractType] = factory;
+            return this;
         }
 
         /// <summary>
         /// Registers the nested types of the given parent type as a source of implementations.
         /// </summary>
-        public void Refer(Type parent)
+        public Needs Refer(Type parent)
         {
-            Refer(ParentSouce(parent));
+            return Refer(contractType => FindImplType(contractType, parent.GetNestedTypes()));
         }
 
         /// <summary>
         /// Registers the exported types in the given assembly as a source of implementations.
         /// </summary>
-        /// <param name="assembly"></param>
-        public void Refer(Assembly assembly)
+        public Needs Refer(Assembly assembly)
         {
-            Refer(AssemblySource(assembly));
+            return Refer(contractType => FindImplType(contractType, assembly.GetExportedTypes()));
         }
 
         /// <summary>
         /// Registers the given delegate as an arbitrary source of implementations.
         /// </summary>
-        public void Refer(Source source)
+        public Needs Refer(Source source)
         {
             sources.Add(source);
+            return this;
         }
 
-        private static Source ParentSouce(Type parent)
-        {
-            return contractType => FindImpl(contractType, parent.GetNestedTypes());
-        }
-
-        private static Source AssemblySource(Assembly assembly)
-        {
-            return contractType => FindImpl(contractType, assembly.GetExportedTypes());
-        }
-
-        private static Type FindImpl(Type contractType, IEnumerable<Type> types)
+        private static Type FindImplType(Type contractType, IEnumerable<Type> types)
         {
             return types.FirstOrDefault(t => t.GetInterfaces().Any(x => x == contractType));
+        }
+
+        /// <summary>
+        /// Registers the given Needs as a backup to this Needs.
+        /// </summary>
+        public Needs Defer(Needs needs)
+        {
+            return Defer(contractType =>
+            {
+                try
+                {
+                    return needs.Get(contractType);
+                }
+                catch (NotImplementedException)
+                {
+                    return null;
+                }
+            });
+        }
+
+        /// <summary>
+        /// Registers the given delegate as an arbitrary backup to this Needs.
+        /// Backup should not throw and should return null to indicate resolution failure.
+        /// </summary>
+        public Needs Defer(Backup backup)
+        {
+            backups.Add(backup);
+            return this;
         }
 
         /// <summary>
@@ -119,14 +141,27 @@ namespace KitchenSink
 
             if (factories.TryGetValue(contractType, out factory))
             {
-                return factory(contractType);
+                return factory();
             }
 
-            var implType = sources.Select(s => s(contractType)).FirstOrDefault(x => x != null);
-
-            if (implType != null)
+            foreach (var source in sources)
             {
-                return Persist(contractType, implType, multiUse);
+                var implType = source(contractType);
+
+                if (implType != null)
+                {
+                    return Persist(contractType, implType, multiUse);
+                }
+            }
+
+            foreach (var backup in backups)
+            {
+                var impl = backup(contractType);
+
+                if (impl != null)
+                {
+                    return impl;
+                }
             }
 
             throw new NotImplementedException($"No implementation found for {contractType}");
@@ -136,13 +171,13 @@ namespace KitchenSink
         {
             if (IsSingleUse(implType))
             {
-                Factory factory = _ => New(implType, multiUse);
+                Factory factory = () => New(implType, multiUse);
                 factories[contractType] = factory;
-                return factory(contractType);
+                return factory();
             }
 
             var impl = New(implType, multiUse);
-            factories[contractType] = _ => impl;
+            factories[contractType] = () => impl;
             return impl;
         }
 
