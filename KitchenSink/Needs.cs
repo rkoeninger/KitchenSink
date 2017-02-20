@@ -6,8 +6,10 @@ using System.Reflection;
 namespace KitchenSink
 {
     /// <summary>
-    /// Indicates that a class/component is not thread safe
+    /// Indicates that a class/component is not thread safe, or has transient state
     /// and is only good for one time use.
+    /// Multi-use classes cannot depend on single-use classes.
+    /// Classes are multi-use by default.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class SingleUseAttribute : Attribute
@@ -16,31 +18,63 @@ namespace KitchenSink
 
     public class Needs
     {
-        public delegate Type Source(Type type);
+        /// <summary>
+        /// Returns a type implementing the given type, or null.
+        /// </summary>
+        public delegate Type Source(Type contractType);
 
-        private readonly Dictionary<Type, Func<object>> resolvers = new Dictionary<Type, Func<object>>();
+        /// <summary>
+        /// Returns an object implementing the given type.
+        /// </summary>
+        public delegate object Factory(Type contractType);
+
+        private readonly Dictionary<Type, Factory> factories = new Dictionary<Type, Factory>();
         private readonly List<Source> sources = new List<Source>();
 
-        public void Add<T>(T instance)
+        /// <summary>
+        /// Specifies an implementing object for a given contract type.
+        /// </summary>
+        public void Add<Contract>(Contract impl)
         {
-            Add(typeof(T), instance);
+            Add(typeof(Contract), impl);
         }
 
-        public void Add(Type type, object instance)
+        /// <summary>
+        /// Specifies an implementing object for a given contract type.
+        /// </summary>
+        public void Add(Type contractType, object impl)
         {
-            resolvers[type] = () => instance;
+            Add(contractType, _ => impl);
         }
 
+        /// <summary>
+        /// Provides a factory for building an object implementing a given contract type.
+        /// </summary>
+        public void Add(Type contractType, Factory factory)
+        {
+            factories[contractType] = factory;
+        }
+
+        /// <summary>
+        /// Registers the nested types of the given parent type as a source of implementations.
+        /// </summary>
         public void Refer(Type parent)
         {
             Refer(ParentSouce(parent));
         }
 
+        /// <summary>
+        /// Registers the exported types in the given assembly as a source of implementations.
+        /// </summary>
+        /// <param name="assembly"></param>
         public void Refer(Assembly assembly)
         {
             Refer(AssemblySource(assembly));
         }
 
+        /// <summary>
+        /// Registers the given delegate as an arbitrary source of implementations.
+        /// </summary>
         public void Refer(Source source)
         {
             sources.Add(source);
@@ -48,69 +82,77 @@ namespace KitchenSink
 
         private static Source ParentSouce(Type parent)
         {
-            return type => FindImpl(type, parent.GetNestedTypes());
+            return contractType => FindImpl(contractType, parent.GetNestedTypes());
         }
 
         private static Source AssemblySource(Assembly assembly)
         {
-            return type => FindImpl(type, assembly.GetExportedTypes());
+            return contractType => FindImpl(contractType, assembly.GetExportedTypes());
         }
 
-        private static Type FindImpl(Type type, IEnumerable<Type> types)
+        private static Type FindImpl(Type contractType, IEnumerable<Type> types)
         {
-            return types.FirstOrDefault(t => t.GetInterfaces().Any(x => x == type));
+            return types.FirstOrDefault(t => t.GetInterfaces().Any(x => x == contractType));
         }
 
-        public T Get<T>()
+        /// <summary>
+        /// Resolves an implementing object for the given contract type.
+        /// </summary>
+        /// <exception cref="NotImplementedException">If no implementation found.</exception>
+        public Contract Get<Contract>()
         {
-            return (T) Get(typeof(T));
+            return (Contract) Get(typeof(Contract));
         }
 
-        public object Get(Type type)
+        /// <summary>
+        /// Resolves an implementing object for the given contract type.
+        /// </summary>
+        /// <exception cref="NotImplementedException">If no implementation found.</exception>
+        public object Get(Type contractType)
         {
-            return GetInternal(type, !IsSingleUse(type));
+            return GetInternal(contractType, !IsSingleUse(contractType));
         }
 
-        private object GetInternal(Type type, bool multiUse)
+        private object GetInternal(Type contractType, bool multiUse)
         {
-            Func<object> resolver;
+            Factory factory;
 
-            if (resolvers.TryGetValue(type, out resolver))
+            if (factories.TryGetValue(contractType, out factory))
             {
-                return resolver();
+                return factory(contractType);
             }
 
-            var implType = sources.Select(s => s(type)).FirstOrDefault();
+            var implType = sources.Select(s => s(contractType)).FirstOrDefault(x => x != null);
 
             if (implType != null)
             {
-                return Persist(type, implType, multiUse);
+                return Persist(contractType, implType, multiUse);
             }
 
-            throw new Exception($"No implementation found for {type}");
+            throw new NotImplementedException($"No implementation found for {contractType}");
         }
 
-        private object Persist(Type type, Type implType, bool multiUse)
+        private object Persist(Type contractType, Type implType, bool multiUse)
         {
             if (IsSingleUse(implType))
             {
-                Func<object> resolver = () => New(implType, multiUse);
-                resolvers[type] = resolver;
-                return resolver();
+                Factory factory = _ => New(implType, multiUse);
+                factories[contractType] = factory;
+                return factory(contractType);
             }
 
-            var obj = New(implType, multiUse);
-            resolvers[type] = () => obj;
-            return obj;
+            var impl = New(implType, multiUse);
+            factories[contractType] = _ => impl;
+            return impl;
         }
 
-        private object New(Type type, bool multiUse)
+        private object New(Type implType, bool multiUse)
         {
-            var ctors = type.GetConstructors();
+            var ctors = implType.GetConstructors();
 
             if (ctors.Length != 1)
             {
-                throw new Exception($"Type {type} must have exactly 1 constructor, but has {ctors.Length}");
+                throw new Exception($"Type {implType} must have exactly 1 constructor, but has {ctors.Length}");
             }
 
             var ctor = ctors[0];
@@ -124,7 +166,7 @@ namespace KitchenSink
                 {
                     if (IsSingleUse(argType))
                     {
-                        throw new Exception($"Non-SingleUse object ({type}) cannot depend on SingleUse object ({argType})");
+                        throw new Exception($"MultiUse class ({implType}) cannot depend on SingleUse class ({argType})");
                     }
                 }
             }
@@ -132,9 +174,9 @@ namespace KitchenSink
             return ctor.Invoke(args);
         }
 
-        private static bool IsSingleUse(MemberInfo type)
+        private static bool IsSingleUse(MemberInfo implType)
         {
-            return type.GetCustomAttribute(typeof(SingleUseAttribute)) != null;
+            return implType.GetCustomAttribute(typeof(SingleUseAttribute)) != null;
         }
     }
 }
