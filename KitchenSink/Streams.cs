@@ -8,6 +8,26 @@ namespace KitchenSink
 {
     public static class Streams
     {
+        public static IEnumerable<byte> AsEnumerable(this Stream stream)
+        {
+            int b;
+
+            while ((b = stream.ReadByte()) >= 0)
+            {
+                yield return (byte) b;
+            }
+        }
+
+        public static IEnumerable<string> AsEnumerable(this TextReader reader)
+        {
+            string line;
+
+            while ((line = reader.ReadLine()) != null)
+            {
+                yield return line;
+            }
+        }
+
         public static Stream ToStream(this string str, Encoding encoding = null)
         {
             encoding = encoding ?? Encoding.UTF8;
@@ -54,20 +74,9 @@ namespace KitchenSink
                 return bytesRead;
             }
 
-            public override bool CanRead
-            {
-                get { return true; }
-            }
-
-            public override bool CanSeek
-            {
-                get { return false; }
-            }
-
-            public override bool CanWrite
-            {
-                get { return false; }
-            }
+            public override bool CanRead => true;
+            public override bool CanSeek => false;
+            public override bool CanWrite => false;
 
             public override long Length
             {
