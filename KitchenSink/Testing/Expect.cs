@@ -1,9 +1,4 @@
-﻿using Microsoft.CSharp;
-using System;
-using System.Linq;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using KitchenSink.Collections;
+﻿using System;
 
 namespace KitchenSink.Testing
 {
@@ -52,49 +47,6 @@ namespace KitchenSink.Testing
         public static ExpectationFailedException FailedAssert(Action f)
         {
             return Error<ExpectationFailedException>(f);
-        }
-
-        private static CompilerResults DoCompile(string source, params string[] assemblies)
-        {
-            var options = new Dictionary<string, string> { { "CompilerVersion", "v4.0" } };
-            var provider = new CSharpCodeProvider(options);
-            var parameters = new CompilerParameters(assemblies);
-            parameters.ReferencedAssemblies.Add("mscorlib.dll");
-            parameters.ReferencedAssemblies.Add("System.dll");
-            parameters.ReferencedAssemblies.Add("System.Core.dll");
-            parameters.GenerateInMemory = true;
-            return provider.CompileAssemblyFromSource(parameters, source);
-        }
-
-        /// <summary>
-        /// Throws exception if code doesn't fail to compile due to given errors.
-        /// </summary>
-        public static void CompileFail(string source, string[] assemblies, string[] errorCodes)
-        {
-            var results = DoCompile(source, assemblies);
-
-            if (results.Errors.HasErrors)
-            {
-                foreach (var e in results.Errors)
-                {
-                    Console.WriteLine(e);
-                    Console.WriteLine();
-                }
-
-                var errorNumbers = results.Errors.GetEnumerator()
-                    .AsEnumerable<CompilerError>()
-                    .Select(x => x.ErrorNumber)
-                    .OrderBy(x => x);
-
-                if (! errorNumbers.SequenceEqual(errorCodes.OrderBy(x => x)))
-                {
-                    throw new ExpectationFailedException("Unexpected compiler errors present / Expected compiler errors present - check standard out");
-                }
-            }
-            else
-            {
-                throw new ExpectationFailedException("Expected compilation failure");
-            }
         }
 
         /// <summary>Asserts that the actual maybe has a value and the value is equal to the expected value.</summary>

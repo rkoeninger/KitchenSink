@@ -44,7 +44,6 @@
     <Compile Include="Testing\All.cs" />
     <Compile Include="Booleans.cs" />
     <Compile Include="Testing\Check.cs" />
-    <Compile Include="CodeLoader.cs" />
     <Compile Include="Collections\CollectionHelpers.cs" />
     <Compile Include="Comparables.cs" />
     <Compile Include="Dates.cs" />

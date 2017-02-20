@@ -1,5 +1,4 @@
-﻿using KitchenSink.Testing;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
@@ -8,30 +7,6 @@ namespace KitchenSink.Tests
     {
         public sealed class CustomerId : NewType<int> { public CustomerId(int x) : base(x) {} }
         public sealed class ProductCode : NewType<string> { public ProductCode(string x) : base(x) {} }
-
-        [Test]
-        public void NewTypeTypeChecking()
-        {
-            Expect.CompileFail(
-                @"using KitchenSink;
-                public sealed class CustomerId : NewType<int> { public CustomerId(int x) : base(x) {} }
-                public static class TestClass
-                {
-                    static void SomethingWithCustomer(CustomerId x)
-                    {
-                    }
-                    static void Test()
-                    {
-                        SomethingWithCustomer(123);
-                    }
-                }",
-                new [] {Common.KsDll},
-                new []
-                {
-                    "CS1502", // SomethingWithCustomer has some invalid arguments
-                    "CS1503"  // Cannot convert from int to CustomerId
-                });
-        }
 
         [Test]
         public void NewTypeEquality()

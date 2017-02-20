@@ -58,7 +58,6 @@
     <Compile Include="CollectionTests.cs" />
     <Compile Include="LensTests.cs" />
     <Compile Include="StringTests.cs" />
-    <Compile Include="ConfigTests.cs" />
     <Compile Include="DependencyInjection.cs" />
     <Compile Include="NumbersTests.cs" />
     <Compile Include="CheckTests.cs" />
