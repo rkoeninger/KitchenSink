@@ -1,330 +1,195 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace KitchenSink
 {
-    public class Dictionary<A, B, V> : IDictionary<Tuple<A, B>, V>, IReadOnlyDictionary<Tuple<A, B>, V>
+    /// <summary>
+    /// A 2-key Dictionary.
+    /// </summary>
+    public class Dictionary<TKey1, TKey2, TValue> : Dictionary<Tuple<TKey1, TKey2>, TValue>
     {
-        private readonly IDictionary<Tuple<A, B>, V> inner = new Dictionary<Tuple<A, B>, V>();
+        public Dictionary() { }
 
-        public IEnumerator<KeyValuePair<Tuple<A, B>, V>> GetEnumerator()
+        public Dictionary(IEqualityComparer<Tuple<TKey1, TKey2>> comparer) : base(comparer) { }
+
+        public bool ContainsKeys(TKey1 a, TKey2 b)
         {
-            return inner.GetEnumerator();
+            return ContainsKey(Tuple.Create(a, b));
         }
 
-        public void Clear()
+        public bool ContainsKey1(TKey1 a)
         {
-            inner.Clear();
+            return Keys.Any(x => Equals(x.Item1, a));
         }
 
-        public void CopyTo(KeyValuePair<Tuple<A, B>, V>[] array, int arrayIndex)
+        public bool ContainsKey2(TKey2 b)
         {
-            inner.CopyTo(array, arrayIndex);
+            return Keys.Any(x => Equals(x.Item2, b));
         }
 
-        public int Count
+        public ICollection<TKey1> Keys1 => Keys.Select(x => x.Item1).Distinct().ToList();
+        public ICollection<TKey2> Keys2 => Keys.Select(x => x.Item2).Distinct().ToList();
+
+        public void Add(TKey1 a, TKey2 b, TValue value)
         {
-            get { return inner.Count; }
+            Add(Tuple.Create(a, b), value);
         }
 
-        public bool IsReadOnly
+        public bool Remove(TKey1 a, TKey2 b)
         {
-            get { return inner.IsReadOnly; }
+            return Remove(Tuple.Create(a, b));
         }
 
-        public bool Contains(KeyValuePair<Tuple<A, B>, V> item)
+        public bool TryGetValue(TKey1 a, TKey2 b, out TValue value)
         {
-            return inner.Contains(item);
+            return TryGetValue(Tuple.Create(a, b), out value);
         }
 
-        public bool ContainsKey(Tuple<A, B> key)
+        public TValue this[TKey1 a, TKey2 b]
         {
-            return inner.ContainsKey(key);
+            get { return this[Tuple.Create(a, b)]; }
+            set { this[Tuple.Create(a, b)] = value; }
         }
 
-        public bool ContainsKeys(A k1, B k2)
+        public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b)
         {
-            return ContainsKey(Tuple.Create(k1, k2));
-        }
-
-        public bool ContainsKey1(A k1)
-        {
-            // TODO this could be better implemented
-            return Keys1.Contains(k1);
-        }
-
-        public bool ContainsKey2(B k2)
-        {
-            // TODO this could be better implemented
-            return Keys2.Contains(k2);
-        }
-
-        public void Add(KeyValuePair<Tuple<A, B>, V> item)
-        {
-            inner.Add(item);
-        }
-
-        public void Add(Tuple<A, B> key, V value)
-        {
-            inner.Add(key, value);
-        }
-
-        public void Add(A k1, B k2, V value)
-        {
-            Add(Tuple.Create(k1, k2), value);
-        }
-
-        public bool Remove(KeyValuePair<Tuple<A, B>, V> item)
-        {
-            return inner.Remove(item);
-        }
-
-        public bool Remove(Tuple<A, B> key)
-        {
-            return inner.Remove(key);
-        }
-
-        public bool Remove(A k1, B k2)
-        {
-            return Remove(Tuple.Create(k1, k2));
-        }
-
-        public bool TryGetValue(Tuple<A, B> key, out V value)
-        {
-            return inner.TryGetValue(key, out value);
-        }
-
-        public bool TryGetValue(A k1, B k2, out V value)
-        {
-            return inner.TryGetValue(Tuple.Create(k1, k2), out value);
-        }
-
-        public V this[Tuple<A, B> key]
-        {
-            get { return inner[key]; }
-            set { inner[key] = value; }
-        }
-
-        public V this[A k1, B k2]
-        {
-            get { return this[Tuple.Create(k1, k2)]; }
-            set { this[Tuple.Create(k1, k2)] = value; }
-        }
-
-        public Maybe<V> GetMaybe(Tuple<A, B> key)
-        {
-            V result;
-            return TryGetValue(key, out result) ? Maybe.Some(result) : Maybe<V>.None;
-        }
-
-        public Maybe<V> GetMaybe(A k1, B k2)
-        {
-            V result;
-            return TryGetValue(Tuple.Create(k1, k2), out result) ? Maybe.Some(result) : Maybe<V>.None;
-        }
-
-        public ICollection<Tuple<A, B>> Keys
-        {
-            get { return inner.Keys; }
-        }
-
-        public ICollection<A> Keys1
-        {
-            get { return inner.Keys.Select(x => x.Item1).Distinct().ToArray(); }
-        }
-
-        public ICollection<B> Keys2
-        {
-            get { return inner.Keys.Select(x => x.Item2).Distinct().ToArray(); }
-        }
-
-        public ICollection<V> Values
-        {
-            get { return inner.Values; }
-        }
-
-        IEnumerable<Tuple<A, B>> IReadOnlyDictionary<Tuple<A, B>, V>.Keys
-        {
-            get { return Keys; }
-        }
-
-        IEnumerable<V> IReadOnlyDictionary<Tuple<A, B>, V>.Values
-        {
-            get { return Values; }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            TValue result;
+            return TryGetValue(Tuple.Create(a, b), out result)
+                ? Maybe.Some(result)
+                : Maybe<TValue>.None;
         }
     }
 
-    public class Dictionary<A, B, C, V> : IDictionary<Tuple<A, B, C>, V>, IReadOnlyDictionary<Tuple<A, B, C>, V>
+    /// <summary>
+    /// A 3-key dictionary.
+    /// </summary>
+    public class Dictionary<TKey1, TKey2, TKey3, TValue> : Dictionary<Tuple<TKey1, TKey2, TKey3>, TValue>
     {
-        private readonly IDictionary<Tuple<A, B, C>, V> inner = new Dictionary<Tuple<A, B, C>, V>();
+        public Dictionary() { }
 
-        public IEnumerator<KeyValuePair<Tuple<A, B, C>, V>> GetEnumerator()
+        public Dictionary(IEqualityComparer<Tuple<TKey1, TKey2, TKey3>> comparer) : base(comparer) { }
+
+        public bool ContainsKeys(TKey1 a, TKey2 b, TKey3 c)
         {
-            return inner.GetEnumerator();
+            return ContainsKey(Tuple.Create(a, b, c));
         }
 
-        public void Clear()
+        public bool ContainsKey1(TKey1 a)
         {
-            inner.Clear();
+            return Keys.Any(x => Equals(x.Item1, a));
         }
 
-        public void CopyTo(KeyValuePair<Tuple<A, B, C>, V>[] array, int arrayIndex)
+        public bool ContainsKey2(TKey2 b)
         {
-            inner.CopyTo(array, arrayIndex);
+            return Keys.Any(x => Equals(x.Item2, b));
         }
 
-        public int Count
+        public bool ContainsKey3(TKey3 c)
         {
-            get { return inner.Count; }
+            return Keys.Any(x => Equals(x.Item3, c));
         }
 
-        public bool IsReadOnly
+        public ICollection<TKey1> Keys1 => Keys.Select(x => x.Item1).Distinct().ToList();
+        public ICollection<TKey2> Keys2 => Keys.Select(x => x.Item2).Distinct().ToList();
+        public ICollection<TKey3> Keys3 => Keys.Select(x => x.Item3).Distinct().ToList();
+
+        public void Add(TKey1 a, TKey2 b, TKey3 c, TValue value)
         {
-            get { return inner.IsReadOnly; }
+            Add(Tuple.Create(a, b, c), value);
         }
 
-        public bool Contains(KeyValuePair<Tuple<A, B, C>, V> item)
+        public bool Remove(TKey1 a, TKey2 b, TKey3 c)
         {
-            return inner.Contains(item);
+            return Remove(Tuple.Create(a, b, c));
         }
 
-        public bool ContainsKey(Tuple<A, B, C> key)
+        public bool TryGetValue(TKey1 a, TKey2 b, TKey3 c, out TValue value)
         {
-            return inner.ContainsKey(key);
+            return TryGetValue(Tuple.Create(a, b, c), out value);
         }
 
-        public bool ContainsKeys(A k1, B k2, C k3)
+        public TValue this[TKey1 a, TKey2 b, TKey3 c]
         {
-            return ContainsKey(Tuple.Create(k1, k2, k3));
+            get { return this[Tuple.Create(a, b, c)]; }
+            set { this[Tuple.Create(a, b, c)] = value; }
         }
 
-        public bool ContainsKey1(A k1)
+        public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b, TKey3 c)
         {
-            // TODO this could be better implemented
-            return Keys1.Contains(k1);
+            TValue result;
+            return TryGetValue(Tuple.Create(a, b, c), out result)
+                ? Maybe.Some(result)
+                : Maybe<TValue>.None;
+        }
+    }
+
+    /// <summary>
+    /// A 4-key dictionary.
+    /// </summary>
+    public class Dictionary<TKey1, TKey2, TKey3, TKey4, TValue> : Dictionary<Tuple<TKey1, TKey2, TKey3, TKey4>, TValue>
+    {
+        public Dictionary() { }
+
+        public Dictionary(IEqualityComparer<Tuple<TKey1, TKey2, TKey3, TKey4>> comparer) : base(comparer) { }
+
+        public bool ContainsKeys(TKey1 a, TKey2 b, TKey3 c, TKey4 d)
+        {
+            return ContainsKey(Tuple.Create(a, b, c, d));
         }
 
-        public bool ContainsKey2(B k2)
+        public bool ContainsKey1(TKey1 a)
         {
-            // TODO this could be better implemented
-            return Keys2.Contains(k2);
+            return Keys.Any(x => Equals(x.Item1, a));
         }
 
-        public bool ContainsKey3(C k3)
+        public bool ContainsKey2(TKey2 b)
         {
-            // TODO this could be better implemented
-            return Keys3.Contains(k3);
+            return Keys.Any(x => Equals(x.Item2, b));
         }
 
-        public void Add(KeyValuePair<Tuple<A, B, C>, V> item)
+        public bool ContainsKey3(TKey3 c)
         {
-            inner.Add(item);
+            return Keys.Any(x => Equals(x.Item3, c));
         }
 
-        public void Add(Tuple<A, B, C> key, V value)
+        public bool ContainsKey4(TKey4 d)
         {
-            inner.Add(key, value);
+            return Keys.Any(x => Equals(x.Item2, d));
         }
 
-        public void Add(A k1, B k2, C k3, V value)
+        public ICollection<TKey1> Keys1 => Keys.Select(x => x.Item1).Distinct().ToList();
+        public ICollection<TKey2> Keys2 => Keys.Select(x => x.Item2).Distinct().ToList();
+        public ICollection<TKey3> Keys3 => Keys.Select(x => x.Item3).Distinct().ToList();
+        public ICollection<TKey4> Keys4 => Keys.Select(x => x.Item4).Distinct().ToList();
+
+        public void Add(TKey1 a, TKey2 b, TKey3 c, TKey4 d, TValue value)
         {
-            Add(Tuple.Create(k1, k2, k3), value);
+            Add(Tuple.Create(a, b, c, d), value);
         }
 
-        public bool Remove(KeyValuePair<Tuple<A, B, C>, V> item)
+        public bool Remove(TKey1 a, TKey2 b, TKey3 c, TKey4 d)
         {
-            return inner.Remove(item);
+            return Remove(Tuple.Create(a, b, c, d));
         }
 
-        public bool Remove(Tuple<A, B, C> key)
+        public bool TryGetValue(TKey1 a, TKey2 b, TKey3 c, TKey4 d, out TValue value)
         {
-            return inner.Remove(key);
+            return TryGetValue(Tuple.Create(a, b, c, d), out value);
         }
 
-        public bool Remove(A k1, B k2, C k3)
+        public TValue this[TKey1 a, TKey2 b, TKey3 c, TKey4 d]
         {
-            return Remove(Tuple.Create(k1, k2, k3));
+            get { return this[Tuple.Create(a, b, c, d)]; }
+            set { this[Tuple.Create(a, b, c, d)] = value; }
         }
 
-        public bool TryGetValue(Tuple<A, B, C> key, out V value)
+        public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b, TKey3 c, TKey4 d)
         {
-            return inner.TryGetValue(key, out value);
-        }
-
-        public bool TryGetValue(A k1, B k2, C k3, out V value)
-        {
-            return inner.TryGetValue(Tuple.Create(k1, k2, k3), out value);
-        }
-
-        public V this[Tuple<A, B, C> key]
-        {
-            get { return inner[key]; }
-            set { inner[key] = value; }
-        }
-
-        public V this[A k1, B k2, C k3]
-        {
-            get { return this[Tuple.Create(k1, k2, k3)]; }
-            set { this[Tuple.Create(k1, k2, k3)] = value; }
-        }
-
-        public Maybe<V> GetMaybe(Tuple<A, B, C> key)
-        {
-            V result;
-            return TryGetValue(key, out result) ? Maybe.Some(result) : Maybe<V>.None;
-        }
-
-        public Maybe<V> GetMaybe(A k1, B k2, C k3)
-        {
-            V result;
-            return TryGetValue(Tuple.Create(k1, k2, k3), out result) ? Maybe.Some(result) : Maybe<V>.None;
-        }
-
-        public ICollection<Tuple<A, B, C>> Keys
-        {
-            get { return inner.Keys; }
-        }
-
-        public ICollection<A> Keys1
-        {
-            get { return inner.Keys.Select(x => x.Item1).Distinct().ToArray(); }
-        }
-
-        public ICollection<B> Keys2
-        {
-            get { return inner.Keys.Select(x => x.Item2).Distinct().ToArray(); }
-        }
-
-        public ICollection<C> Keys3
-        {
-            get { return inner.Keys.Select(x => x.Item3).Distinct().ToArray(); }
-        }
-
-        public ICollection<V> Values
-        {
-            get { return inner.Values; }
-        }
-
-        IEnumerable<Tuple<A, B, C>> IReadOnlyDictionary<Tuple<A, B, C>, V>.Keys
-        {
-            get { return Keys; }
-        }
-
-        IEnumerable<V> IReadOnlyDictionary<Tuple<A, B, C>, V>.Values
-        {
-            get { return Values; }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            TValue result;
+            return TryGetValue(Tuple.Create(a, b, c, d), out result)
+                ? Maybe.Some(result)
+                : Maybe<TValue>.None;
         }
     }
 }
