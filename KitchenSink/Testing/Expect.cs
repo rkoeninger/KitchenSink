@@ -4,7 +4,7 @@ using System.Linq;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 
-namespace KitchenSink
+namespace KitchenSink.Testing
 {
     public class ExpectationFailedException : Exception
     {

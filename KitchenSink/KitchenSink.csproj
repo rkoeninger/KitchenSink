@@ -40,9 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="All.cs" />
+    <Compile Include="Testing\All.cs" />
     <Compile Include="Booleans.cs" />
-    <Compile Include="Check.cs" />
+    <Compile Include="Testing\Check.cs" />
     <Compile Include="CodeLoader.cs" />
     <Compile Include="Collections.cs" />
     <Compile Include="Comparables.cs" />
@@ -60,15 +60,15 @@
     <Compile Include="NewType.cs" />
     <Compile Include="Numbers.cs" />
     <Compile Include="Objects.cs" />
-    <Compile Include="Rand.cs" />
+    <Compile Include="Testing\Rand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RangeComparison.cs" />
-    <Compile Include="Sample.cs" />
+    <Compile Include="Testing\Sample.cs" />
     <Compile Include="Slang.cs" />
     <Compile Include="Sequence.cs" />
     <Compile Include="Streams.cs" />
     <Compile Include="Strings.cs" />
-    <Compile Include="Expect.cs" />
+    <Compile Include="Testing\Expect.cs" />
     <Compile Include="Maybe.cs" />
     <Compile Include="Types.cs" />
     <Compile Include="TypeTree.cs" />

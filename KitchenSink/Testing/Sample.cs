@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace KitchenSink
+namespace KitchenSink.Testing
 {
     public static class Sample
     {

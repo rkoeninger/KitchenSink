@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace KitchenSink
+namespace KitchenSink.Testing
 {
     public static class Rand
     {

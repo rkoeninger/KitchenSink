@@ -1,4 +1,5 @@
 ﻿using KitchenSink.DI;
+using KitchenSink.Testing;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests

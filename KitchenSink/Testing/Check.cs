@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace KitchenSink
+namespace KitchenSink.Testing
 {
     public static class Check
     {

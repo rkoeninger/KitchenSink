@@ -1,14 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace KitchenSink
+namespace KitchenSink.Testing
 {
     public static class All
     {
-        public static IEnumerable<int> Ints
-        {
-            get { return int.MinValue.ToIncluding(int.MaxValue); }
-        }
+        public static IEnumerable<int> Ints => int.MinValue.ToIncluding(int.MaxValue);
 
         public static readonly IReadOnlyCollection<char> AlphaUpperChars = 48.To(58).Select(x => (char)x).ToArray();
 

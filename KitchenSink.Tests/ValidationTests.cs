@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using KitchenSink.Testing;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
