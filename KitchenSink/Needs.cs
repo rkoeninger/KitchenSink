@@ -12,10 +12,19 @@ namespace KitchenSink
     /// Classes are multi-use by default.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class SingleUseAttribute : Attribute
+    public class SingleUse : Attribute
     {
+        public static bool Is(Type implType)
+        {
+            return implType.HasAttribute<SingleUse>();
+        }
     }
 
+    /// <summary>
+    /// A simple IoC container. Resolves dependencies that are explicity
+    /// registered, by discovering them in assemblies and parent classes,
+    /// or by deferring to backup providers.
+    /// </summary>
     public class Needs
     {
         /// <summary>
@@ -28,6 +37,10 @@ namespace KitchenSink
         /// </summary>
         public delegate object Factory();
 
+        /// <summary>
+        /// A backup resolver that this Needs can defer to if it is unable to
+        /// resolve a dependency.
+        /// </summary>
         public delegate object Backup(Type contractType);
 
         private readonly Dictionary<Type, Factory> factories = new Dictionary<Type, Factory>();
@@ -64,7 +77,7 @@ namespace KitchenSink
         /// </summary>
         public Needs Refer(Type parent)
         {
-            return Refer(contractType => FindImplType(contractType, parent.GetNestedTypes()));
+            return Refer(SourceFrom(parent.GetNestedTypes()));
         }
 
         /// <summary>
@@ -72,7 +85,7 @@ namespace KitchenSink
         /// </summary>
         public Needs Refer(Assembly assembly)
         {
-            return Refer(contractType => FindImplType(contractType, assembly.GetExportedTypes()));
+            return Refer(SourceFrom(assembly.GetExportedTypes()));
         }
 
         /// <summary>
@@ -84,9 +97,9 @@ namespace KitchenSink
             return this;
         }
 
-        private static Type FindImplType(Type contractType, IEnumerable<Type> types)
+        private static Source SourceFrom(IEnumerable<Type> types)
         {
-            return types.FirstOrDefault(t => t.GetInterfaces().Any(x => x == contractType));
+            return contractType => types.FirstOrDefault(t => t.GetInterfaces().Contains(contractType));
         }
 
         /// <summary>
@@ -132,7 +145,7 @@ namespace KitchenSink
         /// <exception cref="NotImplementedException">If no implementation found.</exception>
         public object Get(Type contractType)
         {
-            return GetInternal(contractType, !IsSingleUse(contractType));
+            return GetInternal(contractType, !SingleUse.Is(contractType));
         }
 
         private object GetInternal(Type contractType, bool multiUse)
@@ -169,7 +182,7 @@ namespace KitchenSink
 
         private object Persist(Type contractType, Type implType, bool multiUse)
         {
-            if (IsSingleUse(implType))
+            if (SingleUse.Is(implType))
             {
                 Factory factory = () => New(implType, multiUse);
                 factories[contractType] = factory;
@@ -199,7 +212,7 @@ namespace KitchenSink
             {
                 foreach (var argType in args.Select(x => x.GetType()))
                 {
-                    if (IsSingleUse(argType))
+                    if (SingleUse.Is(argType))
                     {
                         throw new Exception($"MultiUse class ({implType}) cannot depend on SingleUse class ({argType})");
                     }
@@ -207,11 +220,6 @@ namespace KitchenSink
             }
 
             return ctor.Invoke(args);
-        }
-
-        private static bool IsSingleUse(MemberInfo implType)
-        {
-            return implType.GetCustomAttribute(typeof(SingleUseAttribute)) != null;
         }
     }
 }
