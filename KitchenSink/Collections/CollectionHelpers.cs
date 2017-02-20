@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace KitchenSink
+namespace KitchenSink.Collections
 {
-    public static class Collections
+    public static class CollectionHelpers
     {
         /// <summary>
         /// Adapter for specialized collections that do not implement IEnumerable&lt;A&gt;.
@@ -188,7 +188,7 @@ namespace KitchenSink
         }
     }
 
-    public static class List
+    public static class AList
     {
         public static List<A> Of<A>(params A[] vals)
         {

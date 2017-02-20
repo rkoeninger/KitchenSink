@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using KitchenSink.Collections;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests

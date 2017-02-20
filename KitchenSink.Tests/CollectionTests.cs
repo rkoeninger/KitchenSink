@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KitchenSink.Collections;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -11,7 +12,7 @@ namespace KitchenSink.Tests
         [Test]
         public void ListCreateWithOfMethod()
         {
-            var xs = List.Of(1, 2, 3, 4, 5);
+            var xs = AList.Of(1, 2, 3, 4, 5);
             var ys = new List<int> { 1, 2, 3, 4, 5 };
             Assert.IsTrue(xs.SequenceEqual(ys));
         }

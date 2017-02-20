@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using KitchenSink.Collections;
 
 namespace KitchenSink
 {
@@ -173,12 +174,12 @@ namespace KitchenSink
 
         public static Maybe<IEnumerable<A>> IsNotEmpty<A>(Maybe<IEnumerable<A>> maybe)
         {
-            return maybe.Where(Collections.NotEmpty);
+            return maybe.Where(CollectionHelpers.NotEmpty);
         }
 
         public static Maybe<List<A>> IsNotEmpty<A>(Maybe<List<A>> maybe)
         {
-            return maybe.Where(Collections.NotEmpty);
+            return maybe.Where(CollectionHelpers.NotEmpty);
         }
 
         public static Maybe<string> IsNotBlank(Maybe<string> maybe)
@@ -499,7 +500,7 @@ namespace KitchenSink
 
         public List<A> ToList()
         {
-            return HasValue ? List.Of(Value) : new List<A>();
+            return HasValue ? AList.Of(Value) : new List<A>();
         }
 
         public A[] ToArray()

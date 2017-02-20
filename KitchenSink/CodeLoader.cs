@@ -1,4 +1,5 @@
-﻿using Microsoft.CSharp;
+﻿using KitchenSink.Collections;
+using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace KitchenSink
+namespace KitchenSink.Collections
 {
     /// <summary>
     /// Like an IEnumerator, but persistent.

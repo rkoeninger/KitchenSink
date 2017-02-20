@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace KitchenSink
+namespace KitchenSink.Collections
 {
     /// <summary>
     /// A 2-key Dictionary.
