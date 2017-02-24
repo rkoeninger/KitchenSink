@@ -12,6 +12,10 @@ A library for multi-paradigm programming in C#/.Net.
   * `Void` - no value can be constructed; is always null
   * `ISequence<A>` - lazy, persistent, one-time iteration of values
 
+### Adaptable Control Structures
+
+  * `Cond` - builds a list of clauses and conditionally evaluates consequents
+
 ### Pure Functional Programming Facilities
 
   * `IO` - a type for modeling and composing I/O operations and side effects
