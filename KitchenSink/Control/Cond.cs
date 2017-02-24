@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using static KitchenSink.Collections.ConstructionOperators;
+using System.Linq;
 
 namespace KitchenSink.Control
 {
     /// <summary>
     /// A Cond with an incomplete clause and yet unknown return type.
     /// </summary>
-    public interface ICondIfInitial
+    public interface ICondInitial
     {
         /// <summary>
         /// Provides a consequent for previous condition.
@@ -112,7 +112,7 @@ namespace KitchenSink.Control
         /// Starts a new Cond with a new clause with given condition
         /// and yet unknown return type.
         /// </summary>
-        public static ICondIfInitial If(Func<bool> condition)
+        public static ICondInitial If(Func<bool> condition)
         {
             return new CondBuilderInitial(condition);
         }
@@ -121,7 +121,7 @@ namespace KitchenSink.Control
         /// Starts a new Cond with a new clause with given condition
         /// and yet unknown return type.
         /// </summary>
-        public static ICondIfInitial If(bool condition)
+        public static ICondInitial If(bool condition)
         {
             return If(() => condition);
         }
@@ -144,7 +144,7 @@ namespace KitchenSink.Control
             return If<TResult>(() => condition);
         }
 
-        private class CondBuilderInitial : ICondIfInitial
+        private class CondBuilderInitial : ICondInitial
         {
             private readonly Func<bool> pending;
 
@@ -194,13 +194,12 @@ namespace KitchenSink.Control
 
             public bool End()
             {
-                foreach (var clause in clauses)
+                var clause = clauses.FirstOrDefault(x => x.Condition());
+
+                if (clause != null)
                 {
-                    if (clause.Condition())
-                    {
-                        clause.Consequent();
-                        return true;
-                    }
+                    clause.Consequent();
+                    return true;
                 }
 
                 return false;
@@ -208,11 +207,7 @@ namespace KitchenSink.Control
 
             public ICondThen Absorb(ICondThen builder)
             {
-                foreach (var clause in ((CondBuilder) builder).clauses)
-                {
-                    clauses.Add(clause);
-                }
-
+                clauses.AddRange(((CondBuilder)builder).clauses);
                 return this;
             }
         }
@@ -247,24 +242,12 @@ namespace KitchenSink.Control
 
             public Maybe<TResult> End()
             {
-                foreach (var clause in clauses)
-                {
-                    if (clause.Condition())
-                    {
-                        return some(clause.Consequent());
-                    }
-                }
-
-                return none<TResult>();
+                return clauses.FirstMaybe(x => x.Condition()).Select(x => x.Consequent());
             }
 
             public ICondThen<TResult> Absorb(ICondThen<TResult> builder)
             {
-                foreach (var clause in ((CondBuilder<TResult>) builder).clauses)
-                {
-                    clauses.Add(clause);
-                }
-
+                clauses.AddRange(((CondBuilder<TResult>)builder).clauses);
                 return this;
             }
         }
@@ -272,7 +255,7 @@ namespace KitchenSink.Control
         /// <summary>
         /// Provides a result for previous condition.
         /// </summary>
-        public static ICondThen<TResult> Then<TResult>(this ICondIfInitial builder, TResult result)
+        public static ICondThen<TResult> Then<TResult>(this ICondInitial builder, TResult result)
         {
             return builder.Then(() => result);
         }
@@ -280,7 +263,7 @@ namespace KitchenSink.Control
         /// <summary>
         /// Does nothing for previous condition.
         /// </summary>
-        public static ICondThen Then(this ICondIfInitial builder)
+        public static ICondThen Then(this ICondInitial builder)
         {
             return builder.Then(() => { });
         }
