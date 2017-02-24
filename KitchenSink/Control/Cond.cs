@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static KitchenSink.Collections.ConstructionOperators;
 
 namespace KitchenSink.Control
 {
@@ -34,12 +35,12 @@ namespace KitchenSink.Control
         /// Starts a new clause with given condition.
         /// </summary>
         ICondIf If(Func<bool> condition);
-
+        
         /// <summary>
-        /// Evaluates Cond, invoking the given alternative if
-        /// no conditions were true.
+        /// Evaluates Cond, returning true if one of the
+        /// consequents was evaluated, false if none were.
         /// </summary>
-        void Else(Action alternative);
+        bool End();
     }
 
     /// <summary>
@@ -64,10 +65,10 @@ namespace KitchenSink.Control
         ICondIf<TResult> If(Func<bool> condition);
 
         /// <summary>
-        /// Evaluates Cond, invoking the given alternative if
-        /// no conditions were true.
+        /// Evaluates Cond, returning Some if one of the
+        /// consequents was evaluated, None if none were.
         /// </summary>
-        TResult Else(Func<TResult> alternative);
+        Maybe<TResult> End();
     }
 
     /// <summary>
@@ -181,18 +182,18 @@ namespace KitchenSink.Control
                 return this;
             }
 
-            public void Else(Action alternative)
+            public bool End()
             {
                 foreach (var clause in clauses)
                 {
                     if (clause.Condition())
                     {
                         clause.Consequent();
-                        return;
+                        return true;
                     }
                 }
 
-                alternative();
+                return false;
             }
         }
 
@@ -224,17 +225,17 @@ namespace KitchenSink.Control
                 return this;
             }
 
-            public TResult Else(Func<TResult> alternative)
+            public Maybe<TResult> End()
             {
                 foreach (var clause in clauses)
                 {
                     if (clause.Condition())
                     {
-                        return clause.Consequent();
+                        return some(clause.Consequent());
                     }
                 }
 
-                return alternative();
+                return none<TResult>();
             }
         }
 
@@ -271,6 +272,16 @@ namespace KitchenSink.Control
         }
 
         /// <summary>
+        /// Evaluates Cond, invoking the given alternative if
+        /// no conditions were true.
+        /// </summary>
+        public static void Else(this ICondThen builder, Action alternative)
+        {
+            if (!builder.End())
+                alternative();
+        }
+
+        /// <summary>
         /// Evaluates Cond, doing nothing if no conditions were true.
         /// </summary>
         public static void Else(this ICondThen builder)
@@ -295,11 +306,20 @@ namespace KitchenSink.Control
         }
 
         /// <summary>
+        /// Evaluates Cond, invoking the given alternative if
+        /// no conditions were true.
+        /// </summary>
+        public static TResult Else<TResult>(this ICondThen<TResult> builder, Func<TResult> alternative)
+        {
+            return builder.End().OrElseEval(alternative);
+        }
+
+        /// <summary>
         /// Provides a result for previous condition.
         /// </summary>
-        public static TResult Else<TResult>(this ICondThen<TResult> builder, TResult result)
+        public static TResult Else<TResult>(this ICondThen<TResult> builder, TResult alternative)
         {
-            return builder.Else(() => result);
+            return builder.Else(() => alternative);
         }
     }
 }
