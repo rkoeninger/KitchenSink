@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("KitchenSink")]
-[assembly: AssemblyCopyright("Copyright © 2014, 2015 by Robert Koeninger")]
+[assembly: AssemblyCopyright("Copyright © 2014-2017 Robert Koeninger")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
