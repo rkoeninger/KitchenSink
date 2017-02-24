@@ -18,7 +18,7 @@ A library for multi-paradigm programming in C#/.Net.
   * `Streams` - extensions for converting `IEnumerable`s to/from `Stream`s
   * `MultiKeyDictionary` - `Dictionary`s that use `Tuple` for aggregate keys
 
-### Adaptable Control Structures
+### Composable Control Structures
 
   * `Cond` - builds a list of clauses and conditionally evaluates consequents
 

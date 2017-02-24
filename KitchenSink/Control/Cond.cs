@@ -41,6 +41,11 @@ namespace KitchenSink.Control
         /// consequents was evaluated, false if none were.
         /// </summary>
         bool End();
+
+        /// <summary>
+        /// Adds all the clauses in the given Cond to this one.
+        /// </summary>
+        ICondThen Absorb(ICondThen builder);
     }
 
     /// <summary>
@@ -69,6 +74,11 @@ namespace KitchenSink.Control
         /// consequents was evaluated, None if none were.
         /// </summary>
         Maybe<TResult> End();
+
+        /// <summary>
+        /// Adds all the clauses in the given Cond to this one.
+        /// </summary>
+        ICondThen<TResult> Absorb(ICondThen<TResult> builder);
     }
 
     /// <summary>
@@ -195,6 +205,16 @@ namespace KitchenSink.Control
 
                 return false;
             }
+
+            public ICondThen Absorb(ICondThen builder)
+            {
+                foreach (var clause in ((CondBuilder) builder).clauses)
+                {
+                    clauses.Add(clause);
+                }
+
+                return this;
+            }
         }
 
         private class CondBuilder<TResult> : ICondIf<TResult>, ICondThen<TResult>
@@ -236,6 +256,16 @@ namespace KitchenSink.Control
                 }
 
                 return none<TResult>();
+            }
+
+            public ICondThen<TResult> Absorb(ICondThen<TResult> builder)
+            {
+                foreach (var clause in ((CondBuilder<TResult>) builder).clauses)
+                {
+                    clauses.Add(clause);
+                }
+
+                return this;
             }
         }
 
