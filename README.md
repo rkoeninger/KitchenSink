@@ -3,7 +3,9 @@
 
 # KitchenSink
 
-A library for multi-paradigm programming in C#/.Net.
+A library for multi-paradigm programming in C#.
+
+Not everything in this library is meant to be taken completely seriously. Some facilities are almost sarcastic in their inclusion.
 
 ### Basic Data Types
 
