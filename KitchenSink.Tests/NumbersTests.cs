@@ -57,10 +57,10 @@ namespace KitchenSink.Tests
         [Test]
         public void CombinationsOfSet()
         {
-            var seq1 = ReadOnly.Collection(5, 6, 7, 8, 9);
+            var seq1 = listof(5, 6, 7, 8, 9);
             const int subsetSize = 3;
             var combinations = seq1.Combinations(subsetSize).ToList();
-            var expectedCombinations = ReadOnly.Collection(
+            var expectedCombinations = listof(
                 seqof(5, 6, 7),
                 seqof(5, 6, 8),
                 seqof(5, 6, 9),
@@ -85,10 +85,10 @@ namespace KitchenSink.Tests
         [Test]
         public void PermutationsOfSet()
         {
-            var seq1 = ReadOnly.Collection(5, 6, 7, 8, 9);
+            var seq1 = listof(5, 6, 7, 8, 9);
             const int subsetSize = 2;
             var permutations = seq1.Permutations(subsetSize).ToList();
-            var expectedPermutations = ReadOnly.Collection(
+            var expectedPermutations = listof(
                 seqof(5, 6),
                 seqof(5, 7),
                 seqof(5, 8),

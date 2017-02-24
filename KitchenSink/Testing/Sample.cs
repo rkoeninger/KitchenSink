@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using KitchenSink.Collections;
+using static KitchenSink.Collections.ConstructionOperators;
 
 namespace KitchenSink.Testing
 {
     public static class Sample
     {
-        public static readonly IReadOnlyCollection<bool> Booleans = ReadOnly.Collection(true, false);
+        public static readonly IReadOnlyCollection<bool> Booleans = arrayof(true, false);
 
-        public static readonly IReadOnlyCollection<int> Ints = ReadOnly.Collection(
+        public static readonly IReadOnlyCollection<int> Ints = arrayof(
             0,
             int.MinValue, int.MinValue + 1, int.MinValue + 2,
             int.MaxValue, int.MaxValue - 1, int.MaxValue - 2,
@@ -27,7 +28,7 @@ namespace KitchenSink.Testing
             -65535, -65536, -65537
         );
 
-        public static readonly IReadOnlyCollection<uint> UnsignedInts = ReadOnly.Collection<uint>(
+        public static readonly IReadOnlyCollection<uint> UnsignedInts = arrayof<uint>(
             0,
             uint.MaxValue, uint.MaxValue - 1, uint.MaxValue - 2,
             1, 2, 3,
@@ -39,7 +40,7 @@ namespace KitchenSink.Testing
             65535, 65536, 65537
         );
 
-        public static readonly IReadOnlyCollection<double> Doubles = ReadOnly.Collection(
+        public static readonly IReadOnlyCollection<double> Doubles = arrayof(
             double.NaN,
             double.PositiveInfinity,
             double.NegativeInfinity,
@@ -50,7 +51,7 @@ namespace KitchenSink.Testing
             -double.Epsilon, -double.Epsilon * 2, -double.Epsilon * 3
         );
 
-        public static readonly IReadOnlyCollection<string> TopLevelDomains = ReadOnly.Collection(
+        public static readonly IReadOnlyCollection<string> TopLevelDomains = arrayof(
             "com", "org", "net", "gov", "edu", "uk", "ca", "jp", "au", "de", "fr", "us"
         );
     }

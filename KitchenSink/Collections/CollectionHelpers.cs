@@ -13,16 +13,12 @@ namespace KitchenSink.Collections
         /// Eagerly reads enumerator results into list.
         /// Result can be enumerated multiple times.
         /// </summary>
-        public static IEnumerable<A> AsEnumerable<A>(this IEnumerator e)
+        public static IEnumerable AsEnumerable(this IEnumerator e)
         {
-            var list = new List<A>();
-
             while (e.MoveNext())
             {
-                list.Add((A) e.Current);
+                yield return e.Current;
             }
-
-            return list;
         }
 
         /// <summary>
@@ -113,11 +109,6 @@ namespace KitchenSink.Collections
             return seq.Where(x => !excludeSet.Contains(x));
         }
 
-        public static HashSet<A> Set<A>(params A[] vals)
-        {
-            return new HashSet<A>(vals);
-        }
-
         public static HashSet<A> Set<A>(this IEnumerable<A> seq)
         {
             return new HashSet<A>(seq);
@@ -165,27 +156,6 @@ namespace KitchenSink.Collections
                 array[i] = value;
 
             return array;
-        }
-    }
-
-    public static class ReadOnly
-    {
-        public static IReadOnlyList<A> List<A>(params A[] values)
-        {
-            return new List<A>(values);
-        }
-
-        public static IReadOnlyCollection<A> Collection<A>(params A[] values)
-        {
-            return values;
-        }
-    }
-
-    public static class KeyValuePair
-    {
-        public static KeyValuePair<A, B> Of<A, B>(A key, B value)
-        {
-            return new KeyValuePair<A, B>(key, value);
         }
     }
 
@@ -293,39 +263,6 @@ namespace KitchenSink.Collections
         public static IEnumerable<Tuple<A, B>> Zip<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys)
         {
             return xs.Zip(ys, tupleof);
-        }
-    }
-
-    public static class EnumeratorLinq
-    {
-        public static IEnumerator<B> Select<A, B>(this IEnumerator<A> e, Func<A, B> f)
-        {
-            while (e.MoveNext())
-                yield return f(e.Current);
-        }
-
-        public static IEnumerator<B> SelectMany<A, B>(this IEnumerator<A> e, Func<A, IEnumerator<B>> f)
-        {
-            while (e.MoveNext())
-            {
-                var ee = f(e.Current);
-
-                while (ee.MoveNext())
-                    yield return ee.Current;
-            }
-        }
-
-        public static IEnumerator<A> Where<A>(this IEnumerator<A> e, Func<A, bool> f)
-        {
-            while (e.MoveNext())
-                if (f(e.Current))
-                    yield return e.Current;
-        }
-
-        public static IEnumerable<A> ToEnumerable<A>(this IEnumerator<A> e)
-        {
-            while (e.MoveNext())
-                yield return e.Current;
         }
     }
 
