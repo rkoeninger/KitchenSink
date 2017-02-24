@@ -66,7 +66,6 @@
     <Compile Include="RangeComparison.cs" />
     <Compile Include="Testing\Sample.cs" />
     <Compile Include="Slang.cs" />
-    <Compile Include="Collections\Sequence.cs" />
     <Compile Include="Streams.cs" />
     <Compile Include="Strings.cs" />
     <Compile Include="Testing\Expect.cs" />

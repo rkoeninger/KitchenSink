@@ -10,7 +10,6 @@ A library for multi-paradigm programming in C#/.Net.
   * `Maybe<A>` - may or may not have a value and maps functions over missing value
   * `Unit` - has only one meaningully unique value
   * `Void` - no value can be constructed; is always null
-  * `ISequence<A>` - lazy, persistent, one-time iteration of values
 
 ### Adaptable Control Structures
 
