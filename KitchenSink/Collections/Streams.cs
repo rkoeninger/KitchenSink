@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using KitchenSink.Collections;
 
-namespace KitchenSink
+namespace KitchenSink.Collections
 {
     public static class Streams
     {

@@ -7,9 +7,16 @@ A library for multi-paradigm programming in C#/.Net.
 
 ### Basic Data Types
 
-  * `Maybe<A>` - may or may not have a value and maps functions over missing value
   * `Unit` - has only one meaningully unique value
   * `Void` - no value can be constructed; is always null
+  * `Maybe<A>` - may or may not have a value and maps functions over missing value
+  * `NewType<A>` - wraps existing types to distinguish on the type level
+
+### Collection Enhancements
+
+  * `ConstructionOperators` - functions for building collections concisely
+  * `Streams` - extensions for converting `IEnumerable`s to/from `Stream`s
+  * `MultiKeyDictionary` - `Dictionary`s that use `Tuple` for aggregate keys
 
 ### Adaptable Control Structures
 
@@ -19,6 +26,7 @@ A library for multi-paradigm programming in C#/.Net.
 
   * `IO` - a type for modeling and composing I/O operations and side effects
   * `Lens` - composable get and set pair for immutable types
+  * `HList` - allows for abstraction over arity
 
 ### Testing and Validation
 
