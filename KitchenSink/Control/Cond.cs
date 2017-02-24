@@ -99,7 +99,7 @@ namespace KitchenSink.Control
         /// </summary>
         public static ICondIf<TResult> If(bool condition)
         {
-            return Cond.If<TResult>(() => condition);
+            return If(() => condition);
         }
     }
 
@@ -123,7 +123,7 @@ namespace KitchenSink.Control
         /// </summary>
         public static ICondIfInitial If(bool condition)
         {
-            return new CondBuilderInitial(() => condition);
+            return If(() => condition);
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace KitchenSink.Control
         /// </summary>
         public static ICondIf<TResult> If<TResult>(bool condition)
         {
-            return new CondBuilder<TResult>().If(() => condition);
+            return If<TResult>(() => condition);
         }
 
         private class CondBuilderInitial : ICondIfInitial
