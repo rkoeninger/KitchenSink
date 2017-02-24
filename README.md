@@ -22,11 +22,10 @@ A library for multi-paradigm programming in C#/.Net.
 
   * `Cond` - builds a list of clauses and conditionally evaluates consequents
 
-### Pure Functional Programming Facilities
+### Dependency Injection
 
-  * `IO` - a type for modeling and composing I/O operations and side effects
-  * `Lens` - composable get and set pair for immutable types
-  * `HList` - allows for abstraction over arity
+  * `Needs` - a minimal-configuration IoC container that can search assemblies and parent types and failover to other IoC containers
+  * `SingleUse` - an attribute indicating that a dependency implementation is not threadsafe or can only be used once
 
 ### Testing and Validation
 
@@ -38,10 +37,11 @@ A library for multi-paradigm programming in C#/.Net.
   * `Sample` - provides common and edge-case test values
   * `All` - enumerates all values of certain types
 
-### Dependency Injection
+### Pure Functional Programming Facilities
 
-  * `Needs` - a minimal-configuration IoC container that can search assemblies and parent types and failover to other IoC containers
-  * `SingleUse` - an attribute indicating that a dependency implementation is not threadsafe or can only be used once
+  * `IO` - a type for modeling and composing I/O operations and side effects
+  * `Lens` - composable get and set pair for immutable types
+  * `HList` - allows for abstraction over arity
 
 ### Questionable File Path Building Facility using Operator Overloading
 
