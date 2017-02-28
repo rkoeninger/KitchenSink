@@ -381,6 +381,23 @@ namespace KitchenSink
             return Maybe.If(Value, x => x is B, x => (B) (object) x);
         }
 
+        public B Branch<B>(Func<A, B> forSome, Func<B> forNone)
+        {
+            return HasValue ? forSome(Value) : forNone();
+        }
+
+        public void Branch(Action<A> forSome, Action forNone)
+        {
+            if (HasValue)
+            {
+                forSome(Value);
+            }
+            else
+            {
+                forNone();
+            }
+        }
+
         private static readonly Maybe<A> Default = Maybe.Of(default(A));
 
         public Maybe<A> OrDefault()
