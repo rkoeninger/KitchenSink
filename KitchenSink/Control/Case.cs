@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 
 // TODO: Absorb
+// Builders need to implement IClause so they can be properly nested
+// for both Cond and Case
 
 namespace KitchenSink.Control
 {
