@@ -63,18 +63,5 @@ namespace KitchenSink
 
             return x;
         }
-
-        public static B When<A, B>(this A x, Func<A, bool> p, Func<A, B> f)
-        {
-            return x.IsNotNull() && p(x) ? f(x) : default(B);
-        }
-
-        public static A When<A>(this A x, Func<A, bool> p, Action<A> f)
-        {
-            if (x.IsNotNull() && p(x))
-                f(x);
-
-            return x;
-        }
     }
 }
