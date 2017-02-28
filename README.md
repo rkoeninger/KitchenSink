@@ -23,6 +23,7 @@ Not everything in this library is meant to be taken completely seriously. Some f
 ### Composable Control Structures
 
   * `Cond` - builds a list of clauses and conditionally evaluates consequents
+  * `Case` - like `Cond`, but clauses are applied to a key value
 
 ### Dependency Injection
 
