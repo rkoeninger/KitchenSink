@@ -144,6 +144,18 @@ namespace KitchenSink.Control
             return If<TResult>(() => condition);
         }
 
+        private class Clause
+        {
+            public Func<bool> Condition { get; set; }
+            public Action Consequent { get; set; }
+        }
+
+        private class Clause<TResult>
+        {
+            public Func<bool> Condition { get; set; }
+            public Func<TResult> Consequent { get; set; }
+        }
+
         private class CondBuilderInitial : ICondInitial
         {
             private readonly Func<bool> pending;
@@ -166,12 +178,6 @@ namespace KitchenSink.Control
 
         private class CondBuilder : ICondIf, ICondThen
         {
-            private class Clause
-            {
-                public Func<bool> Condition { get; set; }
-                public Action Consequent { get; set; }
-            }
-
             private Func<bool> pending;
             private readonly List<Clause> clauses = new List<Clause>();
 
@@ -214,14 +220,8 @@ namespace KitchenSink.Control
 
         private class CondBuilder<TResult> : ICondIf<TResult>, ICondThen<TResult>
         {
-            private class Clause
-            {
-                public Func<bool> Condition { get; set; }
-                public Func<TResult> Consequent { get; set; }
-            }
-
             private Func<bool> pending;
-            private readonly List<Clause> clauses = new List<Clause>();
+            private readonly List<Clause<TResult>> clauses = new List<Clause<TResult>>();
 
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public ICondIf<TResult> If(Func<bool> condition)
@@ -232,7 +232,7 @@ namespace KitchenSink.Control
 
             public ICondThen<TResult> Then(Func<TResult> consequent)
             {
-                clauses.Add(new Clause
+                clauses.Add(new Clause<TResult>
                 {
                     Condition = pending,
                     Consequent = consequent
