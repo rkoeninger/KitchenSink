@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\ConstructionOperators.cs" />
+    <Compile Include="Control\Case.cs" />
     <Compile Include="Control\Cond.cs" />
     <Compile Include="Testing\All.cs" />
     <Compile Include="Booleans.cs" />

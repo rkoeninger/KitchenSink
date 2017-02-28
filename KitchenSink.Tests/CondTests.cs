@@ -64,4 +64,49 @@ namespace KitchenSink.Tests
             }
         }
     }
+
+    [TestFixture]
+    public class CaseTests
+    {
+        [Test]
+        public void DefaultMakesElseUnnecessary()
+        {
+            Assert.AreEqual("bye",
+                Case.Of(0)
+                    .Default("bye")
+                    .When(1)
+                    .Then("hi")
+                    .When(2)
+                    .Then("hello")
+                    .When(3)
+                    .Then("hey")
+                    .End());
+        }
+
+        [Test]
+        public void ClausesCanCastSubtypes()
+        {
+            Assert.AreEqual(1,
+                Case.Of<InterfaceX>(new ImplA { ValA = 1 })
+                    .When<ImplA>()
+                    .Then(x => x.ValA)
+                    .When<ImplB>(x => x.ValB != null)
+                    .Then(x => x.ValB.Length)
+                    .Else(0));
+        }
+
+        public interface InterfaceX
+        {
+        }
+
+        public class ImplA : InterfaceX
+        {
+            public int ValA { get; set; }
+        }
+
+        public class ImplB : InterfaceX
+        {
+            public string ValB { get; set; }
+        }
+    }
 }
