@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-// TODO: Absorb
-// Builders need to implement IClause so they can be properly nested
-// for both Cond and Case
-
 namespace KitchenSink.Control
 {
     public interface ICaseInitialWhen<TKey>
@@ -45,6 +41,7 @@ namespace KitchenSink.Control
         ICaseWhen<TKey> When(Func<TKey, bool> condition);
         ICaseSubtypeWhen<TKey, TSubtype> When<TSubtype>(Func<TSubtype, bool> condition) where TSubtype : TKey;
         ICaseSubtypeWhen<TKey, TSubtype> When<TSubtype>() where TSubtype : TKey;
+        ICaseThen<TKey> Absorb(ICaseThen<TKey> builder);
         ICaseDefaultThen<TKey> Default(Action<TKey> alternative);
         bool End();
     }
@@ -64,6 +61,7 @@ namespace KitchenSink.Control
         ICaseDefaultWhen<TKey> When(Func<TKey, bool> condition);
         ICaseDefaultSubtypeWhen<TKey, TSubtype> When<TSubtype>(Func<TSubtype, bool> condition) where TSubtype : TKey;
         ICaseDefaultSubtypeWhen<TKey, TSubtype> When<TSubtype>() where TSubtype : TKey;
+        ICaseDefaultThen<TKey> Absorb(ICaseDefaultThen<TKey> builder);
         void End();
     }
 
@@ -82,6 +80,7 @@ namespace KitchenSink.Control
         ICaseWhen<TKey, TResult> When(Func<TKey, bool> condition);
         ICaseSubtypeWhen<TKey, TSubtype, TResult> When<TSubtype>(Func<TSubtype, bool> condition) where TSubtype : TKey;
         ICaseSubtypeWhen<TKey, TSubtype, TResult> When<TSubtype>() where TSubtype : TKey;
+        ICaseThen<TKey, TResult> Absorb(ICaseThen<TKey, TResult> builder);
         ICaseDefaultThen<TKey, TResult> Default(Func<TKey, TResult> alternative);
         Maybe<TResult> End();
     }
@@ -101,6 +100,7 @@ namespace KitchenSink.Control
         ICaseDefaultWhen<TKey, TResult> When(Func<TKey, bool> condition);
         ICaseDefaultSubtypeWhen<TKey, TSubtype, TResult> When<TSubtype>(Func<TSubtype, bool> condition) where TSubtype : TKey;
         ICaseDefaultSubtypeWhen<TKey, TSubtype, TResult> When<TSubtype>() where TSubtype : TKey;
+        ICaseDefaultThen<TKey, TResult> Absorb(ICaseDefaultThen<TKey, TResult> builder);
         TResult End();
     }
 
@@ -174,6 +174,17 @@ namespace KitchenSink.Control
             }
         }
 
+        private class NestedDefaultClause<TKey> : IClause<TKey>
+        {
+            public ICaseDefaultThen<TKey> Builder { private get; set; }
+
+            public bool Eval(TKey key)
+            {
+                Builder.End();
+                return true;
+            }
+        }
+
         private class ScalarClause<TKey, TResult> : IClause<TKey, TResult>
         {
             public Func<TKey, bool> Condition { private get; set; }
@@ -192,6 +203,16 @@ namespace KitchenSink.Control
             public Maybe<TResult> Eval(TKey key)
             {
                 return Builder.End();
+            }
+        }
+
+        private class NestedDefaultClause<TKey, TResult> : IClause<TKey, TResult>
+        {
+            public ICaseDefaultThen<TKey, TResult> Builder { private get; set; }
+
+            public Maybe<TResult> Eval(TKey key)
+            {
+                return Maybe.Some(Builder.End());
             }
         }
 
@@ -293,6 +314,12 @@ namespace KitchenSink.Control
             {
                 return clauses.Any(x => x.Eval(key));
             }
+
+            public ICaseThen<TKey> Absorb(ICaseThen<TKey> builder)
+            {
+                clauses.Add(new NestedClause<TKey> {Builder = builder});
+                return this;
+            }
         }
 
         private class CaseBuilderDefault<TKey> : ICaseDefaultThen<TKey>, ICaseDefaultWhen<TKey>
@@ -342,6 +369,12 @@ namespace KitchenSink.Control
                     alternative(key);
                 }
             }
+
+            public ICaseDefaultThen<TKey> Absorb(ICaseDefaultThen<TKey> builder)
+            {
+                clauses.Add(new NestedDefaultClause<TKey> {Builder = builder});
+                return this;
+            }
         }
 
         private class CaseBuilder<TKey, TResult> : ICaseThen<TKey, TResult>, ICaseWhen<TKey, TResult>
@@ -390,6 +423,12 @@ namespace KitchenSink.Control
             {
                 return clauses.FirstSome(x => x.Eval(key));
             }
+
+            public ICaseThen<TKey, TResult> Absorb(ICaseThen<TKey, TResult> builder)
+            {
+                clauses.Add(new NestedClause<TKey, TResult> { Builder = builder });
+                return this;
+            }
         }
 
         private class CaseBuilderDefault<TKey, TResult> : ICaseDefaultThen<TKey, TResult>, ICaseDefaultWhen<TKey, TResult>
@@ -435,6 +474,12 @@ namespace KitchenSink.Control
             public TResult End()
             {
                 return clauses.FirstSome(x => x.Eval(key)).OrElseEval(key, alternative);
+            }
+
+            public ICaseDefaultThen<TKey, TResult> Absorb(ICaseDefaultThen<TKey, TResult> builder)
+            {
+                clauses.Add(new NestedDefaultClause<TKey, TResult> { Builder = builder });
+                return this;
             }
         }
 
