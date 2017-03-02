@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 // TODO: Absorb
 // Builders need to implement IClause so they can be properly nested
@@ -136,16 +137,62 @@ namespace KitchenSink.Control
             return Of(key).Returns<TResult>();
         }
 
-        private class Clause<TKey>
+        private interface IClause<in TKey>
         {
-            public Func<TKey, bool> Condition { get; set; }
-            public Action<TKey> Consequent { get; set; }
+            bool Eval(TKey key);
         }
 
-        private class Clause<TKey, TResult>
+        private interface IClause<in TKey, TResult>
         {
-            public Func<TKey, bool> Condition { get; set; }
-            public Func<TKey, TResult> Consequent { get; set; }
+            Maybe<TResult> Eval(TKey key);
+        }
+
+        private class ScalarClause<TKey> : IClause<TKey>
+        {
+            public Func<TKey, bool> Condition { private get; set; }
+            public Action<TKey> Consequent { private get; set; }
+
+            public bool Eval(TKey key)
+            {
+                if (Condition(key))
+                {
+                    Consequent(key);
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        private class NestedClause<TKey> : IClause<TKey>
+        {
+            public ICaseThen<TKey> Builder { private get; set; }
+
+            public bool Eval(TKey key)
+            {
+                return Builder.End();
+            }
+        }
+
+        private class ScalarClause<TKey, TResult> : IClause<TKey, TResult>
+        {
+            public Func<TKey, bool> Condition { private get; set; }
+            public Func<TKey, TResult> Consequent { private get; set; }
+
+            public Maybe<TResult> Eval(TKey key)
+            {
+                return Condition(key) ? Maybe.Some(Consequent(key)) : Maybe<TResult>.None;
+            }
+        }
+
+        private class NestedClause<TKey, TResult> : IClause<TKey, TResult>
+        {
+            public ICaseThen<TKey, TResult> Builder { private get; set; }
+
+            public Maybe<TResult> Eval(TKey key)
+            {
+                return Builder.End();
+            }
         }
 
         private class CaseBuilderInitial<TKey> : ICaseInitialThen<TKey>, ICaseInitialWhen<TKey>
@@ -191,12 +238,12 @@ namespace KitchenSink.Control
 
             public ICaseDefaultThen<TKey> Default(Action<TKey> alternative)
             {
-                return new CaseBuilderDefault<TKey>(key, new Clause<TKey>[0], alternative);
+                return new CaseBuilderDefault<TKey>(key, new IClause<TKey>[0], alternative);
             }
 
             public ICaseDefaultThen<TKey, TResult> Default<TResult>(Func<TKey, TResult> alternative)
             {
-                return new CaseBuilderDefault<TKey, TResult>(key, new Clause<TKey, TResult>[0], alternative);
+                return new CaseBuilderDefault<TKey, TResult>(key, new IClause<TKey, TResult>[0], alternative);
             }
         }
 
@@ -204,7 +251,7 @@ namespace KitchenSink.Control
         {
             private readonly TKey key;
             private Func<TKey, bool> pending;
-            private readonly List<Clause<TKey>> clauses = new List<Clause<TKey>>();
+            private readonly List<IClause<TKey>> clauses = new List<IClause<TKey>>();
 
             public CaseBuilder(TKey key)
             {
@@ -229,7 +276,7 @@ namespace KitchenSink.Control
 
             public ICaseThen<TKey> Then(Action<TKey> consequent)
             {
-                clauses.Add(new Clause<TKey>
+                clauses.Add(new ScalarClause<TKey>
                 {
                     Condition = pending,
                     Consequent = consequent
@@ -244,9 +291,7 @@ namespace KitchenSink.Control
 
             public bool End()
             {
-                return clauses
-                    .FirstMaybe(x => x.Condition(key))
-                    .ForEach(x => x.Consequent(key)).HasValue;
+                return clauses.Any(x => x.Eval(key));
             }
         }
 
@@ -254,10 +299,10 @@ namespace KitchenSink.Control
         {
             private readonly TKey key;
             private Func<TKey, bool> pending;
-            private readonly List<Clause<TKey>> clauses = new List<Clause<TKey>>();
+            private readonly List<IClause<TKey>> clauses = new List<IClause<TKey>>();
             private readonly Action<TKey> alternative;
 
-            public CaseBuilderDefault(TKey key, IEnumerable<Clause<TKey>> clauses, Action<TKey> alternative)
+            public CaseBuilderDefault(TKey key, IEnumerable<IClause<TKey>> clauses, Action<TKey> alternative)
             {
                 this.key = key;
                 this.clauses.AddRange(clauses);
@@ -282,7 +327,7 @@ namespace KitchenSink.Control
 
             public ICaseDefaultThen<TKey> Then(Action<TKey> consequent)
             {
-                clauses.Add(new Clause<TKey>
+                clauses.Add(new ScalarClause<TKey>
                 {
                     Condition = pending,
                     Consequent = consequent
@@ -292,9 +337,10 @@ namespace KitchenSink.Control
 
             public void End()
             {
-                clauses
-                    .FirstMaybe(x => x.Condition(key))
-                    .Branch(x => x.Consequent(key), () => alternative(key));
+                if (!clauses.Any(x => x.Eval(key)))
+                {
+                    alternative(key);
+                }
             }
         }
 
@@ -302,7 +348,7 @@ namespace KitchenSink.Control
         {
             private readonly TKey key;
             private Func<TKey, bool> pending;
-            private readonly List<Clause<TKey, TResult>> clauses = new List<Clause<TKey, TResult>>();
+            private readonly List<IClause<TKey, TResult>> clauses = new List<IClause<TKey, TResult>>();
 
             public CaseBuilder(TKey key)
             {
@@ -327,7 +373,7 @@ namespace KitchenSink.Control
 
             public ICaseThen<TKey, TResult> Then(Func<TKey, TResult> consequent)
             {
-                clauses.Add(new Clause<TKey, TResult>
+                clauses.Add(new ScalarClause<TKey, TResult>
                 {
                     Condition = pending,
                     Consequent = consequent
@@ -342,9 +388,7 @@ namespace KitchenSink.Control
 
             public Maybe<TResult> End()
             {
-                return clauses
-                    .FirstMaybe(x => x.Condition(key))
-                    .Select(x => x.Consequent(key));
+                return clauses.FirstSome(x => x.Eval(key));
             }
         }
 
@@ -352,10 +396,10 @@ namespace KitchenSink.Control
         {
             private readonly TKey key;
             private Func<TKey, bool> pending;
-            private readonly List<Clause<TKey, TResult>> clauses = new List<Clause<TKey, TResult>>();
+            private readonly List<IClause<TKey, TResult>> clauses = new List<IClause<TKey, TResult>>();
             private readonly Func<TKey, TResult> alternative;
 
-            public CaseBuilderDefault(TKey key, IEnumerable<Clause<TKey, TResult>> clauses, Func<TKey, TResult> alternative)
+            public CaseBuilderDefault(TKey key, IEnumerable<IClause<TKey, TResult>> clauses, Func<TKey, TResult> alternative)
             {
                 this.key = key;
                 this.clauses.AddRange(clauses);
@@ -380,7 +424,7 @@ namespace KitchenSink.Control
 
             public ICaseDefaultThen<TKey, TResult> Then(Func<TKey, TResult> consequent)
             {
-                clauses.Add(new Clause<TKey, TResult>
+                clauses.Add(new ScalarClause<TKey, TResult>
                 {
                     Condition = pending,
                     Consequent = consequent
@@ -390,9 +434,7 @@ namespace KitchenSink.Control
 
             public TResult End()
             {
-                return clauses
-                    .FirstMaybe(x => x.Condition(key))
-                    .Branch(x => x.Consequent(key), () => alternative(key));
+                return clauses.FirstSome(x => x.Eval(key)).OrElseEval(key, alternative);
             }
         }
 
