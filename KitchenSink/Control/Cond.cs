@@ -21,6 +21,9 @@ namespace KitchenSink.Control
         ICondThen Then(Action consequent);
     }
 
+    /// <summary>
+    /// A Cond with an imcomplete clause.
+    /// </summary>
     public interface ICondIf
     {
         /// <summary>
@@ -29,6 +32,9 @@ namespace KitchenSink.Control
         ICondThen Then(Action consequent);
     }
 
+    /// <summary>
+    /// A Cond with a list of complete clauses.
+    /// </summary>
     public interface ICondThen
     {
         /// <summary>
@@ -144,16 +150,62 @@ namespace KitchenSink.Control
             return If<TResult>(() => condition);
         }
 
-        private class Clause
+        private interface IClause
         {
-            public Func<bool> Condition { get; set; }
-            public Action Consequent { get; set; }
+            bool Eval();
         }
 
-        private class Clause<TResult>
+        private interface IClause<TResult>
         {
-            public Func<bool> Condition { get; set; }
-            public Func<TResult> Consequent { get; set; }
+            Maybe<TResult> Eval();
+        }
+
+        private class ScalarClause : IClause
+        {
+            public Func<bool> Condition { private get; set; }
+            public Action Consequent { private get; set; }
+
+            public bool Eval()
+            {
+                if (Condition())
+                {
+                    Consequent();
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        private class NestedClause : IClause
+        {
+            public ICondThen Builder { private get; set; }
+
+            public bool Eval()
+            {
+                return Builder.End();
+            }
+        }
+
+        private class ScalarClause<TResult> : IClause<TResult>
+        {
+            public Func<bool> Condition { private get;  set; }
+            public Func<TResult> Consequent { private get; set; }
+
+            public Maybe<TResult> Eval()
+            {
+                return Condition() ? Maybe.Some(Consequent()) : Maybe<TResult>.None;
+            }
+        }
+
+        private class NestedClause<TResult> : IClause<TResult>
+        {
+            public ICondThen<TResult> Builder { private get; set; }
+
+            public Maybe<TResult> Eval()
+            {
+                return Builder.End();
+            }
         }
 
         private class CondBuilderInitial : ICondInitial
@@ -179,7 +231,7 @@ namespace KitchenSink.Control
         private class CondBuilder : ICondIf, ICondThen
         {
             private Func<bool> pending;
-            private readonly List<Clause> clauses = new List<Clause>();
+            private readonly List<IClause> clauses = new List<IClause>();
 
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public ICondIf If(Func<bool> condition)
@@ -190,7 +242,7 @@ namespace KitchenSink.Control
 
             public ICondThen Then(Action consequent)
             {
-                clauses.Add(new Clause
+                clauses.Add(new ScalarClause
                 {
                     Condition = pending,
                     Consequent = consequent
@@ -200,20 +252,12 @@ namespace KitchenSink.Control
 
             public bool End()
             {
-                var clause = clauses.FirstOrDefault(x => x.Condition());
-
-                if (clause != null)
-                {
-                    clause.Consequent();
-                    return true;
-                }
-
-                return false;
+                return clauses.Any(x => x.Eval());
             }
 
             public ICondThen Absorb(ICondThen builder)
             {
-                clauses.AddRange(((CondBuilder)builder).clauses);
+                clauses.Add(new NestedClause { Builder = builder });
                 return this;
             }
         }
@@ -221,7 +265,7 @@ namespace KitchenSink.Control
         private class CondBuilder<TResult> : ICondIf<TResult>, ICondThen<TResult>
         {
             private Func<bool> pending;
-            private readonly List<Clause<TResult>> clauses = new List<Clause<TResult>>();
+            private readonly List<IClause<TResult>> clauses = new List<IClause<TResult>>();
 
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public ICondIf<TResult> If(Func<bool> condition)
@@ -232,7 +276,7 @@ namespace KitchenSink.Control
 
             public ICondThen<TResult> Then(Func<TResult> consequent)
             {
-                clauses.Add(new Clause<TResult>
+                clauses.Add(new ScalarClause<TResult>
                 {
                     Condition = pending,
                     Consequent = consequent
@@ -242,12 +286,12 @@ namespace KitchenSink.Control
 
             public Maybe<TResult> End()
             {
-                return clauses.FirstMaybe(x => x.Condition()).Select(x => x.Consequent());
+                return clauses.FirstSome(x => x.Eval());
             }
 
             public ICondThen<TResult> Absorb(ICondThen<TResult> builder)
             {
-                clauses.AddRange(((CondBuilder<TResult>)builder).clauses);
+                clauses.Add(new NestedClause<TResult> { Builder = builder });
                 return this;
             }
         }

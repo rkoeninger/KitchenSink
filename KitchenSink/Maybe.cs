@@ -113,6 +113,20 @@ namespace KitchenSink
             return Maybe<A>.None;
         }
 
+        public static Maybe<A> FirstSome<A>(this IEnumerable<Maybe<A>> seq)
+        {
+            foreach (var item in seq)
+                if (item.HasValue)
+                    return item;
+
+            return Maybe<A>.None;
+        }
+
+        public static Maybe<B> FirstSome<A, B>(this IEnumerable<A> seq, Func<A, Maybe<B>> selector)
+        {
+            return FirstSome(seq.Select(selector));
+        }
+
         public static Maybe<A> LastMaybe<A>(this IEnumerable<A> seq)
         {
             return Try(seq.Last);
