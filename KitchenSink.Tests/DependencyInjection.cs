@@ -1,4 +1,4 @@
-﻿using KitchenSink.DI;
+﻿using KitchenSink.Injection;
 using KitchenSink.Testing;
 using NUnit.Framework;
 

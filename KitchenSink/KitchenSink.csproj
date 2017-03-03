@@ -50,12 +50,12 @@
     <Compile Include="Comparables.cs" />
     <Compile Include="Dates.cs" />
     <Compile Include="DateTimeRange.cs" />
-    <Compile Include="DI\Exceptions.cs" />
-    <Compile Include="DI\SingleUse.cs" />
+    <Compile Include="Injection\Exceptions.cs" />
+    <Compile Include="Injection\SingleUse.cs" />
     <Compile Include="FilePath.cs" />
     <Compile Include="HList.cs" />
     <Compile Include="Collections\MultiKeyDictionary.cs" />
-    <Compile Include="DI\Needs.cs" />
+    <Compile Include="Injection\Needs.cs" />
     <Compile Include="Funcs.cs" />
     <Compile Include="IO.cs" />
     <Compile Include="Lens.cs" />

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace KitchenSink.DI
+namespace KitchenSink.Injection
 {
     /// <summary>
     /// Indicates that a class/component is not thread safe, or has transient state

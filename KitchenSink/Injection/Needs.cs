@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace KitchenSink.DI
+namespace KitchenSink.Injection
 {
     /// <summary>
     /// A simple IoC container. Resolves dependencies that are explicity

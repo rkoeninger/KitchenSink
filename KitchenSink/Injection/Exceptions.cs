@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace KitchenSink.DI
+namespace KitchenSink.Injection
 {
     public class ImplementationUnresolvedException : Exception
     {
