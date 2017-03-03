@@ -81,26 +81,24 @@ namespace KitchenSink
         public DateTimeRange(DateTime begin, DateTime end) : this()
         {
             if (end < begin)
-                throw new ArgumentException("End can't be earlier than Begin");
+                throw new ArgumentException($"{nameof(end)} can't come before {nameof(begin)}");
 
             Begin = begin;
             End = end;
-            Length = end - begin;
         }
 
         public DateTimeRange(DateTime begin, TimeSpan length) : this()
         {
             if (length < TimeSpan.Zero)
-                throw new ArgumentException("Length can't be negative");
+                throw new ArgumentException($"{nameof(length)} can't be negative");
 
             Begin = begin;
             End = begin + length;
-            Length = length;
         }
 
         public DateTime Begin { get; }
         public DateTime End { get; }
-        public TimeSpan Length { get; private set; }
+        public TimeSpan Length => End - Begin;
 
         public bool Contains(DateTime time)
         {
