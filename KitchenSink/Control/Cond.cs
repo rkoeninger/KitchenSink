@@ -22,7 +22,7 @@ namespace KitchenSink.Control
     }
 
     /// <summary>
-    /// A Cond with an imcomplete clause.
+    /// A Cond with an imcomplete clause that returns void.
     /// </summary>
     public interface ICondIf
     {
@@ -33,7 +33,7 @@ namespace KitchenSink.Control
     }
 
     /// <summary>
-    /// A Cond with a list of complete clauses.
+    /// A Cond with a list of complete clauses that returns void.
     /// </summary>
     public interface ICondThen
     {

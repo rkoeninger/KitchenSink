@@ -4,134 +4,355 @@ using System.Linq;
 
 namespace KitchenSink.Control
 {
+    /// <summary>
+    /// A Case with an incomplete clause and yet unknown return type.
+    /// </summary>
     public interface ICaseInitialWhen<TKey>
     {
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// </summary>
         ICaseThen<TKey> Then(Action<TKey> consequent);
+
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// Return type for Case is inferred from argument.
+        /// </summary>
         ICaseThen<TKey, TResult> Then<TResult>(Func<TKey, TResult> consequent);
     }
 
+    /// <summary>
+    /// A Case with an incomplete clause, focused on a key subtype, and yet unknown return type.
+    /// </summary>
     public interface ICaseSubtypeInitialWhen<TKey, out TSubtype> where TSubtype : TKey
     {
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// </summary>
         ICaseThen<TKey> Then(Action<TSubtype> consequent);
+
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// Return type for Case is inferred from argument.
+        /// </summary>
         ICaseThen<TKey, TResult> Then<TResult>(Func<TSubtype, TResult> consequent);
     }
 
+    /// <summary>
+    /// A Case with no clauses and yet unknown return type.
+    /// </summary>
     public interface ICaseInitialThen<TKey>
     {
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
         ICaseInitialWhen<TKey> When(Func<TKey, bool> condition);
+
+        /// <summary>
+        /// Starts a new clause with given condition, predicated on key being of specified subtype.
+        /// </summary>
         ICaseSubtypeInitialWhen<TKey, TSubtype> When<TSubtype>(Func<TSubtype, bool> condition) where TSubtype : TKey;
+
+        /// <summary>
+        /// Starts a new clause, predicated on key being of specified subtype.
+        /// </summary>
         ICaseSubtypeInitialWhen<TKey, TSubtype> When<TSubtype>() where TSubtype : TKey;
+
+        /// <summary>
+        /// Explicitly declares return type for this Case.
+        /// </summary>
         ICaseThen<TKey, TResult> Returns<TResult>();
+        
+        /// <summary>
+        /// Provides a default consequent for this Case.
+        /// </summary>
         ICaseDefaultThen<TKey> Default(Action<TKey> alternative);
+
+        /// <summary>
+        /// Provides a default consequent for this Case.
+        /// Return type for Case is inferred from argument.
+        /// </summary>
         ICaseDefaultThen<TKey, TResult> Default<TResult>(Func<TKey, TResult> alternative);
     }
 
+    /// <summary>
+    /// A Case with an incomplete clause that returns void.
+    /// </summary>
     public interface ICaseWhen<TKey>
     {
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// </summary>
         ICaseThen<TKey> Then(Action<TKey> consequent);
     }
 
+    /// <summary>
+    /// A Case with an incomplete clause, focused on a key subtype, that returns void.
+    /// </summary>
     public interface ICaseSubtypeWhen<TKey, out TSubtype> where TSubtype : TKey
     {
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// </summary>
         ICaseThen<TKey> Then(Action<TSubtype> consequent);
     }
 
+    /// <summary>
+    /// A Case with a list of complete clauses that returns void.
+    /// </summary>
     public interface ICaseThen<TKey>
     {
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
         ICaseWhen<TKey> When(Func<TKey, bool> condition);
+
+        /// <summary>
+        /// Starts a new clause with given condition, predicated on key being of specified subtype.
+        /// </summary>
         ICaseSubtypeWhen<TKey, TSubtype> When<TSubtype>(Func<TSubtype, bool> condition) where TSubtype : TKey;
+
+        /// <summary>
+        /// Starts a new clause, predicated on key being of specified subtype.
+        /// </summary>
         ICaseSubtypeWhen<TKey, TSubtype> When<TSubtype>() where TSubtype : TKey;
+
+        /// <summary>
+        /// Adds all the clauses in the given Case to this one.
+        /// </summary>
         ICaseThen<TKey> Absorb(ICaseThen<TKey> builder);
+
+        /// <summary>
+        /// Provides a default consequent for this Case.
+        /// </summary>
         ICaseDefaultThen<TKey> Default(Action<TKey> alternative);
+
+        /// <summary>
+        /// Evaluates Case, returning true if one of the
+        /// consequents was evaluated, false if none were.
+        /// </summary>
         bool End();
     }
 
+    /// <summary>
+    /// A Cond with an incomplete clause and a default consequent that returns void.
+    /// </summary>
     public interface ICaseDefaultWhen<TKey>
     {
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// </summary>
         ICaseDefaultThen<TKey> Then(Action<TKey> consequent);
     }
 
+    /// <summary>
+    /// A Cond with an incomplete clause, focused on a key subtype, and a default consequent that returns void.
+    /// </summary>
     public interface ICaseDefaultSubtypeWhen<TKey, out TSubtype> where TSubtype : TKey
     {
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// </summary>
         ICaseDefaultThen<TKey> Then(Action<TSubtype> consequent);
     }
 
+    /// <summary>
+    /// A Case with a list of complete clauses and a default consequent that returns void.
+    /// </summary>
     public interface ICaseDefaultThen<TKey>
     {
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
         ICaseDefaultWhen<TKey> When(Func<TKey, bool> condition);
+
+        /// <summary>
+        /// Starts a new clause with given condition, predicated on key being of specified subtype.
+        /// </summary>
         ICaseDefaultSubtypeWhen<TKey, TSubtype> When<TSubtype>(Func<TSubtype, bool> condition) where TSubtype : TKey;
+
+        /// <summary>
+        /// Starts a new clause, predicated on key being of specified subtype.
+        /// </summary>
         ICaseDefaultSubtypeWhen<TKey, TSubtype> When<TSubtype>() where TSubtype : TKey;
+
+        /// <summary>
+        /// Adds all the clauses in the given Case to this one.
+        /// </summary>
         ICaseDefaultThen<TKey> Absorb(ICaseDefaultThen<TKey> builder);
+
+        /// <summary>
+        /// Evaluates Case.
+        /// </summary>
         void End();
     }
 
+    /// <summary>
+    /// A Case with an incomplete clause.
+    /// </summary>
     public interface ICaseWhen<TKey, TResult>
     {
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// </summary>
         ICaseThen<TKey, TResult> Then(Func<TKey, TResult> consequent);
     }
-    
+
+    /// <summary>
+    /// A Case with an incomplete clause, focused on a key subtype.
+    /// </summary>
     public interface ICaseSubtypeWhen<TKey, out TSubtype, TResult> where TSubtype : TKey
     {
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// </summary>
         ICaseThen<TKey, TResult> Then(Func<TSubtype, TResult> consequent);
     }
 
+    /// <summary>
+    /// A Case with a list of complete clauses.
+    /// </summary>
     public interface ICaseThen<TKey, TResult>
     {
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
         ICaseWhen<TKey, TResult> When(Func<TKey, bool> condition);
+
+        /// <summary>
+        /// Starts a new clause with given condition, predicated on key being of specified subtype.
+        /// </summary>
         ICaseSubtypeWhen<TKey, TSubtype, TResult> When<TSubtype>(Func<TSubtype, bool> condition) where TSubtype : TKey;
+
+        /// <summary>
+        /// Starts a new clause, predicated on key being of specified subtype.
+        /// </summary>
         ICaseSubtypeWhen<TKey, TSubtype, TResult> When<TSubtype>() where TSubtype : TKey;
+
+        /// <summary>
+        /// Adds all the clauses in the given Case to this one.
+        /// </summary>
         ICaseThen<TKey, TResult> Absorb(ICaseThen<TKey, TResult> builder);
+
+        /// <summary>
+        /// Provides a default consequent for this Case.
+        /// </summary>
         ICaseDefaultThen<TKey, TResult> Default(Func<TKey, TResult> alternative);
+
+        /// <summary>
+        /// Evaluates Case, returning Some if one of the
+        /// consequents was evaluated, None if none were.
+        /// </summary>
         Maybe<TResult> End();
     }
 
+    /// <summary>
+    /// A Case with an incomplete clause and a default consequent.
+    /// </summary>
     public interface ICaseDefaultWhen<TKey, TResult>
     {
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// </summary>
         ICaseDefaultThen<TKey, TResult> Then(Func<TKey, TResult> consequent);
     }
 
+    /// <summary>
+    /// A Case with an incomplete clause, focused on a key subtype, and a default consequent.
+    /// </summary>
     public interface ICaseDefaultSubtypeWhen<TKey, out TSubtype, TResult> where TSubtype : TKey
     {
+        /// <summary>
+        /// Provides a consequent for previous condition.
+        /// </summary>
         ICaseDefaultThen<TKey, TResult> Then(Func<TSubtype, TResult> consequent);
     }
 
+    /// <summary>
+    /// A Case with a list of complete clauses and a default consequent.
+    /// </summary>
     public interface ICaseDefaultThen<TKey, TResult>
     {
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
         ICaseDefaultWhen<TKey, TResult> When(Func<TKey, bool> condition);
+
+        /// <summary>
+        /// Starts a new clause with given condition, predicated on key being of specified subtype.
+        /// </summary>
         ICaseDefaultSubtypeWhen<TKey, TSubtype, TResult> When<TSubtype>(Func<TSubtype, bool> condition) where TSubtype : TKey;
+
+        /// <summary>
+        /// Starts a new clause, predicated on key being of specified subtype.
+        /// </summary>
         ICaseDefaultSubtypeWhen<TKey, TSubtype, TResult> When<TSubtype>() where TSubtype : TKey;
+
+        /// <summary>
+        /// Adds all the clauses in the given Case to this one.
+        /// </summary>
         ICaseDefaultThen<TKey, TResult> Absorb(ICaseDefaultThen<TKey, TResult> builder);
+
+        /// <summary>
+        /// Evaluates Case.
+        /// </summary>
         TResult End();
     }
 
+    /// <summary>
+    /// Builds a conditional control structure based on a key value.
+    /// </summary>
     public static class Case<TKey, TResult>
     {
+        /// <summary>
+        /// Starts a new Case with the given key value.
+        /// </summary>
         public static ICaseThen<TKey, TResult> Of(TKey key)
         {
             return Case.Of(key).Returns<TResult>();
         }
     }
 
+    /// <summary>
+    /// Builds a conditional control structure based on a key value.
+    /// </summary>
     public static class Case<TKey>
     {
+        /// <summary>
+        /// Starts a new Case with the given key value
+        /// and yet unknown return type.
+        /// </summary>
         public static ICaseInitialThen<TKey> Of(TKey key)
         {
             return Case.Of(key);
         }
 
+        /// <summary>
+        /// Starts a new Case with the given key value.
+        /// </summary>
         public static ICaseThen<TKey, TResult> Of<TResult>(TKey key)
         {
             return Case.Of(key).Returns<TResult>();
         }
     }
 
+    /// <summary>
+    /// Builds a conditional control structure based on a key value.
+    /// </summary>
     public static class Case
     {
+        /// <summary>
+        /// Starts a new Case with the given key value
+        /// and yet unknown return type.
+        /// </summary>
         public static ICaseInitialThen<TKey> Of<TKey>(TKey key)
         {
             return new CaseBuilderInitial<TKey>(key);
         }
 
+        /// <summary>
+        /// Starts a new Case with the given key value.
+        /// </summary>
         public static ICaseThen<TKey, TResult> Of<TKey, TResult>(TKey key)
         {
             return Of(key).Returns<TResult>();
@@ -590,12 +811,18 @@ namespace KitchenSink.Control
             }
         }
 
+        /// <summary>
+        /// Provides a result for previous condition.
+        /// </summary>
         public static ICaseThen<TKey> Then<TKey>(
             this ICaseInitialWhen<TKey> builder)
         {
             return builder.Then(_ => { });
         }
 
+        /// <summary>
+        /// Provides a result for previous condition.
+        /// </summary>
         public static ICaseThen<TKey, TResult> Then<TKey, TResult>(
             this ICaseInitialWhen<TKey> builder,
             TResult consequent)
@@ -603,12 +830,18 @@ namespace KitchenSink.Control
             return builder.Then(_ => consequent);
         }
 
+        /// <summary>
+        /// Provides a subtype focused result for previous condition.
+        /// </summary>
         public static ICaseThen<TKey> Then<TKey, TSubtype>(
             this ICaseSubtypeInitialWhen<TKey, TSubtype> builder) where TSubtype : TKey
         {
             return builder.Then(_ => { });
         }
 
+        /// <summary>
+        /// Provides a subtype focused result for previous condition.
+        /// </summary>
         public static ICaseThen<TKey, TResult> Then<TKey, TSubtype, TResult>(
             this ICaseSubtypeInitialWhen<TKey, TSubtype> builder,
             TResult consequent) where TSubtype : TKey
@@ -616,6 +849,9 @@ namespace KitchenSink.Control
             return builder.Then(_ => consequent);
         }
 
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
         public static ICaseInitialWhen<TKey> When<TKey>(
             this ICaseInitialThen<TKey> builder,
             bool condition)
@@ -623,17 +859,28 @@ namespace KitchenSink.Control
             return builder.When(_ => condition);
         }
 
-        public static ICaseInitialWhen<TKey> When<TKey>(this ICaseInitialThen<TKey> builder, TKey condition)
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
+        public static ICaseInitialWhen<TKey> When<TKey>(
+            this ICaseInitialThen<TKey> builder,
+            TKey condition)
         {
             return builder.When(x => Equals(x, condition));
         }
 
+        /// <summary>
+        /// Provides a default consequent for this Case.
+        /// </summary>
         public static ICaseDefaultThen<TKey> Default<TKey>(
             this ICaseInitialThen<TKey> builder)
         {
             return builder.Default(_ => { });
         }
 
+        /// <summary>
+        /// Provides a default consequent for this Case.
+        /// </summary>
         public static ICaseDefaultThen<TKey, TResult> Default<TKey, TResult>(
             this ICaseInitialThen<TKey> builder,
             TResult alternative)
@@ -641,18 +888,27 @@ namespace KitchenSink.Control
             return builder.Default(_ => alternative);
         }
 
+        /// <summary>
+        /// Provides a result for previous condition.
+        /// </summary>
         public static ICaseThen<TKey> Then<TKey>(
             this ICaseWhen<TKey> builder)
         {
             return builder.Then(_ => { });
         }
 
+        /// <summary>
+        /// Provides a result for previous condition.
+        /// </summary>
         public static ICaseThen<TKey> Then<TKey, TSubtype>(
             this ICaseSubtypeWhen<TKey, TSubtype> builder) where TSubtype : TKey
         {
             return builder.Then(_ => { });
         }
 
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
         public static ICaseWhen<TKey> When<TKey>(
             this ICaseThen<TKey> builder,
             bool condition)
@@ -660,17 +916,28 @@ namespace KitchenSink.Control
             return builder.When(_ => condition);
         }
 
-        public static ICaseWhen<TKey> When<TKey>(this ICaseThen<TKey> builder, TKey condition)
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
+        public static ICaseWhen<TKey> When<TKey>(
+            this ICaseThen<TKey> builder,
+            TKey condition)
         {
             return builder.When(x => Equals(x, condition));
         }
 
+        /// <summary>
+        /// Provides a default consequent for this Case.
+        /// </summary>
         public static ICaseDefaultThen<TKey> Default<TKey>(
             this ICaseThen<TKey> builder)
         {
             return builder.Default(_ => { });
         }
 
+        /// <summary>
+        /// Provides a alternative consequent for Case when no conditions were true.
+        /// </summary>
         public static void Else<TKey>(
             this ICaseThen<TKey> builder,
             Action<TKey> alternative)
@@ -678,18 +945,27 @@ namespace KitchenSink.Control
             builder.Default(alternative).End();
         }
 
+        /// <summary>
+        /// Provides a alternative consequent for Case when no conditions were true.
+        /// </summary>
         public static void Else<TKey>(
             this ICaseThen<TKey> builder)
         {
             builder.End();
         }
 
+        /// <summary>
+        /// Provides a result for previous condition.
+        /// </summary>
         public static ICaseDefaultThen<TKey> Then<TKey>(
             this ICaseDefaultWhen<TKey> builder)
         {
             return builder.Then(_ => { });
         }
 
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
         public static ICaseDefaultWhen<TKey> When<TKey>(
             this ICaseDefaultThen<TKey> builder,
             bool condition)
@@ -697,11 +973,19 @@ namespace KitchenSink.Control
             return builder.When(_ => condition);
         }
 
-        public static ICaseDefaultWhen<TKey> When<TKey>(this ICaseDefaultThen<TKey> builder, TKey condition)
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
+        public static ICaseDefaultWhen<TKey> When<TKey>(
+            this ICaseDefaultThen<TKey> builder,
+            TKey condition)
         {
             return builder.When(x => Equals(x, condition));
         }
 
+        /// <summary>
+        /// Provides a result for previous condition.
+        /// </summary>
         public static ICaseThen<TKey, TResult> Then<TKey, TResult>(
             this ICaseWhen<TKey, TResult> builder,
             TResult consequent)
@@ -709,6 +993,9 @@ namespace KitchenSink.Control
             return builder.Then(_ => consequent);
         }
 
+        /// <summary>
+        /// Provides a result for previous condition.
+        /// </summary>
         public static ICaseThen<TKey, TResult> Then<TKey, TSubtype, TResult>(
             this ICaseSubtypeWhen<TKey, TSubtype, TResult> builder,
             TResult consequent) where TSubtype : TKey
@@ -716,6 +1003,9 @@ namespace KitchenSink.Control
             return builder.Then(_ => consequent);
         }
 
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
         public static ICaseWhen<TKey, TResult> When<TKey, TResult>(
             this ICaseThen<TKey, TResult> builder,
             bool condition)
@@ -723,11 +1013,19 @@ namespace KitchenSink.Control
             return builder.When(_ => condition);
         }
 
-        public static ICaseWhen<TKey, TResult> When<TKey, TResult>(this ICaseThen<TKey, TResult> builder, TKey condition)
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
+        public static ICaseWhen<TKey, TResult> When<TKey, TResult>(
+            this ICaseThen<TKey, TResult> builder,
+            TKey condition)
         {
             return builder.When(x => Equals(x, condition));
         }
 
+        /// <summary>
+        /// Provides a default consequent for this Case.
+        /// </summary>
         public static ICaseDefaultThen<TKey, TResult> Default<TKey, TResult>(
             this ICaseThen<TKey, TResult> builder,
             TResult alternative)
@@ -735,6 +1033,9 @@ namespace KitchenSink.Control
             return builder.Default(_ => alternative);
         }
 
+        /// <summary>
+        /// Provides a alternative consequent for Case when no conditions were true.
+        /// </summary>
         public static TResult Else<TKey, TResult>(
             this ICaseThen<TKey, TResult> builder,
             TResult alternative)
@@ -742,6 +1043,9 @@ namespace KitchenSink.Control
             return builder.End() | alternative;
         }
 
+        /// <summary>
+        /// Provides a result for previous condition.
+        /// </summary>
         public static ICaseDefaultThen<TKey, TResult> Then<TKey, TResult>(
             this ICaseDefaultWhen<TKey, TResult> builder,
             TResult consequent)
@@ -749,6 +1053,9 @@ namespace KitchenSink.Control
             return builder.Then(_ => consequent);
         }
 
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
         public static ICaseDefaultWhen<TKey, TResult> When<TKey, TResult>(
             this ICaseDefaultThen<TKey, TResult> builder,
             bool condition)
@@ -756,7 +1063,12 @@ namespace KitchenSink.Control
             return builder.When(_ => condition);
         }
 
-        public static ICaseDefaultWhen<TKey, TResult> When<TKey, TResult>(this ICaseDefaultThen<TKey, TResult> builder, TKey condition)
+        /// <summary>
+        /// Starts a new clause with given condition.
+        /// </summary>
+        public static ICaseDefaultWhen<TKey, TResult> When<TKey, TResult>(
+            this ICaseDefaultThen<TKey, TResult> builder,
+            TKey condition)
         {
             return builder.When(x => Equals(x, condition));
         }
