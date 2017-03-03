@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using static KitchenSink.Collections.ConstructionOperators;
-using static KitchenSink.Z;
+using static KitchenSink.Operators;
 using static KitchenSink.Testing.Expect;
 using NUnit.Framework;
 using static NUnit.Framework.Assert;

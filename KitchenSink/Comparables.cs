@@ -2,6 +2,11 @@
 
 namespace KitchenSink
 {
+    public enum Comparison
+    {
+        GT, LT, EQ
+    }
+
     public static class Comparables
     {
         public static bool IsLessThan<A>(this A val, A that) where A : IComparable<A>

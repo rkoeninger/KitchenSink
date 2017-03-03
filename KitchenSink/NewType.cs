@@ -1,4 +1,6 @@
-﻿namespace KitchenSink
+﻿using static KitchenSink.Operators;
+
+namespace KitchenSink
 {
     /// <summary>
     /// Used to specialize another type.
@@ -17,7 +19,7 @@
         /// </summary>
         public override string ToString()
         {
-            return Z.Str(Value);
+            return Str(Value);
         }
 
         /// <summary>
@@ -25,7 +27,7 @@
         /// </summary>
         public override int GetHashCode()
         {
-            return Z.Hash(Value);
+            return Hash(Value);
         }
 
         /// <summary>

@@ -5,6 +5,7 @@ using System.Reflection;
 
 namespace KitchenSink
 {
+    // TODO: move into Extensions
     public static class Types
     {
         public static bool IsAssignableTo(this Type x, Type y)

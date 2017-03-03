@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using static KitchenSink.Collections.ConstructionOperators;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Testing
 {
@@ -85,15 +86,10 @@ namespace KitchenSink.Testing
             });
         }
 
-        private static int Hash<A>(A x)
-        {
-            return x.IsNull() ? 0 : x.GetHashCode();
-        }
-
         public static void EqualsAndHashCode<A>(IEnumerable<A> testData0)
         {
             var list0 = testData0.ToList();
-            That(list0, list0, (x, y) => Equals(x, y).Implies(Hash(x) == Hash(y)));
+            That(list0, list0, (x, y) => Implies(Equals(x, y), Hash(x) == Hash(y)));
         }
 
         public static void Idempotent<A>(Func<A, A> f)

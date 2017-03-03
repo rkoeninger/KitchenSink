@@ -2,6 +2,7 @@
 using System.Linq;
 using KitchenSink.Collections;
 using static KitchenSink.Collections.ConstructionOperators;
+using static KitchenSink.Operators;
 using KitchenSink.Testing;
 using NUnit.Framework;
 
@@ -45,7 +46,7 @@ namespace KitchenSink.Tests
         public void Idempotence()
         {
             Check.Idempotent(Sample.Ints.Where(x => x != int.MinValue), Math.Abs);
-            Expect.FailedAssert(() => Check.Idempotent(Z.Inc));
+            Expect.FailedAssert(() => Check.Idempotent(Inc));
         }
     }
 }

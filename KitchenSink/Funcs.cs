@@ -2,6 +2,7 @@
 
 namespace KitchenSink
 {
+    // TODO: move into Operators/Extensions
     public static class Funcs
     {
         public static Func<Unit> UnitF(Action f)

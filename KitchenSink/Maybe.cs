@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Linq;
 using KitchenSink.Collections;
 using static KitchenSink.Collections.ConstructionOperators;
+using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
@@ -22,7 +23,7 @@ namespace KitchenSink
 
         public static Maybe<A> Some<A>(A val)
         {
-            if (val.IsNull())
+            if (Null(val))
                 throw new ArgumentNullException("Can't create Maybe.IsSome<" + typeof(A) + "> with null value");
 
             return new Maybe<A>(val);
@@ -202,14 +203,14 @@ namespace KitchenSink
             return maybe.Where(Strings.IsNotBlank);
         }
 
-        public static Maybe<int> NotNeg(Maybe<int> maybe)
+        public static Maybe<int> NonNeg(Maybe<int> maybe)
         {
-            return maybe.Where(Z.NotNeg);
+            return maybe.Where(Operators.NonNeg);
         }
 
         public static Maybe<int> Pos(Maybe<int> maybe)
         {
-            return maybe.Where(Z.Pos);
+            return maybe.Where(Operators.Pos);
         }
 
         public static A OrElseNull<A>(this Maybe<A> maybe) where A : class
@@ -348,7 +349,7 @@ namespace KitchenSink
         internal Maybe(A val) : this()
         {
             Value = val;
-            HasValue = val.IsNotNull();
+            HasValue = NonNull(val);
         }
 
         internal A Value { get; set; }

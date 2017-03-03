@@ -43,8 +43,8 @@
     <Compile Include="Collections\ConstructionOperators.cs" />
     <Compile Include="Control\Case.cs" />
     <Compile Include="Control\Cond.cs" />
+    <Compile Include="Operators.cs" />
     <Compile Include="Testing\All.cs" />
-    <Compile Include="Booleans.cs" />
     <Compile Include="Testing\Check.cs" />
     <Compile Include="Collections\CollectionHelpers.cs" />
     <Compile Include="Comparables.cs" />
@@ -76,7 +76,6 @@
     <Compile Include="Validation.cs" />
     <Compile Include="Void.cs" />
     <Compile Include="Xml.cs" />
-    <Compile Include="Z.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

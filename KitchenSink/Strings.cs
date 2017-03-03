@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
+    // TODO: move into Operators/Extensions
     public static class Strings
     {
         public static string ToLF(this string s)
@@ -16,11 +18,6 @@ namespace KitchenSink
         public static string ToCRLF(this string s)
         {
             return s.Replace("\r\n", "\n").Replace("\n", "\r\n");
-        }
-
-        public static string Format(this string s, params object[] args)
-        {
-            return string.Format(s, args);
         }
 
         public static IEnumerable<string> SplitSeq(this string s, Regex r)
@@ -60,7 +57,7 @@ namespace KitchenSink
 
         public static bool IsNotBlank(this string x)
         {
-            return string.IsNullOrWhiteSpace(x).Not();
+            return Not(string.IsNullOrWhiteSpace(x));
         }
 
         public static string IfEmpty(this string x, string y)

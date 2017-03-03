@@ -1,4 +1,6 @@
 ﻿using NUnit.Framework;
+using static KitchenSink.Comparison;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Tests
 {
@@ -14,11 +16,19 @@ namespace KitchenSink.Tests
         }
 
         [Test]
+        public void CompareOperator()
+        {
+            Assert.AreEqual(GT, Compare(6, -1));
+            Assert.AreEqual(LT, Compare(-6, -1));
+            Assert.AreEqual(EQ, Compare(6, 6));
+        }
+
+        [Test]
         public void RangeOperators()
         {
-            Assert.IsTrue(Z.Cmp- 0 < 3 <= 5);
-            Assert.IsFalse(Z.Cmp- 0 < 3 >= 5);
-            Assert.IsTrue(Z.Cmp- 10 > 5 < 9);
+            Assert.IsTrue(Cmp- 0 < 3 <= 5);
+            Assert.IsFalse(Cmp- 0 < 3 >= 5);
+            Assert.IsTrue(Cmp- 10 > 5 < 9);
         }
     }
 }

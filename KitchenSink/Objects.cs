@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
+    // TODO: move into Operators/Extensions
     public static class Objects
     {
         public static A To<A>(this IConvertible obj)
@@ -18,7 +20,7 @@ namespace KitchenSink
 
         public static bool IsIn<A>(this A val, ICollection<A> coll)
         {
-            return coll.Any(val.Eq());
+            return coll.Any(x => Eq(x, val));
         }
 
         public static bool IsNotIn<A>(this A val, params A[] vals)
@@ -31,34 +33,14 @@ namespace KitchenSink
             return ! IsIn(val, coll);
         }
 
-        public static bool IsNull(this object obj)
-        {
-            return obj == null;
-        }
-
-        public static bool IsNotNull(this object obj)
-        {
-            return obj != null;
-        }
-
-        public static Func<A, bool> Eq<A>(this A x)
-        {
-            return y => Equals(x, y);
-        }
-
-        public static Func<A, bool> Same<A>(this A x)
-        {
-            return y => ReferenceEquals(x, y);
-        }
-
         public static B With<A, B>(this A x, Func<A, B> f)
         {
-            return x.IsNotNull() ? f(x) : default(B);
+            return Null(x) ? default(B) : f(x);
         }
 
         public static A With<A>(this A x, Action<A> f)
         {
-            if (x.IsNotNull())
+            if (NonNull(x))
                 f(x);
 
             return x;
