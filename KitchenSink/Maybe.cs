@@ -413,18 +413,6 @@ namespace KitchenSink
             }
         }
 
-        private static readonly Maybe<A> Default = Maybe.Of(default(A));
-
-        public Maybe<A> OrDefault()
-        {
-            return HasValue ? this : Default;
-        }
-
-        public A OrElseDefault()
-        {
-            return HasValue ? Value : default(A);
-        }
-
         public A OrElse(A other)
         {
             return HasValue ? Value : other;
