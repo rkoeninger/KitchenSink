@@ -352,7 +352,7 @@ namespace KitchenSink
             HasValue = NonNull(val);
         }
 
-        internal A Value { get; set; }
+        internal A Value { get; }
         public bool HasValue { get; }
 
         public Type InnerType => typeof(A);
