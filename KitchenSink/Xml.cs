@@ -8,23 +8,15 @@ namespace KitchenSink
     public class Xml
     {
         /// <summary>Starts new XML document.</summary>
-        public static XmlStart Doc
-        {
-            get { return default(XmlStart); }
-        }
+        public static XmlStart Doc => default(XmlStart);
 
         /// <summary>Starts new indented XML document.</summary>
         public static XmlStart IndentedDoc
-        {
-            get { return new XmlStart(new XmlWriterSettings { Indent = true, IndentChars = "    " }); }
-        }
-        
+            => new XmlStart(new XmlWriterSettings { Indent = true, IndentChars = "    " });
+
         /// <summary>Used to close open tag with <code>&lt; Xml.End</code>.</summary>
-        public static int End
-        {
-            get { return 1; }
-        }
-        
+        public static int End => 1;
+
         /// <summary>Used to close <code>x</code> levels of open tags with <code>&lt; Xml.EndMany(3)</code>.</summary>
         public static int EndMany(int x)
         {
@@ -32,11 +24,8 @@ namespace KitchenSink
         }
 
         /// <summary>Used to close all remaining open tags with <code>&lt; Xml.EndDoc</code>.</summary>
-        public static int EndDoc
-        {
-            get { return -1; }
-        }
-        
+        public static int EndDoc => -1;
+
         /// <summary>Opens new tag.</summary>
         public static Xml operator <(Xml xml, string tagName)
         {
