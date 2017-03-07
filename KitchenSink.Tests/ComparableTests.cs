@@ -26,9 +26,9 @@ namespace KitchenSink.Tests
         [Test]
         public void RangeOperators()
         {
-            Assert.IsTrue(Cmp- 0 < 3 <= 5);
-            Assert.IsFalse(Cmp- 0 < 3 >= 5);
-            Assert.IsTrue(Cmp- 10 > 5 < 9);
+            Assert.IsTrue(0 < Cmp(3) <= 5);
+            Assert.IsFalse(0 < Cmp(3) >= 5);
+            Assert.IsTrue(10 > Cmp(5) < 9);
         }
     }
 }

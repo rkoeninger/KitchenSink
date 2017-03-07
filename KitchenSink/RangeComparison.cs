@@ -2,105 +2,106 @@
 
 namespace KitchenSink
 {
-    public enum RangeComparisonOp
+    public static class RangeComparison
     {
-        Lt, LtEq, Gt, GtEq
-    }
-
-    public struct RangeComparison0
-    {
-        public static RangeComparison1 operator -(RangeComparison0 r, IComparable firstBound)
+        internal static Initial<TValue> New<TValue>(TValue value) where TValue : IComparable<TValue>
         {
-            return new RangeComparison1(firstBound);
-        }
-    }
-
-    public struct RangeComparison1
-    {
-        public IComparable FirstBound { get; }
-
-        public RangeComparison1(IComparable firstBound) : this()
-        {
-            FirstBound = firstBound;
+            return new Initial<TValue>(value);
         }
 
-        public static RangeComparison2 operator <(RangeComparison1 r, IComparable value)
+        internal enum Op
         {
-            return new RangeComparison2(r.FirstBound, RangeComparisonOp.Lt, value);
+            LessThan,
+            LessThanEqual,
+            GreaterThan,
+            GreaterThanEqual
         }
 
-        public static RangeComparison2 operator <=(RangeComparison1 r, IComparable value)
+        public struct Initial<TValue> where TValue : IComparable<TValue>
         {
-            return new RangeComparison2(r.FirstBound, RangeComparisonOp.LtEq, value);
+            private readonly TValue value;
+
+            internal Initial(TValue value) : this()
+            {
+                this.value = value;
+            }
+
+            public static Left<TValue> operator <(TValue leftValue, Initial<TValue> builder)
+            {
+                return new Left<TValue>(builder.value, Op.LessThan, leftValue);
+            }
+
+            public static Left<TValue> operator >(TValue leftValue, Initial<TValue> builder)
+            {
+                return new Left<TValue>(builder.value, Op.GreaterThan, leftValue);
+            }
+
+            public static Left<TValue> operator <=(TValue leftValue, Initial<TValue> builder)
+            {
+                return new Left<TValue>(builder.value, Op.LessThanEqual, leftValue);
+            }
+
+            public static Left<TValue> operator >=(TValue leftValue, Initial<TValue> builder)
+            {
+                return new Left<TValue>(builder.value, Op.GreaterThanEqual, leftValue);
+            }
         }
 
-        public static RangeComparison2 operator >(RangeComparison1 r, IComparable value)
+        public struct Left<TValue> where TValue : IComparable<TValue>
         {
-            return new RangeComparison2(r.FirstBound, RangeComparisonOp.Gt, value);
+            private readonly TValue value;
+            private readonly Op leftOp;
+            private readonly TValue leftValue;
+
+            internal Left(TValue value, Op leftOp, TValue leftValue) : this()
+            {
+                this.value = value;
+                this.leftOp = leftOp;
+                this.leftValue = leftValue;
+            }
+
+            public static bool operator <(Left<TValue> builder, TValue rightValue)
+            {
+                return DoCompare(builder.leftValue, builder.leftOp, builder.value, Op.LessThan, rightValue);
+            }
+
+            public static bool operator >(Left<TValue> builder, TValue rightValue)
+            {
+                return DoCompare(builder.leftValue, builder.leftOp, builder.value, Op.GreaterThan, rightValue);
+            }
+
+            public static bool operator <=(Left<TValue> builder, TValue rightValue)
+            {
+                return DoCompare(builder.leftValue, builder.leftOp, builder.value, Op.LessThanEqual, rightValue);
+            }
+
+            public static bool operator >=(Left<TValue> builder, TValue rightValue)
+            {
+                return DoCompare(builder.leftValue, builder.leftOp, builder.value, Op.GreaterThanEqual, rightValue);
+            }
         }
 
-        public static RangeComparison2 operator >=(RangeComparison1 r, IComparable value)
+        private static bool DoCompare<TValue>(
+            TValue leftValue,
+            Op leftOp,
+            TValue value,
+            Op rightOp,
+            TValue rightValue) where TValue : IComparable<TValue>
         {
-            return new RangeComparison2(r.FirstBound, RangeComparisonOp.GtEq, value);
-        }
-    }
-
-    public struct RangeComparison2
-    {
-        public IComparable FirstBound { get; }
-        public RangeComparisonOp FirstOp { get; }
-        public IComparable Value { get; }
-
-        public RangeComparison2(IComparable firstBound, RangeComparisonOp firstOp, IComparable value) : this()
-        {
-            FirstBound = firstBound;
-            FirstOp = firstOp;
-            Value = value;
+            return DoCompare(leftValue, leftOp, value) && DoCompare(value, rightOp, rightValue);
         }
 
-        public static bool operator <(RangeComparison2 r, IComparable secondBound)
+        private static bool DoCompare<TValue>(TValue left, Op op, TValue right) where TValue : IComparable<TValue>
         {
-            return RangeComparisons.Compare(r.FirstBound, r.FirstOp, r.Value, RangeComparisonOp.Lt, secondBound);
-        }
-
-        public static bool operator <=(RangeComparison2 r, IComparable secondBound)
-        {
-            return RangeComparisons.Compare(r.FirstBound, r.FirstOp, r.Value, RangeComparisonOp.LtEq, secondBound);
-        }
-
-        public static bool operator >(RangeComparison2 r, IComparable secondBound)
-        {
-            return RangeComparisons.Compare(r.FirstBound, r.FirstOp, r.Value, RangeComparisonOp.Gt, secondBound);
-        }
-
-        public static bool operator >=(RangeComparison2 r, IComparable secondBound)
-        {
-            return RangeComparisons.Compare(r.FirstBound, r.FirstOp, r.Value, RangeComparisonOp.GtEq, secondBound);
-        }
-    }
-
-    internal static class RangeComparisons
-    {
-        public static bool Compare(
-            IComparable firstBound,
-            RangeComparisonOp firstOp,
-            IComparable value,
-            RangeComparisonOp secondOp,
-            IComparable secondBound)
-        {
-            return Compare(firstBound, firstOp, value) && Compare(value, secondOp, secondBound);
-        }
-        
-        public static bool Compare(IComparable x, RangeComparisonOp op, IComparable y)
-        {
-            var z = x.CompareTo(y);
+            // TODO: use Case
+            var z = left.CompareTo(right);
 
             switch (op)
             {
-                case RangeComparisonOp.Lt:   return z < 0;
-                case RangeComparisonOp.LtEq: return z <= 0;
-                case RangeComparisonOp.Gt:   return z > 0;
-                case RangeComparisonOp.GtEq: return z >= 0;
+                case Op.LessThan:         return z < 0;
+                case Op.LessThanEqual:    return z <= 0;
+                case Op.GreaterThan:      return z > 0;
+                case Op.GreaterThanEqual: return z >= 0;
                 default: throw new ArgumentException("Invalid comparison operator");
             }
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections;
 using KitchenSink.Control;
 
@@ -107,9 +108,11 @@ namespace KitchenSink
         public static Func<A, bool> ExclusiveUpperBound<A>(A x) where A : IComparable<A>
             => y => y.CompareTo(x) < 0;
 
-        // TODO: this needs to be reconsidered
-        /// <summary>Starting point for a range comparison: <c>Z.Cmp - 0 &lt;= x &lt; 10</c></summary>
-        public static readonly RangeComparison0 Cmp = new RangeComparison0();
+        /// <summary>Starting point for a range comparison: <c>0 &lt;= Cmp(x) &lt; 10</c></summary>
+        public static RangeComparison.Initial<A> Cmp<A>(A value) where A : IComparable<A>
+        {
+            return RangeComparison.New(value);
+        }
 
         /// <summary>
         /// Comparison that returns a symbolic result.
