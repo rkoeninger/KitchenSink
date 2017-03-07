@@ -20,6 +20,9 @@ namespace KitchenSink
         /// <summary>Positive integer predicate.</summary>
         public static readonly Func<int, bool> Pos = x => x > 0;
 
+        /// <summary>Non-positive integer predicate.</summary>
+        public static readonly Func<int, bool> NonPos = x => x <= 0;
+
         /// <summary>Negative integer predicate.</summary>
         public static readonly Func<int, bool> Neg = x => x < 0;
 

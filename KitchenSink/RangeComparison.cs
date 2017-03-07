@@ -93,7 +93,6 @@ namespace KitchenSink
 
         private static bool DoCompare<TValue>(TValue left, Op op, TValue right) where TValue : IComparable<TValue>
         {
-            // TODO: use Case
             var z = left.CompareTo(right);
 
             switch (op)
