@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using KitchenSink.Control;
 
 namespace KitchenSink
 {
@@ -122,10 +123,66 @@ namespace KitchenSink
                 return Comparison.LT;
             if (y == null)
                 return Comparison.GT;
-            var result = x.CompareTo(y);
-            if (result < 0)
-                return Comparison.LT;
-            return result > 0 ? Comparison.GT : Comparison.EQ;
+            return Case(x.CompareTo(y))
+                .When(Neg).Then(Comparison.LT)
+                .When(Pos).Then(Comparison.GT)
+                .Else(Comparison.EQ);
+        }
+
+        /// <summary>
+        /// Starts a Cond with the given condition.
+        /// </summary>
+        public static ICondInitial If(Func<bool> condition)
+        {
+            return Cond.If(condition);
+        }
+
+        /// <summary>
+        /// Starts a Cond with the given condition.
+        /// </summary>
+        public static ICondInitial If(bool condition)
+        {
+            return Cond.If(condition);
+        }
+
+        /// <summary>
+        /// Starts a Cond with the given condition.
+        /// </summary>
+        public static ICondIf<TResult> If<TResult>(Func<bool> condition)
+        {
+            return Cond<TResult>.If(condition);
+        }
+
+        /// <summary>
+        /// Starts a Cond with the given condition.
+        /// </summary>
+        public static ICondIf<TResult> If<TResult>(bool condition)
+        {
+            return Cond<TResult>.If(condition);
+        }
+
+        /// <summary>
+        /// Starts a Case for the given key.
+        /// </summary>
+        public static ICaseInitialThen<A> Case<A>(A key)
+        {
+            return Control.Case.Of(key);
+        }
+
+        /// <summary>
+        /// Starts a Case for the given key with explicit return type.
+        /// </summary>
+        public static ICaseThen<TKey, TResult> Case<TKey, TResult>(TKey key)
+        {
+            return Control.Case<TKey, TResult>.Of(key);
+        }
+
+        /// <summary>
+        /// Allows a block of statements to be used as an expression.
+        /// </summary>
+        public static A Do<A>(Func<A> body)
+        {
+            return body();
         }
     }
 }

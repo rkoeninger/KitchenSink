@@ -46,7 +46,7 @@ namespace KitchenSink.Tests
 
     namespace UsingStatic
     {
-        using static Cond;
+        using static Operators;
 
         [TestFixture]
         public class CondUsingStaticTests
