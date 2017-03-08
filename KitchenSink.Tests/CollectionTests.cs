@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KitchenSink.Collections;
+using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 using NUnit.Framework;
 
@@ -126,9 +127,9 @@ namespace KitchenSink.Tests
             Assert.IsFalse(z == 3);
 
             /*
-             * Force() causes an IEnumerable to be evaluated and side-effects to occur.
+             * ToList() causes an IEnumerable to be evaluated and side-effects to occur.
              */
-            e.Force();
+            e.ToList();
 
             Assert.IsTrue(x == 1);
             Assert.IsTrue(y == 2);

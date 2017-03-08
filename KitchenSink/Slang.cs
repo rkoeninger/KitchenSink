@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using KitchenSink.Collections;
+using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
 namespace KitchenSink

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KitchenSink.Collections;
+using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
 namespace KitchenSink

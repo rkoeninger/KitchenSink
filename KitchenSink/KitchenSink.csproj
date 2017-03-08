@@ -43,6 +43,7 @@
     <Compile Include="CollectionOperators.cs" />
     <Compile Include="Control\Case.cs" />
     <Compile Include="Control\Cond.cs" />
+    <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\ExtensionMethods.cs" />
     <Compile Include="Operators.cs" />
     <Compile Include="Testing\All.cs" />
