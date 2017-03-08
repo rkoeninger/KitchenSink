@@ -10,9 +10,7 @@ namespace KitchenSink.Collections
     {
         public static IEnumerable<byte> AsEnumerable(this Stream stream)
         {
-            int b;
-
-            while ((b = stream.ReadByte()) >= 0)
+            for (int b; (b = stream.ReadByte()) >= 0;)
             {
                 yield return (byte) b;
             }
@@ -20,9 +18,7 @@ namespace KitchenSink.Collections
 
         public static IEnumerable<string> AsEnumerable(this TextReader reader)
         {
-            string line;
-
-            while ((line = reader.ReadLine()) != null)
+            for (string line; (line = reader.ReadLine()) != null;)
             {
                 yield return line;
             }

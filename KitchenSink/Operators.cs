@@ -129,7 +129,7 @@ namespace KitchenSink
         public static Func<A, bool> ExclusiveUpperBound<A>(A x) where A : IComparable<A>
             => y => y.CompareTo(x) < 0;
 
-        /// <summary>Starting point for a range comparison: <c>0 &lt;= Cmp(x) &lt; 10</c></summary>
+        /// <summary>Starting point for a range comparison, example: <c>0 &lt;= Cmp(x) &lt; 10</c></summary>
         public static RangeComparison.Initial<A> Cmp<A>(A value) where A : IComparable<A>
         {
             return RangeComparison.New(value);

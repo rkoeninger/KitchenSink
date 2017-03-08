@@ -15,26 +15,6 @@ namespace KitchenSink
             return () => f();
         }
 
-        public static B Apply<A, B>(this Func<A, B> f, A x)
-        {
-            return f(x);
-        }
-
-        public static Func<B, C> Apply<A, B, C>(this Func<A, B, C> f, A x)
-        {
-            return y => f(x, y);
-        }
-
-        public static Func<B, C, D> Apply<A, B, C, D>(this Func<A, B, C, D> f, A x)
-        {
-            return (y, z) => f(x, y, z);
-        }
-
-        public static Func<B, C, D, E> Apply<A, B, C, D, E>(this Func<A, B, C, D, E> f, A x)
-        {
-            return (y, z, w) => f(x, y, z, w);
-        }
-
         public static Func<A, D> Zip<A, B, C, D>(this Func<A, B> f, Func<A, C> g, Func<B, C, D> zipper)
         {
             return x => zipper(f(x), g(x));

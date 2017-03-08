@@ -2,9 +2,17 @@
 
 namespace KitchenSink
 {
+    /// <summary>
+    /// Result of comparing two values.
+    /// </summary>
     public enum Comparison
     {
-        GT, LT, EQ
+        /// <summary>Greater than.</summary>
+        GT,
+        /// <summary>Lesser than.</summary>
+        LT,
+        /// <summary>Equal to.</summary>
+        EQ
     }
 
     public static class RangeComparison

@@ -117,5 +117,53 @@ namespace KitchenSink.Extensions
 
             yield return s.Substring(i, s.Length - i);
         }
+
+        /// <summary>
+        /// Partially applies 2-parameter function to 1 argument.
+        /// </summary>
+        public static Func<B, Z> Invoke<A, B, Z>(this Func<A, B, Z> f, A a)
+        {
+            return b => f.Invoke(a, b);
+        }
+
+        /// <summary>
+        /// Partially applies 3-parameter function to 1 argument.
+        /// </summary>
+        public static Func<B, C, Z> Invoke<A, B, C, Z>(this Func<A, B, C, Z> f, A a)
+        {
+            return (b, c) => f.Invoke(a, b, c);
+        }
+
+        /// <summary>
+        /// Partially applies 3-parameter function to 2 arguments.
+        /// </summary>
+        public static Func<C, Z> Invoke<A, B, C, Z>(this Func<A, B, C, Z> f, A a, B b)
+        {
+            return c => f.Invoke(a, b, c);
+        }
+
+        /// <summary>
+        /// Partially applies 4-parameter function to 1 argument.
+        /// </summary>
+        public static Func<B, C, D, Z> Invoke<A, B, C, D, Z>(this Func<A, B, C, D, Z> f, A a)
+        {
+            return (b, c, d) => f.Invoke(a, b, c, d);
+        }
+
+        /// <summary>
+        /// Partially applies 4-parameter function to 2 arguments.
+        /// </summary>
+        public static Func<C, D, Z> Invoke<A, B, C, D, Z>(this Func<A, B, C, D, Z> f, A a, B b)
+        {
+            return (c, d) => f.Invoke(a, b, c, d);
+        }
+
+        /// <summary>
+        /// Partially applies 4-parameter function to 3 arguments.
+        /// </summary>
+        public static Func<D, Z> Invoke<A, B, C, D, Z>(this Func<A, B, C, D, Z> f, A a, B b, C c)
+        {
+            return d => f.Invoke(a, b, c, d);
+        }
     }
 }

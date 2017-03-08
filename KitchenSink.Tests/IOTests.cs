@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
 namespace KitchenSink.Tests
@@ -17,7 +18,7 @@ namespace KitchenSink.Tests
         [Test]
         public void IOTransforms()
         {
-            Assert.AreEqual(3, IO.Demote(IO.Of(() => Add.Apply(1))).Invoke(2).Eval());
+            Assert.AreEqual(3, IO.Demote(IO.Of(() => Add.Invoke(1))).Invoke(2).Eval());
         }
     }
 }
