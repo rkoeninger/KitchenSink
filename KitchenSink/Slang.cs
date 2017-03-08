@@ -718,7 +718,7 @@ namespace KitchenSink
             return TypeKeywords.GetMaybe(str).OrElse(null);
         }
 
-        public static readonly IReadOnlyDictionary<string, Type> TypeKeywords = DictOf(
+        public static readonly IDictionary<string, Type> TypeKeywords = DictOf(
             "bool",    typeof(bool),
             "char",    typeof(char),
             "byte",    typeof(byte),

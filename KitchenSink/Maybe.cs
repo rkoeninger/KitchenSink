@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using KitchenSink.Collections;
+using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
 namespace KitchenSink
@@ -55,106 +54,9 @@ namespace KitchenSink
             return new Lazy<Maybe<B>>(() => If(val, f, selector));
         }
 
-        public static Maybe<int> ToInt(this string s)
-        {
-            int i;
-            return int.TryParse(s, out i) ? Of(i) : Maybe<int>.None;
-        }
-
-        public static Maybe<double> ToDouble(this string s)
-        {
-            double d;
-            return double.TryParse(s, out d) ? Of(d) : Maybe<double>.None;
-        }
-
-        public static Maybe<XDocument> ToXml(this string s)
-        {
-            return Try(() => XDocument.Parse(s));
-        }
-
-        public static Maybe<A> GetMaybe<A>(this IReadOnlyList<A> list, int index)
-        {
-            return Try(() => list[index]);
-        }
-
-        public static Maybe<A> GetMaybe<A>(this IList<A> list, int index)
-        {
-            return Try(() => list[index]);
-        }
-
-        public static Maybe<B> GetMaybe<A, B>(this IReadOnlyDictionary<A, B> dict, A key)
-        {
-            return Try(() => dict[key]);
-        }
-
-        public static Maybe<B> GetMaybe<A, B>(this IDictionary<A, B> dict, A key)
-        {
-            return Try(() => dict[key]);
-        }
-
-        public static Maybe<B> GetMaybe<A, B>(this ConcurrentDictionary<A, B> dict, A key)
-        {
-            return Try(() => dict[key]);
-        }
-
-        public static Maybe<A> FirstMaybe<A>(this IEnumerable<A> seq)
-        {
-            foreach (var item in seq)
-                return Some(item);
-
-            return Maybe<A>.None;
-        }
-
-        public static Maybe<A> FirstMaybe<A>(this IEnumerable<A> seq, Func<A, bool> predicate)
-        {
-            foreach (var item in seq.Where(predicate))
-                return Some(item);
-
-            return Maybe<A>.None;
-        }
-
-        public static Maybe<A> FirstSome<A>(this IEnumerable<Maybe<A>> seq)
-        {
-            foreach (var item in seq)
-                if (item.HasValue)
-                    return item;
-
-            return Maybe<A>.None;
-        }
-
-        public static Maybe<B> FirstSome<A, B>(this IEnumerable<A> seq, Func<A, Maybe<B>> selector)
-        {
-            return FirstSome(seq.Select(selector));
-        }
-
-        public static Maybe<A> LastMaybe<A>(this IEnumerable<A> seq)
-        {
-            return Try(seq.Last);
-        }
-
-        public static Maybe<A> SingleMaybe<A>(this IEnumerable<A> seq)
-        {
-            return Try(seq.Single);
-        }
-
-        public static Maybe<A> ElementAtMaybe<A>(this IEnumerable<A> seq, int index)
-        {
-            return Try(() => seq.ElementAt(index));
-        }
-
         public static Maybe<A> Flatten<A>(this Maybe<Maybe<A>> maybe)
         {
             return maybe.HasValue ? maybe.Value : Maybe<A>.None;
-        }
-
-        public static IEnumerable<A> Flatten<A>(this IEnumerable<Maybe<A>> seq)
-        {
-            return seq.Where(x => x.HasValue).Select(x => x.Value);
-        }
-
-        public static IEnumerable<B> SelectMany<A, B>(this IEnumerable<A> seq, Func<A, Maybe<B>> f)
-        {
-            return seq.Select(f).Flatten();
         }
 
         public static Maybe<C> Join<A, B, C>(this Maybe<A> outer, Maybe<B> inner, Func<A, B, C> resultSelector)
@@ -171,7 +73,7 @@ namespace KitchenSink
         {
             var array = seq.ToArray();
 
-            return array.Any(x => !x.HasValue) ? Maybe<IEnumerable<A>>.None : Of(array.Flatten());
+            return array.Any(x => !x.HasValue) ? Maybe<IEnumerable<A>>.None : Of(array.WhereSome());
         }
 
         public static Func<A, Maybe<C>> Compose<A, B, C>(this Func<A, Maybe<B>> f, Func<B, Maybe<C>> g)
@@ -187,61 +89,6 @@ namespace KitchenSink
             return _ => Maybe<B>.None;
         }
 
-        public static Maybe<int> NonNeg(Maybe<int> maybe)
-        {
-            return maybe.Where(Operators.NonNeg);
-        }
-
-        public static Maybe<int> Pos(Maybe<int> maybe)
-        {
-            return maybe.Where(Operators.Pos);
-        }
-
-        public static A OrElseNull<A>(this Maybe<A> maybe) where A : class
-        {
-            return maybe.OrElse(null);
-        }
-
-        public static bool OrElseFalse(this Maybe<bool> maybe)
-        {
-            return maybe.OrElse(false);
-        }
-
-        public static int OrElseZero(this Maybe<int> maybe)
-        {
-            return maybe.OrElse(0);
-        }
-
-        public static string OrElseEmpty(this Maybe<string> maybe)
-        {
-            return maybe.OrElse("");
-        }
-
-        public static IEnumerable<A> OrElseEmpty<A>(this Maybe<IEnumerable<A>> maybe)
-        {
-            return maybe.OrElse(SeqOf<A>());
-        }
-
-        public static Maybe<bool> OrFalse(this Maybe<bool> maybe)
-        {
-            return maybe.Or(Of(false));
-        }
-
-        public static Maybe<int> OrZero(this Maybe<int> maybe)
-        {
-            return maybe.Or(Of(0));
-        }
-
-        public static Maybe<string> OrEmpty(this Maybe<string> maybe)
-        {
-            return maybe.Or(Of(""));
-        }
-
-        public static Maybe<IEnumerable<A>> OrEmpty<A>(this Maybe<IEnumerable<A>> maybe)
-        {
-            return maybe.Or(Of(SeqOf<A>()));
-        }
-
         public static int Compare<A>(Maybe<A> x, Maybe<A> y) where A : IComparable<A>
         {
             if (x.HasValue == y.HasValue == false)
@@ -253,7 +100,7 @@ namespace KitchenSink
             if (!x.HasValue && y.HasValue)
                 return -1;
 
-            return 0;
+            return 0; // TODO: this is incomplete
         }
 
         public static Maybe<R> All<A, R>(Maybe<A> ma, Func<A, R> f)

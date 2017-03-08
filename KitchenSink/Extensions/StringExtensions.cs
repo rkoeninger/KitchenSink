@@ -38,6 +38,18 @@ namespace KitchenSink.Extensions
             return $"{x:c}";
         }
 
+        public static Maybe<int> ToInt(this string s)
+        {
+            int i;
+            return int.TryParse(s, out i) ? some(i) : none<int>();
+        }
+
+        public static Maybe<double> ToDouble(this string s)
+        {
+            double d;
+            return double.TryParse(s, out d) ? some(d) : none<double>();
+        }
+
         /// <summary>
         /// Converts items in sequence to string and concats them
         /// separated by <c>sep</c>, which defaults to empty string.

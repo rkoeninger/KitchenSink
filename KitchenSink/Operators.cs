@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using KitchenSink.Control;
+using KitchenSink.Extensions;
 using static KitchenSink.Comparison;
 
 namespace KitchenSink
@@ -19,6 +20,12 @@ namespace KitchenSink
 
         /// <summary>Composes predicate with logical negation.</summary>
         public static Func<A, bool> Complement<A>(Func<A, bool> f) => x => !f(x);
+
+        /// <summary>Attempts parse of string to int.</summary>
+        public static Func<string, Maybe<int>> ToInt = x => x.ToInt();
+
+        /// <summary>Attempts parse of string to double.</summary>
+        public static Func<string, Maybe<double>> ToDouble = x => x.ToDouble();
 
         /// <summary>Positive integer predicate.</summary>
         public static readonly Func<int, bool> Pos = x => x > 0;
