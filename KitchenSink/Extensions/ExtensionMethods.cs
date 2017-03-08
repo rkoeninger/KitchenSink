@@ -48,17 +48,17 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
-        /// Converts sequence to comma-separated string, using quotes
-        /// to escape values containing commas.
+        /// Converts sequence to character-separated string, using quotes
+        /// to escape values containing the separator (comma by default).
         /// </summary>
-        public static string ToCsv(this IEnumerable<object> seq)
+        public static string ToCsv(this IEnumerable<object> seq, string sep = ",")
         {
             return seq
                 .Select(Str)
-                .Select(s => s.Contains(",")
+                .Select(s => s.Contains(sep)
                     ? "\"" + s.Replace("\"", "\"\"") + "\""
                     : s)
-                .MakeString(",");
+                .MakeString(sep);
         }
 
         /// <summary>
