@@ -61,7 +61,14 @@ namespace KitchenSink.Tests
         }
 
         [Test]
-        public void AddingImplementingType()
+        public void AddingImplementingTypeAsTypeObject()
+        {
+            var needs = new Needs().Add<ISomeInterface>(typeof(SomeImplementation));
+            Assert.IsInstanceOf<SomeImplementation>(needs.Get<ISomeInterface>());
+        }
+
+        [Test]
+        public void AddingImplementingTypeAsTypeParameter()
         {
             var needs = new Needs().Add<ISomeInterface>(typeof(SomeImplementation));
             Assert.IsInstanceOf<SomeImplementation>(needs.Get<ISomeInterface>());

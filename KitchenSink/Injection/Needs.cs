@@ -59,6 +59,14 @@ namespace KitchenSink.Injection
         /// <summary>
         /// Specifies an implementing type for a given contract type.
         /// </summary>
+        public Needs Add<Contract, Implementation>()
+        {
+            return Add(typeof(Contract), typeof(Implementation));
+        }
+
+        /// <summary>
+        /// Specifies an implementing type for a given contract type.
+        /// </summary>
         public Needs Add(Type contractType, Type implType)
         {
             Persist(contractType, implType, !implType.HasAttribute<SingleUse>());
