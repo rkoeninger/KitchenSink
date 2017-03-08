@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KitchenSink.Collections;
+using KitchenSink.Extensions;
 
 namespace KitchenSink.Testing
 {
@@ -51,12 +52,12 @@ namespace KitchenSink.Testing
 
         public static string UnicodeString()
         {
-            return Chars().Take(Int(256)).Concat();
+            return Chars().Take(Int(256)).MakeString();
         }
 
         public static string UnicodeString(int length)
         {
-            return Chars().Take(Int(length)).Concat();
+            return Chars().Take(Int(length)).MakeString();
         }
 
         public static IEnumerable<string> UnicodeStrings()
@@ -76,17 +77,17 @@ namespace KitchenSink.Testing
 
         public static string AsciiString()
         {
-            return AsciiChars().Take(Int(256)).Concat();
+            return AsciiChars().Take(Int(256)).MakeString();
         }
 
         public static string AsciiString(int length)
         {
-            return AsciiChars().Take(Int(length)).Concat();
+            return AsciiChars().Take(Int(length)).MakeString();
         }
 
         public static string AsciiStringNoWhiteSpace(int minLength, int maxLength)
         {
-            return Chars().Where(x => ! char.IsWhiteSpace(x)).Take(Int(minLength, maxLength)).Concat();
+            return Chars().Where(x => ! char.IsWhiteSpace(x)).Take(Int(minLength, maxLength)).MakeString();
         }
 
         public static IEnumerable<string> AsciiStrings()

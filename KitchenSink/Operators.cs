@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections;
 using KitchenSink.Control;
 
@@ -69,10 +68,23 @@ namespace KitchenSink
         public static readonly Func<object, string> Str = x => x?.ToString() ?? "";
 
         /// <summary>Check if collection is empty.</summary>
-        public static readonly Func<ICollection, bool> Empty = x => x.Count == 0;
+        public static readonly Func<IEnumerable, bool> Empty = x =>
+        {
+            var e = x.GetEnumerator();
+
+            if (e is IDisposable)
+            {
+                using ((IDisposable) e)
+                {
+                    return e.MoveNext();
+                }
+            }
+
+            return e.MoveNext();
+        };
 
         /// <summary>Check if collection is non-empty.</summary>
-        public static readonly Func<ICollection, bool> NonEmpty = x => x.Count > 0;
+        public static readonly Func<IEnumerable, bool> NonEmpty = x => !Empty(x);
 
         /// <summary>Identity function.</summary>
         public static A Id<A>(A val) => val;

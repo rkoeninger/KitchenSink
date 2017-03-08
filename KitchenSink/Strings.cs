@@ -10,16 +10,6 @@ namespace KitchenSink
     // TODO: move into Operators/Extensions
     public static class Strings
     {
-        public static string ToLF(this string s)
-        {
-            return s.Replace("\r\n", "\n");
-        }
-
-        public static string ToCRLF(this string s)
-        {
-            return s.Replace("\r\n", "\n").Replace("\n", "\r\n");
-        }
-
         public static IEnumerable<string> SplitSeq(this string s, Regex r)
         {
             var m = r.Match(s);
@@ -45,16 +35,6 @@ namespace KitchenSink
             yield return s.Substring(i, s.Length - i);
         }
 
-        public static bool EqualsIgnoreCase(this string x, string y)
-        {
-            return string.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
-        }
-
-        public static Func<string, bool> EqualsIgnoreCase(this string x)
-        {
-            return y => EqualsIgnoreCase(x, y);
-        }
-
         public static bool IsNotBlank(this string x)
         {
             return Not(string.IsNullOrWhiteSpace(x));
@@ -70,13 +50,6 @@ namespace KitchenSink
             return string.IsNullOrWhiteSpace(x) ? y : x;
         }
 
-        public static readonly Regex WhiteSpaceRegex = new Regex("\\s+");
-
-        public static string CollapseSpace(this string x)
-        {
-            return WhiteSpaceRegex.Split(x.Trim()).Concat(" ");
-        }
-
         public static string ToTitleCase(this string x)
         {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x);
@@ -90,12 +63,6 @@ namespace KitchenSink
         public static IEnumerable<string> TrimAll(this IEnumerable<string> seq)
         {
             return seq.Where(IsNotBlank).Select(x => x.Trim());
-        }
-
-        /// <summary>Joins the string representations of the elements in the sequence, separated by the given string (defaults to empty string).</summary>
-        public static string Concat<A>(this IEnumerable<A> seq, string sep = null)
-        {
-            return string.Join(sep ?? "", seq);
         }
     }
 }

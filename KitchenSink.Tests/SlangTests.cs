@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KitchenSink.Extensions;
 using KitchenSink.Testing;
 using NUnit.Framework;
 
@@ -179,8 +180,8 @@ namespace KitchenSink.Tests
         {
             const int depth = 256;
             Syntax.Read(
-                  Enumerable.Repeat("(", depth).Concat()
-                + Enumerable.Repeat(")", depth).Concat());
+                  Enumerable.Repeat("(", depth).MakeString()
+                + Enumerable.Repeat(")", depth).MakeString());
         }
 
         [Test]

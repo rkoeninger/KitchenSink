@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using KitchenSink.Extensions;
 
 namespace KitchenSink
 {
@@ -49,7 +50,7 @@ namespace KitchenSink
                 if (string.Equals(param.Name, propertyName, StringComparison.InvariantCultureIgnoreCase))
                     return (Expression) valParam;
 
-                var prop = props.Where(x => param.Name.EqualsIgnoreCase(x.Name)).FirstMaybe().OrElseThrow("No property has the same name as constructor parameter: " + param.Name);
+                var prop = props.Where(x => param.Name.IsSimilar(x.Name)).FirstMaybe().OrElseThrow("No property has the same name as constructor parameter: " + param.Name);
                 return Expression.PropertyOrField(objParam, prop.Name);
             }).ToArray();
             var newExpr = Expression.New(ctor, argExprs);
