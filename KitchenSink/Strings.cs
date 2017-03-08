@@ -34,35 +34,5 @@ namespace KitchenSink
 
             yield return s.Substring(i, s.Length - i);
         }
-
-        public static bool IsNotBlank(this string x)
-        {
-            return Not(string.IsNullOrWhiteSpace(x));
-        }
-
-        public static string IfEmpty(this string x, string y)
-        {
-            return string.IsNullOrEmpty(x) ? y : x;
-        }
-
-        public static string IfBlank(this string x, string y)
-        {
-            return string.IsNullOrWhiteSpace(x) ? y : x;
-        }
-
-        public static string ToTitleCase(this string x)
-        {
-            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x);
-        }
-
-        public static string ToCurrencyString(this decimal x)
-        {
-            return $"{x:c}";
-        }
-
-        public static IEnumerable<string> TrimAll(this IEnumerable<string> seq)
-        {
-            return seq.Where(IsNotBlank).Select(x => x.Trim());
-        }
     }
 }

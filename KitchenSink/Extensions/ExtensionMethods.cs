@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using static KitchenSink.Operators;
@@ -19,6 +20,22 @@ namespace KitchenSink.Extensions
         public static string CollapseSpace(this string s)
         {
             return WhiteSpaceRegex.Replace(s.Trim(), " ");
+        }
+
+        /// <summary>
+        /// Returns string with words captialized.
+        /// </summary>
+        public static string ToTitleCase(this string x)
+        {
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x);
+        }
+
+        /// <summary>
+        /// Formats decimal value as currency.
+        /// </summary>
+        public static string ToCurrencyString(this decimal x)
+        {
+            return $"{x:c}";
         }
 
         /// <summary>
@@ -66,6 +83,39 @@ namespace KitchenSink.Extensions
         public static bool IsSimilar(this string x, string y)
         {
             return string.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        /// <summary>
+        /// Splits a string according to given Regex.
+        /// </summary>
+        public static IEnumerable<string> Split(this string s, Regex r)
+        {
+            var m = r.Match(s);
+
+            while (m.Success)
+            {
+                yield return m.Value;
+                m = m.NextMatch();
+            }
+        }
+
+        /// <summary>
+        /// Splits a string according to given separator and optional
+        /// StringComparison method.
+        /// </summary>
+        public static IEnumerable<string> Split(
+            this string s,
+            string sep,
+            StringComparison comparison = StringComparison.InvariantCulture)
+        {
+            var i = 0;
+
+            for (int j; (j = s.IndexOf(sep, i, comparison)) >= 0; i = j + sep.Length)
+            {
+                yield return s.Substring(i, j - i);
+            }
+
+            yield return s.Substring(i, s.Length - i);
         }
     }
 }

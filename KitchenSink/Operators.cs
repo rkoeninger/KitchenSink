@@ -86,6 +86,12 @@ namespace KitchenSink
         /// <summary>Check if collection is non-empty.</summary>
         public static readonly Func<IEnumerable, bool> NonEmpty = x => !Empty(x);
 
+        /// <summary>Check if string is only whitespace.</summary>
+        public static readonly Func<string, bool> Blank = x => string.IsNullOrWhiteSpace(x);
+
+        /// <summary>Check if string is not only whitespace.</summary>
+        public static readonly Func<string, bool> NonBlank = x => !Blank(x);
+
         /// <summary>Identity function.</summary>
         public static A Id<A>(A val) => val;
 

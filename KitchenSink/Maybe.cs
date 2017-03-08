@@ -198,11 +198,6 @@ namespace KitchenSink
             return maybe.Where(CollectionHelpers.NotEmpty);
         }
 
-        public static Maybe<string> IsNotBlank(Maybe<string> maybe)
-        {
-            return maybe.Where(Strings.IsNotBlank);
-        }
-
         public static Maybe<int> NonNeg(Maybe<int> maybe)
         {
             return maybe.Where(Operators.NonNeg);

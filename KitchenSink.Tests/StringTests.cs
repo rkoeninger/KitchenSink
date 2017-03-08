@@ -15,7 +15,6 @@ namespace KitchenSink.Tests
             const string s = "comma, separated, string with multiple, comma, separated, parts";
             var splits = s.SplitSeq(",").ToList();
             Assert.AreEqual(6, splits.Count);
-            Assert.IsTrue(splits.TrimAll().SequenceEqual(seqof("comma", "separated", "string with multiple", "comma", "separated", "parts")));
         }
 
         [Test]
