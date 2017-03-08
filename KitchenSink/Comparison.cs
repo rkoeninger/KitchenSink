@@ -2,6 +2,11 @@
 
 namespace KitchenSink
 {
+    public enum Comparison
+    {
+        GT, LT, EQ
+    }
+
     public static class RangeComparison
     {
         internal static Initial<TValue> New<TValue>(TValue value) where TValue : IComparable<TValue>

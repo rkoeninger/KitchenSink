@@ -7,6 +7,9 @@ namespace KitchenSink
     /// </summary>
     public abstract class NewType<A>
     {
+        /// <summary>
+        /// Value that this NewType wraps.
+        /// </summary>
         public A Value { get; }
 
         protected NewType(A value)

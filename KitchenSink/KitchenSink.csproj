@@ -48,7 +48,6 @@
     <Compile Include="Testing\All.cs" />
     <Compile Include="Testing\Check.cs" />
     <Compile Include="Collections\CollectionHelpers.cs" />
-    <Compile Include="Comparables.cs" />
     <Compile Include="Dates.cs" />
     <Compile Include="DateTimeRange.cs" />
     <Compile Include="Injection\Exceptions.cs" />
@@ -65,7 +64,7 @@
     <Compile Include="Objects.cs" />
     <Compile Include="Testing\Rand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RangeComparison.cs" />
+    <Compile Include="Comparison.cs" />
     <Compile Include="Testing\Sample.cs" />
     <Compile Include="Slang.cs" />
     <Compile Include="Collections\Streams.cs" />

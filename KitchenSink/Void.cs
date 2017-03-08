@@ -10,6 +10,9 @@ namespace KitchenSink
     // ReSharper disable once ConvertToStaticClass
     public sealed class Void
     {
+        /// <summary>
+        /// The singleton "instance" of Void that is always null.
+        /// </summary>
         public static readonly Void It = null;
 
         private Void()
