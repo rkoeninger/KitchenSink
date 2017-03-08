@@ -32,18 +32,5 @@ namespace KitchenSink
         {
             return ! IsIn(val, coll);
         }
-
-        public static B With<A, B>(this A x, Func<A, B> f)
-        {
-            return Null(x) ? default(B) : f(x);
-        }
-
-        public static A With<A>(this A x, Action<A> f)
-        {
-            if (NonNull(x))
-                f(x);
-
-            return x;
-        }
     }
 }

@@ -672,10 +672,11 @@ namespace KitchenSink
                 {
                     var paramsToken = (Combo)Tokens[1];
                     var paramsExprs = paramsToken.Tokens
-                        .Select(x => ((Combo) x).With(y =>
+                        .Cast<Combo>()
+                        .Select(y =>
                             env.Define(
                                 ((Atom)y.Tokens[1]).Literal,
-                                ParseType(((Atom)y.Tokens[0]).Literal))))
+                                ParseType(((Atom)y.Tokens[0]).Literal)))
                         .ToArray();
                     var bodyExpr = Tokens[2].Parse(env);
                     return Expression.Lambda(bodyExpr, paramsExprs);
