@@ -229,7 +229,7 @@ namespace KitchenSink
 
         public static IEnumerable<A> OrElseEmpty<A>(this Maybe<IEnumerable<A>> maybe)
         {
-            return maybe.OrElse(seqof<A>());
+            return maybe.OrElse(SeqOf<A>());
         }
 
         public static Maybe<bool> OrFalse(this Maybe<bool> maybe)
@@ -249,7 +249,7 @@ namespace KitchenSink
 
         public static Maybe<IEnumerable<A>> OrEmpty<A>(this Maybe<IEnumerable<A>> maybe)
         {
-            return maybe.Or(Of(seqof<A>()));
+            return maybe.Or(Of(SeqOf<A>()));
         }
 
         public static int Compare<A>(Maybe<A> x, Maybe<A> y) where A : IComparable<A>
@@ -515,12 +515,12 @@ namespace KitchenSink
 
         public List<A> ToList()
         {
-            return HasValue ? listof(Value) : new List<A>();
+            return HasValue ? ListOf(Value) : new List<A>();
         }
 
         public A[] ToArray()
         {
-            return HasValue ? arrayof(Value) : new A[0];
+            return HasValue ? ArrayOf(Value) : new A[0];
         }
 
         public override string ToString()

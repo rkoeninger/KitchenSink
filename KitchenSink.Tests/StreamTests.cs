@@ -13,7 +13,7 @@ namespace KitchenSink.Tests
         [Test]
         public void StreamSerialization()
         {
-            var people = listof(
+            var people = ListOf(
                 new Person
                 {
                     FirstName = "Rusty",

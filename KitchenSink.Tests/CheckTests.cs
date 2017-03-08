@@ -24,7 +24,7 @@ namespace KitchenSink.Tests
                 Sample.Ints.Except(int.MinValue),
                 x => Math.Abs(x) >= 0);
 
-            Check.EqualsAndHashCode(seqof(
+            Check.EqualsAndHashCode(SeqOf(
                 Date.On(2001, 4, 13),
                 Date.On(1947, 1, 20),
                 Date.On(2030, 11, 9),

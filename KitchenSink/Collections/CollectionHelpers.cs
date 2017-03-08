@@ -262,7 +262,7 @@ namespace KitchenSink.Collections
 
         public static IEnumerable<Tuple<A, B>> Zip<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys)
         {
-            return xs.Zip(ys, tupleof);
+            return xs.Zip(ys, TupleOf);
         }
     }
 

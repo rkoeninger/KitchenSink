@@ -716,7 +716,7 @@ namespace KitchenSink
             return TypeKeywords.GetMaybe(str).OrElse(null);
         }
 
-        public static readonly IReadOnlyDictionary<string, Type> TypeKeywords = dictof(
+        public static readonly IReadOnlyDictionary<string, Type> TypeKeywords = DictOf(
             "bool",    typeof(bool),
             "char",    typeof(char),
             "byte",    typeof(byte),
@@ -794,7 +794,7 @@ namespace KitchenSink
 
             Expression<Func<IEnumerable<object>, bool>> f = xs => AllEqual(xs);
             var exprs = tokensArray.Select(x => x.Parse(env));
-            return Expression.Invoke(f, seqof(BuildListExpression(exprs)));
+            return Expression.Invoke(f, SeqOf(BuildListExpression(exprs)));
         }
 
         private static Expression InequalityOp(SymbolEnvironment env, IEnumerable<Token> tokens)
@@ -806,7 +806,7 @@ namespace KitchenSink
 
             Expression<Func<IEnumerable<object>, bool>> f = xs => AllInequal(xs);
             var exprs = tokensArray.Select(x => x.Parse(env));
-            return Expression.Invoke(f, seqof(BuildListExpression(exprs)));
+            return Expression.Invoke(f, SeqOf(BuildListExpression(exprs)));
         }
 
         private static Expression CompareOp(SymbolEnvironment env, IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)

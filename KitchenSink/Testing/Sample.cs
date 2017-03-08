@@ -5,9 +5,9 @@ namespace KitchenSink.Testing
 {
     public static class Sample
     {
-        public static readonly IReadOnlyCollection<bool> Booleans = arrayof(true, false);
+        public static readonly IReadOnlyCollection<bool> Booleans = ArrayOf(true, false);
 
-        public static readonly IReadOnlyCollection<int> Ints = arrayof(
+        public static readonly IReadOnlyCollection<int> Ints = ArrayOf(
             0,
             int.MinValue, int.MinValue + 1, int.MinValue + 2,
             int.MaxValue, int.MaxValue - 1, int.MaxValue - 2,
@@ -27,7 +27,7 @@ namespace KitchenSink.Testing
             -65535, -65536, -65537
         );
 
-        public static readonly IReadOnlyCollection<uint> UnsignedInts = arrayof<uint>(
+        public static readonly IReadOnlyCollection<uint> UnsignedInts = ArrayOf<uint>(
             0,
             uint.MaxValue, uint.MaxValue - 1, uint.MaxValue - 2,
             1, 2, 3,
@@ -39,7 +39,7 @@ namespace KitchenSink.Testing
             65535, 65536, 65537
         );
 
-        public static readonly IReadOnlyCollection<double> Doubles = arrayof(
+        public static readonly IReadOnlyCollection<double> Doubles = ArrayOf(
             double.NaN,
             double.PositiveInfinity,
             double.NegativeInfinity,
@@ -50,7 +50,7 @@ namespace KitchenSink.Testing
             -double.Epsilon, -double.Epsilon * 2, -double.Epsilon * 3
         );
 
-        public static readonly IReadOnlyCollection<string> TopLevelDomains = arrayof(
+        public static readonly IReadOnlyCollection<string> TopLevelDomains = ArrayOf(
             "com", "org", "net", "gov", "edu", "uk", "ca", "jp", "au", "de", "fr", "us"
         );
     }

@@ -56,20 +56,20 @@ namespace KitchenSink.Tests
         [Test]
         public void CombinationsOfSet()
         {
-            var seq1 = listof(5, 6, 7, 8, 9);
+            var seq1 = ListOf(5, 6, 7, 8, 9);
             const int subsetSize = 3;
             var combinations = seq1.Combinations(subsetSize).ToList();
-            var expectedCombinations = listof(
-                seqof(5, 6, 7),
-                seqof(5, 6, 8),
-                seqof(5, 6, 9),
-                seqof(5, 7, 8),
-                seqof(5, 7, 9),
-                seqof(5, 8, 9),
-                seqof(6, 7, 8),
-                seqof(6, 7, 9),
-                seqof(6, 8, 9),
-                seqof(7, 8, 9)
+            var expectedCombinations = ListOf(
+                SeqOf(5, 6, 7),
+                SeqOf(5, 6, 8),
+                SeqOf(5, 6, 9),
+                SeqOf(5, 7, 8),
+                SeqOf(5, 7, 9),
+                SeqOf(5, 8, 9),
+                SeqOf(6, 7, 8),
+                SeqOf(6, 7, 9),
+                SeqOf(6, 8, 9),
+                SeqOf(7, 8, 9)
             );
 
             Assert.AreEqual(seq1.Count.Combinations(subsetSize), combinations.Count);
@@ -84,30 +84,30 @@ namespace KitchenSink.Tests
         [Test]
         public void PermutationsOfSet()
         {
-            var seq1 = listof(5, 6, 7, 8, 9);
+            var seq1 = ListOf(5, 6, 7, 8, 9);
             const int subsetSize = 2;
             var permutations = seq1.Permutations(subsetSize).ToList();
-            var expectedPermutations = listof(
-                seqof(5, 6),
-                seqof(5, 7),
-                seqof(5, 8),
-                seqof(5, 9),
-                seqof(6, 5),
-                seqof(6, 7),
-                seqof(6, 8),
-                seqof(6, 9),
-                seqof(7, 5),
-                seqof(7, 6),
-                seqof(7, 8),
-                seqof(7, 9),
-                seqof(8, 5),
-                seqof(8, 6),
-                seqof(8, 7),
-                seqof(8, 9),
-                seqof(9, 5),
-                seqof(9, 6),
-                seqof(9, 7),
-                seqof(9, 8)
+            var expectedPermutations = ListOf(
+                SeqOf(5, 6),
+                SeqOf(5, 7),
+                SeqOf(5, 8),
+                SeqOf(5, 9),
+                SeqOf(6, 5),
+                SeqOf(6, 7),
+                SeqOf(6, 8),
+                SeqOf(6, 9),
+                SeqOf(7, 5),
+                SeqOf(7, 6),
+                SeqOf(7, 8),
+                SeqOf(7, 9),
+                SeqOf(8, 5),
+                SeqOf(8, 6),
+                SeqOf(8, 7),
+                SeqOf(8, 9),
+                SeqOf(9, 5),
+                SeqOf(9, 6),
+                SeqOf(9, 7),
+                SeqOf(9, 8)
             );
 
             Assert.AreEqual(seq1.Count.Permutations(subsetSize), permutations.Count);

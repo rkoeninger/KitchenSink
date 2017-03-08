@@ -24,7 +24,7 @@ namespace KitchenSink.Tests
             const string s = "some text that (123) 555-1234 contains some U.S. phone 432.6545 numbers of varying 654 234 1233 formats";
             var splits = s.Split(usPhoneRegex).ToList();
             Assert.AreEqual(3, splits.Count);
-            Assert.IsTrue(splits.SequenceEqual(seqof("(123) 555-1234", "432.6545", "654 234 1233")));
+            Assert.IsTrue(splits.SequenceEqual(SeqOf("(123) 555-1234", "432.6545", "654 234 1233")));
         }
 
         [Test]

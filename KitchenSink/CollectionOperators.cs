@@ -21,72 +21,72 @@ namespace KitchenSink
             return Maybe<A>.None;
         }
 
-        public static IEnumerable<A> seqof<A>(params A[] values)
+        public static IEnumerable<A> SeqOf<A>(params A[] values)
         {
             return values;
         }
 
-        public static A[] arrayof<A>(params A[] values)
+        public static A[] ArrayOf<A>(params A[] values)
         {
             return values;
         }
 
-        public static List<A> listof<A>(params A[] values)
+        public static List<A> ListOf<A>(params A[] values)
         {
             return new List<A>(values);
         }
 
-        public static HashSet<A> setof<A>(params A[] values)
+        public static HashSet<A> SetOf<A>(params A[] values)
         {
             return new HashSet<A>(values);
         }
 
-        public static ConcurrentBag<A> bagof<A>(params A[] values)
+        public static ConcurrentBag<A> BagOf<A>(params A[] values)
         {
             return new ConcurrentBag<A>(values);
         }
 
-        public static Queue<A> queueof<A>(params A[] values)
+        public static Queue<A> QueueOf<A>(params A[] values)
         {
             return new Queue<A>(values);
         }
 
-        public static Tuple<A, B> tupleof<A, B>(A a, B b)
+        public static Tuple<A, B> TupleOf<A, B>(A a, B b)
         {
             return Tuple.Create(a, b);
         }
 
-        public static Tuple<A, B, C> tupleof<A, B, C>(A a, B b, C c)
+        public static Tuple<A, B, C> TupleOf<A, B, C>(A a, B b, C c)
         {
             return Tuple.Create(a, b, c);
         }
 
-        public static Tuple<A, B, C, D> tupleof<A, B, C, D>(A a, B b, C c, D d)
+        public static Tuple<A, B, C, D> TupleOf<A, B, C, D>(A a, B b, C c, D d)
         {
             return Tuple.Create(a, b, c, d);
         }
 
-        public static Tuple<A, B, C, D, E> tupleof<A, B, C, D, E>(A a, B b, C c, D d, E e)
+        public static Tuple<A, B, C, D, E> TupleOf<A, B, C, D, E>(A a, B b, C c, D d, E e)
         {
             return Tuple.Create(a, b, c, d, e);
         }
 
-        public static Tuple<A, B, C, D, E, F> tupleof<A, B, C, D, E, F>(A a, B b, C c, D d, E e, F f)
+        public static Tuple<A, B, C, D, E, F> TupleOf<A, B, C, D, E, F>(A a, B b, C c, D d, E e, F f)
         {
             return Tuple.Create(a, b, c, d, e, f);
         }
 
-        public static Tuple<A, B, C, D, E, F, G> tupleof<A, B, C, D, E, F, G>(A a, B b, C c, D d, E e, F f, G g)
+        public static Tuple<A, B, C, D, E, F, G> TupleOf<A, B, C, D, E, F, G>(A a, B b, C c, D d, E e, F f, G g)
         {
             return Tuple.Create(a, b, c, d, e, f, g);
         }
 
-        public static Dictionary<A, V> dictof<A, V>()
+        public static Dictionary<A, V> DictOf<A, V>()
         {
             return new Dictionary<A, V>();
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0)
         {
             return new Dictionary<A, V>
@@ -95,7 +95,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1)
         {
@@ -106,7 +106,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2)
@@ -119,7 +119,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -134,7 +134,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -151,7 +151,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -170,7 +170,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -191,7 +191,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -214,7 +214,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -239,7 +239,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -266,7 +266,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -295,7 +295,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -326,7 +326,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -359,7 +359,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -394,7 +394,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -431,7 +431,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -470,7 +470,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -511,7 +511,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -554,7 +554,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,
@@ -599,7 +599,7 @@ namespace KitchenSink
             };
         }
 
-        public static Dictionary<A, V> dictof<A, V>(
+        public static Dictionary<A, V> DictOf<A, V>(
             A k0, V v0,
             A k1, V v1,
             A k2, V v2,

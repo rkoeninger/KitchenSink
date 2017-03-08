@@ -108,7 +108,7 @@ namespace KitchenSink
             {
                 foreach (var item in array)
                 {
-                    yield return seqof(item);
+                    yield return SeqOf(item);
                 }
 
                 yield break;
@@ -120,7 +120,7 @@ namespace KitchenSink
 
                 foreach (var subseq in Permutations(sublist, r - 1))
                 {
-                    yield return seqof(array[i]).Concat(subseq);
+                    yield return SeqOf(array[i]).Concat(subseq);
                 }
             }
         }
@@ -184,13 +184,13 @@ namespace KitchenSink
             }
         }
 
-        private static readonly IEnumerable<bool> OneTrue = seqof(true);
-        private static readonly IEnumerable<bool> OneFalse = seqof(false);
-        private static readonly IEnumerable<bool> EmptyBoolSeq = seqof<bool>();
+        private static readonly IEnumerable<bool> OneTrue = SeqOf(true);
+        private static readonly IEnumerable<bool> OneFalse = SeqOf(false);
+        private static readonly IEnumerable<bool> EmptyBoolSeq = SeqOf<bool>();
 
         private static Func<IEnumerable<bool>, IEnumerable<A>> ZipWhere<A>(IEnumerable<A> seq)
         {
-            return selectors => seq.Zip(selectors, tupleof).Where(x => x.Item2).Select(x => x.Item1);
+            return selectors => seq.Zip(selectors, TupleOf).Where(x => x.Item2).Select(x => x.Item1);
         }
     }
 }

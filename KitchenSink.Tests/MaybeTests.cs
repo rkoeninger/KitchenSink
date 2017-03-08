@@ -61,18 +61,18 @@ namespace KitchenSink.Tests
         [Test]
         public void MaybeEnumerableExtensions()
         {
-            IsSome(0, seqof(0).FirstMaybe());
-            IsNone(seqof<int>().FirstMaybe());
-            IsSome(0, seqof(0).LastMaybe());
-            IsNone(seqof<int>().LastMaybe());
-            IsSome(0, seqof(0).SingleMaybe());
-            IsNone(seqof<int>().SingleMaybe());
-            IsSome(2, arrayof(0, 1, 2, 3).ElementAtMaybe(2));
-            IsNone(arrayof(0, 1, 2, 3).ElementAtMaybe(5));
-            IsNone(arrayof(0, 1, 2, 3).ElementAtMaybe(-1));
-            AreEqual(5, arrayof("#", "3", "2", "1", "e", "3", "r", "3").Select(Maybe.ToInt).Flatten().Count());
-            IsNone(arrayof("#", "3", "2", "1", "e", "3", "r", "3").Select(Maybe.ToInt).Sequence());
-            IsSome(arrayof("9", "3", "2", "1", "6", "3", "5", "3").Select(Maybe.ToInt).Sequence());
+            IsSome(0, SeqOf(0).FirstMaybe());
+            IsNone(SeqOf<int>().FirstMaybe());
+            IsSome(0, SeqOf(0).LastMaybe());
+            IsNone(SeqOf<int>().LastMaybe());
+            IsSome(0, SeqOf(0).SingleMaybe());
+            IsNone(SeqOf<int>().SingleMaybe());
+            IsSome(2, ArrayOf(0, 1, 2, 3).ElementAtMaybe(2));
+            IsNone(ArrayOf(0, 1, 2, 3).ElementAtMaybe(5));
+            IsNone(ArrayOf(0, 1, 2, 3).ElementAtMaybe(-1));
+            AreEqual(5, ArrayOf("#", "3", "2", "1", "e", "3", "r", "3").Select(Maybe.ToInt).Flatten().Count());
+            IsNone(ArrayOf("#", "3", "2", "1", "e", "3", "r", "3").Select(Maybe.ToInt).Sequence());
+            IsSome(ArrayOf("9", "3", "2", "1", "6", "3", "5", "3").Select(Maybe.ToInt).Sequence());
         }
 
         [Test]
