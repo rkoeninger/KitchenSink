@@ -44,7 +44,8 @@
     <Compile Include="Control\Case.cs" />
     <Compile Include="Control\Cond.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
-    <Compile Include="Extensions\ExtensionMethods.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\FuncExtensions.cs" />
     <Compile Include="Operators.cs" />
     <Compile Include="Testing\All.cs" />
     <Compile Include="Testing\Check.cs" />

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using KitchenSink.Collections;
-using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 using KitchenSink.Testing;
 using NUnit.Framework;
@@ -22,7 +21,7 @@ namespace KitchenSink.Tests
         public void CheckWithProvidedInputs()
         {
             Check.That(
-                Sample.Ints.Except(int.MinValue),
+                Sample.Ints.Except(SeqOf(int.MinValue)),
                 x => Math.Abs(x) >= 0);
 
             Check.EqualsAndHashCode(SeqOf(

@@ -211,7 +211,7 @@ namespace KitchenSink
             }
             catch (Exception e)
             {
-                return new Validation<A>(Value, ErrorList.Add(e));
+                return new Validation<A>(Value, ErrorList.Concat(e));
             }
         }
 
@@ -220,7 +220,7 @@ namespace KitchenSink
             if (Done)
                 return this;
 
-            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Add(new ApplicationException(message ?? "")));
+            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Concat(new ApplicationException(message ?? "")));
         }
 
         public Validation<A> Is(Func<A, bool> f, string message = null)
@@ -228,7 +228,7 @@ namespace KitchenSink
             if (Done)
                 return this;
 
-            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Add(new ApplicationException(message ?? "")));
+            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Concat(new ApplicationException(message ?? "")));
         }
 
         public Validation<A> Is(bool cond, Exception exc)
@@ -236,7 +236,7 @@ namespace KitchenSink
             if (Done)
                 return this;
 
-            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Add(exc));
+            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Concat(exc));
         }
 
         public Validation<A> Is(Func<A, bool> f, Exception exc)
@@ -244,7 +244,7 @@ namespace KitchenSink
             if (Done)
                 return this;
 
-            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Add(exc));
+            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Concat(exc));
         }
 
         public Validation<A> Is(Action<A> f)
@@ -259,7 +259,7 @@ namespace KitchenSink
             }
             catch (Exception exc)
             {
-                return new Validation<A>(Value, ErrorList.Add(exc));
+                return new Validation<A>(Value, ErrorList.Concat(exc));
             }
         }
 

@@ -814,7 +814,7 @@ namespace KitchenSink
         private static Expression CompareOp(SymbolEnvironment env, IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)
         {
             var exprs = tokens.Skip(1).Select(x => x.Parse(env));
-            return exprs.OverlappingPartition2().Select(x => f(x.Item1, x.Item2)).Aggregate(Expression.AndAlso);
+            return exprs.OverlappingPairs().Select(x => f(x.Item1, x.Item2)).Aggregate(Expression.AndAlso);
         }
 
         private static Expression NaryOp(SymbolEnvironment env, IEnumerable<Token> tokens, Func<Expression, Expression, Expression> f)

@@ -35,9 +35,9 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Returns true if item is not in sequence.
         /// </summary>
-        public static bool IsNotIn<A>(this A val, IEnumerable<A> coll)
+        public static bool IsNotIn<A>(this A val, IEnumerable<A> seq)
         {
-            return ! IsIn(val, coll);
+            return ! IsIn(val, seq);
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace KitchenSink.Extensions
             return seq.OrderBy(x => x);
         }
 
-        public static IEnumerable<A> SortDesc<A>(this IEnumerable<A> seq) where A : IComparable
+        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq) where A : IComparable
         {
             return seq.OrderByDescending(x => x);
         }
@@ -92,61 +92,67 @@ namespace KitchenSink.Extensions
             return seq.OrderBy(x => x, comp);
         }
 
-        public static IEnumerable<A> SortDesc<A>(this IEnumerable<A> seq, IComparer<A> comp)
+        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq, IComparer<A> comp)
         {
             return seq.OrderByDescending(x => x, comp);
         }
 
+        /// <summary>
+        /// Returns elements in given sequence as sub-sequences of given size.
+        /// Example: [1 2 3 4 5 6 7 8] 3 => [[1 2 3] [4 5 6] [7 8]]
+        /// </summary>
         public static IEnumerable<IEnumerable<A>> Partition<A>(this IEnumerable<A> seq, int count)
         {
-            var array = seq.ToArray();
+            var segment = new A[count];
+            var i = 0;
 
-            for (var i = 0; i < array.Length; i += count)
+            foreach (var item in seq)
             {
-                var partSize = Math.Min(count, array.Length - i);
-                var array2 = new A[partSize];
+                segment[i] = item;
+                i++;
 
-                for (var j = 0; j < partSize; ++j)
+                if (i == count)
                 {
-                    array2[j] = array[i + j];
+                    yield return segment;
+                    segment = new A[count];
+                    i = 0;
                 }
+            }
 
-                yield return array2;
+            if (i > 0)
+            {
+                yield return segment.Take(i);
             }
         }
 
-        public static IEnumerable<List<A>> Partition<A>(this List<A> list, int count)
-        {
-            return Partition(list.AsEnumerable(), count).Select(x => x.ToList());
-        }
-
-        public static IEnumerable<A[]> Partition<A>(this A[] array, int count)
-        {
-            return Partition(array.AsEnumerable(), count).Select(x => x.ToArray());
-        }
-
-        public static IEnumerable<Tuple<A, A>> OverlappingPartition2<A>(this IEnumerable<A> seq)
+        /// <summary>
+        /// Returns sequence of overlapping pairs of elements in given sequence.
+        /// Example: [1 2 3 4] => [[1 2] [2 3] [3 4]]
+        /// </summary>
+        public static IEnumerable<Tuple<A, A>> OverlappingPairs<A>(this IEnumerable<A> seq)
         {
             var array = seq.ToArray();
 
             if (array.Length < 2)
-                throw new Exception("too few elements");
+                throw new ArgumentException("too few elements");
 
             return Enumerable.Range(0, array.Length - 1).Select(i => Tuple.Create(array[i], array[i + 1]));
         }
 
-        public static IEnumerable<A> Except<A>(this IEnumerable<A> seq, params A[] excludes)
-        {
-            var excludeSet = Set(excludes);
-            return seq.Where(x => !excludeSet.Contains(x));
-        }
-
-        public static HashSet<A> Set<A>(this IEnumerable<A> seq)
+        public static HashSet<A> ToSet<A>(this IEnumerable<A> seq)
         {
             return new HashSet<A>(seq);
         }
 
-        public static A[] Add<A>(this A[] array, params A[] vals)
+        public static IEnumerable<A> Force<A>(this IEnumerable<A> seq)
+        {
+            return seq.ToArray();
+        }
+
+        /// <summary>
+        /// Optimized version of Concat for Arrays.
+        /// </summary>
+        public static A[] Concat<A>(this A[] array, params A[] vals)
         {
             var result = new A[array.Length + vals.Length];
             array.CopyTo(result, 0);
@@ -154,9 +160,15 @@ namespace KitchenSink.Extensions
             return result;
         }
 
-        public static bool NotEmpty<A>(this IEnumerable<A> seq)
+        /// <summary>
+        /// Optimized version of Concat for Lists.
+        /// </summary>
+        public static List<A> Concat<A>(this List<A> xs, List<A> ys)
         {
-            return seq.Any();
+            var result = new List<A>(xs.Count + ys.Count);
+            result.AddRange(xs);
+            result.AddRange(ys);
+            return result;
         }
 
         public static IEnumerable<int> Indicies<A>(this IEnumerable<A> seq)

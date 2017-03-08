@@ -109,10 +109,10 @@ namespace KitchenSink.Tests
         [Test]
         public void EnumerableForce()
         {
-            /*
-             * Enumerable methods like Where() and Select() make use of deferred execution so side-effects in
-             * functions will not occur until the resulting Enumerable is iterated or a method like ToList() is called.
-             */
+            // Enumerable methods like Where() and Select() make use of
+            // deferred execution so side-effects in functions will not
+            // occur until the resulting Enumerable is iterated or
+            // a method like ToList() is called.
             var x = 0;
             var y = 0;
             var z = 0;
@@ -126,10 +126,8 @@ namespace KitchenSink.Tests
             Assert.IsFalse(y == 2);
             Assert.IsFalse(z == 3);
 
-            /*
-             * ToList() causes an IEnumerable to be evaluated and side-effects to occur.
-             */
-            e.ToList();
+            // Force() causes an IEnumerable to be evaluated and side-effects to occur.
+            e.Force();
 
             Assert.IsTrue(x == 1);
             Assert.IsTrue(y == 2);
