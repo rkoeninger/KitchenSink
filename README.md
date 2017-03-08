@@ -1,3 +1,4 @@
+[![C# Version](https://img.shields.io/badge/C%23-6.0-green.svg)](https://msdn.microsoft.com/en-us/magazine/dn802602.aspx)
 [![.Net Build Status](https://img.shields.io/appveyor/ci/rkoeninger/KitchenSink/master.svg?label=.Net%20Build)](https://ci.appveyor.com/project/rkoeninger/kitchensink/branch/master)
 [![Mono Build Status](https://img.shields.io/travis/rkoeninger/KitchenSink/master.svg?label=Mono%20Build)](https://travis-ci.org/rkoeninger/KitchenSink)
 
@@ -14,11 +15,19 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `Maybe<A>` - may or may not have a value and maps functions over missing value
   * `NewType<A>` - wraps existing types to distinguish on the type level
 
+### Convenient Operators and Extensions
+
+  * `ListOf`, `SeqOf`, `DictOf` - concise collection creation: `DictOf("one", 1, "two" 2, "three", 3)`
+  * `Cmp` - sets up expressive bound comparisons: `0 <= Cmp(x) < 10`
+  * `Eq`, `Same`, `Str`, `Hash` - null-safe basic object operations
+  * `Apply` - partially apply functions
+  * `Split` - splits strings by `Regex`
+  * `A.IsIn(IEnumerable<A>)`, `A.IsIn(params A[])` - reversed contains check
+
 ### Collection Enhancements
 
-  * `ConstructionOperators` - functions for building collections concisely
-  * `Streams` - extensions for converting `IEnumerable`s to/from `Stream`s
-  * `MultiKeyDictionary` - `Dictionary`s that use `Tuple` for aggregate keys
+  * `IEnumerable.AsStream`, `Stream.AsEnumerable` - extensions for converting `IEnumerable`s to/from `Stream`s
+  * `Dictionary<K1, K2, V>` - `Dictionary`s that use `Tuple` for aggregate keys
 
 ### Composable Control Structures
 
@@ -60,14 +69,6 @@ Drive.C / "Folder1" / "Folder2" / "File.txt"
 Folder.AppData / "MyApp" / "Config.xml"
     "C:\Users\Me\AppData\MyApp\Config.xml"
 	"/users/me/.config/"
-```
-
-### Bizarre Range Comparison Facility using Operator Overloading
-
-  * Can use `<`, `>`, `<=` and `>=` in a type-safe way
-
-```csharp
-0 <= Cmp(x) < 10
 ```
 
 ### Crazy XML Building Facility using Operator Overloading

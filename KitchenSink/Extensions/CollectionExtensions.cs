@@ -41,7 +41,7 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
-        /// Adapter for specialized collections that do not implement IEnumerable&lt;A&gt;.
+        /// Adapter for specialized collections that do not implement <see cref="IEnumerable{A}"/>.
         /// Eagerly reads enumerator results into list.
         /// Result can be enumerated multiple times.
         /// </summary>
@@ -54,7 +54,7 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
-        /// Adapter for specialized collections that do not implement IEnumerable&lt;A&gt;.
+        /// Adapter for specialized collections that do not implement <see cref="IEnumerable{A}"/>.
         /// </summary>
         public static IEnumerable<A> AsEnumerable<A>(this IEnumerator<A> e)
         {
@@ -65,7 +65,7 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
-        /// Adapter for specialized collections that do not implement IEnumerable&lt;A&gt;.
+        /// Adapter for specialized collections that do not implement <see cref="IEnumerable{A}"/>.
         /// Lazily reads enumerator results and returns them.
         /// Result can be enumerated only once.
         /// </summary>
@@ -191,7 +191,7 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
-        /// Creates a <see cref="HashSet&lt;A&gt;"/> from an <see cref="IEnumerable&lt;A&gt;"/>.
+        /// Creates a <see cref="HashSet{A}"/> from an <see cref="IEnumerable{A}"/>.
         /// </summary>
         public static HashSet<A> ToSet<A>(this IEnumerable<A> seq)
         {
