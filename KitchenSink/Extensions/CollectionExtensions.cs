@@ -2,11 +2,44 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Extensions
 {
     public static class CollectionExtensions
     {
+        /// <summary>
+        /// Returns true if item is in sequence.
+        /// </summary>
+        public static bool IsIn<A>(this A val, params A[] vals)
+        {
+            return IsIn(val, (IEnumerable<A>) vals);
+        }
+
+        /// <summary>
+        /// Returns true if item is in sequence.
+        /// </summary>
+        public static bool IsIn<A>(this A val, IEnumerable<A> seq)
+        {
+            return seq.Any(Apply<A, A, bool>(Eq, val));
+        }
+
+        /// <summary>
+        /// Returns true if item is not in sequence.
+        /// </summary>
+        public static bool IsNotIn<A>(this A val, params A[] vals)
+        {
+            return ! IsIn(val, (IEnumerable<A>) vals);
+        }
+
+        /// <summary>
+        /// Returns true if item is not in sequence.
+        /// </summary>
+        public static bool IsNotIn<A>(this A val, IEnumerable<A> coll)
+        {
+            return ! IsIn(val, coll);
+        }
+
         /// <summary>
         /// Adapter for specialized collections that do not implement IEnumerable&lt;A&gt;.
         /// Eagerly reads enumerator results into list.

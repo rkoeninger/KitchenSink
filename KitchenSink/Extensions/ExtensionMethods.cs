@@ -123,7 +123,7 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static Func<B, Z> Invoke<A, B, Z>(this Func<A, B, Z> f, A a)
         {
-            return b => f.Invoke(a, b);
+            return Apply(f, a);
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static Func<B, C, Z> Invoke<A, B, C, Z>(this Func<A, B, C, Z> f, A a)
         {
-            return (b, c) => f.Invoke(a, b, c);
+            return Apply(f, a);
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static Func<C, Z> Invoke<A, B, C, Z>(this Func<A, B, C, Z> f, A a, B b)
         {
-            return c => f.Invoke(a, b, c);
+            return Apply(f, a, b);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static Func<B, C, D, Z> Invoke<A, B, C, D, Z>(this Func<A, B, C, D, Z> f, A a)
         {
-            return (b, c, d) => f.Invoke(a, b, c, d);
+            return Apply(f, a);
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static Func<C, D, Z> Invoke<A, B, C, D, Z>(this Func<A, B, C, D, Z> f, A a, B b)
         {
-            return (c, d) => f.Invoke(a, b, c, d);
+            return Apply(f, a, b);
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static Func<D, Z> Invoke<A, B, C, D, Z>(this Func<A, B, C, D, Z> f, A a, B b, C c)
         {
-            return d => f.Invoke(a, b, c, d);
+            return Apply(f, a, b, c);
         }
     }
 }

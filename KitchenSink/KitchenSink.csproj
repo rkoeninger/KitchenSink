@@ -62,7 +62,6 @@
     <Compile Include="Lens.cs" />
     <Compile Include="NewType.cs" />
     <Compile Include="Numbers.cs" />
-    <Compile Include="Objects.cs" />
     <Compile Include="Testing\Rand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Comparison.cs" />
