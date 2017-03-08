@@ -90,6 +90,25 @@ namespace KitchenSink.Collections
             // ReSharper disable once IteratorNeverReturns
         }
 
+        /// <summary>
+        /// Generates a sequence based on given function.
+        /// Functions returns None to indicate end of sequence.
+        /// </summary>
+        public static IEnumerable<A> Unaggregate<A>(Func<Maybe<A>> f)
+        {
+            while (true)
+            {
+                var x = f();
+
+                if (x.HasValue)
+                {
+                    yield return x.Value;
+                }
+            }
+
+            // ReSharper disable once IteratorNeverReturns
+        }
+
         /// <summary>Performs side-effecting Action on each item in sequence.</summary>
         public static IEnumerable<A> ForEach<A>(this IEnumerable<A> seq, Action<A> f)
         {
