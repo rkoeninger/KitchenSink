@@ -29,7 +29,7 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static bool IsNotIn<A>(this A val, params A[] vals)
         {
-            return ! IsIn(val, (IEnumerable<A>) vals);
+            return !IsIn(val, (IEnumerable<A>) vals);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static bool IsNotIn<A>(this A val, IEnumerable<A> seq)
         {
-            return ! IsIn(val, seq);
+            return !IsIn(val, seq);
         }
 
         /// <summary>
@@ -77,24 +77,73 @@ namespace KitchenSink.Extensions
             }
         }
 
+        /// <summary>
+        /// Sorts elements by their natural order.
+        /// </summary>
         public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq) where A : IComparable
         {
             return seq.OrderBy(x => x);
         }
 
+        /// <summary>
+        /// Sorts elements descending by their natural order.
+        /// </summary>
         public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq) where A : IComparable
         {
             return seq.OrderByDescending(x => x);
         }
 
+        /// <summary>
+        /// Sorts elements according to given comparer.
+        /// </summary>
         public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, IComparer<A> comp)
         {
             return seq.OrderBy(x => x, comp);
         }
 
+        /// <summary>
+        /// Sorts elements descending according to given comparer.
+        /// </summary>
         public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq, IComparer<A> comp)
         {
             return seq.OrderByDescending(x => x, comp);
+        }
+
+        /// <summary>
+        /// Sorts elements according to given comparer.
+        /// </summary>
+        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, Func<A, A, Comparison> f)
+        {
+            return seq.OrderBy(x => x, new ComparisonComparer<A>(f));
+        }
+
+        /// <summary>
+        /// Sorts elements descending according to given comparer.
+        /// </summary>
+        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq, Func<A, A, Comparison> f)
+        {
+            return seq.OrderByDescending(x => x, new ComparisonComparer<A>(f));
+        }
+
+        private class ComparisonComparer<A> : IComparer<A>
+        {
+            private readonly Func<A, A, Comparison> f;
+
+            public ComparisonComparer(Func<A, A, Comparison> f)
+            {
+                this.f = f;
+            }
+
+            public int Compare(A x, A y)
+            {
+                switch (f(x, y))
+                {
+                    case Comparison.GT: return 1;
+                    case Comparison.LT: return -1;
+                    case Comparison.EQ: return 0;
+                    default: throw new ArgumentOutOfRangeException();
+                }
+            }
         }
 
         /// <summary>
@@ -134,16 +183,24 @@ namespace KitchenSink.Extensions
             var array = seq.ToArray();
 
             if (array.Length < 2)
+            {
                 throw new ArgumentException("too few elements");
+            }
 
             return Enumerable.Range(0, array.Length - 1).Select(i => Tuple.Create(array[i], array[i + 1]));
         }
 
+        /// <summary>
+        /// Creates a <see cref="HashSet&lt;A&gt;"/> from an <see cref="IEnumerable&lt;A&gt;"/>.
+        /// </summary>
         public static HashSet<A> ToSet<A>(this IEnumerable<A> seq)
         {
             return new HashSet<A>(seq);
         }
 
+        /// <summary>
+        /// Forces entire sequence to be enumerated immediately.
+        /// </summary>
         public static IEnumerable<A> Force<A>(this IEnumerable<A> seq)
         {
             return seq.ToArray();
@@ -171,22 +228,37 @@ namespace KitchenSink.Extensions
             return result;
         }
 
-        public static IEnumerable<int> Indicies<A>(this IEnumerable<A> seq)
+        /// <summary>
+        /// Returns a sequence of items paired with their index in the original sequence.
+        /// </summary>
+        public static IEnumerable<Tuple<A, int>> ZipWithIndicies<A>(this IEnumerable<A> seq)
         {
-            return Enumerable.Range(0, seq.Count());
+            var i = 0;
+
+            foreach (var item in seq)
+            {
+                yield return Tuple.Create(item, i);
+                i++;
+            }
         }
 
-        public static IEnumerable<A> WithoutAt<A>(this IEnumerable<A> seq, int index)
+        /// <summary>
+        /// Returns sequence, excluding elements at given indicies.
+        /// </summary>
+        public static IEnumerable<A> ExceptAt<A>(this IEnumerable<A> seq, params int[] indicies)
         {
-            return seq.Where((_, i) => i != index);
+            return seq.Where((_, i) => i.IsNotIn(indicies));
         }
 
+        /// <summary>
+        /// Randomizes elements in sequence. This will enumerate the entire sequence.
+        /// </summary>
         public static IEnumerable<A> Shuffle<A>(this IEnumerable<A> seq)
         {
             var rand = new Random();
             var temp = seq.ToArray();
 
-            foreach (var i in temp.Indicies())
+            foreach (var i in Enumerable.Range(0, temp.Length))
             {
                 var j = rand.Next(i, temp.Length);
                 yield return temp[j];
@@ -194,10 +266,15 @@ namespace KitchenSink.Extensions
             }
         }
 
+        /// <summary>
+        /// Sets every value in array to a particular value.
+        /// </summary>
         public static A[] Fill<A>(this A[] array, A value)
         {
             for (var i = 0; i < array.Length; ++i)
+            {
                 array[i] = value;
+            }
 
             return array;
         }

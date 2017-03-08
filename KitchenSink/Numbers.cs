@@ -117,7 +117,7 @@ namespace KitchenSink
 
             foreach (var i in array.Indicies())
             {
-                var sublist = array.WithoutAt(i);
+                var sublist = array.ExceptAt(i);
 
                 foreach (var subseq in Permutations(sublist, r - 1))
                 {
