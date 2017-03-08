@@ -64,12 +64,10 @@ Folder.AppData / "MyApp" / "Config.xml"
 
 ### Bizarre Range Comparison Facility using Operator Overloading
 
-  * Can use `<`, `>`, `<=` and `>=`
-  * Not type safe, as you can't specify type parameters to operators
-  * Aside from the first `-` operator, looks pretty clean
+  * Can use `<`, `>`, `<=` and `>=` in a type-safe way
 
 ```csharp
-Z.Cmp- 0 <= x < 10
+0 <= Cmp(x) < 10
 ```
 
 ### Crazy XML Building Facility using Operator Overloading
