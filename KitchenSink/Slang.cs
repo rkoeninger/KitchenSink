@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using KitchenSink.Collections;
-using static KitchenSink.Collections.ConstructionOperators;
+using static KitchenSink.Operators;
 
 namespace KitchenSink
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KitchenSink.Collections;
-using static KitchenSink.Collections.ConstructionOperators;
+using static KitchenSink.Operators;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests

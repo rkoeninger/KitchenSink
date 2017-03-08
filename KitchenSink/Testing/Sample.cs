@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
-using KitchenSink.Collections;
-using static KitchenSink.Collections.ConstructionOperators;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Testing
 {

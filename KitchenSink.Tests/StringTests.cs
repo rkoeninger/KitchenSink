@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
-using static KitchenSink.Collections.ConstructionOperators;
+using static KitchenSink.Operators;
 using KitchenSink.Extensions;
 using NUnit.Framework;
 

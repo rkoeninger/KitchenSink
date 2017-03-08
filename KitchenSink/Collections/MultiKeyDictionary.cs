@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using static KitchenSink.Collections.ConstructionOperators;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Collections
 {

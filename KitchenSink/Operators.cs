@@ -8,7 +8,7 @@ namespace KitchenSink
     /// Simple functions in a simple form.
     /// Suggested use of this class is with <c>using static</c>.
     /// </summary>
-    public static class Operators
+    public static partial class Operators
     {
         /// <summary>Logical negation.</summary>
         public static readonly Func<bool, bool> Not = x => !x;

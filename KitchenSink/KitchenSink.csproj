@@ -40,7 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Collections\ConstructionOperators.cs" />
+    <Compile Include="CollectionOperators.cs" />
     <Compile Include="Control\Case.cs" />
     <Compile Include="Control\Cond.cs" />
     <Compile Include="Extensions\ExtensionMethods.cs" />

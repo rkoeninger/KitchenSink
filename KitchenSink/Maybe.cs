@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using KitchenSink.Collections;
-using static KitchenSink.Collections.ConstructionOperators;
 using static KitchenSink.Operators;
 
 namespace KitchenSink

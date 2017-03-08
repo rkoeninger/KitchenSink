@@ -2,9 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace KitchenSink.Collections
+namespace KitchenSink
 {
-    public static class ConstructionOperators
+    public static partial class Operators
     {
         public static Maybe<A> maybeof<A>(A value)
         {

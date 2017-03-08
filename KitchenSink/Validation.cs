@@ -1,5 +1,5 @@
 ﻿using KitchenSink.Collections;
-using static KitchenSink.Collections.ConstructionOperators;
+using static KitchenSink.Operators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
