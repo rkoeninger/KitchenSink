@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Injection
 {
@@ -26,7 +27,7 @@ namespace KitchenSink.Injection
         /// A backup resolver that this Needs can defer to if it is unable to
         /// resolve a dependency.
         /// </summary>
-        public delegate object Backup(Type contractType);
+        public delegate Maybe<object> Backup(Type contractType);
 
         private readonly Dictionary<Type, Factory> factories = new Dictionary<Type, Factory>();
         private readonly List<Source> sources = new List<Source>();
@@ -35,9 +36,9 @@ namespace KitchenSink.Injection
         /// <summary>
         /// Specifies an implementing object for a given contract type.
         /// </summary>
-        public Needs Add<Contract>(Contract impl)
+        public Needs Add<TContract>(TContract impl)
         {
-            return Add(typeof(Contract), impl);
+            return Add(typeof(TContract), impl);
         }
 
         /// <summary>
@@ -51,17 +52,17 @@ namespace KitchenSink.Injection
         /// <summary>
         /// Specifies an implementing type for a given contract type.
         /// </summary>
-        public Needs Add<Contract>(Type implType)
+        public Needs Add<TContract>(Type implType)
         {
-            return Add(typeof(Contract), implType);
+            return Add(typeof(TContract), implType);
         }
 
         /// <summary>
         /// Specifies an implementing type for a given contract type.
         /// </summary>
-        public Needs Add<Contract, Implementation>()
+        public Needs Add<TContract, TImplementation>()
         {
-            return Add(typeof(Contract), typeof(Implementation));
+            return Add(typeof(TContract), typeof(TImplementation));
         }
 
         /// <summary>
@@ -117,17 +118,7 @@ namespace KitchenSink.Injection
         /// </summary>
         public Needs Defer(Needs needs)
         {
-            return Defer(contractType =>
-            {
-                try
-                {
-                    return needs.Get(contractType);
-                }
-                catch (ImplementationUnresolvedException)
-                {
-                    return null;
-                }
-            });
+            return Defer(needs.GetMaybe);
         }
 
         /// <summary>
@@ -144,9 +135,9 @@ namespace KitchenSink.Injection
         /// Resolves an implementing object for the given contract type.
         /// </summary>
         /// <exception cref="ImplementationUnresolvedException">If no implementation found.</exception>
-        public Contract Get<Contract>()
+        public TContract Get<TContract>()
         {
-            return (Contract) Get(typeof(Contract));
+            return (TContract) Get(typeof(TContract));
         }
 
         /// <summary>
@@ -155,19 +146,28 @@ namespace KitchenSink.Injection
         /// <exception cref="ImplementationUnresolvedException">If no implementation found.</exception>
         public object Get(Type contractType)
         {
+            return GetMaybe(contractType).OrElseThrow(new ImplementationUnresolvedException(contractType));
+        }
+
+        /// <summary>
+        /// Resolves Some implementing object for the given contract type.
+        /// Returns None if no implementation found.
+        /// </summary>
+        public Maybe<object> GetMaybe(Type contractType)
+        {
             return GetInternal(contractType, !contractType.HasAttribute<SingleUse>());
         }
 
         // Resolves dependency by checking for existing Factory,
         // then checking list of Sources, then checking list of Backups.
         // Throws NotImplementedException if impl is not found.
-        private object GetInternal(Type contractType, bool multiUse)
+        private Maybe<object> GetInternal(Type contractType, bool multiUse)
         {
             Factory factory;
 
             if (factories.TryGetValue(contractType, out factory))
             {
-                return factory();
+                return some(factory());
             }
 
             foreach (var source in sources)
@@ -176,21 +176,21 @@ namespace KitchenSink.Injection
 
                 if (implType != null)
                 {
-                    return Persist(contractType, implType, multiUse);
+                    return some(Persist(contractType, implType, multiUse));
                 }
             }
 
             foreach (var backup in backups)
             {
-                var impl = backup(contractType);
+                var implMaybe = backup(contractType);
 
-                if (impl != null)
+                if (implMaybe.HasValue)
                 {
-                    return impl;
+                    return implMaybe;
                 }
             }
 
-            throw new ImplementationUnresolvedException(contractType);
+            return none<object>();
         }
 
         // Create and store Factory. Factory returns singleton instance if
@@ -222,6 +222,7 @@ namespace KitchenSink.Injection
             var ctor = ctors[0];
             var args = ctor.GetParameters()
                 .Select(p => GetInternal(p.ParameterType, multiUse))
+                .Select(m => m.OrElseThrow(new ImplementationUnresolvedException(m.InnerType)))
                 .ToArray();
 
             if (multiUse)

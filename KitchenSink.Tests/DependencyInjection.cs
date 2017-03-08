@@ -117,5 +117,40 @@ namespace KitchenSink.Tests
             var needs = new Needs().Refer(typeof(DependencyInjection));
             Expect.Error<MultipleConstructorsException>(() => needs.Get<IBlahInterface>());
         }
+
+        public class TypeSpecialized
+        {
+            public sealed class PlumVariant : NewType<ISomeInterface>
+            {
+                public PlumVariant(ISomeInterface value) : base(value)
+                {
+                }
+            }
+
+            public sealed class PearVariant : NewType<ISomeInterface>
+            {
+                public PearVariant(ISomeInterface value) : base(value)
+                {
+                }
+            }
+
+            public class VariantDependent
+            {
+                // ReSharper disable UnusedParameter.Local
+                public VariantDependent(PlumVariant plum, PearVariant pear)
+                {
+                }
+                // ReSharper restore UnusedParameter.Local
+            }
+
+            [Test]
+            public void ImplementationsCanBeDeterminedByNewType()
+            {
+                var needs = new Needs();
+                needs.Add(new PearVariant(new SomeImplementation()));
+                needs.Add(new PlumVariant(new SomeImplementation()));
+                Assert.AreNotEqual(needs.Get<PearVariant>().Value, needs.Get<PlumVariant>().Value);
+            }
+        }
     }
 }
