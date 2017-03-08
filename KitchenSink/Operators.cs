@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using KitchenSink.Control;
+using static KitchenSink.Comparison;
 
 namespace KitchenSink
 {
@@ -15,6 +16,9 @@ namespace KitchenSink
 
         /// <summary>Logical implication.</summary>
         public static readonly Func<bool, bool, bool> Implies = (x, y) => !x || y;
+
+        /// <summary>Composes predicate with logical negation.</summary>
+        public static Func<A, bool> Complement<A>(Func<A, bool> f) => x => !f(x);
 
         /// <summary>Positive integer predicate.</summary>
         public static readonly Func<int, bool> Pos = x => x > 0;
@@ -68,13 +72,17 @@ namespace KitchenSink
         public static readonly Func<object, string> Str = x => x?.ToString() ?? "";
 
         /// <summary>Check if collection is empty.</summary>
-        public static readonly Func<IEnumerable, bool> Empty = x =>
+        public static readonly Func<IEnumerable, bool> Empty = x => !NonEmpty(x);
+
+        /// <summary>Check if collection is non-empty.</summary>
+        public static readonly Func<IEnumerable, bool> NonEmpty = x =>
         {
             var e = x.GetEnumerator();
+            var disposable = e as IDisposable;
 
-            if (e is IDisposable)
+            if (disposable != null)
             {
-                using ((IDisposable) e)
+                using (disposable)
                 {
                     return e.MoveNext();
                 }
@@ -82,9 +90,6 @@ namespace KitchenSink
 
             return e.MoveNext();
         };
-
-        /// <summary>Check if collection is non-empty.</summary>
-        public static readonly Func<IEnumerable, bool> NonEmpty = x => !Empty(x);
 
         /// <summary>Check if string is only whitespace.</summary>
         public static readonly Func<string, bool> Blank = x => string.IsNullOrWhiteSpace(x);
@@ -155,82 +160,60 @@ namespace KitchenSink
 
         /// <summary>Starting point for a range comparison, example: <c>0 &lt;= Cmp(x) &lt; 10</c></summary>
         public static RangeComparison.Initial<A> Cmp<A>(A value) where A : IComparable<A>
-        {
-            return RangeComparison.New(value);
-        }
+            => RangeComparison.New(value);
 
         /// <summary>
         /// Comparison that returns a symbolic result.
         /// Null values are always less than non-null values.
         /// </summary>
-        public static Comparison Compare<A>(A x, A y) where A : IComparable<A>
-        {
-            if (x == null && y == null)
-                return Comparison.EQ;
-            if (x == null)
-                return Comparison.LT;
-            if (y == null)
-                return Comparison.GT;
-            return Case(x.CompareTo(y))
-                .When(Neg).Then(Comparison.LT)
-                .When(Pos).Then(Comparison.GT)
-                .Else(Comparison.EQ);
-        }
+        public static Comparison Compare<A>(A x, A y) where A : IComparable<A> =>
+            x == null && y == null ? EQ :
+            x == null ? LT :
+            y == null ? GT :
+            Case(x.CompareTo(y))
+                .When(Neg).Then(LT)
+                .When(Pos).Then(GT)
+                .Else(EQ);
 
         /// <summary>
         /// Starts a Cond with the given condition.
         /// </summary>
         public static ICondInitial If(Func<bool> condition)
-        {
-            return Cond.If(condition);
-        }
+            => Cond.If(condition);
 
         /// <summary>
         /// Starts a Cond with the given condition.
         /// </summary>
         public static ICondInitial If(bool condition)
-        {
-            return Cond.If(condition);
-        }
+            => Cond.If(condition);
 
         /// <summary>
         /// Starts a Cond with the given condition.
         /// </summary>
         public static ICondIf<TResult> If<TResult>(Func<bool> condition)
-        {
-            return Cond<TResult>.If(condition);
-        }
+            => Cond<TResult>.If(condition);
 
         /// <summary>
         /// Starts a Cond with the given condition.
         /// </summary>
         public static ICondIf<TResult> If<TResult>(bool condition)
-        {
-            return Cond<TResult>.If(condition);
-        }
+            => Cond<TResult>.If(condition);
 
         /// <summary>
         /// Starts a Case for the given key.
         /// </summary>
         public static ICaseInitialThen<A> Case<A>(A key)
-        {
-            return Control.Case.Of(key);
-        }
+            => Control.Case.Of(key);
 
         /// <summary>
         /// Starts a Case for the given key with explicit return type.
         /// </summary>
         public static ICaseThen<TKey, TResult> Case<TKey, TResult>(TKey key)
-        {
-            return Control.Case<TKey, TResult>.Of(key);
-        }
+            => Control.Case<TKey, TResult>.Of(key);
 
         /// <summary>
         /// Allows a block of statements to be used as an expression.
         /// </summary>
-        public static A Do<A>(Func<A> body)
-        {
-            return body();
-        }
+        public static A Do<A>(Func<A> body) => body();
     }
 }
