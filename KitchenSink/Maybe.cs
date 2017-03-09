@@ -91,16 +91,16 @@ namespace KitchenSink
 
         public static int Compare<A>(Maybe<A> x, Maybe<A> y) where A : IComparable<A>
         {
-            if (x.HasValue == y.HasValue == false)
+            if (!x.HasValue && !y.HasValue)
                 return 0;
-
-            if (x.HasValue && !y.HasValue)
-                return 1;
 
             if (!x.HasValue && y.HasValue)
                 return -1;
 
-            return 0; // TODO: this is incomplete
+            if (x.HasValue && !y.HasValue)
+                return 1;
+
+            return Comparer<A>.Default.Compare(x.Value, y.Value);
         }
 
         public static Maybe<R> All<A, R>(Maybe<A> ma, Func<A, R> f)
