@@ -23,10 +23,10 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `Apply` - partially apply functions
   * `Split` - splits strings by `Regex`
   * `A.IsIn(IEnumerable<A>)`, `A.IsIn(params A[])` - reversed contains check
+  * `IEnumerable.AsStream`, `Stream.AsEnumerable` - converts `IEnumerable`s to/from `Stream`s
 
 ### Collection Enhancements
 
-  * `IEnumerable.AsStream`, `Stream.AsEnumerable` - extensions for converting `IEnumerable`s to/from `Stream`s
   * `Dictionary<K1, K2, V>` - `Dictionary`s that use `Tuple` for aggregate keys
 
 ### Composable Control Structures
