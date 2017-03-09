@@ -18,6 +18,16 @@ namespace KitchenSink
             return f(val) ? MaybeOf(convert(val)) : None<B>();
         }
 
+        public static Maybe<B> SelectMany<A, B>(this Maybe<A> m, Func<A, Maybe<B>> selector)
+        {
+            return m.Select(selector).Flatten();
+        }
+
+        public static Maybe<C> SelectMany<A, B, C>(this Maybe<A> m, Func<A, Maybe<B>> k, Func<A, B, C> s)
+        {
+            return m.SelectMany(x => k(x).SelectMany(y => Some(s(x, y))));
+        }
+
         public static Lazy<Maybe<B>> LazyIf<A, B>(A val, Func<A, bool> f, Func<A, B> selector)
         {
             return new Lazy<Maybe<B>>(() => If(val, f, selector));
@@ -122,7 +132,6 @@ namespace KitchenSink
 
         public Maybe<B> Cast<B>() => HasValue && Value is B ? Some((B) (object) Value) : None<B>();
         public Maybe<B> Select<B>(Func<A, B> f) => HasValue ? Some(f(Value)) : None<B>();
-        public Maybe<B> SelectMany<B>(Func<A, Maybe<B>> f) => Select(f).Flatten();
         public Maybe<A> Where(Func<A, bool> f) => HasValue && f(Value) ? this : None<A>();
 
         public Maybe<C> Join<B, C, K>(
