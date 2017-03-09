@@ -3,10 +3,6 @@
 namespace KitchenSink
 {
     // TODO: move into Operators/Extensions/(Calendar namespace)
-    public enum Month
-    {
-        January = 1, February, March, April, May, June, July, August, September, October, November, December
-    }
 
     public static class Date
     {
@@ -33,6 +29,11 @@ namespace KitchenSink
             return new TimeSpan(0, x, 0);
         }
 
+        public static TimeSpan Seconds(this int x)
+        {
+            return new TimeSpan(0, 0, x);
+        }
+
         public static DateTime AgoLocal(this TimeSpan x)
         {
             return DateTime.Now.Add(x.Negate());
@@ -53,9 +54,9 @@ namespace KitchenSink
             return DateTime.UtcNow.Add(x);
         }
 
-        public static DateTimeRange To(this DateTime begin, DateTime end)
+        public static DateSpan To(this DateTime begin, DateTime end)
         {
-            return new DateTimeRange(begin, end);
+            return new DateSpan(begin, end);
         }
 
         public static DateTime At(this DateTime dateTime, int hours, int minutes, int seconds)

@@ -53,7 +53,7 @@
     <Compile Include="Testing\Check.cs" />
     <Compile Include="Collections\CollectionHelpers.cs" />
     <Compile Include="Dates.cs" />
-    <Compile Include="DateTimeRange.cs" />
+    <Compile Include="DateSpan.cs" />
     <Compile Include="Injection\Exceptions.cs" />
     <Compile Include="Injection\SingleUse.cs" />
     <Compile Include="FilePath.cs" />
