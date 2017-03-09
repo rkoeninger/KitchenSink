@@ -4,6 +4,7 @@ using KitchenSink.Control;
 using KitchenSink.Extensions;
 using static KitchenSink.Comparison;
 
+// TODO: split some of these out into other *Operators in the same partial class
 namespace KitchenSink
 {
     /// <summary>

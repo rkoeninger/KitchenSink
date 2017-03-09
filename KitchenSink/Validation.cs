@@ -7,6 +7,8 @@ using KitchenSink.Collections;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
+// TODO: some of this is made unnecessary by C# 6.0 (?.) operator
+
 namespace KitchenSink
 {
     public static class Verify

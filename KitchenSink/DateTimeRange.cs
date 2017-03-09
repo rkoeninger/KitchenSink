@@ -3,6 +3,7 @@ using System.Globalization;
 
 namespace KitchenSink
 {
+    // TODO: move under Timekeeping/Calendar namespace, rename to DateSpan?
     public struct DateTimeRange
     {
         public static DateTimeRange GetEntireDay(DateTime dt)
