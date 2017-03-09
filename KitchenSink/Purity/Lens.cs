@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using KitchenSink.Extensions;
 
-namespace KitchenSink
+namespace KitchenSink.Purity
 {
     public static class Lens
     {

@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
+using KitchenSink.Purity;
 
 namespace KitchenSink.Tests
 {

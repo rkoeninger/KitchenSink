@@ -1,4 +1,5 @@
 ﻿using System;
+using KitchenSink.Purity;
 using KitchenSink.Testing;
 using NUnit.Framework;
 
