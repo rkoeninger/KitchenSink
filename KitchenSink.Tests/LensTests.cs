@@ -46,10 +46,9 @@ namespace KitchenSink.Tests
                 Address = address;
             }
 
-            // TODO: these should not have to be writeable
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
-            public Address Address { get; set; }
+            public string FirstName { get; }
+            public string LastName { get; }
+            public Address Address { get; }
         }
 
         public class Address
@@ -60,9 +59,8 @@ namespace KitchenSink.Tests
                 City = city;
             }
 
-            // TODO: these should not have to be writeable
-            public string Street { get; set; }
-            public string City { get; set; }
+            public string Street { get; }
+            public string City { get; }
         }
     }
 }

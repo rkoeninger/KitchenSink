@@ -31,12 +31,6 @@ namespace KitchenSink.Purity
             }
 
             var property = (PropertyInfo)memberExpr.Member;
-
-            if (!property.CanWrite)
-            {
-                throw new ArgumentException($"Property {property.Name} must be writeable.");
-            }
-
             return new Lens<A, B>(getExpr.Compile(), Setter<A, B>(property.Name));
         }
 
