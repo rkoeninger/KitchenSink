@@ -148,7 +148,7 @@ namespace KitchenSink.Extensions
 
         /// <summary>
         /// Returns elements in given sequence as sub-sequences of given size.
-        /// Example: [1 2 3 4 5 6 7 8] 3 => [[1 2 3] [4 5 6] [7 8]]
+        /// Example: [1 2 3 4 5 6 7 8], 3 => [[1 2 3] [4 5 6] [7 8]]
         /// </summary>
         public static IEnumerable<IEnumerable<A>> Partition<A>(this IEnumerable<A> seq, int count)
         {
@@ -176,7 +176,7 @@ namespace KitchenSink.Extensions
 
         /// <summary>
         /// Returns sequence of overlapping pairs of elements in given sequence.
-        /// Example: [1 2 3 4] => [[1 2] [2 3] [3 4]]
+        /// Example: [1 2 3 4 5] => [[1 2] [2 3] [3 4] [4 5]]
         /// </summary>
         public static IEnumerable<Tuple<A, A>> OverlappingPairs<A>(this IEnumerable<A> seq)
         {
@@ -253,16 +253,18 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Randomizes elements in sequence. This will enumerate the entire sequence.
         /// </summary>
-        public static IEnumerable<A> Shuffle<A>(this IEnumerable<A> seq)
+        public static IEnumerable<A> Shuffle<A>(this IEnumerable<A> seq, Random rand = null)
         {
-            var rand = new Random();
-            var temp = seq.ToArray();
+            rand = rand ?? new Random();
+            var values = seq.ToArray();
 
-            foreach (var i in Enumerable.Range(0, temp.Length))
+            for (var i = 0; i < values.Length; ++i)
             {
-                var j = rand.Next(i, temp.Length);
-                yield return temp[j];
-                temp[j] = temp[i];
+                var j = rand.Next(i, values.Length);
+                var temp = values[j];
+                values[j] = values[i];
+                values[i] = temp;
+                yield return temp;
             }
         }
 
