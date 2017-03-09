@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KitchenSink.Collections;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 using NUnit.Framework;
@@ -49,7 +48,7 @@ namespace KitchenSink.Tests
         [Test]
         public void DictionaryCreateByAnonObject()
         {
-            var dict2 = Dictionary.Of(new
+            var dict2 = ToDictionary(new
             {
                 // ReSharper disable once RedundantAnonymousTypePropertyName
                 Red = ConsoleColor.Red,
@@ -71,7 +70,7 @@ namespace KitchenSink.Tests
             Assert.IsInstanceOf<Func<int, int>>(dict2["Func1"]);
 
             // Can actually be any object
-            var dict3 = Dictionary.Of(new Color(12, 23, 34));
+            var dict3 = ToDictionary(new Color(12, 23, 34));
             Assert.AreEqual(3, dict3.Count);
             Assert.IsTrue(dict3.ContainsKey("R"));
             Assert.IsTrue(dict3.ContainsKey("G"));

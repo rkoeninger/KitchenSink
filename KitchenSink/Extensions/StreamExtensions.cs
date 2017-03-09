@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using KitchenSink.Extensions;
 
-namespace KitchenSink.Collections
+namespace KitchenSink.Extensions
 {
-    public static class Streams
+    public static class StreamExtensions
     {
         public static IEnumerable<byte> AsEnumerable(this Stream stream)
         {
             for (int b; (b = stream.ReadByte()) >= 0;)
             {
-                yield return (byte) b;
+                yield return (byte)b;
             }
         }
 
@@ -32,10 +31,9 @@ namespace KitchenSink.Collections
             return new MemoryStream(bytes);
         }
 
-        public static Stream ToStream(this IEnumerable<string> seq, Encoding encoding = null, string separator = null)
+        public static Stream ToStream(this IEnumerable<string> seq, Encoding encoding = null, string separator = "")
         {
             encoding = encoding ?? Encoding.UTF8;
-            separator = separator ?? "";
             return new EnumerableStream(seq.Intersperse(separator).SelectMany(encoding.GetBytes));
         }
 
@@ -77,33 +75,33 @@ namespace KitchenSink.Collections
 
             public override long Length
             {
-                get { throw new NotImplementedException(); }
+                get { throw new NotSupportedException(); }
             }
 
             public override void SetLength(long value)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public override long Position
             {
-                get { throw new NotImplementedException(); }
-                set { throw new NotImplementedException(); }
+                get { throw new NotSupportedException(); }
+                set { throw new NotSupportedException(); }
             }
 
             public override void Flush()
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public override long Seek(long offset, SeekOrigin origin)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public override void Write(byte[] buffer, int offset, int count)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
         }
     }

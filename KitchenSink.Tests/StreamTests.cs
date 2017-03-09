@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using KitchenSink.Collections;
+using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 using NUnit.Framework;
 
