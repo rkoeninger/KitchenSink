@@ -44,6 +44,7 @@
     <Compile Include="Control\Case.cs" />
     <Compile Include="Control\Cond.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
+    <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="Extensions\LinqMaybeExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\FuncExtensions.cs" />
@@ -52,8 +53,7 @@
     <Compile Include="Testing\All.cs" />
     <Compile Include="Testing\Check.cs" />
     <Compile Include="Collections\CollectionHelpers.cs" />
-    <Compile Include="Dates.cs" />
-    <Compile Include="DateSpan.cs" />
+    <Compile Include="Timekeeping\DateSpan.cs" />
     <Compile Include="Injection\Exceptions.cs" />
     <Compile Include="Injection\SingleUse.cs" />
     <Compile Include="FilePath.cs" />
@@ -72,6 +72,7 @@
     <Compile Include="Collections\Streams.cs" />
     <Compile Include="Testing\Expect.cs" />
     <Compile Include="Maybe.cs" />
+    <Compile Include="Timekeeping\Date.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="Validation.cs" />
     <Compile Include="Void.cs" />

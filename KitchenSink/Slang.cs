@@ -380,10 +380,7 @@ namespace KitchenSink
             return tokens;
         }
 
-        private Location CurrentLocation
-        {
-            get { return new Location(_sourceUnit, _line, _column); }
-        }
+        private Location CurrentLocation => new Location(_sourceUnit, _line, _column);
 
         private void Fail(string message)
         {
@@ -406,7 +403,7 @@ namespace KitchenSink
 
         public override string ToString()
         {
-            return string.Format("Line {0}, Column {1} in {2}", Line, Column, File);
+            return $"Line {Line}, Column {Column} in {File}";
         }
     }
 

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Globalization;
 
-namespace KitchenSink
+namespace KitchenSink.Timekeeping
 {
-    // TODO: move under Timekeeping/Calendar namespace?
-
     /// <summary>
     /// Represents a region of time between two instants, each
     /// represented as a <see cref="DateTime"/>.

@@ -3,6 +3,7 @@ using System.Linq;
 using KitchenSink.Collections;
 using static KitchenSink.Operators;
 using KitchenSink.Testing;
+using KitchenSink.Timekeeping;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests

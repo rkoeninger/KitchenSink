@@ -1,18 +1,9 @@
 ﻿using System;
+using KitchenSink.Timekeeping;
 
-namespace KitchenSink
+namespace KitchenSink.Extensions
 {
-    // TODO: move into Operators/Extensions/(Calendar namespace)
-
-    public static class Date
-    {
-        public static DateTime On(int year, int month, int day)
-        {
-            return new DateTime(year, month, day);
-        }
-    }
-
-    public static class Dates
+    public static class DateTimeExtensions
     {
         public static TimeSpan Days(this int x)
         {
@@ -39,17 +30,17 @@ namespace KitchenSink
             return DateTime.Now.Add(x.Negate());
         }
 
-        public static DateTime Ago(this TimeSpan x)
+        public static DateTime AgoUtc(this TimeSpan x)
         {
             return DateTime.UtcNow.Add(x.Negate());
         }
 
-        public static DateTime FromNowLocal(this TimeSpan x)
+        public static DateTime AheadLocal(this TimeSpan x)
         {
             return DateTime.Now.Add(x);
         }
 
-        public static DateTime FromNow(this TimeSpan x)
+        public static DateTime AheadUtc(this TimeSpan x)
         {
             return DateTime.UtcNow.Add(x);
         }
