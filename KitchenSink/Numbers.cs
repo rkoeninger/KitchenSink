@@ -5,6 +5,8 @@ using KitchenSink.Collections;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
+// TODO: move under Extensions
+
 namespace KitchenSink
 {
     public static class Numbers
