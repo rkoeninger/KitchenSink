@@ -168,7 +168,7 @@ namespace KitchenSink.Injection
 
             if (factories.TryGetValue(contractType, out factory))
             {
-                return some(factory());
+                return Some(factory());
             }
 
             foreach (var source in sources)
@@ -177,7 +177,7 @@ namespace KitchenSink.Injection
 
                 if (implType != null)
                 {
-                    return some(Persist(contractType, implType, multiUse));
+                    return Some(Persist(contractType, implType, multiUse));
                 }
             }
 
@@ -191,7 +191,7 @@ namespace KitchenSink.Injection
                 }
             }
 
-            return none<object>();
+            return None<object>();
         }
 
         // Create and store Factory. Factory returns singleton instance if

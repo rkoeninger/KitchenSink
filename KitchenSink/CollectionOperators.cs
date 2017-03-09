@@ -40,17 +40,26 @@ namespace KitchenSink
             // ReSharper disable once IteratorNeverReturns
         }
 
-        public static Maybe<A> maybeof<A>(A value)
+        /// <summary>
+        /// Creates a Maybe that has the given value if it is not null.
+        /// </summary>
+        public static Maybe<A> MaybeOf<A>(A value)
         {
-            return Maybe.Of(value);
+            return new Maybe<A>(value);
         }
 
-        public static Maybe<A> some<A>(A value)
+        /// <summary>
+        /// Creates a Maybe with the given value.
+        /// </summary>
+        public static Maybe<A> Some<A>(A value)
         {
-            return Maybe.Some(value);
+            return new Maybe<A>(value, true);
         }
 
-        public static Maybe<A> none<A>()
+        /// <summary>
+        /// Creates a Maybe without a value.
+        /// </summary>
+        public static Maybe<A> None<A>()
         {
             return Maybe<A>.None;
         }

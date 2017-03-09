@@ -13,8 +13,8 @@ namespace KitchenSink.Extensions
         public static Maybe<A> GetMaybe<A>(this IReadOnlyList<A> list, int index)
         {
             return 0 <= Cmp(index) < list.Count
-                ? some(list[index])
-                : none<A>();
+                ? Some(list[index])
+                : None<A>();
         }
 
         /// <summary>
@@ -23,8 +23,8 @@ namespace KitchenSink.Extensions
         public static Maybe<A> GetMaybe<A>(this IList<A> list, int index)
         {
             return 0 <= Cmp(index) < list.Count
-                ? some(list[index])
-                : none<A>();
+                ? Some(list[index])
+                : None<A>();
         }
 
         /// <summary>
@@ -34,8 +34,8 @@ namespace KitchenSink.Extensions
         {
             B value;
             return dict.TryGetValue(key, out value)
-                ? some(value)
-                : none<B>();
+                ? Some(value)
+                : None<B>();
         }
 
         /// <summary>
@@ -45,10 +45,10 @@ namespace KitchenSink.Extensions
         {
             foreach (var item in seq)
             {
-                return some(item);
+                return Some(item);
             }
 
-            return none<A>();
+            return None<A>();
         }
 
         /// <summary>
@@ -61,11 +61,11 @@ namespace KitchenSink.Extensions
             {
                 if (predicate(item))
                 {
-                    return some(item);
+                    return Some(item);
                 }
             }
 
-            return none<A>();
+            return None<A>();
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace KitchenSink.Extensions
                 }
             }
 
-            return none<A>();
+            return None<A>();
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace KitchenSink.Extensions
                 }
             }
 
-            return none<A>();
+            return None<A>();
         }
 
         /// <summary>

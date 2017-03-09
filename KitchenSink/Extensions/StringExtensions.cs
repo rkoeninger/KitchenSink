@@ -41,13 +41,13 @@ namespace KitchenSink.Extensions
         public static Maybe<int> ToInt(this string s)
         {
             int i;
-            return int.TryParse(s, out i) ? some(i) : none<int>();
+            return int.TryParse(s, out i) ? Some(i) : None<int>();
         }
 
         public static Maybe<double> ToDouble(this string s)
         {
             double d;
-            return double.TryParse(s, out d) ? some(d) : none<double>();
+            return double.TryParse(s, out d) ? Some(d) : None<double>();
         }
 
         /// <summary>

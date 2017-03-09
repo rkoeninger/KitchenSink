@@ -267,7 +267,7 @@ namespace KitchenSink
 
         public Maybe<A> ToMaybe()
         {
-            return HasErrors ? Maybe<A>.None : maybeof(Value);
+            return HasErrors ? Maybe<A>.None : MaybeOf(Value);
         }
     }
 }

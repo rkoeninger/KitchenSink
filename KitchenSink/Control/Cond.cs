@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KitchenSink.Extensions;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Control
 {
@@ -195,7 +196,7 @@ namespace KitchenSink.Control
 
             public Maybe<TResult> Eval()
             {
-                return Condition() ? Maybe.Some(Consequent()) : Maybe<TResult>.None;
+                return Condition() ? Some(Consequent()) : None<TResult>();
             }
         }
 

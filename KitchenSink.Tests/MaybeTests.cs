@@ -13,20 +13,20 @@ namespace KitchenSink.Tests
         [Test]
         public void AllDefined()
         {
-            var a = some(0);
-            var b = some(1);
-            var c = some(2);
-            Assert.AreEqual(some(3), Maybe.All(a, b, c, (x, y, z) => x + y + z));
-            Assert.AreEqual(none<int>(), Maybe.All(a, b, none<int>(), (x, y, z) => x + y + z));
+            var a = Some(0);
+            var b = Some(1);
+            var c = Some(2);
+            Assert.AreEqual(Some(3), Maybe.All(a, b, c, (x, y, z) => x + y + z));
+            Assert.AreEqual(None<int>(), Maybe.All(a, b, None<int>(), (x, y, z) => x + y + z));
         }
 
         [Test]
         public void MaybeWrappers()
         {
             const string s = "";
-            Expect.IsNone(maybeof((string) null));
-            Expect.IsSome(maybeof(s));
-            Expect.IsNone(none<string>());
+            Expect.IsNone(MaybeOf((string) null));
+            Expect.IsSome(MaybeOf(s));
+            Expect.IsNone(None<string>());
         }
 
         [Test]
@@ -43,19 +43,19 @@ namespace KitchenSink.Tests
         [Test]
         public void MaybeJoining()
         {
-            Expect.IsSome(3, maybeof(1).Join(maybeof(2), Add));
-            Expect.IsNone(none<int>().Join(maybeof(2), Add));
-            Expect.IsNone(maybeof(1).Join(none<int>(), Add));
-            Expect.IsNone(none<int>().Join(none<int>(), Add));
+            Expect.IsSome(3, MaybeOf(1).Join(MaybeOf(2), Add));
+            Expect.IsNone(None<int>().Join(MaybeOf(2), Add));
+            Expect.IsNone(MaybeOf(1).Join(None<int>(), Add));
+            Expect.IsNone(None<int>().Join(None<int>(), Add));
         }
 
         [Test]
         public void MaybeCasting()
         {
-            Assert.IsTrue(maybeof("").Cast<string>().HasValue); // same-type
-            Assert.IsTrue(maybeof("").Cast<object>().HasValue); // up-casting
-            Assert.IsFalse(maybeof(new object()).Cast<string>().HasValue); // down-casting
-            Assert.IsFalse(maybeof("").Cast<int>().HasValue); // casting to unrelated type
+            Assert.IsTrue(MaybeOf("").Cast<string>().HasValue); // same-type
+            Assert.IsTrue(MaybeOf("").Cast<object>().HasValue); // up-casting
+            Assert.IsFalse(MaybeOf(new object()).Cast<string>().HasValue); // down-casting
+            Assert.IsFalse(MaybeOf("").Cast<int>().HasValue); // casting to unrelated type
         }
 
         [Test]
@@ -72,9 +72,9 @@ namespace KitchenSink.Tests
         public void MaybeAllTests()
         {
             var result = Maybe.All(
-                    some("hello"),
-                    none<string>(),
-                    some("world!"),
+                    Some("hello"),
+                    None<string>(),
+                    Some("world!"),
                     (x, y, z) => x + y + z)
                 .OrElse("something missing");
             Assert.AreEqual("something missing", result);
@@ -83,10 +83,10 @@ namespace KitchenSink.Tests
         [Test]
         public void MaybeDefaultOperator()
         {
-            Assert.AreEqual(3, none<int>() | none<int>() | 3);
-            Assert.AreEqual(2, none<int>() | some(2) | 3);
-            Expect.IsSome(2, none<int>() | some(2) | none<int>());
-            Expect.IsNone(none<string>() | none<string>());
+            Assert.AreEqual(3, None<int>() | None<int>() | 3);
+            Assert.AreEqual(2, None<int>() | Some(2) | 3);
+            Expect.IsSome(2, None<int>() | Some(2) | None<int>());
+            Expect.IsNone(None<string>() | None<string>());
         }
 
         [Test]

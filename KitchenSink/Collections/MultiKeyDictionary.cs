@@ -56,7 +56,7 @@ namespace KitchenSink.Collections
         public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b)
         {
             TValue result;
-            return TryGetValue(TupleOf(a, b), out result) ? some(result) : none<TValue>();
+            return TryGetValue(TupleOf(a, b), out result) ? Some(result) : None<TValue>();
         }
     }
 
@@ -117,7 +117,7 @@ namespace KitchenSink.Collections
         public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b, TKey3 c)
         {
             TValue result;
-            return TryGetValue(TupleOf(a, b, c), out result) ? some(result) : none<TValue>();
+            return TryGetValue(TupleOf(a, b, c), out result) ? Some(result) : None<TValue>();
         }
     }
 
@@ -184,7 +184,7 @@ namespace KitchenSink.Collections
         public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b, TKey3 c, TKey4 d)
         {
             TValue result;
-            return TryGetValue(TupleOf(a, b, c, d), out result) ? some(result) : none<TValue>();
+            return TryGetValue(TupleOf(a, b, c, d), out result) ? Some(result) : None<TValue>();
         }
     }
 }

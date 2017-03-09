@@ -1,4 +1,5 @@
 ﻿using System;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Testing
 {
@@ -52,7 +53,7 @@ namespace KitchenSink.Testing
         /// <summary>Asserts that the actual maybe has a value and the value is equal to the expected value.</summary>
         public static void IsSome<A>(A expected, Maybe<A> actual)
         {
-            if (Maybe.Some(expected) != actual)
+            if (Some(expected) != actual)
             {
                 throw new Exception();
             }

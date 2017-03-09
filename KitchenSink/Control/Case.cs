@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KitchenSink.Extensions;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Control
 {
@@ -414,7 +415,7 @@ namespace KitchenSink.Control
 
             public Maybe<TResult> Eval(TKey key)
             {
-                return Condition(key) ? Maybe.Some(Consequent(key)) : Maybe<TResult>.None;
+                return Condition(key) ? Some(Consequent(key)) : None<TResult>();
             }
         }
 
@@ -434,7 +435,7 @@ namespace KitchenSink.Control
 
             public Maybe<TResult> Eval(TKey key)
             {
-                return Maybe.Some(Builder.End());
+                return Some(Builder.End());
             }
         }
 

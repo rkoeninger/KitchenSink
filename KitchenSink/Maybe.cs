@@ -8,29 +8,11 @@ namespace KitchenSink
 {
     public static class Maybe
     {
-        public static Maybe<A> Of<A>(A? nullable) where A : struct
-        {
-            return nullable.HasValue ? new Maybe<A>(nullable.Value) : Maybe<A>.None;
-        }
-
-        public static Maybe<A> Of<A>(A val)
-        {
-            return new Maybe<A>(val);
-        }
-
-        public static Maybe<A> Some<A>(A val)
-        {
-            if (Null(val))
-                throw new ArgumentNullException("Can't create Maybe.IsSome<" + typeof(A) + "> with null value");
-
-            return new Maybe<A>(val);
-        }
-
         public static Maybe<A> Try<A>(Func<A> f)
         {
             try
             {
-                return Of(f());
+                return MaybeOf(f());
             }
             catch
             {
@@ -45,7 +27,7 @@ namespace KitchenSink
 
         public static Maybe<B> If<A, B>(A val, Func<A, bool> f, Func<A, B> convert)
         {
-            return f(val) ? Of(convert(val)) : Maybe<B>.None;
+            return f(val) ? MaybeOf(convert(val)) : Maybe<B>.None;
         }
 
         public static Lazy<Maybe<B>> LazyIf<A, B>(A val, Func<A, bool> f, Func<A, B> selector)
@@ -75,7 +57,7 @@ namespace KitchenSink
         {
             var array = seq.ToArray();
 
-            return array.Any(x => !x.HasValue) ? Maybe<IEnumerable<A>>.None : Of(array.WhereSome());
+            return array.Any(x => !x.HasValue) ? Maybe<IEnumerable<A>>.None : MaybeOf(array.WhereSome());
         }
 
         public static Func<A, Maybe<C>> Compose<A, B, C>(this Func<A, Maybe<B>> f, Func<B, Maybe<C>> g)
@@ -86,7 +68,7 @@ namespace KitchenSink
         public static Func<A, Maybe<B>> Demote<A, B>(this Maybe<Func<A, B>> maybe)
         {
             if (maybe.HasValue)
-                return x => Of(maybe.Value(x));
+                return x => MaybeOf(maybe.Value(x));
 
             return _ => Maybe<B>.None;
         }
@@ -156,7 +138,7 @@ namespace KitchenSink
 
         public static implicit operator Maybe<A>(A val)
         {
-            return Maybe.Of(val);
+            return MaybeOf(val);
         }
 
         public static Maybe<A> operator |(Maybe<A> x, Maybe<A> y)
@@ -179,10 +161,10 @@ namespace KitchenSink
             return !Equals(x, y);
         }
 
-        internal Maybe(A val) : this()
+        internal Maybe(A val, bool? hasValue = null) : this()
         {
             Value = val;
-            HasValue = NonNull(val);
+            HasValue = hasValue ?? NonNull(val);
         }
 
         internal A Value { get; }
@@ -192,7 +174,7 @@ namespace KitchenSink
 
         public Maybe<B> Select<B>(Func<A, B> f)
         {
-            return HasValue ? Maybe.Of(f(Value)) : Maybe<B>.None;
+            return HasValue ? MaybeOf(f(Value)) : Maybe<B>.None;
         }
 
         public Maybe<B> TrySelect<B>(Func<A, B> f)
@@ -219,7 +201,7 @@ namespace KitchenSink
         public Maybe<C> Join<B, C, K>(Maybe<B> inner, Func<A, K> outerKeySelector, Func<B, K> innerKeySelector, Func<A, B, C> resultSelector, IEqualityComparer<K> comparer)
         {
             return HasValue && inner.HasValue && comparer.Equals(outerKeySelector(Value), innerKeySelector(inner.Value))
-                ? Maybe.Of(resultSelector(Value, inner.Value))
+                ? MaybeOf(resultSelector(Value, inner.Value))
                 : Maybe<C>.None;
         }
 
@@ -283,7 +265,7 @@ namespace KitchenSink
 
         public Maybe<A> OrIf<B>(B key, Func<B, bool> p, Func<B, A> f)
         {
-            return HasValue ? this : p(key) ? Maybe.Of(f(key)) : None;
+            return HasValue ? this : p(key) ? MaybeOf(f(key)) : None;
         }
 
         public Maybe<A> OrIf<B>(B key, Func<B, bool> p, Func<B, Maybe<A>> f)

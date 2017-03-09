@@ -8,7 +8,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using KitchenSink.Collections;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
@@ -884,7 +883,7 @@ namespace KitchenSink
 
         public SymbolEnvironment(SymbolEnvironment parent)
         {
-            ContainingScope = Maybe.Some(parent);
+            ContainingScope = Some(parent);
         }
 
         public Maybe<ParameterExpression> Get(string name)
