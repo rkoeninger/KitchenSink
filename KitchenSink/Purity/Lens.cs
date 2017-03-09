@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
 namespace KitchenSink.Purity
@@ -10,9 +13,6 @@ namespace KitchenSink.Purity
     /// </summary>
     public static class Lens
     {
-        // TODO: this mutates the object instead of creating a new one
-        //       need to generate call to constructor
-
         /// <summary>
         /// Builds a Lens for the given property.
         /// </summary>
@@ -37,12 +37,45 @@ namespace KitchenSink.Purity
                 throw new ArgumentException($"Property {property.Name} must be writeable.");
             }
 
-            Func<A, B, A> setter = (obj, val) =>
+            return new Lens<A, B>(getExpr.Compile(), Setter<A, B>(property.Name));
+        }
+
+        private static Func<A, B, A> Setter<A, B>(string name)
+        {
+            var ctor = typeof(A)
+                .GetConstructors()
+                .SingleOrDefault(c => c.GetParameters().Length > 0);
+
+            if (ctor == null)
             {
-                property.SetValue(obj, val);
-                return obj;
+                throw new InvalidOperationException(
+                    $"Type {typeof(A)} has more than one constructor");
+            }
+
+            var properties = typeof(A).GetProperties();
+            var paramz = ctor.GetParameters();
+            return (record, value) =>
+            {
+                var args = paramz
+                    .Select(p => p.Name.IsSimilar(name)
+                        ? value
+                        : Get<A>(record, properties, p))
+                    .ToArray();
+                return (A) ctor.Invoke(args);
             };
-            return new Lens<A, B>(getExpr.Compile(), setter);
+        }
+
+        private static object Get<A>(object target, IEnumerable<PropertyInfo> properties, ParameterInfo param)
+        {
+            var property = properties.FirstOrDefault(x => x.Name.IsSimilar(param.Name));
+
+            if (property == null)
+            {
+                throw new InvalidOperationException(
+                    $"Constructor for type {typeof(A)} has parameters that do not match properties");
+            }
+
+            return property.GetValue(target, null);
         }
     }
 
