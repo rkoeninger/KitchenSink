@@ -878,7 +878,7 @@ namespace KitchenSink
 
         public SymbolEnvironment()
         {
-            ContainingScope = Maybe<SymbolEnvironment>.None;
+            ContainingScope = None<SymbolEnvironment>();
         }
 
         public SymbolEnvironment(SymbolEnvironment parent)
@@ -888,7 +888,7 @@ namespace KitchenSink
 
         public Maybe<ParameterExpression> Get(string name)
         {
-            return Symbols.GetMaybe(name).OrEval(() => ContainingScope.Select(x => x.Get(name)).Flatten());
+            return Symbols.GetMaybe(name).OrDo(() => ContainingScope.Select(x => x.Get(name)).Flatten());
         }
 
         public ParameterExpression Define(string name, Type type)
@@ -901,7 +901,7 @@ namespace KitchenSink
         public bool IsDefined(string name)
         {
             return Symbols.GetMaybe(name)
-                .OrEval(() => ContainingScope.Select(x => x.Symbols.GetMaybe(name)).Flatten())
+                .OrDo(() => ContainingScope.Select(x => x.Symbols.GetMaybe(name)).Flatten())
                 .HasValue;
         }
     }

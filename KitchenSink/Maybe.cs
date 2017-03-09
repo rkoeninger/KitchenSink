@@ -8,18 +8,6 @@ namespace KitchenSink
 {
     public static class Maybe
     {
-        public static Maybe<A> Try<A>(Func<A> f)
-        {
-            try
-            {
-                return MaybeOf(f());
-            }
-            catch
-            {
-                return Maybe<A>.None;
-            }
-        }
-
         public static Maybe<A> If<A>(A val, Func<A, bool> f)
         {
             return If(val, f, x => x);
@@ -27,7 +15,7 @@ namespace KitchenSink
 
         public static Maybe<B> If<A, B>(A val, Func<A, bool> f, Func<A, B> convert)
         {
-            return f(val) ? MaybeOf(convert(val)) : Maybe<B>.None;
+            return f(val) ? MaybeOf(convert(val)) : None<B>();
         }
 
         public static Lazy<Maybe<B>> LazyIf<A, B>(A val, Func<A, bool> f, Func<A, B> selector)
@@ -37,7 +25,7 @@ namespace KitchenSink
 
         public static Maybe<A> Flatten<A>(this Maybe<Maybe<A>> maybe)
         {
-            return maybe.HasValue ? maybe.Value : Maybe<A>.None;
+            return maybe.HasValue ? maybe.Value : None<A>();
         }
 
         public static Maybe<Tuple<A, B>> Zip<A, B>(this Maybe<A> x, Maybe<B> y) =>
@@ -57,7 +45,7 @@ namespace KitchenSink
         {
             var array = seq.ToArray();
 
-            return array.Any(x => !x.HasValue) ? Maybe<IEnumerable<A>>.None : MaybeOf(array.WhereSome());
+            return array.Any(x => !x.HasValue) ? None<IEnumerable<A>>() : MaybeOf(array.WhereSome());
         }
 
         public static Func<A, Maybe<C>> Compose<A, B, C>(this Func<A, Maybe<B>> f, Func<B, Maybe<C>> g)
@@ -70,7 +58,7 @@ namespace KitchenSink
             if (maybe.HasValue)
                 return x => MaybeOf(maybe.Value(x));
 
-            return _ => Maybe<B>.None;
+            return _ => None<B>();
         }
 
         public static int Compare<A>(Maybe<A> x, Maybe<A> y) where A : IComparable<A>
@@ -94,17 +82,17 @@ namespace KitchenSink
 
         public static Maybe<R> All<A, B, R>(Maybe<A> ma, Maybe<B> mb, Func<A, B, R> f)
         {
-            return ma.HasValue && mb.HasValue ? Some(f(ma.Value, mb.Value)) : Maybe<R>.None;
+            return ma.HasValue && mb.HasValue ? Some(f(ma.Value, mb.Value)) : None<R>();
         }
 
         public static Maybe<R> All<A, B, C, R>(Maybe<A> ma, Maybe<B> mb, Maybe<C> mc, Func<A, B, C, R> f)
         {
-            return ma.HasValue && mb.HasValue && mc.HasValue ? Some(f(ma.Value, mb.Value, mc.Value)) : Maybe<R>.None;
+            return ma.HasValue && mb.HasValue && mc.HasValue ? Some(f(ma.Value, mb.Value, mc.Value)) : None<R>();
         }
 
         public static Maybe<R> All<A, B, C, D, R>(Maybe<A> ma, Maybe<B> mb, Maybe<C> mc, Maybe<D> md, Func<A, B, C, D, R> f)
         {
-            return ma.HasValue && mb.HasValue && mc.HasValue && md.HasValue ? Some(f(ma.Value, mb.Value, mc.Value, md.Value)) : Maybe<R>.None;
+            return ma.HasValue && mb.HasValue && mc.HasValue && md.HasValue ? Some(f(ma.Value, mb.Value, mc.Value, md.Value)) : None<R>();
         }
 
         public static Maybe<R> AllFlat<A, R>(Maybe<A> ma, Func<A, Maybe<R>> f)
@@ -114,17 +102,17 @@ namespace KitchenSink
 
         public static Maybe<R> AllFlat<A, B, R>(Maybe<A> ma, Maybe<B> mb, Func<A, B, Maybe<R>> f)
         {
-            return ma.HasValue && mb.HasValue ? f(ma.Value, mb.Value) : Maybe<R>.None;
+            return ma.HasValue && mb.HasValue ? f(ma.Value, mb.Value) : None<R>();
         }
 
         public static Maybe<R> AllFlat<A, B, C, R>(Maybe<A> ma, Maybe<B> mb, Maybe<C> mc, Func<A, B, C, Maybe<R>> f)
         {
-            return ma.HasValue && mb.HasValue && mc.HasValue ? f(ma.Value, mb.Value, mc.Value) : Maybe<R>.None;
+            return ma.HasValue && mb.HasValue && mc.HasValue ? f(ma.Value, mb.Value, mc.Value) : None<R>();
         }
 
         public static Maybe<R> AllFlat<A, B, C, D, R>(Maybe<A> ma, Maybe<B> mb, Maybe<C> mc, Maybe<D> md, Func<A, B, C, D, Maybe<R>> f)
         {
-            return ma.HasValue && mb.HasValue && mc.HasValue && md.HasValue ? f(ma.Value, mb.Value, mc.Value, md.Value) : Maybe<R>.None;
+            return ma.HasValue && mb.HasValue && mc.HasValue && md.HasValue ? f(ma.Value, mb.Value, mc.Value, md.Value) : None<R>();
         }
     }
     
@@ -134,7 +122,7 @@ namespace KitchenSink
     /// </summary>
     public struct Maybe<A>
     {
-        public static readonly Maybe<A> None = default(Maybe<A>);
+        internal static readonly Maybe<A> None = default(Maybe<A>);
 
         public static implicit operator Maybe<A>(A val)
         {
@@ -161,10 +149,10 @@ namespace KitchenSink
             return !Equals(x, y);
         }
 
-        internal Maybe(A val, bool? hasValue = null) : this()
+        internal Maybe(A value, bool? hasValue = null) : this()
         {
-            Value = val;
-            HasValue = hasValue ?? NonNull(val);
+            Value = value;
+            HasValue = hasValue ?? NonNull(value);
         }
 
         internal A Value { get; }
@@ -172,48 +160,23 @@ namespace KitchenSink
 
         public Type InnerType => typeof(A);
 
-        public Maybe<B> Select<B>(Func<A, B> f)
-        {
-            return HasValue ? MaybeOf(f(Value)) : Maybe<B>.None;
-        }
+        public Maybe<B> Cast<B>() => HasValue && Value is B ? Some((B) (object) Value) : None<B>();
+        public Maybe<B> Select<B>(Func<A, B> f) => HasValue ? Some(f(Value)) : None<B>();
+        public Maybe<B> SelectMany<B>(Func<A, Maybe<B>> f) => Select(f).Flatten();
+        public Maybe<A> Where(Func<A, bool> f) => HasValue && f(Value) ? this : None<A>();
 
-        public Maybe<B> TrySelect<B>(Func<A, B> f)
+        public Maybe<C> Join<B, C, K>(
+            Maybe<B> inner,
+            Func<A, K> outerKeySelector,
+            Func<B, K> innerKeySelector,
+            Func<A, B, C> resultSelector,
+            IEqualityComparer<K> comparer)
         {
-            var val = Value;
-            return HasValue ? Maybe.Try(() => f(val)) : Maybe<B>.None;
-        }
-
-        public Maybe<B> SelectMany<B>(Func<A, Maybe<B>> f)
-        {
-            return Select(f).Flatten();
-        }
-
-        public Maybe<B> TrySelectMany<B>(Func<A, Maybe<B>> f)
-        {
-            return TrySelect(f).Flatten();
-        }
-
-        public Maybe<A> Where(Func<A, bool> f)
-        {
-            return HasValue ? Maybe.If(Value, f) : this;
-        }
-
-        public Maybe<C> Join<B, C, K>(Maybe<B> inner, Func<A, K> outerKeySelector, Func<B, K> innerKeySelector, Func<A, B, C> resultSelector, IEqualityComparer<K> comparer)
-        {
-            return HasValue && inner.HasValue && comparer.Equals(outerKeySelector(Value), innerKeySelector(inner.Value))
+            return HasValue
+                   && inner.HasValue
+                   && comparer.Equals(outerKeySelector(Value), innerKeySelector(inner.Value))
                 ? MaybeOf(resultSelector(Value, inner.Value))
-                : Maybe<C>.None;
-        }
-
-        /// <summary>Attempts cast. Propogates None and returns None if cast fails.</summary>
-        public Maybe<B> Cast<B>()
-        {
-            return Maybe.If(Value, x => x is B, x => (B) (object) x);
-        }
-
-        public B Branch<B>(Func<A, B> forSome, Func<B> forNone)
-        {
-            return HasValue ? forSome(Value) : forNone();
+                : None<C>();
         }
 
         public void Branch(Action<A> forSome, Action forNone)
@@ -228,60 +191,20 @@ namespace KitchenSink
             }
         }
 
-        public A OrElse(A other)
-        {
-            return HasValue ? Value : other;
-        }
-
-        public A OrElseEval(Func<A> f)
-        {
-            return HasValue ? Value : f();
-        }
-
-        public A OrElseEval<B>(B key, Func<B, A> f)
-        {
-            return HasValue ? Value : f(key);
-        }
-
-        public Maybe<A> OrEval(Func<A> f)
-        {
-            return HasValue ? this : Maybe.Try(f);
-        }
-
-        public Maybe<A> OrEval(Func<Maybe<A>> f)
-        {
-            return HasValue ? this : f();
-        }
-
-        public Maybe<A> OrEvalMany<B>(B key, Func<B, Maybe<A>> f)
-        {
-            return HasValue ? this : f(key);
-        }
-
-        public Maybe<A> OrEvalMany(Func<Maybe<A>> f)
-        {
-            return HasValue ? this : Maybe.Try(f).Flatten();
-        }
-
-        public Maybe<A> OrIf<B>(B key, Func<B, bool> p, Func<B, A> f)
-        {
-            return HasValue ? this : p(key) ? MaybeOf(f(key)) : None;
-        }
-
-        public Maybe<A> OrIf<B>(B key, Func<B, bool> p, Func<B, Maybe<A>> f)
-        {
-            return HasValue ? this : p(key) ? f(key) : None;
-        }
-
-        public Maybe<A> Or(Maybe<A> maybe)
-        {
-            return HasValue ? this : maybe;
-        }
+        public B Branch<B>(Func<A, B> forSome, Func<B> forNone) =>
+            HasValue ? forSome(Value) : forNone();
+        public A OrElse(A other) => HasValue ? Value : other;
+        public A OrElseDo(Func<A> f) => HasValue ? Value : f();
+        public Maybe<A> OrDo(Func<A> f) => HasValue ? this : Some(f());
+        public Maybe<A> OrDo(Func<Maybe<A>> f) => HasValue ? this : f();
+        public Maybe<A> Or(Maybe<A> maybe) => HasValue ? this : maybe;
 
         public Maybe<A> OrThrow(string message)
         {
             if (HasValue)
+            {
                 return this;
+            }
 
             throw new Exception(message);
         }
@@ -289,7 +212,9 @@ namespace KitchenSink
         public Maybe<A> OrThrow(Exception e)
         {
             if (HasValue)
+            {
                 return this;
+            }
 
             throw e;
         }
@@ -297,7 +222,9 @@ namespace KitchenSink
         public Maybe<A> OrThrow(Func<Exception> f)
         {
             if (HasValue)
+            {
                 return this;
+            }
             
             throw f();
         }
@@ -305,7 +232,9 @@ namespace KitchenSink
         public A OrElseThrow(string message)
         {
             if (HasValue)
+            {
                 return Value;
+            }
 
             throw new Exception(message);
         }
@@ -313,7 +242,9 @@ namespace KitchenSink
         public A OrElseThrow(Exception e)
         {
             if (HasValue)
+            {
                 return Value;
+            }
 
             throw e;
         }
@@ -321,38 +252,25 @@ namespace KitchenSink
         public A OrElseThrow(Func<Exception> f)
         {
             if (HasValue)
+            {
                 return Value;
+            }
 
             throw f();
         }
 
-        public Maybe<A> ForEach(Action<A> f)
+        public void ForEach(Action<A> f)
         {
             if (HasValue)
+            {
                 f(Value);
-
-            return this;
+            }
         }
 
-        public List<A> ToList()
-        {
-            return HasValue ? ListOf(Value) : new List<A>();
-        }
-
-        public A[] ToArray()
-        {
-            return HasValue ? ArrayOf(Value) : new A[0];
-        }
-
-        public override string ToString()
-        {
-            return HasValue ? Value.ToString() : "None";
-        }
-
-        public override int GetHashCode()
-        {
-            return HasValue ? Value.GetHashCode() ^ 0x0a5a5a5a : 1;
-        }
+        public List<A> ToList() => HasValue ? ListOf(Value) : new List<A>();
+        public A[] ToArray() => HasValue ? ArrayOf(Value) : new A[0];
+        public override string ToString() => HasValue ? Str(Value) : "None";
+        public override int GetHashCode() => HasValue ? Hash(Value) : 1;
 
         public override bool Equals(object other)
         {

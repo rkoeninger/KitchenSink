@@ -370,7 +370,7 @@ namespace KitchenSink.Control
         /// </summary>
         public static TResult Else<TResult>(this ICondThen<TResult> builder, Func<TResult> alternative)
         {
-            return builder.End().OrElseEval(alternative);
+            return builder.End().OrElseDo(alternative);
         }
 
         /// <summary>

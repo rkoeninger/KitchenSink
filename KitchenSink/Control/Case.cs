@@ -696,7 +696,7 @@ namespace KitchenSink.Control
 
             public TResult End()
             {
-                return clauses.FirstSome(x => x.Eval(key)).OrElseEval(key, alternative);
+                return clauses.FirstSome(x => x.Eval(key)).OrElseDo(() => alternative(key));
             }
 
             public ICaseDefaultThen<TKey, TResult> Absorb(ICaseDefaultThen<TKey, TResult> builder)
