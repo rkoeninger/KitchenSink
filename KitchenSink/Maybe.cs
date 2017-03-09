@@ -58,6 +58,9 @@ namespace KitchenSink
             return maybe.HasValue ? maybe.Value : Maybe<A>.None;
         }
 
+        public static Maybe<Tuple<A, B>> Zip<A, B>(this Maybe<A> x, Maybe<B> y) =>
+            x.Join(y, TupleOf);
+
         public static Maybe<C> Join<A, B, C>(this Maybe<A> outer, Maybe<B> inner, Func<A, B, C> resultSelector)
         {
             return outer.Join(inner, _ => 0, _ => 0, resultSelector, EqualityComparer<int>.Default);
