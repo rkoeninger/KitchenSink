@@ -81,6 +81,15 @@ namespace KitchenSink.Tests
         }
 
         [Test]
+        public void MaybeDefaultOperator()
+        {
+            Assert.AreEqual(3, none<int>() | none<int>() | 3);
+            Assert.AreEqual(2, none<int>() | some(2) | 3);
+            Expect.IsSome(2, none<int>() | some(2) | none<int>());
+            Expect.IsNone(none<string>() | none<string>());
+        }
+
+        [Test]
         public void ValidationTests()
         {
             var v = Validation.Of("abcdefg")
