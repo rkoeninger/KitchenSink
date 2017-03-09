@@ -9,7 +9,7 @@ namespace KitchenSink
     /// Represents a region of time between two instants, each
     /// represented as a <see cref="DateTime"/>.
     /// </summary>
-    public struct DateSpan
+    public struct DateSpan : IEquatable<DateSpan>, IComparable<DateSpan>
     {
         /// <summary>
         /// Returns <see cref="DateSpan"/> of entire day containing
@@ -143,26 +143,39 @@ namespace KitchenSink
         public DateTime End { get; }
         public TimeSpan Length => End - Begin;
 
-        public bool Contains(DateTime time)
-        {
-            return time >= Begin && time < End;
-        }
+        public bool Contains(DateTime time) => time >= Begin && time < End;
 
-        public bool Contains(DateSpan that)
-        {
-            return that.Begin >= Begin && that.End <= End;
-        }
+        public bool Contains(DateSpan that) => that.Begin >= Begin && that.End <= End;
 
-        public bool Overlaps(DateSpan that)
-        {
-            return Contains(that)
+        public bool Overlaps(DateSpan that) =>
+            Contains(that)
                 || (that.Begin < End && that.End > Begin)
                 || (Begin < that.End && End > that.Begin);
-        }
 
-        public string ToString(string format)
-        {
-            return Begin.ToString(format) + DateTimeSeparator + End.ToString(format);
-        }
+        public override int GetHashCode() => Begin.GetHashCode() ^ End.GetHashCode();
+
+        public override bool Equals(object obj) => obj is DateSpan && Equals((DateSpan)obj);
+
+        public bool Equals(DateSpan that) => Begin == that.Begin && End == that.End;
+
+        public int CompareTo(DateSpan that) =>
+            Math.Sign((Begin == that.Begin ? End - that.End : Begin - that.Begin).Ticks);
+
+        public override string ToString() =>
+            ToString(CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern);
+
+        public string ToString(string format) => $"{Begin:format} to {End:format}";
+
+        public static bool operator ==(DateSpan x, DateSpan y) => x.Equals(y);
+
+        public static bool operator !=(DateSpan x, DateSpan y) => !x.Equals(y);
+
+        public static bool operator <(DateSpan x, DateSpan y) => x.CompareTo(y) < 0;
+
+        public static bool operator >(DateSpan x, DateSpan y) => x.CompareTo(y) > 0;
+
+        public static bool operator <=(DateSpan x, DateSpan y) => x.CompareTo(y) <= 0;
+
+        public static bool operator >=(DateSpan x, DateSpan y) => x.CompareTo(y) >= 0;
     }
 }
