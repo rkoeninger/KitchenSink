@@ -64,6 +64,235 @@ namespace KitchenSink
             return Maybe<A>.None;
         }
 
+        public static Maybe<Z> AllSome<A, Z>(
+            Maybe<A> ma,
+            Func<A, Z> selector)
+        {
+            return ma.Select(selector);
+        }
+
+        public static Maybe<Z> AllSome<A, B, Z>(
+            Maybe<A> ma,
+            Maybe<B> mb,
+            Func<A, B, Z> selector)
+        {
+            return ma.HasValue
+                && mb.HasValue
+                ? Some(selector(
+                    ma.Value,
+                    mb.Value))
+                : None<Z>();
+        }
+
+        public static Maybe<Z> AllSome<A, B, C, Z>(
+            Maybe<A> ma,
+            Maybe<B> mb,
+            Maybe<C> mc,
+            Func<A, B, C, Z> selector)
+        {
+            return ma.HasValue
+                && mb.HasValue
+                && mc.HasValue
+                ? Some(selector(
+                    ma.Value,
+                    mb.Value,
+                    mc.Value))
+                : None<Z>();
+        }
+
+        public static Maybe<Z> AllSome<A, B, C, D, Z>(
+            Maybe<A> ma,
+            Maybe<B> mb,
+            Maybe<C> mc,
+            Maybe<D> md,
+            Func<A, B, C, D, Z> selector)
+        {
+            return ma.HasValue
+                && mb.HasValue
+                && mc.HasValue
+                && md.HasValue
+                ? Some(selector(
+                    ma.Value,
+                    mb.Value,
+                    mc.Value,
+                    md.Value))
+                : None<Z>();
+        }
+
+        public static Maybe<Z> AllSome<A, B, C, D, E, Z>(
+            Maybe<A> ma,
+            Maybe<B> mb,
+            Maybe<C> mc,
+            Maybe<D> md,
+            Maybe<E> me,
+            Func<A, B, C, D, E, Z> selector)
+        {
+            return ma.HasValue
+                && mb.HasValue
+                && mc.HasValue
+                && md.HasValue
+                && me.HasValue
+                ? Some(selector(
+                    ma.Value,
+                    mb.Value,
+                    mc.Value,
+                    md.Value,
+                    me.Value))
+                : None<Z>();
+        }
+
+        public static Maybe<Z> AllSome<A, B, C, D, E, F, Z>(
+            Maybe<A> ma,
+            Maybe<B> mb,
+            Maybe<C> mc,
+            Maybe<D> md,
+            Maybe<E> me,
+            Maybe<F> mf,
+            Func<A, B, C, D, E, F, Z> selector)
+        {
+            return ma.HasValue
+                && mb.HasValue
+                && mc.HasValue
+                && md.HasValue
+                && me.HasValue
+                && mf.HasValue
+                ? Some(selector(
+                    ma.Value,
+                    mb.Value,
+                    mc.Value,
+                    md.Value,
+                    me.Value,
+                    mf.Value))
+                : None<Z>();
+        }
+
+        public static Maybe<Z> AllSome<A, B, C, D, E, F, G, Z>(
+            Maybe<A> ma,
+            Maybe<B> mb,
+            Maybe<C> mc,
+            Maybe<D> md,
+            Maybe<E> me,
+            Maybe<F> mf,
+            Maybe<G> mg,
+            Func<A, B, C, D, E, F, G, Z> selector)
+        {
+            return ma.HasValue
+                && mb.HasValue
+                && mc.HasValue
+                && md.HasValue
+                && me.HasValue
+                && mf.HasValue
+                && mg.HasValue
+                ? Some(selector(
+                    ma.Value,
+                    mb.Value,
+                    mc.Value,
+                    md.Value,
+                    me.Value,
+                    mf.Value,
+                    mg.Value))
+                : None<Z>();
+        }
+
+        public static Maybe<Z> AllSome<A, B, C, D, E, F, G, H, Z>(
+            Maybe<A> ma,
+            Maybe<B> mb,
+            Maybe<C> mc,
+            Maybe<D> md,
+            Maybe<E> me,
+            Maybe<F> mf,
+            Maybe<G> mg,
+            Maybe<H> mh,
+            Func<A, B, C, D, E, F, G, H, Z> selector)
+        {
+            return ma.HasValue
+                && mb.HasValue
+                && mc.HasValue
+                && md.HasValue
+                && me.HasValue
+                && mf.HasValue
+                && mg.HasValue
+                && mh.HasValue
+                ? Some(selector(
+                    ma.Value,
+                    mb.Value,
+                    mc.Value,
+                    md.Value,
+                    me.Value,
+                    mf.Value,
+                    mg.Value,
+                    mh.Value))
+                : None<Z>();
+        }
+
+        public static Maybe<Z> AllSome<A, B, C, D, E, F, G, H, I, Z>(
+            Maybe<A> ma,
+            Maybe<B> mb,
+            Maybe<C> mc,
+            Maybe<D> md,
+            Maybe<E> me,
+            Maybe<F> mf,
+            Maybe<G> mg,
+            Maybe<H> mh,
+            Maybe<I> mi,
+            Func<A, B, C, D, E, F, G, H, I, Z> selector)
+        {
+            return ma.HasValue
+                && mb.HasValue
+                && mc.HasValue
+                && md.HasValue
+                && me.HasValue
+                && mf.HasValue
+                && mg.HasValue
+                && mh.HasValue
+                ? Some(selector(
+                    ma.Value,
+                    mb.Value,
+                    mc.Value,
+                    md.Value,
+                    me.Value,
+                    mf.Value,
+                    mg.Value,
+                    mh.Value,
+                    mi.Value))
+                : None<Z>();
+        }
+
+        public static Maybe<Z> AllSome<A, B, C, D, E, F, G, H, I, J, Z>(
+            Maybe<A> ma,
+            Maybe<B> mb,
+            Maybe<C> mc,
+            Maybe<D> md,
+            Maybe<E> me,
+            Maybe<F> mf,
+            Maybe<G> mg,
+            Maybe<H> mh,
+            Maybe<I> mi,
+            Maybe<J> mj,
+            Func<A, B, C, D, E, F, G, H, I, J, Z> selector)
+        {
+            return ma.HasValue
+                && mb.HasValue
+                && mc.HasValue
+                && md.HasValue
+                && me.HasValue
+                && mf.HasValue
+                && mg.HasValue
+                && mh.HasValue
+                ? Some(selector(
+                    ma.Value,
+                    mb.Value,
+                    mc.Value,
+                    md.Value,
+                    me.Value,
+                    mf.Value,
+                    mg.Value,
+                    mh.Value,
+                    mi.Value,
+                    mj.Value))
+                : None<Z>();
+        }
+
         public static IEnumerable<A> SeqOf<A>(params A[] values)
         {
             return values;

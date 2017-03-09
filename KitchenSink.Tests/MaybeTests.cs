@@ -16,8 +16,8 @@ namespace KitchenSink.Tests
             var a = Some(0);
             var b = Some(1);
             var c = Some(2);
-            Assert.AreEqual(Some(3), Maybe.All(a, b, c, (x, y, z) => x + y + z));
-            Assert.AreEqual(None<int>(), Maybe.All(a, b, None<int>(), (x, y, z) => x + y + z));
+            Assert.AreEqual(Some(3), AllSome(a, b, c, (x, y, z) => x + y + z));
+            Assert.AreEqual(None<int>(), AllSome(a, b, None<int>(), (x, y, z) => x + y + z));
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace KitchenSink.Tests
         [Test]
         public void MaybeAllTests()
         {
-            var result = Maybe.All(
+            var result = AllSome(
                     Some("hello"),
                     None<string>(),
                     Some("world!"),

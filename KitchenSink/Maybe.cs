@@ -74,46 +74,6 @@ namespace KitchenSink
 
             return Comparer<A>.Default.Compare(x.Value, y.Value);
         }
-
-        public static Maybe<R> All<A, R>(Maybe<A> ma, Func<A, R> f)
-        {
-            return ma.Select(f);
-        }
-
-        public static Maybe<R> All<A, B, R>(Maybe<A> ma, Maybe<B> mb, Func<A, B, R> f)
-        {
-            return ma.HasValue && mb.HasValue ? Some(f(ma.Value, mb.Value)) : None<R>();
-        }
-
-        public static Maybe<R> All<A, B, C, R>(Maybe<A> ma, Maybe<B> mb, Maybe<C> mc, Func<A, B, C, R> f)
-        {
-            return ma.HasValue && mb.HasValue && mc.HasValue ? Some(f(ma.Value, mb.Value, mc.Value)) : None<R>();
-        }
-
-        public static Maybe<R> All<A, B, C, D, R>(Maybe<A> ma, Maybe<B> mb, Maybe<C> mc, Maybe<D> md, Func<A, B, C, D, R> f)
-        {
-            return ma.HasValue && mb.HasValue && mc.HasValue && md.HasValue ? Some(f(ma.Value, mb.Value, mc.Value, md.Value)) : None<R>();
-        }
-
-        public static Maybe<R> AllFlat<A, R>(Maybe<A> ma, Func<A, Maybe<R>> f)
-        {
-            return ma.SelectMany(f);
-        }
-
-        public static Maybe<R> AllFlat<A, B, R>(Maybe<A> ma, Maybe<B> mb, Func<A, B, Maybe<R>> f)
-        {
-            return ma.HasValue && mb.HasValue ? f(ma.Value, mb.Value) : None<R>();
-        }
-
-        public static Maybe<R> AllFlat<A, B, C, R>(Maybe<A> ma, Maybe<B> mb, Maybe<C> mc, Func<A, B, C, Maybe<R>> f)
-        {
-            return ma.HasValue && mb.HasValue && mc.HasValue ? f(ma.Value, mb.Value, mc.Value) : None<R>();
-        }
-
-        public static Maybe<R> AllFlat<A, B, C, D, R>(Maybe<A> ma, Maybe<B> mb, Maybe<C> mc, Maybe<D> md, Func<A, B, C, D, Maybe<R>> f)
-        {
-            return ma.HasValue && mb.HasValue && mc.HasValue && md.HasValue ? f(ma.Value, mb.Value, mc.Value, md.Value) : None<R>();
-        }
     }
     
     /// <summary>
