@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using KitchenSink.Collections;
 using static KitchenSink.Operators;
 using KitchenSink.Testing;
 using KitchenSink.Timekeeping;
@@ -32,7 +31,7 @@ namespace KitchenSink.Tests
                 Date.On(1994, 9, 16),
                 Date.On(2023, 8, 27)));
 
-            Check.EqualsAndHashCode(Seq.Forever(() => Rand.Ints().Take(Rand.Int(64))).Take(16));
+            Check.EqualsAndHashCode(Forever(() => Rand.Ints().Take(Rand.Int(64))).Take(16));
         }
 
         [Test]

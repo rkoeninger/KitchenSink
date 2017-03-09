@@ -96,17 +96,17 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Sorts elements according to given comparer.
         /// </summary>
-        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, IComparer<A> comp)
+        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, IComparer<A> comparer)
         {
-            return seq.OrderBy(x => x, comp);
+            return seq.OrderBy(x => x, comparer);
         }
 
         /// <summary>
         /// Sorts elements descending according to given comparer.
         /// </summary>
-        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq, IComparer<A> comp)
+        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq, IComparer<A> comparer)
         {
-            return seq.OrderByDescending(x => x, comp);
+            return seq.OrderByDescending(x => x, comparer);
         }
 
         /// <summary>
@@ -187,7 +187,58 @@ namespace KitchenSink.Extensions
                 throw new ArgumentException("too few elements");
             }
 
-            return Enumerable.Range(0, array.Length - 1).Select(i => Tuple.Create(array[i], array[i + 1]));
+            return Enumerable
+                .Range(0, array.Length - 1)
+                .Select(i => TupleOf(array[i], array[i + 1]));
+        }
+
+        /// <summary>
+        /// Returns a sequence with a copy of <c>separator</c> between each
+        /// element of the original sequence.
+        /// Example: [1 2 3], 0 => [1 0 2 0 3]
+        /// </summary>
+        public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, A seperator)
+        {
+            using (var e = seq.GetEnumerator())
+            {
+                if (!e.MoveNext())
+                {
+                    yield break;
+                }
+
+                yield return e.Current;
+
+                while (e.MoveNext())
+                {
+                    yield return seperator;
+                    yield return e.Current;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Infinitely enumerates sequence.
+        /// Example: [1 2 3] => [1 2 3 1 2 3 1 2 3 1 2 ...]
+        /// </summary>
+        public static IEnumerable<A> Cycle<A>(this IEnumerable<A> seq)
+        {
+            var list = new List<A>();
+
+            foreach (var item in seq)
+            {
+                list.Add(item);
+                yield return item;
+            }
+
+            while (true)
+            {
+                foreach (var item in list)
+                {
+                    yield return item;
+                }
+            }
+
+            // ReSharper disable once IteratorNeverReturns
         }
 
         /// <summary>
@@ -229,7 +280,17 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
+        /// Combines two sequences by pairing off their elements into tuples.
+        /// Example: [1 2 3], [A B C] => [(1, A) (2, B) (3, C)]
+        /// </summary>
+        public static IEnumerable<Tuple<A, B>> Zip<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys)
+        {
+            return xs.Zip(ys, TupleOf);
+        }
+
+        /// <summary>
         /// Returns a sequence of items paired with their index in the original sequence.
+        /// Example: [A B C] => [(A, 0) (B, 1) (C, 2)]
         /// </summary>
         public static IEnumerable<Tuple<A, int>> ZipWithIndicies<A>(this IEnumerable<A> seq)
         {
@@ -263,6 +324,17 @@ namespace KitchenSink.Extensions
                 var j = rand.Next(i, values.Length);
                 yield return values[j];
                 values[j] = values[i];
+            }
+        }
+
+        /// <summary>
+        /// Performs side-effecting Action on each item in sequence.
+        /// </summary>
+        public static void ForEach<A>(this IEnumerable<A> seq, Action<A> f)
+        {
+            foreach (var item in seq)
+            {
+                f(item);
             }
         }
 

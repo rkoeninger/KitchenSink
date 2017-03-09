@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using KitchenSink.Collections;
 using KitchenSink.Extensions;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Testing
 {
@@ -27,7 +28,7 @@ namespace KitchenSink.Testing
 
         public static IEnumerable<int> Ints()
         {
-            return Seq.Forever(Int);
+            return Forever(Int);
         }
 
         public static double Double()
@@ -37,7 +38,7 @@ namespace KitchenSink.Testing
 
         public static IEnumerable<double> Doubles()
         {
-            return Seq.Forever(Double);
+            return Forever(Double);
         }
 
         public static char Char()
@@ -47,7 +48,7 @@ namespace KitchenSink.Testing
 
         public static IEnumerable<char> Chars()
         {
-            return Seq.Forever(Char);
+            return Forever(Char);
         }
 
         public static string UnicodeString()
@@ -62,7 +63,7 @@ namespace KitchenSink.Testing
 
         public static IEnumerable<string> UnicodeStrings()
         {
-            return Seq.Forever(UnicodeString);
+            return Forever(UnicodeString);
         }
 
         public static char AsciiChar()
@@ -72,7 +73,7 @@ namespace KitchenSink.Testing
 
         public static IEnumerable<char> AsciiChars()
         {
-            return Seq.Forever(AsciiChar);
+            return Forever(AsciiChar);
         }
 
         public static string AsciiString()
@@ -92,7 +93,7 @@ namespace KitchenSink.Testing
 
         public static IEnumerable<string> AsciiStrings()
         {
-            return Seq.Forever(AsciiString);
+            return Forever(AsciiString);
         }
 
         public static string Email()
@@ -102,7 +103,7 @@ namespace KitchenSink.Testing
 
         public static IEnumerable<string> Emails()
         {
-            return Seq.Forever(Email);
+            return Forever(Email);
         }
 
         public static List<A> List<A>(IEnumerable<A> elements)
@@ -113,7 +114,7 @@ namespace KitchenSink.Testing
 
         public static IEnumerable<List<A>> Lists<A>(IEnumerable<A> elements)
         {
-            return Seq.Forever(() => List(elements));
+            return Forever(() => List(elements));
         }
 
         public static bool Bool()
@@ -123,7 +124,7 @@ namespace KitchenSink.Testing
 
         public static IEnumerable<bool> Bools()
         {
-            return Seq.Forever(Bool);
+            return Forever(Bool);
         }
 
         public static bool NextBoolean(this Random rand)

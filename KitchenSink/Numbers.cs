@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KitchenSink.Collections;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
@@ -117,7 +116,7 @@ namespace KitchenSink
                 yield break;
             }
 
-            foreach (var i in array.Indicies())
+            foreach (var i in Enumerable.Range(0, array.Length))
             {
                 var sublist = array.ExceptAt(i);
 

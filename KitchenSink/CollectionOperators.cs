@@ -6,6 +6,39 @@ namespace KitchenSink
 {
     public static partial class Operators
     {
+        /// <summary>
+        /// Infinitely enumerates items returned from provided function.
+        /// Example: f => [f() f() f() ...]
+        /// </summary>
+        public static IEnumerable<A> Forever<A>(Func<A> f)
+        {
+            while (true)
+            {
+                yield return f();
+            }
+
+            // ReSharper disable once IteratorNeverReturns
+        }
+
+        /// <summary>
+        /// Generates a sequence based on given function.
+        /// Functions returns None to indicate end of sequence.
+        /// </summary>
+        public static IEnumerable<A> Expand<A>(Func<Maybe<A>> f)
+        {
+            while (true)
+            {
+                var x = f();
+
+                if (x.HasValue)
+                {
+                    yield return x.Value;
+                }
+            }
+
+            // ReSharper disable once IteratorNeverReturns
+        }
+
         public static Maybe<A> maybeof<A>(A value)
         {
             return Maybe.Of(value);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using KitchenSink.Control;
 using KitchenSink.Extensions;
 using static KitchenSink.Comparison;
@@ -100,7 +101,7 @@ namespace KitchenSink
         };
 
         /// <summary>Check if string is only whitespace.</summary>
-        public static readonly Func<string, bool> Blank = x => string.IsNullOrWhiteSpace(x);
+        public static readonly Func<string, bool> Blank = x => String.IsNullOrWhiteSpace(x);
 
         /// <summary>Check if string is not only whitespace.</summary>
         public static readonly Func<string, bool> NonBlank = x => !Blank(x);
@@ -154,24 +155,19 @@ namespace KitchenSink
             => d => f.Invoke(a, b, c, d);
 
         /// <summary>Curried comparision.</summary>
-        public static Func<A, bool> LowerBound<A>(A x) where A : IComparable<A>
-            => y => y.CompareTo(x) >= 0;
+        public static Func<A, bool> LowerBound<A>(A x) where A : IComparable<A> => y => y.CompareTo(x) >= 0;
 
         /// <summary>Curried comparision.</summary>
-        public static Func<A, bool> UpperBound<A>(A x) where A : IComparable<A>
-            => y => y.CompareTo(x) <= 0;
+        public static Func<A, bool> UpperBound<A>(A x) where A : IComparable<A> => y => y.CompareTo(x) <= 0;
 
         /// <summary>Curried comparision.</summary>
-        public static Func<A, bool> ExclusiveLowerBound<A>(A x) where A : IComparable<A>
-            => y => y.CompareTo(x) > 0;
+        public static Func<A, bool> ExclusiveLowerBound<A>(A x) where A : IComparable<A> => y => y.CompareTo(x) > 0;
 
         /// <summary>Curried comparision.</summary>
-        public static Func<A, bool> ExclusiveUpperBound<A>(A x) where A : IComparable<A>
-            => y => y.CompareTo(x) < 0;
+        public static Func<A, bool> ExclusiveUpperBound<A>(A x) where A : IComparable<A> => y => y.CompareTo(x) < 0;
 
         /// <summary>Starting point for a range comparison, example: <c>0 &lt;= Cmp(x) &lt; 10</c></summary>
-        public static RangeComparison.Initial<A> Cmp<A>(A value) where A : IComparable<A>
-            => RangeComparison.New(value);
+        public static RangeComparison.Initial<A> Cmp<A>(A value) where A : IComparable<A> => RangeComparison.New(value);
 
         /// <summary>
         /// Comparison that returns a symbolic result.
