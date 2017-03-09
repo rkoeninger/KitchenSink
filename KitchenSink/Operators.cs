@@ -120,6 +120,9 @@ namespace KitchenSink
         /// <summary>Type check for type parameter.</summary>
         public static bool Is<A>(object val) => val is A;
 
+        /// <summary>Negative type check for type parameter.</summary>
+        public static bool IsNot<A>(object val) => !Is<A>(val);
+
         /// <summary>Function composition.</summary>
         public static Func<A, C> Compose<A, B, C>(Func<B, C> f, Func<A, B> g) => x => f(g(x));
 
