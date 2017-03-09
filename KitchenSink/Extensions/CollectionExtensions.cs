@@ -261,10 +261,8 @@ namespace KitchenSink.Extensions
             for (var i = 0; i < values.Length; ++i)
             {
                 var j = rand.Next(i, values.Length);
-                var temp = values[j];
+                yield return values[j];
                 values[j] = values[i];
-                values[i] = temp;
-                yield return temp;
             }
         }
 
