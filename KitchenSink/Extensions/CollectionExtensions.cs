@@ -305,6 +305,7 @@ namespace KitchenSink.Extensions
 
         /// <summary>
         /// Returns sequence, excluding elements at given indicies.
+        /// Example: [1 2 3 4 5 6 7 8], 3, 5 => [1 2 3 5 7 8]
         /// </summary>
         public static IEnumerable<A> ExceptAt<A>(this IEnumerable<A> seq, params int[] indicies)
         {
@@ -313,6 +314,7 @@ namespace KitchenSink.Extensions
 
         /// <summary>
         /// Randomizes elements in sequence. This will enumerate the entire sequence.
+        /// Example: [1 2 3 4 5] => [3 5 2 1 4]
         /// </summary>
         public static IEnumerable<A> Shuffle<A>(this IEnumerable<A> seq, Random rand = null)
         {
