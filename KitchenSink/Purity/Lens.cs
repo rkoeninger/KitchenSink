@@ -16,7 +16,10 @@ namespace KitchenSink.Purity
         /// <summary>
         /// Builds a Lens for the given property.
         /// </summary>
-        public static Lens<A, B> For<A, B>(Expression<Func<A, B>> getExpr)
+        public static Lens<A, B> For<A, B>(Expression<Func<A, B>> getExpr) =>
+            new Lens<A, B>(getExpr.Compile(), Setter<A, B>(Parse(getExpr)));
+
+        private static string Parse<A, B>(Expression<Func<A, B>> getExpr)
         {
             if (IsNot<MemberExpression>(getExpr.Body))
             {
@@ -30,8 +33,7 @@ namespace KitchenSink.Purity
                 throw new ArgumentException("Expression must be a property");
             }
 
-            var property = (PropertyInfo)memberExpr.Member;
-            return new Lens<A, B>(getExpr.Compile(), Setter<A, B>(property.Name));
+            return ((PropertyInfo)memberExpr.Member).Name;
         }
 
         private static Func<A, B, A> Setter<A, B>(string name)
@@ -49,14 +51,12 @@ namespace KitchenSink.Purity
             var properties = typeof(A).GetProperties();
             var paramz = ctor.GetParameters();
             return (record, value) =>
-            {
-                var args = paramz
-                    .Select(p => p.Name.IsSimilar(name)
-                        ? value
-                        : Get<A>(record, properties, p))
-                    .ToArray();
-                return (A) ctor.Invoke(args);
-            };
+                (A) ctor
+                    .Invoke(paramz
+                        .Select(p => p.Name.IsSimilar(name)
+                            ? value
+                            : Get<A>(record, properties, p))
+                        .ToArray());
         }
 
         private static object Get<A>(object target, IEnumerable<PropertyInfo> properties, ParameterInfo param)
