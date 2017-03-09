@@ -60,7 +60,6 @@
     <Compile Include="HList.cs" />
     <Compile Include="Collections\MultiKeyDictionary.cs" />
     <Compile Include="Injection\Needs.cs" />
-    <Compile Include="Funcs.cs" />
     <Compile Include="Purity\IO.cs" />
     <Compile Include="Purity\Lens.cs" />
     <Compile Include="NewType.cs" />

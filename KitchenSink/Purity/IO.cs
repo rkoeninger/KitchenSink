@@ -19,7 +19,7 @@ namespace KitchenSink.Purity
 
         public static IO<Unit> Of_(Action cont)
         {
-            return new IO<Unit>(Funcs.UnitF(cont));
+            return new IO<Unit>(() => { cont(); return Unit.It; });
         }
 
         public static IO<A> Flatten<A>(this IO<IO<A>> io)
