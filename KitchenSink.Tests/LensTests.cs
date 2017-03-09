@@ -26,9 +26,9 @@ namespace KitchenSink.Tests
         [Test]
         public void LensGen()
         {
-            var fn = Lens.Gen<Person, string>("FirstName");
-            var ln = Lens.Gen<Person, string>("LastName");
-            var ct = Lens.Gen<Address, string>("City");
+            var fn = Lens.Gen<Person, string>(nameof(Person.FirstName));
+            var ln = Lens.Gen<Person, string>(nameof(Person.LastName));
+            var ct = Lens.Gen<Address, string>(nameof(Address.City));
 
             var address = new Address("123 Fake Street", "Anytown");
             var person = new Person("John", "Doe", address);
