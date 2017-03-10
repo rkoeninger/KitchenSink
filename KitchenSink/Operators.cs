@@ -176,7 +176,7 @@ namespace KitchenSink
             x == null && y == null ? EQ :
             x == null ? LT :
             y == null ? GT :
-            Case(x.CompareTo(y))
+            Switch(x.CompareTo(y))
                 .When(Neg).Then(LT)
                 .When(Pos).Then(GT)
                 .Else(EQ);
@@ -208,14 +208,14 @@ namespace KitchenSink
         /// <summary>
         /// Starts a Case for the given key.
         /// </summary>
-        public static ICaseInitialThen<A> Case<A>(A key)
-            => Control.Case.Of(key);
+        public static ICaseInitialThen<A> Switch<A>(A key)
+            => Case.Of(key);
 
         /// <summary>
         /// Starts a Case for the given key with explicit return type.
         /// </summary>
-        public static ICaseThen<TKey, TResult> Case<TKey, TResult>(TKey key)
-            => Control.Case<TKey, TResult>.Of(key);
+        public static ICaseThen<TKey, TResult> Switch<TKey, TResult>(TKey key)
+            => Case<TKey, TResult>.Of(key);
 
         /// <summary>
         /// Allows a block of statements to be used as an expression.

@@ -311,8 +311,7 @@ namespace KitchenSink.Control
         /// </summary>
         public static ICaseThen<TKey, TResult> Of(TKey key)
         {
-            // ReSharper disable once RedundantNameQualifier
-            return Control.Case.Of(key).Returns<TResult>();
+            return Case.Of(key).Returns<TResult>();
         }
     }
 
@@ -327,8 +326,7 @@ namespace KitchenSink.Control
         /// </summary>
         public static ICaseInitialThen<TKey> Of(TKey key)
         {
-            // ReSharper disable once RedundantNameQualifier
-            return Control.Case.Of(key);
+            return Case.Of(key);
         }
 
         /// <summary>
@@ -336,8 +334,7 @@ namespace KitchenSink.Control
         /// </summary>
         public static ICaseThen<TKey, TResult> Of<TResult>(TKey key)
         {
-            // ReSharper disable once RedundantNameQualifier
-            return Control.Case.Of(key).Returns<TResult>();
+            return Case.Of(key).Returns<TResult>();
         }
     }
 
