@@ -92,7 +92,7 @@ namespace KitchenSink
                 },
                 (_, stack) =>
                 {
-                    stack.Pop();
+                    stack.Push(value);
                     return stack;
                 }));
         }
