@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using KitchenSink.Testing;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -14,6 +10,7 @@ namespace KitchenSink.Tests
         public void ValuesArePoppedWhenUsingEnds()
         {
             var scope = new DynamicScope();
+
             using (scope.Add("x", 1))
             {
                 Assert.AreEqual(1, scope.Get("x"));
@@ -32,6 +29,8 @@ namespace KitchenSink.Tests
                 
                 Assert.AreEqual(1, scope.Get("x"));
             }
+
+            Expect.Error(() => scope.Get("x"));
         }
     }
 }
