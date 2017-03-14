@@ -62,20 +62,18 @@ namespace KitchenSink
         private readonly ConcurrentDictionary<string, Stack<object>> index =
             new ConcurrentDictionary<string, Stack<object>>();
 
-        private class PopValue : IDisposable
+        private class Pop : IDisposable
         {
-            private readonly DynamicScope scope;
-            private readonly string key;
+            private readonly Stack<object> stack;
 
-            public PopValue(DynamicScope scope, string key)
+            public Pop(Stack<object> stack)
             {
-                this.scope = scope;
-                this.key = key;
+                this.stack = stack;
             }
 
             public void Dispose()
             {
-                scope.index[key].Pop();
+                stack.Pop();
             }
         }
 
@@ -84,7 +82,7 @@ namespace KitchenSink
         /// </summary>
         public IDisposable Add(string key, object value)
         {
-            index.AddOrUpdate(
+            return new Pop(index.AddOrUpdate(
                 key,
                 _ =>
                 {
@@ -96,8 +94,7 @@ namespace KitchenSink
                 {
                     stack.Pop();
                     return stack;
-                });
-            return new PopValue(this, key);
+                }));
         }
 
         /// <summary>
