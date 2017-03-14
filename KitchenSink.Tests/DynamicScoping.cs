@@ -9,28 +9,31 @@ namespace KitchenSink.Tests
         [Test]
         public void ValuesArePoppedWhenUsingBlockEnds()
         {
-            var scope = new DynamicScope();
-
-            using (scope.Add("x", 1))
+            using (Scope.Push("x", 1))
             {
-                Assert.AreEqual(1, scope.Get("x"));
+                Assert.AreEqual(1, Scope.Get("x"));
 
-                using (scope.Add("x", 2))
+                using (Scope.Push("x", 2))
                 {
-                    Assert.AreEqual(2, scope.Get("x"));
-
-                    using (scope.Add("x", 3))
-                    {
-                        Assert.AreEqual(3, scope.Get("x"));
-                    }
-
-                    Assert.AreEqual(2, scope.Get("x"));
+                    OtherMethod();
                 }
 
-                Assert.AreEqual(1, scope.Get("x"));
+                Assert.AreEqual(1, Scope.Get("x"));
             }
 
-            Expect.Error(() => scope.Get("x"));
+            Expect.Error(() => Scope.Get("x"));
+        }
+
+        private static void OtherMethod()
+        {
+            Assert.AreEqual(2, Scope.Get("x"));
+
+            using (Scope.Push("x", 3))
+            {
+                Assert.AreEqual(3, Scope.Get("x"));
+            }
+
+            Assert.AreEqual(2, Scope.Get("x"));
         }
     }
 }

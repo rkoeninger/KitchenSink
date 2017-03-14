@@ -5,39 +5,26 @@ using System.Threading;
 
 namespace KitchenSink
 {
-    public class Scope
+    public static class Scope
     {
         private static readonly ThreadLocal<DynamicScope> scopes = new ThreadLocal<DynamicScope>();
 
         /// <summary>
         /// Gets the current dynamic scope for this thread.
         /// </summary>
-        public static DynamicScope Me
-        {
-            get
-            {
-                if (scopes.IsValueCreated)
-                {
-                    return scopes.Value;
-                }
+        public static DynamicScope Me =>
+            scopes.IsValueCreated
+                ? scopes.Value
+                : (scopes.Value = new DynamicScope());
 
-                var scope = new DynamicScope();
-                scopes.Value = scope;
-                return scope;
-            }
-        }
+        public static IDisposable Push(string key, object value) => Me.Push(key, value);
 
-        ///// <summary>
-        ///// Registers dependency in current dynamic scope.
-        ///// </summary>
-        //public static DynamicScope Add<T>(T impl) => Me.Add(impl);
-
-        ///// <summary>
-        ///// Resolves registered dependency <c>T</c> in current dynamic scope.
-        ///// </summary>
-        //public static T Get<T>() => Me.Get<T>();
+        public static object Get(string key) => Me.Get(key);
     }
 
+    /// <remarks>
+    /// Extensions can be defined on this type for conveinence methods.
+    /// </remarks>
     public class DynamicScope
     {
         private readonly ConcurrentDictionary<string, Stack<object>> index =
@@ -58,22 +45,22 @@ namespace KitchenSink
             }
         }
 
-        /// <summary>
-        /// Pushes value onto dynamic stack.
-        /// </summary>
-        public IDisposable Add(string key, object value)
-        {
-            return new Pop(index.AddOrUpdate(key, NewStack(value), ExistingStack(value)));
-        }
-
-        private static Func<string, Stack<object>> NewStack(object value) => key =>
-            ExistingStack(value)(key, new Stack<object>());
-
-        private static Func<string, Stack<object>, Stack<object>> ExistingStack(object value) => (key, stack) =>
+        private static Func<string, Stack<object>, Stack<object>> Existing(object value) => (key, stack) =>
         {
             stack.Push(value);
             return stack;
         };
+
+        private static Func<string, Stack<object>> New(object value) => key =>
+            Existing(value)(key, new Stack<object>());
+
+        /// <summary>
+        /// Pushes value onto dynamic stack.
+        /// </summary>
+        public IDisposable Push(string key, object value)
+        {
+            return new Pop(index.AddOrUpdate(key, New(value), Existing(value)));
+        }
 
         /// <summary>
         /// Resolves registered value in this scope.
