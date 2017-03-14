@@ -7,53 +7,34 @@ namespace KitchenSink
 {
     public class Scope
     {
-        private static readonly ConcurrentDictionary<Thread, DynamicScope> scopes =
-            new ConcurrentDictionary<Thread, DynamicScope>();
-
-        private static readonly ConcurrentDictionary<Thread, Thread> parents =
-            new ConcurrentDictionary<Thread, Thread>();
+        private static readonly ThreadLocal<DynamicScope> scopes = new ThreadLocal<DynamicScope>();
 
         /// <summary>
         /// Gets the current dynamic scope for this thread.
         /// </summary>
-        public static DynamicScope Me => GetScope(Thread.CurrentThread);
-
-        private static DynamicScope GetScope(Thread thread)
+        public static DynamicScope Me
         {
-            DynamicScope scope;
-            if (scopes.TryGetValue(thread, out scope))
+            get
             {
+                if (scopes.IsValueCreated)
+                {
+                    return scopes.Value;
+                }
+
+                var scope = new DynamicScope();
+                scopes.Value = scope;
                 return scope;
             }
-
-            Thread parent;
-            if (parents.TryGetValue(thread, out parent))
-            {
-                return GetScope(parent);
-            }
-
-            throw new InvalidOperationException("Dynamic scope does not exist");
         }
 
-        /// <summary>
-        /// Starts a new thread with the current thread as its parent.
-        /// </summary>
-        public static Thread Fork(Action start)
-        {
-            var thread = new Thread(new ThreadStart(start));
-            parents[thread] = Thread.CurrentThread;
-            thread.Start();
-            return thread;
-        }
-
-        /// <summary>
-        /// Registers dependency in current dynamic scope.
-        /// </summary>
+        ///// <summary>
+        ///// Registers dependency in current dynamic scope.
+        ///// </summary>
         //public static DynamicScope Add<T>(T impl) => Me.Add(impl);
 
-        /// <summary>
-        /// Resolves registered dependency <c>T</c> in current dynamic scope.
-        /// </summary>
+        ///// <summary>
+        ///// Resolves registered dependency <c>T</c> in current dynamic scope.
+        ///// </summary>
         //public static T Get<T>() => Me.Get<T>();
     }
 
@@ -82,20 +63,17 @@ namespace KitchenSink
         /// </summary>
         public IDisposable Add(string key, object value)
         {
-            return new Pop(index.AddOrUpdate(
-                key,
-                _ =>
-                {
-                    var stack = new Stack<object>();
-                    stack.Push(value);
-                    return stack;
-                },
-                (_, stack) =>
-                {
-                    stack.Push(value);
-                    return stack;
-                }));
+            return new Pop(index.AddOrUpdate(key, NewStack(value), ExistingStack(value)));
         }
+
+        private static Func<string, Stack<object>> NewStack(object value) => key =>
+            ExistingStack(value)(key, new Stack<object>());
+
+        private static Func<string, Stack<object>, Stack<object>> ExistingStack(object value) => (key, stack) =>
+        {
+            stack.Push(value);
+            return stack;
+        };
 
         /// <summary>
         /// Resolves registered value in this scope.

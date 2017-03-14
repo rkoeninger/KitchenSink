@@ -7,7 +7,7 @@ namespace KitchenSink.Tests
     public class DynamicScoping
     {
         [Test]
-        public void ValuesArePoppedWhenUsingEnds()
+        public void ValuesArePoppedWhenUsingBlockEnds()
         {
             var scope = new DynamicScope();
 
@@ -23,10 +23,10 @@ namespace KitchenSink.Tests
                     {
                         Assert.AreEqual(3, scope.Get("x"));
                     }
-                    
+
                     Assert.AreEqual(2, scope.Get("x"));
                 }
-                
+
                 Assert.AreEqual(1, scope.Get("x"));
             }
 
