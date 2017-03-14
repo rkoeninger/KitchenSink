@@ -2,77 +2,111 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using KitchenSink.Injection;
 
 namespace KitchenSink
 {
-// TODO: make dynamic vars follow stack
-    /*
-if scopes has entry for current thread
-    then if scope stack for current thread is not empty
-         then if top stack frame can resolve key
-              then return value
-              else recur this process for rest of stack
-          else raise error
-    else if thread has a parent thread
-         then recur this process for parent thread
-         else raise error
-     */
-
-    public class StackUnderflowException : Exception
-    {
-    }
-
     public class Scope
     {
-        private static readonly ConcurrentDictionary<Thread, Stack<DynamicScope>> scopes =
-            new ConcurrentDictionary<Thread, Stack<DynamicScope>>();
+        private static readonly ConcurrentDictionary<Thread, DynamicScope> scopes =
+            new ConcurrentDictionary<Thread, DynamicScope>();
+
+        private static readonly ConcurrentDictionary<Thread, Thread> parents =
+            new ConcurrentDictionary<Thread, Thread>();
 
         /// <summary>
         /// Gets the current dynamic scope for this thread.
         /// </summary>
-        public static DynamicScope Me
+        public static DynamicScope Me => GetScope(Thread.CurrentThread);
+
+        private static DynamicScope GetScope(Thread thread)
         {
-            get
+            DynamicScope scope;
+            if (scopes.TryGetValue(thread, out scope))
             {
-                var stack = scopes.GetOrAdd(Thread.CurrentThread, _ => new Stack<DynamicScope>());
-
-                if (stack.Count == 0)
-                {
-                    throw new StackUnderflowException();
-                }
-
-                return stack.Peek();
+                return scope;
             }
+
+            Thread parent;
+            if (parents.TryGetValue(thread, out parent))
+            {
+                return GetScope(parent);
+            }
+
+            throw new InvalidOperationException("Dynamic scope does not exist");
+        }
+
+        /// <summary>
+        /// Starts a new thread with the current thread as its parent.
+        /// </summary>
+        public static Thread Fork(Action start)
+        {
+            var thread = new Thread(new ThreadStart(start));
+            parents[thread] = Thread.CurrentThread;
+            thread.Start();
+            return thread;
         }
 
         /// <summary>
         /// Registers dependency in current dynamic scope.
         /// </summary>
-        public static DynamicScope Add<T>(T impl) => Me.Add(impl);
+        //public static DynamicScope Add<T>(T impl) => Me.Add(impl);
 
         /// <summary>
         /// Resolves registered dependency <c>T</c> in current dynamic scope.
         /// </summary>
-        public static T Get<T>() => Me.Get<T>();
+        //public static T Get<T>() => Me.Get<T>();
     }
 
     public class DynamicScope
     {
-        private readonly Needs needs = new Needs();
+        private readonly ConcurrentDictionary<string, Stack<object>> index =
+            new ConcurrentDictionary<string, Stack<object>>();
 
-        /// <summary>
-        /// Registers dependency.
-        /// </summary>
-        public DynamicScope Add<T>(T impl)
+        private class PopValue : IDisposable
         {
-            needs.Add(impl);
-            return this;
+            private readonly DynamicScope scope;
+            private readonly string key;
+
+            public PopValue(DynamicScope scope, string key)
+            {
+                this.scope = scope;
+                this.key = key;
+            }
+
+            public void Dispose()
+            {
+                scope.index[key].Pop();
+            }
         }
 
         /// <summary>
-        /// Resolves registered dependency <c>T</c> in this scope.
+        /// Pushes value onto dynamic stack.
         /// </summary>
-        public T Get<T>() => needs.Get<T>();
+        public IDisposable Add(string key, object value)
+        {
+            index.AddOrUpdate(
+                key,
+                _ =>
+                {
+                    var stack = new Stack<object>();
+                    stack.Push(value);
+                    return stack;
+                },
+                (_, stack) =>
+                {
+                    stack.Pop();
+                    return stack;
+                });
+            return new PopValue(this, key);
+        }
+
+        /// <summary>
+        /// Resolves registered value in this scope.
+        /// </summary>
+        public object Get(string key)
+        {
+            var stack = index.GetOrAdd(key, _ => new Stack<object>());
+            return stack.Peek();
+        }
     }
 }
