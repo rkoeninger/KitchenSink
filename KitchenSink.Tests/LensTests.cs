@@ -12,7 +12,7 @@ namespace KitchenSink.Tests
             var addr = new Lens<Person, Address>(x => x.Address, (x, y) => new Person(x.FirstName, x.LastName, y));
             var ct = new Lens<Address, string>(x => x.City, (x, y) => new Address(x.Street, y));
 
-            var addrCt = addr.Compose(ct);
+            var addrCt = addr.Then(ct);
 
             var address = new Address("123 Fake Street", "Anytown");
             var person = new Person("John", "Doe", address);

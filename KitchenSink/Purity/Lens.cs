@@ -87,7 +87,12 @@ namespace KitchenSink.Purity
         public Func<A, B> Get { get; }
         public Func<A, B, A> Set { get; }
 
-        public Lens<A, C> Compose<C>(Lens<B, C> other)
+        public Lens<C, B> Compose<C>(Lens<C, A> other)
+        {
+            return other.Then(this);
+        }
+
+        public Lens<A, C> Then<C>(Lens<B, C> other)
         {
             var me = this;
             return new Lens<A, C>(
