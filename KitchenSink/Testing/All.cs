@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using KitchenSink.Extensions;
 
 namespace KitchenSink.Testing
 {

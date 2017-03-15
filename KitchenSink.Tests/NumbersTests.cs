@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 using KitchenSink.Testing;
 using NUnit.Framework;

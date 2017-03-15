@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
-// TODO: move under Extensions
-
-namespace KitchenSink
+namespace KitchenSink.Extensions
 {
-    public static class Numbers
+    public static class MathExtensions
     {
         public static bool IsReal(this double x)
         {
@@ -39,7 +36,7 @@ namespace KitchenSink
         {
             return x % y != 0;
         }
-
+        
         /// <summary>Inclusive on start value, exclusive on end value.</summary>
         public static IEnumerable<int> To(this int start, int end)
         {
