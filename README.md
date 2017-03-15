@@ -34,6 +34,10 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `Cond` - builds a list of clauses and conditionally evaluates consequents
   * `Case` - like `Cond`, but clauses are applied to a key value
 
+### Dynamic Scoping Emulation
+
+  * `Scope.Push`, `Scope.Get` - controlled, thread local, global variables that are only defined farther down the call chain
+
 ### Dependency Injection
 
   * `Needs` - a minimal-configuration IoC container that can search assemblies and parent types and failover to other IoC containers
