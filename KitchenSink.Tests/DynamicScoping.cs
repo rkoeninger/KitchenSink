@@ -35,5 +35,19 @@ namespace KitchenSink.Tests
 
             Assert.AreEqual(2, Scope.Get("x"));
         }
+
+        public interface IRepository { }
+        public class Repository : IRepository { }
+
+        [Test]
+        public void ValuesCanBeIndexedByStaticType()
+        {
+            using (Scope.Push<IRepository>(new Repository()))
+            {
+                Assert.IsInstanceOf<Repository>(Scope.Get<IRepository>());
+            }
+
+            Expect.Error(() => Scope.Get<IRepository>());
+        }
     }
 }
