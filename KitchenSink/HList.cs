@@ -2,27 +2,27 @@
 
 namespace KitchenSink
 {
-    public interface IUntypedHeterogenousList
+    public interface IUntypedHeterogeneousList
     {
         object UntypedHead { get; }
         object UntypedTail { get; }
     }
 
-    public interface IHeterogenousList<out A, out B> : IUntypedHeterogenousList where B : IUntypedHeterogenousList
+    public interface IHeterogeneousList<out A, out B> : IUntypedHeterogeneousList where B : IUntypedHeterogeneousList
     {
         A Head { get; }
         B Tail { get; }
-        IHeterogenousList<C, IHeterogenousList<A, B>> Cons<C>(C x);
+        IHeterogeneousList<C, IHeterogeneousList<A, B>> Cons<C>(C x);
         bool Contains<C>(C x);
     }
 
-    public interface IEmptyHeterogenousList : IHeterogenousList<Void, IEmptyHeterogenousList>
+    public interface IEmptyHeterogeneousList : IHeterogeneousList<Void, IEmptyHeterogeneousList>
     {
     }
 
     public static class HList
     {
-        private sealed class Node<A, B> : IHeterogenousList<A, B> where B : IUntypedHeterogenousList
+        private sealed class Node<A, B> : IHeterogeneousList<A, B> where B : IUntypedHeterogeneousList
         {
             public Node(A head, B tail)
             {
@@ -34,40 +34,40 @@ namespace KitchenSink
             public B Tail { get; }
             public object UntypedHead => Head;
             public object UntypedTail => Tail;
-            public IHeterogenousList<C, IHeterogenousList<A, B>> Cons<C>(C x) =>
-                new Node<C, IHeterogenousList<A, B>>(x, this);
+            public IHeterogeneousList<C, IHeterogeneousList<A, B>> Cons<C>(C x) =>
+                new Node<C, IHeterogeneousList<A, B>>(x, this);
             public bool Contains<C>(C x) => Equals(Head, x) || Dyn(Tail).Contains(x);
         }
 
-        private sealed class VoidNode : IEmptyHeterogenousList
+        private sealed class VoidNode : IEmptyHeterogeneousList
         {
             private VoidNode() { }
             public static readonly VoidNode It = new VoidNode();
             public Void Head => Void.It;
-            public IEmptyHeterogenousList Tail => this;
+            public IEmptyHeterogeneousList Tail => this;
             public object UntypedHead => Head;
             public object UntypedTail => Tail;
-            public IHeterogenousList<C, IHeterogenousList<Void, IEmptyHeterogenousList>> Cons<C>(C x) =>
+            public IHeterogeneousList<C, IHeterogeneousList<Void, IEmptyHeterogeneousList>> Cons<C>(C x) =>
                 Singleton(x);
             public bool Contains<C>(C x) => false;
         }
 
-        public static IEmptyHeterogenousList Empty => VoidNode.It;
+        public static IEmptyHeterogeneousList Empty => VoidNode.It;
 
-        public static IHeterogenousList<A, IEmptyHeterogenousList> Singleton<A>(A x) =>
+        public static IHeterogeneousList<A, IEmptyHeterogeneousList> Singleton<A>(A x) =>
             new Node<A, VoidNode>(x, VoidNode.It);
 
-        public static IHeterogenousList<C, IHeterogenousList<A, B>> Cons<A, B, C>(
+        public static IHeterogeneousList<C, IHeterogeneousList<A, B>> Cons<A, B, C>(
             C x,
-            IHeterogenousList<A, B> hlist)
-            where B : IUntypedHeterogenousList =>
+            IHeterogeneousList<A, B> hlist)
+            where B : IUntypedHeterogeneousList =>
             hlist.Cons(x);
 
-        public static bool IsEmpty(this IEmptyHeterogenousList hlist) => true;
-        public static bool IsEmpty<A, B>(this IHeterogenousList<A, B> hlist) where B : IUntypedHeterogenousList => false;
+        public static bool IsEmpty(this IEmptyHeterogeneousList hlist) => true;
+        public static bool IsEmpty<A, B>(this IHeterogeneousList<A, B> hlist) where B : IUntypedHeterogeneousList => false;
 
-        public static int Length(this IEmptyHeterogenousList hlist) => 0;
-        public static int Length<A, B>(this IHeterogenousList<A, B> hlist) where B : IUntypedHeterogenousList
+        public static int Length(this IEmptyHeterogeneousList hlist) => 0;
+        public static int Length<A, B>(this IHeterogeneousList<A, B> hlist) where B : IUntypedHeterogeneousList
             => 1 + Length(Dyn(hlist.Tail));
     }
 }
