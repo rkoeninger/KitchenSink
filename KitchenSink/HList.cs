@@ -1,165 +1,73 @@
-﻿using System;
+﻿using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
+    public interface IUntypedHeterogenousList
+    {
+        object UntypedHead { get; }
+        object UntypedTail { get; }
+    }
+
+    public interface IHeterogenousList<out A, out B> : IUntypedHeterogenousList where B : IUntypedHeterogenousList
+    {
+        A Head { get; }
+        B Tail { get; }
+        IHeterogenousList<C, IHeterogenousList<A, B>> Cons<C>(C x);
+        bool Contains<C>(C x);
+    }
+
+    public interface IEmptyHeterogenousList : IHeterogenousList<Void, IEmptyHeterogenousList>
+    {
+    }
+
     public static class HList
     {
-        public static HList<T, Void> Singleton<T>(T x)
+        private sealed class Node<A, B> : IHeterogenousList<A, B> where B : IUntypedHeterogenousList
         {
-            return new HList<T, Void>(x, Void.It);
-        }
-    }
+            public Node(A head, B tail)
+            {
+                Head = head;
+                Tail = tail;
+            }
 
-    public class HList<A, B> : IHList<A, B>
-    {
-        public A First { get; }
-        public B Rest { get; }
-
-        public HList(A first, B rest)
-        {
-            First = first;
-            Rest = rest;
-        }
-
-        public IHList<C, IHList<A, B>> Cons<C>(C x)
-        {
-            return new HList<C, HList<A, B>>(x, this);
+            public A Head { get; }
+            public B Tail { get; }
+            public object UntypedHead => Head;
+            public object UntypedTail => Tail;
+            public IHeterogenousList<C, IHeterogenousList<A, B>> Cons<C>(C x) =>
+                new Node<C, IHeterogenousList<A, B>>(x, this);
+            public bool Contains<C>(C x) => Equals(Head, x) || Dyn(Tail).Contains(x);
         }
 
-        public override string ToString()
+        private sealed class VoidNode : IEmptyHeterogenousList
         {
-            return Rest == null
-                ? typeof(A).Name
-                : typeof(A).Name + ", " + Rest;
-        }
-    }
-
-    public interface IHList<out A, out B>
-    {
-        A First { get; }
-        B Rest { get; }
-        IHList<C, IHList<A, B>> Cons<C>(C x);
-    }
-
-    public static class Tup
-    {
-        public static Tup<A> Create<A>(A a)
-        {
-            return new Tup<A>(a);
+            private VoidNode() { }
+            public static readonly VoidNode It = new VoidNode();
+            public Void Head => Void.It;
+            public IEmptyHeterogenousList Tail => this;
+            public object UntypedHead => Head;
+            public object UntypedTail => Tail;
+            public IHeterogenousList<C, IHeterogenousList<Void, IEmptyHeterogenousList>> Cons<C>(C x) =>
+                Singleton(x);
+            public bool Contains<C>(C x) => false;
         }
 
-        public static Tup<A, B> Create<A, B>(A a, B b)
-        {
-            return new Tup<A, B>(Create(a), b);
-        }
+        public static IEmptyHeterogenousList Empty => VoidNode.It;
 
-        public static Tup<A, B, C> Create<A, B, C>(A a, B b, C c)
-        {
-            return new Tup<A, B, C>(Create(a, b), c);
-        }
+        public static IHeterogenousList<A, IEmptyHeterogenousList> Singleton<A>(A x) =>
+            new Node<A, VoidNode>(x, VoidNode.It);
 
-        public static Tup<A, B, C, D> Create<A, B, C, D>(A a, B b, C c, D d)
-        {
-            return new Tup<A, B, C, D>(Create(a, b, c), d);
-        }
-    }
+        public static IHeterogenousList<C, IHeterogenousList<A, B>> Cons<A, B, C>(
+            C x,
+            IHeterogenousList<A, B> hlist)
+            where B : IUntypedHeterogenousList =>
+            hlist.Cons(x);
 
-    public class Tup<A> : IHList<A, Void>
-    {
-        public A First { get; }
+        public static bool IsEmpty(this IEmptyHeterogenousList hlist) => true;
+        public static bool IsEmpty<A, B>(this IHeterogenousList<A, B> hlist) where B : IUntypedHeterogenousList => false;
 
-        public Void Rest
-        {
-            get { return Void.It; }
-        }
-
-        public Tup(A x)
-        {
-            First = x;
-        }
-
-        public IHList<B, IHList<A, Void>> Cons<B>(B x)
-        {
-            return new Tup<A, B>(this, x);
-        }
-
-        public override string ToString()
-        {
-            return Rest == null
-                ? typeof(A).Name
-                : typeof(A).Name + ", " + Rest;
-        }
-    }
-
-    public class Tup<A, B> : IHList<B, IHList<A, Void>>
-    {
-        public B First { get; }
-        public IHList<A, Void> Rest { get; }
-
-        public Tup(Tup<A> x, B y)
-        {
-            First = y;
-            Rest = x;
-        }
-
-        public IHList<C, IHList<B, IHList<A, Void>>> Cons<C>(C x)
-        {
-            return new Tup<A, B, C>(this, x);
-        }
-
-        public override string ToString()
-        {
-            return Rest == null
-                ? typeof(B).Name
-                : typeof(B).Name + ", " + Rest;
-        }
-    }
-
-    public class Tup<A, B, C> : IHList<C, IHList<B, IHList<A, Void>>>
-    {
-        public C First { get; }
-        public IHList<B, IHList<A, Void>> Rest { get; }
-
-        public Tup(Tup<A, B> x, C y)
-        {
-            First = y;
-            Rest = x;
-        }
-
-        public IHList<D, IHList<C, IHList<B, IHList<A, Void>>>> Cons<D>(D x)
-        {
-            return new Tup<A, B, C, D>(this, x);
-        }
-
-        public override string ToString()
-        {
-            return Rest == null
-                ? typeof(C).Name
-                : typeof(C).Name + ", " + Rest;
-        }
-    }
-
-    public class Tup<A, B, C, D> : IHList<D, IHList<C, IHList<B, IHList<A, Void>>>>
-    {
-        public D First { get; }
-        public IHList<C, IHList<B, IHList<A, Void>>> Rest { get; }
-
-        public Tup(Tup<A, B, C> x, D y)
-        {
-            First = y;
-            Rest = x;
-        }
-
-        public IHList<E, IHList<D, IHList<C, IHList<B, IHList<A, Void>>>>> Cons<E>(E x)
-        {
-            throw new Exception("tuples greater than arity 4 not implemented");
-        }
-
-        public override string ToString()
-        {
-            return Rest == null
-                ? typeof(D).Name
-                : typeof(D).Name + ", " + Rest;
-        }
+        public static int Length(this IEmptyHeterogenousList hlist) => 0;
+        public static int Length<A, B>(this IHeterogenousList<A, B> hlist) where B : IUntypedHeterogenousList
+            => 1 + Length(Dyn(hlist.Tail));
     }
 }

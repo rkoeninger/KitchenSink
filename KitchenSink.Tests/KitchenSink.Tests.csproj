@@ -55,6 +55,7 @@
     <Compile Include="CondTests.cs" />
     <Compile Include="DateTimeTests.cs" />
     <Compile Include="DynamicScoping.cs" />
+    <Compile Include="HListTests.cs" />
     <Compile Include="MaybeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CollectionTests.cs" />
