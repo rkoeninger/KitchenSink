@@ -89,14 +89,21 @@ namespace KitchenSink
         private class Pop : IDisposable
         {
             private readonly Stack<object> stack;
+            private readonly int size;
 
             public Pop(Stack<object> stack)
             {
                 this.stack = stack;
+                size = stack.Count;
             }
 
             public void Dispose()
             {
+                if (stack.Count != size)
+                {
+                    throw new InvalidOperationException($"Stack was not of expected size: {size}");
+                }
+
                 stack.Pop();
             }
         }
