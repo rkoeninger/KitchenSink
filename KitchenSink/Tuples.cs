@@ -17,13 +17,8 @@ namespace KitchenSink
         public static Sig<A, B, C> Of<A, B, C>() => default(Sig<A, B, C>);
     }
 
-    public class Test
+    public static class HSet
     {
-        public static void Main(string[] args)
-        {
-            Console.WriteLine(Pick(Tuple.Create(true, DateTime.Now, 2.0m, 1, "a"), Sig.Of<bool, string>()));
-        }
-
         public static A Pick<A, B>(Tuple<A, B> t, Sig<A> _) => t.Item1;
         public static B Pick<A, B>(Tuple<A, B> t, Sig<B> _) => t.Item2;
         public static Tuple<A, B> Pick<A, B>(Tuple<A, B> t, Sig<A, B> _) => t;
