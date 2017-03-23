@@ -13,7 +13,7 @@ namespace KitchenSink
         /// <summary>
         /// The singleton "instance" of Void that is always null.
         /// </summary>
-        public static readonly Void It = null;
+        public static readonly Void It = default(Void);
 
         private Void()
         {
