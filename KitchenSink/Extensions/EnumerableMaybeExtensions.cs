@@ -5,7 +5,7 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink.Extensions
 {
-    public static class LinqMaybeExtensions
+    public static class EnumerableMaybeExtensions
     {
         /// <summary>
         /// Attempts lookup at index, returning None if out of bounds.

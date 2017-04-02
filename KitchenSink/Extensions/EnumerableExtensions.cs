@@ -6,7 +6,7 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink.Extensions
 {
-    public static class CollectionExtensions
+    public static class EnumerableExtensions
     {
         /// <summary>
         /// Returns true if item is in sequence.

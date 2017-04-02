@@ -41,11 +41,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollectionOperators.cs" />
+    <Compile Include="Collections\DefaultingDictionary.cs" />
+    <Compile Include="Collections\DictionaryGrouping.cs" />
+    <Compile Include="Collections\DictionaryLookup.cs" />
     <Compile Include="Control\Case.cs" />
     <Compile Include="Control\Cond.cs" />
-    <Compile Include="Extensions\CollectionExtensions.cs" />
+    <Compile Include="Extensions\DictionaryExtensions.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />
-    <Compile Include="Extensions\LinqMaybeExtensions.cs" />
+    <Compile Include="Extensions\EnumerableMaybeExtensions.cs" />
     <Compile Include="Extensions\MathExtensions.cs" />
     <Compile Include="Extensions\StreamExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
