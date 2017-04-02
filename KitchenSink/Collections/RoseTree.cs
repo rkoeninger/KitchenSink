@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace KitchenSink.Collections
 {
-    public class RoseTree<A>
+    public class RoseTree<A> : IEnumerable<A>
     {
         public RoseTree(A value)
         {
@@ -20,5 +21,20 @@ namespace KitchenSink.Collections
         public A Value { get; }
 
         public IList<RoseTree<A>> Children { get; }
+
+        public IEnumerator<A> GetEnumerator()
+        {
+            yield return Value;
+
+            foreach (var child in Children)
+            {
+                foreach (var item in child)
+                {
+                    yield return item;
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
