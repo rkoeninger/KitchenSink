@@ -37,17 +37,32 @@ namespace KitchenSink.Extensions
         {
             return $"{x:c}";
         }
-
+        
+        /// <summary>
+        /// Attempts parse of string to int.
+        /// </summary>
         public static Maybe<int> ToInt(this string s)
         {
             int i;
             return int.TryParse(s, out i) ? Some(i) : None<int>();
         }
-
+        
+        /// <summary>
+        /// Attempts parse of string to double.
+        /// </summary>
         public static Maybe<double> ToDouble(this string s)
         {
             double d;
             return double.TryParse(s, out d) ? Some(d) : None<double>();
+        }
+        
+        /// <summary>
+        /// Attempts parse of string to enum.
+        /// </summary>
+        public static Maybe<A> ToEnum<A>(this string s) where A : struct
+        {
+            A x;
+            return Enum.TryParse(s, out x) ? Some(x) : None<A>();
         }
 
         /// <summary>
