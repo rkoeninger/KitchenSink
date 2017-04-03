@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using static KitchenSink.Operators;
 
 namespace KitchenSink.Collections
 {
@@ -11,40 +11,95 @@ namespace KitchenSink.Collections
         {
             get
             {
-                return Search(key)
-                    .OrElseThrow(new KeyNotFoundException($"Key not found: {key}"))
-                    .Value;
+                var result = Search(key);
+
+                if (result.Target == null)
+                {
+                    throw new KeyNotFoundException($"Key not found: {key}");
+                }
+
+                return result.Target.Value;
             }
             set
             {
-                Search(key)
-                    .Branch(
-                        node => node.Value = value,
-                        () => { }); // TODO: what to do here?
+                var result = Search(key);
+
+                if (result.Target != null)
+                {
+                    result.Target.Value = value;
+                }
+                else if (result.Parent != null)
+                {
+                    var edge = result.Parent.Edges
+                        .FirstOrDefault(e => e.KeySegment.StartsWith(result.RemainingKey));
+
+                    if (edge == null)
+                    {
+                        result.Parent.Edges
+                            .Add(new Edge(result.RemainingKey, new Node(value)));
+                    }
+                    else
+                    {
+                        var childKey = edge.KeySegment.Substring(result.RemainingKey.Length);
+                        result.Parent.Value = edge.Target.Value;
+                        result.Parent.Edges.Add(new Edge(childKey, new Node(value)));
+                    }
+                }
+                else
+                {
+                    root = new Node(value);
+                }
             }
         }
 
         public void Add(string key, A value)
         {
-            // TODO: what to do here?
+            var result = Search(key);
+
+            if (result.Target != null)
+            {
+                throw new ArgumentException($"Key {key} already present", key);
+            }
+            else if (result.Parent != null)
+            {
+                var edge = result.Parent.Edges
+                    .FirstOrDefault(e => e.KeySegment.StartsWith(result.RemainingKey));
+
+                if (edge == null)
+                {
+                    result.Parent.Edges
+                        .Add(new Edge(result.RemainingKey, new Node(value)));
+                }
+                else
+                {
+                    var childKey = edge.KeySegment.Substring(result.RemainingKey.Length);
+                    result.Parent.Value = edge.Target.Value;
+                    result.Parent.Edges.Add(new Edge(childKey, new Node(value)));
+                }
+            }
+            else
+            {
+                root = new Node(value);
+            }
         }
 
-        public void Remove(string key)
+        public bool Remove(string key)
         {
             // TODO: what to do here?
+            return false;
         }
 
         private Node root;
-        private readonly Maybe<Node> NoneNode = None<Node>();
 
         // Needs to return node, closest parent
-        private Maybe<Node> Search(string key)
+        private SearchResults Search(string key)
         {
             if (root == null)
             {
-                return NoneNode;
+                return new SearchResults(null, null, key);
             }
 
+            Node parent = null;
             var current = root;
             var remainingKey = key;
 
@@ -54,25 +109,28 @@ namespace KitchenSink.Collections
 
                 if (edge == null)
                 {
-                    return NoneNode;
+                    return new SearchResults(parent, null, remainingKey);
                 }
 
+                parent = current;
                 current = edge.Target;
                 remainingKey = remainingKey.Substring(edge.KeySegment.Length);
             }
 
-            return remainingKey.Length == 0 ? Some(current) : NoneNode;
+            return new SearchResults(parent, remainingKey.Length == 0 ? current : null, remainingKey);
         }
 
-        private class SearchResults
+        private struct SearchResults
         {
-            public readonly Maybe<Node> Parent;
-            public readonly Maybe<Node> Result;
+            public readonly Node Parent;
+            public readonly Node Target;
+            public readonly string RemainingKey;
 
-            public SearchResults(Maybe<Node> parent, Maybe<Node> result)
+            public SearchResults(Node parent, Node target, string remainingKey)
             {
                 Parent = parent;
-                Result = result;
+                Target = target;
+                RemainingKey = remainingKey;
             }
         }
 
