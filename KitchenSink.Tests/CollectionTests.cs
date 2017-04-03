@@ -150,7 +150,7 @@ namespace KitchenSink.Tests
         public class RadixTreeTests
         {
             [Test]
-            public void SimpleAddAndGet()
+            public void SimpleAddContainsGet()
             {
                 var tree = new RadixTree<int>();
                 tree.Add("zero", 0);
@@ -166,6 +166,19 @@ namespace KitchenSink.Tests
                 tree.Add("ten", 10);
                 tree.Add("eleven", 11);
                 tree.Add("twelve", 12);
+                Assert.IsTrue(tree.ContainsKey("zero"));
+                Assert.IsTrue(tree.ContainsKey("one"));
+                Assert.IsTrue(tree.ContainsKey("two"));
+                Assert.IsTrue(tree.ContainsKey("three"));
+                Assert.IsTrue(tree.ContainsKey("four"));
+                Assert.IsTrue(tree.ContainsKey("five"));
+                Assert.IsTrue(tree.ContainsKey("six"));
+                Assert.IsTrue(tree.ContainsKey("seven"));
+                Assert.IsTrue(tree.ContainsKey("eight"));
+                Assert.IsTrue(tree.ContainsKey("nine"));
+                Assert.IsTrue(tree.ContainsKey("ten"));
+                Assert.IsTrue(tree.ContainsKey("eleven"));
+                Assert.IsTrue(tree.ContainsKey("twelve"));
                 Assert.AreEqual(0, tree["zero"]);
                 Assert.AreEqual(1, tree["one"]);
                 Assert.AreEqual(2, tree["two"]);
@@ -179,6 +192,33 @@ namespace KitchenSink.Tests
                 Assert.AreEqual(10, tree["ten"]);
                 Assert.AreEqual(11, tree["eleven"]);
                 Assert.AreEqual(12, tree["twelve"]);
+            }
+
+            [Test]
+            public void AddRemoveTracksCount()
+            {
+                var tree = new RadixTree<int>();
+                Assert.AreEqual(0, tree.Count);
+                tree.Add("one", 1);
+                Assert.AreEqual(1, tree.Count);
+                tree.Remove("one");
+                Assert.AreEqual(0, tree.Count);
+            }
+
+            [Test]
+            public void Enumeration()
+            {
+                var tree = new RadixTree<int>();
+                tree.Add("zero", 0);
+                tree.Add("one", 1);
+                tree.Add("two", 2);
+                tree.Add("three", 3);
+                var list = tree.ToList();
+                Assert.AreEqual(4, list.Count);
+                Assert.Contains(new KeyValuePair<string, int>("zero", 0), list);
+                Assert.Contains(new KeyValuePair<string, int>("one", 1), list);
+                Assert.Contains(new KeyValuePair<string, int>("two", 2), list);
+                Assert.Contains(new KeyValuePair<string, int>("three", 3), list);
             }
         }
     }
