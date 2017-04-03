@@ -85,13 +85,28 @@ namespace KitchenSink.Collections
 
         public bool Remove(string key)
         {
-            // TODO: what to do here?
-            return false;
+            var result = Search(key);
+
+            if (result.Target == null)
+            {
+                return false;
+            }
+
+            var edgeIndex = result.Parent.Edges
+                .FindIndex(e => key.EndsWith(e.KeySegment));
+
+            if (edgeIndex < 0)
+            {
+                return false;
+            }
+
+            // TODO: remove parent if last edge removed
+            result.Parent.Edges.RemoveAt(edgeIndex);
+            return true;
         }
 
         private Node root;
 
-        // Needs to return node, closest parent
         private SearchResults Search(string key)
         {
             if (root == null)
@@ -105,7 +120,8 @@ namespace KitchenSink.Collections
 
             while (current != null && current.Edges.Count > 0 && remainingKey.Length > 0)
             {
-                var edge = current.Edges.FirstOrDefault(e => remainingKey.StartsWith(e.KeySegment));
+                var edge = current.Edges
+                    .FirstOrDefault(e => remainingKey.StartsWith(e.KeySegment));
 
                 if (edge == null)
                 {
@@ -117,7 +133,10 @@ namespace KitchenSink.Collections
                 remainingKey = remainingKey.Substring(edge.KeySegment.Length);
             }
 
-            return new SearchResults(parent, remainingKey.Length == 0 ? current : null, remainingKey);
+            return new SearchResults(
+                parent,
+                remainingKey.Length == 0 ? current : null,
+                remainingKey);
         }
 
         private struct SearchResults
