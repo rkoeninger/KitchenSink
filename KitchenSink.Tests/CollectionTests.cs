@@ -147,12 +147,12 @@ namespace KitchenSink.Tests
         }
 
         [TestFixture]
-        public class RadixTreeTests
+        public class RadixDictionaryTests
         {
             [Test]
             public void SimpleAddContainsGet()
             {
-                var tree = new RadixTree<int>();
+                var tree = new RadixDictionary<int>();
                 tree.Add("zero", 0);
                 tree.Add("one", 1);
                 tree.Add("two", 2);
@@ -197,7 +197,7 @@ namespace KitchenSink.Tests
             [Test]
             public void AddRemoveTracksCount()
             {
-                var tree = new RadixTree<int>();
+                var tree = new RadixDictionary<int>();
                 Assert.AreEqual(0, tree.Count);
                 tree.Add("one", 1);
                 Assert.AreEqual(1, tree.Count);
@@ -208,7 +208,7 @@ namespace KitchenSink.Tests
             [Test]
             public void Enumeration()
             {
-                var tree = new RadixTree<int>();
+                var tree = new RadixDictionary<int>();
                 tree.Add("zero", 0);
                 tree.Add("one", 1);
                 tree.Add("two", 2);

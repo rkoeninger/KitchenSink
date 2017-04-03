@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace KitchenSink.Collections
 {
-    public class RadixTree<A> : IDictionary<string, A>, IReadOnlyDictionary<string, A>
+    public class RadixDictionary<A> : IDictionary<string, A>, IReadOnlyDictionary<string, A>
     {
         private readonly Node root = new Node(null, default(A));
 
