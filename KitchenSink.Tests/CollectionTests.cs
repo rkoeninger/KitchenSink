@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KitchenSink.Collections;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 using NUnit.Framework;
@@ -143,6 +144,42 @@ namespace KitchenSink.Tests
                 SeqOf(4, 5, 6),
                 SeqOf(7, 8));
             Assert.IsTrue(actual.Zip(expected, TupleOf).All(t => t.Item1.SequenceEqual(t.Item2)));
+        }
+
+        [TestFixture]
+        public class RadixTreeTests
+        {
+            [Test]
+            public void SimpleAddAndGet()
+            {
+                var tree = new RadixTree<int>();
+                tree.Add("zero", 0);
+                tree.Add("one", 1);
+                tree.Add("two", 2);
+                tree.Add("three", 3);
+                tree.Add("four", 4);
+                tree.Add("five", 5);
+                tree.Add("six", 6);
+                tree.Add("seven", 7);
+                tree.Add("eight", 8);
+                tree.Add("nine", 9);
+                tree.Add("ten", 10);
+                tree.Add("eleven", 11);
+                tree.Add("twelve", 12);
+                Assert.AreEqual(0, tree["zero"]);
+                Assert.AreEqual(1, tree["one"]);
+                Assert.AreEqual(2, tree["two"]);
+                Assert.AreEqual(3, tree["three"]);
+                Assert.AreEqual(4, tree["four"]);
+                Assert.AreEqual(5, tree["five"]);
+                Assert.AreEqual(6, tree["six"]);
+                Assert.AreEqual(7, tree["seven"]);
+                Assert.AreEqual(8, tree["eight"]);
+                Assert.AreEqual(9, tree["nine"]);
+                Assert.AreEqual(10, tree["ten"]);
+                Assert.AreEqual(11, tree["eleven"]);
+                Assert.AreEqual(12, tree["twelve"]);
+            }
         }
     }
 }

@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace KitchenSink.Collections
 {
-    // TODO: implement IEnumerable<A>, IDictionary<string, A>, IReadOnlyDictionary<string, A>
-    public class RadixTree<A>
+    public class RadixTree<A> : IDictionary<string, A>, IReadOnlyDictionary<string, A>
     {
+        private readonly Node root = new Node(null, default(A));
+
         public A this[string key]
         {
             get
@@ -28,27 +30,8 @@ namespace KitchenSink.Collections
                 {
                     result.Target.Value = value;
                 }
-                else if (result.Parent != null)
-                {
-                    var edge = result.Parent.Edges
-                        .FirstOrDefault(e => e.KeySegment.StartsWith(result.RemainingKey));
 
-                    if (edge == null)
-                    {
-                        result.Parent.Edges
-                            .Add(new Edge(result.RemainingKey, new Node(value)));
-                    }
-                    else
-                    {
-                        var childKey = edge.KeySegment.Substring(result.RemainingKey.Length);
-                        result.Parent.Value = edge.Target.Value;
-                        result.Parent.Edges.Add(new Edge(childKey, new Node(value)));
-                    }
-                }
-                else
-                {
-                    root = new Node(value);
-                }
+                AddNew(key, value, result);
             }
         }
 
@@ -60,26 +43,30 @@ namespace KitchenSink.Collections
             {
                 throw new ArgumentException($"Key {key} already present", key);
             }
-            else if (result.Parent != null)
-            {
-                var edge = result.Parent.Edges
-                    .FirstOrDefault(e => e.KeySegment.StartsWith(result.RemainingKey));
 
-                if (edge == null)
-                {
-                    result.Parent.Edges
-                        .Add(new Edge(result.RemainingKey, new Node(value)));
-                }
-                else
-                {
-                    var childKey = edge.KeySegment.Substring(result.RemainingKey.Length);
-                    result.Parent.Value = edge.Target.Value;
-                    result.Parent.Edges.Add(new Edge(childKey, new Node(value)));
-                }
+            AddNew(key, value, result);
+        }
+
+        public void Add(KeyValuePair<string, A> pair)
+        {
+            Add(pair.Key, pair.Value);
+        }
+
+        private void AddNew(string key, A value, SearchResults result)
+        {
+            var edge = result.Parent.Edges
+                .FirstOrDefault(e => e.KeySegment.StartsWith(result.RemainingKey));
+
+            if (edge == null)
+            {
+                result.Parent.Edges
+                    .Add(new Edge(result.RemainingKey, new Node(key, value)));
             }
             else
             {
-                root = new Node(value);
+                var childKey = edge.KeySegment.Substring(result.RemainingKey.Length);
+                result.Parent.Value = edge.Target.Value;
+                result.Parent.Edges.Add(new Edge(childKey, new Node(key, value)));
             }
         }
 
@@ -105,7 +92,85 @@ namespace KitchenSink.Collections
             return true;
         }
 
-        private Node root;
+        public bool Remove(KeyValuePair<string, A> pair)
+        {
+            var result = Search(pair.Key);
+
+            if (result.Target == null)
+            {
+                return false;
+            }
+
+            var edgeIndex = result.Parent.Edges
+                .FindIndex(e => pair.Key.EndsWith(e.KeySegment));
+
+            if (edgeIndex < 0)
+            {
+                return false;
+            }
+
+            var edge = result.Parent.Edges[edgeIndex];
+
+            if (!Equals(pair.Value, edge.Target.Value))
+            {
+                return false;
+            }
+
+            // TODO: remove parent if last edge removed
+            result.Parent.Edges.RemoveAt(edgeIndex);
+            return true;
+        }
+
+        public void Clear()
+        {
+            root.Edges.Clear();
+        }
+
+        public ICollection<string> Keys => Enumerate().Select(x => x.Key).ToList();
+
+        IEnumerable<string> IReadOnlyDictionary<string, A>.Keys => Enumerate().Select(x => x.Key);
+
+        public ICollection<A> Values => Enumerate().Select(x => x.Value).ToList();
+
+        IEnumerable<A> IReadOnlyDictionary<string, A>.Values => Enumerate().Select(x => x.Value);
+
+        public int Count => Enumerate().Count();
+
+        public bool IsReadOnly => false;
+
+        public bool ContainsKey(string key) => Search(key).Target != null;
+
+        public bool Contains(KeyValuePair<string, A> pair)
+        {
+            A value;
+            return TryGetValue(pair.Key, out value) && Equals(value, pair.Value);
+        }
+
+        public bool TryGetValue(string key, out A value)
+        {
+            var result = Search(key);
+
+            if (result.Target == null)
+            {
+                value = default(A);
+                return false;
+            }
+
+            value = result.Target.Value;
+            return true;
+        }
+
+        public IEnumerator<KeyValuePair<string, A>> GetEnumerator() => Enumerate().GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public void CopyTo(KeyValuePair<string, A>[] array, int arrayIndex)
+        {
+            foreach (var pair in Enumerate())
+            {
+                array[arrayIndex++] = pair;
+            }
+        }
 
         private SearchResults Search(string key)
         {
@@ -114,7 +179,7 @@ namespace KitchenSink.Collections
                 return new SearchResults(null, null, key);
             }
 
-            Node parent = null;
+            Node parent = root;
             var current = root;
             var remainingKey = key;
 
@@ -139,6 +204,30 @@ namespace KitchenSink.Collections
                 remainingKey);
         }
 
+        private IEnumerable<KeyValuePair<string, A>> Enumerate()
+        {
+            foreach (var edge in root.Edges)
+            {
+                foreach (var pair in Enumerate(edge))
+                {
+                    yield return pair;
+                }
+            }
+        }
+
+        private IEnumerable<KeyValuePair<string, A>> Enumerate(Edge rootEdge)
+        {
+            yield return new KeyValuePair<string, A>(rootEdge.Target.Key, rootEdge.Target.Value);
+
+            foreach (var edge in rootEdge.Target.Edges)
+            {
+                foreach (var pair in Enumerate(edge))
+                {
+                    yield return pair;
+                }
+            }
+        }
+
         private struct SearchResults
         {
             public readonly Node Parent;
@@ -155,11 +244,13 @@ namespace KitchenSink.Collections
 
         private class Node
         {
+            public string Key;
             public A Value;
             public readonly List<Edge> Edges;
 
-            public Node(A value)
+            public Node(string key, A value)
             {
+                Key = key;
                 Value = value;
                 Edges = new List<Edge>();
             }
