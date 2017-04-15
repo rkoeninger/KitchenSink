@@ -48,6 +48,7 @@
     <Compile Include="Collections\RoseTree.cs" />
     <Compile Include="Control\Case.cs" />
     <Compile Include="Control\Cond.cs" />
+    <Compile Include="Either.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />
