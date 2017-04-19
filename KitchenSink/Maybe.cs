@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
@@ -130,10 +131,16 @@ namespace KitchenSink
 
         public Type InnerType => typeof(A);
 
+        [Pure]
         public Maybe<B> Cast<B>() => HasValue && Value is B ? Some((B) (object) Value) : None<B>();
+
+        [Pure]
         public Maybe<B> Select<B>(Func<A, B> f) => HasValue ? Some(f(Value)) : None<B>();
+
+        [Pure]
         public Maybe<A> Where(Func<A, bool> f) => HasValue && f(Value) ? this : None<A>();
 
+        [Pure]
         public Maybe<C> Join<B, C, K>(
             Maybe<B> inner,
             Func<A, K> outerKeySelector,
@@ -160,14 +167,26 @@ namespace KitchenSink
             }
         }
 
+        [Pure]
         public B Branch<B>(Func<A, B> forSome, Func<B> forNone) =>
             HasValue ? forSome(Value) : forNone();
+
+        [Pure]
         public A OrElse(A other) => HasValue ? Value : other;
+
+        [Pure]
         public A OrElseDo(Func<A> f) => HasValue ? Value : f();
+
+        [Pure]
         public Maybe<A> OrDo(Func<A> f) => HasValue ? this : Some(f());
+
+        [Pure]
         public Maybe<A> OrDo(Func<Maybe<A>> f) => HasValue ? this : f();
+
+        [Pure]
         public Maybe<A> Or(Maybe<A> maybe) => HasValue ? this : maybe;
 
+        [Pure]
         public Maybe<A> OrThrow(string message)
         {
             if (HasValue)
@@ -178,6 +197,7 @@ namespace KitchenSink
             throw new Exception(message);
         }
 
+        [Pure]
         public Maybe<A> OrThrow(Exception e)
         {
             if (HasValue)
@@ -188,6 +208,7 @@ namespace KitchenSink
             throw e;
         }
 
+        [Pure]
         public Maybe<A> OrThrow(Func<Exception> f)
         {
             if (HasValue)
@@ -198,6 +219,7 @@ namespace KitchenSink
             throw f();
         }
 
+        [Pure]
         public A OrElseThrow(string message)
         {
             if (HasValue)
@@ -208,6 +230,7 @@ namespace KitchenSink
             throw new Exception(message);
         }
 
+        [Pure]
         public A OrElseThrow(Exception e)
         {
             if (HasValue)
@@ -218,6 +241,7 @@ namespace KitchenSink
             throw e;
         }
 
+        [Pure]
         public A OrElseThrow(Func<Exception> f)
         {
             if (HasValue)
