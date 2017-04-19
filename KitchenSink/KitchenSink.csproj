@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollectionOperators.cs" />
+    <Compile Include="Collections\ConsList.cs" />
     <Compile Include="Collections\DefaultingDictionary.cs" />
     <Compile Include="Collections\DictionaryGrouping.cs" />
     <Compile Include="Collections\DictionaryLookup.cs" />
