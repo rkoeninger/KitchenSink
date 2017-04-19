@@ -161,7 +161,7 @@ namespace KitchenSink.Injection
 
         // Resolves dependency by checking for existing Factory,
         // then checking list of Sources, then checking list of Backups.
-        // Throws NotImplementedException if impl is not found.
+        // Throws ImplementationUnresolvedException if impl is not found.
         private Maybe<object> GetInternal(Type contractType, bool multiUse)
         {
             Factory factory;

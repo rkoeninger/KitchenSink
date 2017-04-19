@@ -28,6 +28,8 @@ Not everything in this library is meant to be taken completely seriously. Some f
 ### Collection Enhancements
 
   * `Dictionary<K1, K2, V>` - `Dictionary`s that use `Tuple` for aggregate keys
+  * `RadixDictionary<A>` - dictionary optimized for string keys
+  * `RoseTree<A>` - tree data structure that braches arbitrarily
 
 ### Composable Control Structures
 

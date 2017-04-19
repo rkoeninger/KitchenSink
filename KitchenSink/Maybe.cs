@@ -247,7 +247,8 @@ namespace KitchenSink
                 return false;
 
             var that = (Maybe<A>) other;
-            return (!HasValue && !that.HasValue) || (HasValue && that.HasValue && Equals(Value, that.Value));
+            return (!HasValue && !that.HasValue)
+                || (HasValue && that.HasValue && Equals(Value, that.Value));
         }
     }
 }
