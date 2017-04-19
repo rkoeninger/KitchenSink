@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollectionOperators.cs" />
+    <Compile Include="Concurrent\Lock.cs" />
     <Compile Include="Control\Case.cs" />
     <Compile Include="Control\Cond.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
