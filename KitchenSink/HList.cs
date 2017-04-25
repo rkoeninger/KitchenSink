@@ -1,73 +1,519 @@
-﻿using static KitchenSink.Operators;
-
-namespace KitchenSink
+﻿namespace KitchenSink
 {
-    public interface IUntypedHeterogeneousList
+    public abstract class HList<L> where L : HList<L>
     {
-        object UntypedHead { get; }
-        object UntypedTail { get; }
+        internal HList() { }
+        public abstract HCons<C, L> Cons<C>(C x);
     }
 
-    public interface IHeterogeneousList<out A, out B> : IUntypedHeterogeneousList where B : IUntypedHeterogeneousList
+    public sealed class HCons<E, L> : HList<HCons<E, L>> where L : HList<L>
     {
-        A Head { get; }
-        B Tail { get; }
-        IHeterogeneousList<C, IHeterogeneousList<A, B>> Cons<C>(C x);
-        bool Contains<C>(C x);
+        public HCons(E head, L tail)
+        {
+            Head = head;
+            Tail = tail;
+        }
+
+        public override HCons<C, HCons<E, L>> Cons<C>(C x) => new HCons<C, HCons<E, L>>(x, this);
+        public E Head { get; }
+        public L Tail { get; }
     }
 
-    public interface IEmptyHeterogeneousList : IHeterogeneousList<Void, IEmptyHeterogeneousList>
+    public sealed class HNil : HList<HNil>
     {
+        private HNil() { }
+        public static readonly HNil It = new HNil();
+        public override HCons<C, HNil> Cons<C>(C x) => new HCons<C, HNil>(x, It);
     }
 
     public static class HList
     {
-        private sealed class Node<A, B> : IHeterogeneousList<A, B> where B : IUntypedHeterogeneousList
-        {
-            public Node(A head, B tail)
-            {
-                Head = head;
-                Tail = tail;
-            }
+        public static TKey Get<
+            TKey,
+            TMore>(
+            TKey key,
+            HCons<TKey, TMore> list) where TMore : HList<TMore> =>
+            list
+            .Head;
 
-            public A Head { get; }
-            public B Tail { get; }
-            public object UntypedHead => Head;
-            public object UntypedTail => Tail;
-            public IHeterogeneousList<C, IHeterogeneousList<A, B>> Cons<C>(C x) =>
-                new Node<C, IHeterogeneousList<A, B>>(x, this);
-            public bool Contains<C>(C x) => Equals(Head, x) || Dyn(Tail).Contains(x);
-        }
+        public static TKey Get<
+            TKey,
+            T0,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<TKey, TMore>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Head;
 
-        private sealed class VoidNode : IEmptyHeterogeneousList
-        {
-            private VoidNode() { }
-            public static readonly VoidNode It = new VoidNode();
-            public Void Head => Void.It;
-            public IEmptyHeterogeneousList Tail => this;
-            public object UntypedHead => Head;
-            public object UntypedTail => Tail;
-            public IHeterogeneousList<C, IHeterogeneousList<Void, IEmptyHeterogeneousList>> Cons<C>(C x) =>
-                Singleton(x);
-            public bool Contains<C>(C x) => false;
-        }
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<TKey, TMore>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Head;
 
-        public static IEmptyHeterogeneousList Empty => VoidNode.It;
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<TKey, TMore>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Head;
 
-        public static IHeterogeneousList<A, IEmptyHeterogeneousList> Singleton<A>(A x) =>
-            new Node<A, VoidNode>(x, VoidNode.It);
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<TKey, TMore>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
 
-        public static IHeterogeneousList<C, IHeterogeneousList<A, B>> Cons<A, B, C>(
-            C x,
-            IHeterogeneousList<A, B> hlist)
-            where B : IUntypedHeterogeneousList =>
-            hlist.Cons(x);
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            T4,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<T4,
+            HCons<TKey, TMore>>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
 
-        public static bool IsEmpty(this IEmptyHeterogeneousList hlist) => true;
-        public static bool IsEmpty<A, B>(this IHeterogeneousList<A, B> hlist) where B : IUntypedHeterogeneousList => false;
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            T4,
+            T5,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<T4,
+            HCons<T5,
+            HCons<TKey, TMore>>>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
 
-        public static int Length(this IEmptyHeterogeneousList hlist) => 0;
-        public static int Length<A, B>(this IHeterogeneousList<A, B> hlist) where B : IUntypedHeterogeneousList
-            => 1 + Length(Dyn(hlist.Tail));
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            T4,
+            T5,
+            T6,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<T4,
+            HCons<T5,
+            HCons<T6,
+            HCons<TKey, TMore>>>>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
+
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            T4,
+            T5,
+            T6,
+            T7,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<T4,
+            HCons<T5,
+            HCons<T6,
+            HCons<T7,
+            HCons<TKey, TMore>>>>>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
+
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            T4,
+            T5,
+            T6,
+            T7,
+            T8,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<T4,
+            HCons<T5,
+            HCons<T6,
+            HCons<T7,
+            HCons<T8,
+            HCons<TKey, TMore>>>>>>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
+
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            T4,
+            T5,
+            T6,
+            T7,
+            T8,
+            T9,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<T4,
+            HCons<T5,
+            HCons<T6,
+            HCons<T7,
+            HCons<T8,
+            HCons<T9,
+            HCons<TKey, TMore>>>>>>>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
+
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            T4,
+            T5,
+            T6,
+            T7,
+            T8,
+            T9,
+            T10,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<T4,
+            HCons<T5,
+            HCons<T6,
+            HCons<T7,
+            HCons<T8,
+            HCons<T9,
+            HCons<T10,
+            HCons<TKey, TMore>>>>>>>>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
+
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            T4,
+            T5,
+            T6,
+            T7,
+            T8,
+            T9,
+            T10,
+            T11,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<T4,
+            HCons<T5,
+            HCons<T6,
+            HCons<T7,
+            HCons<T8,
+            HCons<T9,
+            HCons<T10,
+            HCons<T11,
+            HCons<TKey, TMore>>>>>>>>>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
+
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            T4,
+            T5,
+            T6,
+            T7,
+            T8,
+            T9,
+            T10,
+            T11,
+            T12,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<T4,
+            HCons<T5,
+            HCons<T6,
+            HCons<T7,
+            HCons<T8,
+            HCons<T9,
+            HCons<T10,
+            HCons<T11,
+            HCons<T12,
+            HCons<TKey, TMore>>>>>>>>>>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
+
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            T4,
+            T5,
+            T6,
+            T7,
+            T8,
+            T9,
+            T10,
+            T11,
+            T12,
+            T13,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<T4,
+            HCons<T5,
+            HCons<T6,
+            HCons<T7,
+            HCons<T8,
+            HCons<T9,
+            HCons<T10,
+            HCons<T11,
+            HCons<T12,
+            HCons<T13,
+            HCons<TKey, TMore>>>>>>>>>>>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
+
+        public static TKey Get<
+            TKey,
+            T0,
+            T1,
+            T2,
+            T3,
+            T4,
+            T5,
+            T6,
+            T7,
+            T8,
+            T9,
+            T10,
+            T11,
+            T12,
+            T13,
+            T14,
+            TMore>(
+            TKey key,
+            HCons<T0,
+            HCons<T1,
+            HCons<T2,
+            HCons<T3,
+            HCons<T4,
+            HCons<T5,
+            HCons<T6,
+            HCons<T7,
+            HCons<T8,
+            HCons<T9,
+            HCons<T10,
+            HCons<T11,
+            HCons<T12,
+            HCons<T13,
+            HCons<T14,
+            HCons<TKey, TMore>>>>>>>>>>>>>>>> list) where TMore : HList<TMore> =>
+            list
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Tail
+            .Head;
     }
 }
