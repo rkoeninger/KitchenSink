@@ -208,6 +208,8 @@ namespace KitchenSink.Injection
             return ctor.Invoke(args.ToArray());
         }
 
-        private static bool IsSingleUse(Type type) => type.HasAttribute<SingleUse>();
+        private static bool IsSingleUse(Type type) =>
+            type.HasAttribute<SingleUse>()
+            || type.GetMembers(BindingFlags.NonPublic).Any(m => m.Name.IsSimilar("DeclareSingleUse"));
     }
 }
