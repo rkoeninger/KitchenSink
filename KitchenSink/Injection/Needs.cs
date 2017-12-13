@@ -37,41 +37,29 @@ namespace KitchenSink.Injection
         /// <summary>
         /// Specifies an implementing object for a given contract type.
         /// </summary>
-        public Needs Add<TContract>(TContract impl)
-        {
-            return Add(typeof(TContract), impl);
-        }
+        public Needs Add<TContract>(TContract impl) => Add(typeof(TContract), impl);
 
         /// <summary>
         /// Specifies an implementing object for a given contract type.
         /// </summary>
-        public Needs Add(Type contractType, object impl)
-        {
-            return Add(contractType, () => impl);
-        }
+        public Needs Add(Type contractType, object impl) => Add(contractType, () => impl);
 
         /// <summary>
         /// Specifies an implementing type for a given contract type.
         /// </summary>
-        public Needs Add<TContract>(Type implType)
-        {
-            return Add(typeof(TContract), implType);
-        }
+        public Needs Add<TContract>(Type implType) => Add(typeof(TContract), implType);
 
         /// <summary>
         /// Specifies an implementing type for a given contract type.
         /// </summary>
-        public Needs Add<TContract, TImplementation>()
-        {
-            return Add(typeof(TContract), typeof(TImplementation));
-        }
+        public Needs Add<TContract, TImplementation>() => Add(typeof(TContract), typeof(TImplementation));
 
         /// <summary>
         /// Specifies an implementing type for a given contract type.
         /// </summary>
         public Needs Add(Type contractType, Type implType)
         {
-            Persist(contractType, implType, !implType.HasAttribute<SingleUse>());
+            Persist(contractType, implType);
             return this;
         }
 
@@ -87,18 +75,12 @@ namespace KitchenSink.Injection
         /// <summary>
         /// Registers the nested types of the given parent type as a source of implementations.
         /// </summary>
-        public Needs Refer(Type parent)
-        {
-            return Refer(SourceFrom(parent.GetNestedTypes()));
-        }
+        public Needs Refer(Type parent) => Refer(SourceFrom(parent.GetNestedTypes()));
 
         /// <summary>
         /// Registers the exported types in the given assembly as a source of implementations.
         /// </summary>
-        public Needs Refer(Assembly assembly)
-        {
-            return Refer(SourceFrom(assembly.GetExportedTypes()));
-        }
+        public Needs Refer(Assembly assembly) => Refer(SourceFrom(assembly.GetExportedTypes()));
 
         /// <summary>
         /// Registers the given delegate as an arbitrary source of implementations.
@@ -109,18 +91,13 @@ namespace KitchenSink.Injection
             return this;
         }
 
-        private static Source SourceFrom(IEnumerable<Type> types)
-        {
-            return contractType => types.FirstOrDefault(t => t.GetInterfaces().Contains(contractType));
-        }
+        private static Source SourceFrom(IEnumerable<Type> types) =>
+            contractType => types.FirstOrDefault(t => t.GetInterfaces().Contains(contractType));
 
         /// <summary>
         /// Registers the given Needs as a backup to this Needs.
         /// </summary>
-        public Needs Defer(Needs needs)
-        {
-            return Defer(needs.GetMaybe);
-        }
+        public Needs Defer(Needs needs) => Defer(needs.GetMaybe);
 
         /// <summary>
         /// Registers the given delegate as an arbitrary backup to this Needs.
@@ -136,33 +113,25 @@ namespace KitchenSink.Injection
         /// Resolves an implementing object for the given contract type.
         /// </summary>
         /// <exception cref="ImplementationUnresolvedException">If no implementation found.</exception>
-        public TContract Get<TContract>()
-        {
-            return (TContract) Get(typeof(TContract));
-        }
+        public TContract Get<TContract>() => (TContract) Get(typeof(TContract));
 
         /// <summary>
         /// Resolves an implementing object for the given contract type.
         /// </summary>
         /// <exception cref="ImplementationUnresolvedException">If no implementation found.</exception>
-        public object Get(Type contractType)
-        {
-            return GetMaybe(contractType).OrElseThrow(new ImplementationUnresolvedException(contractType));
-        }
+        public object Get(Type contractType) =>
+            GetMaybe(contractType).OrElseThrow(new ImplementationUnresolvedException(contractType));
 
         /// <summary>
         /// Resolves Some implementing object for the given contract type.
         /// Returns None if no implementation found.
         /// </summary>
-        public Maybe<object> GetMaybe(Type contractType)
-        {
-            return GetInternal(contractType, !contractType.HasAttribute<SingleUse>());
-        }
+        public Maybe<object> GetMaybe(Type contractType) => GetInternal(contractType);
 
         // Resolves dependency by checking for existing Factory,
         // then checking list of Sources, then checking list of Backups.
         // Throws ImplementationUnresolvedException if impl is not found.
-        private Maybe<object> GetInternal(Type contractType, bool multiUse)
+        private Maybe<object> GetInternal(Type contractType)
         {
             if (factories.TryGetValue(contractType, out var factory))
             {
@@ -175,7 +144,7 @@ namespace KitchenSink.Injection
 
                 if (implType != null)
                 {
-                    return Some(Persist(contractType, implType, multiUse));
+                    return Some(Persist(contractType, implType));
                 }
             }
 
@@ -194,22 +163,22 @@ namespace KitchenSink.Injection
 
         // Create and store Factory. Factory returns singleton instance if
         // implType is multi-use, returns new instance on each call if single-use.
-        private object Persist(Type contractType, Type implType, bool multiUse)
+        private object Persist(Type contractType, Type implType)
         {
-            if (implType.HasAttribute<SingleUse>())
+            if (IsSingleUse(implType))
             {
-                object factory() => New(contractType, implType, multiUse);
+                object factory() => New(contractType, implType);
                 factories[contractType] = factory;
                 return factory();
             }
 
-            var impl = New(contractType, implType, multiUse);
+            var impl = New(contractType, implType);
             factories[contractType] = () => impl;
             return impl;
         }
 
         // Resolve all nested dependencies and create instance.
-        private object New(Type contractType, Type implType, bool multiUse)
+        private object New(Type contractType, Type implType)
         {
             var ctors = implType.GetConstructors();
 
@@ -217,27 +186,28 @@ namespace KitchenSink.Injection
             {
                 throw new MultipleConstructorsException(contractType, implType, ctors.Length);
             }
-
+            
             var ctor = ctors[0];
-            var args = ctor.GetParameters()
-                .Select(p => GetInternal(p.ParameterType, multiUse))
-                .Select(m => m.OrElseThrow(new ImplementationUnresolvedException(m.InnerType)))
-                .ToArray();
+            var multiUse = !IsSingleUse(implType);
+            var args = new List<object>();
 
-            if (multiUse)
+            foreach (var param in ctor.GetParameters())
             {
-                foreach (var arg in args)
-                {
-                    var argType = arg.GetType();
+                var arg = GetInternal(param.ParameterType)
+                    .OrElseThrow(new ImplementationUnresolvedException(param.ParameterType));
+                var argType = arg.GetType();
 
-                    if (argType.HasAttribute<SingleUse>())
-                    {
-                        throw new ImplementationReliabilityException(contractType, implType, argType);
-                    }
+                if (multiUse && IsSingleUse(argType))
+                {
+                    throw new ImplementationReliabilityException(contractType, implType, argType);
                 }
+
+                args.Add(arg);
             }
 
-            return ctor.Invoke(args);
+            return ctor.Invoke(args.ToArray());
         }
+
+        private static bool IsSingleUse(Type type) => type.HasAttribute<SingleUse>();
     }
 }

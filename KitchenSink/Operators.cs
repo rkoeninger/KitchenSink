@@ -154,7 +154,7 @@ namespace KitchenSink
         /// <summary>
         /// Check if string is only whitespace.
         /// </summary>
-        public static readonly Func<string, bool> Blank = x => String.IsNullOrWhiteSpace(x);
+        public static readonly Func<string, bool> Blank = string.IsNullOrWhiteSpace;
 
         /// <summary>
         /// Check if string is not only whitespace.
