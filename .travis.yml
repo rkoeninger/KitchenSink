@@ -6,6 +6,6 @@ language: generic # csharp
   #- nuget restore KitchenSink.sln
   #- nuget install NUnit.ConsoleRunner -Version 3.6.0 -OutputDirectory testrunner
 script:
-  - echo "Travis doesn't support C-Sharp 7.1 yet"
+  - echo "Travis doesn't support C-Sharp 7.2 yet"
   #- xbuild /p:Configuration=Release KitchenSink.sln
   #- mono ./testrunner/NUnit.ConsoleRunner.3.6.0/tools/nunit3-console.exe ./KitchenSink.Tests/bin/Release/KitchenSink.Tests.dll --where "cat != WindowsOnly"
