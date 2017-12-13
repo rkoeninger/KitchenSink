@@ -10,8 +10,8 @@ namespace KitchenSink.Tests
         public void ConcatPaths()
         {
             Assert.AreEqual(
-                @"C:\Program Files (x86)\Microsoft Visual Studio 2013",
-                (Drive.C / "Program Files (x86)" / "Microsoft Visual Studio 2013").Value);
+                @"C:\Program Files (x86)\Microsoft Visual Studio 2017",
+                (Drive.C / "Program Files (x86)" / "Microsoft Visual Studio 2017").Value);
 
             Assert.AreEqual(
                 @"\\somemachine\someshare\subpath\file.txt",
@@ -27,13 +27,13 @@ namespace KitchenSink.Tests
         [Test]
         public void TryOutSpecialFolders()
         {
-            Console.WriteLine(Folder.AppData);
-            Console.WriteLine(Folder.LocalAppData);
-            Console.WriteLine(Folder.Desktop);
-            Console.WriteLine(Folder.Documents);
-            Console.WriteLine(Folder.Profile);
-            Console.WriteLine(Folder.Current);
-            Console.WriteLine(Folder.Programs);
+            Console.WriteLine($"{nameof(Folder.AppData)}      = {Folder.AppData}");
+            Console.WriteLine($"{nameof(Folder.LocalAppData)} = {Folder.LocalAppData}");
+            Console.WriteLine($"{nameof(Folder.Desktop)}      = {Folder.Desktop}");
+            Console.WriteLine($"{nameof(Folder.Documents)}    = {Folder.Documents}");
+            Console.WriteLine($"{nameof(Folder.Profile)}      = {Folder.Profile}");
+            Console.WriteLine($"{nameof(Folder.Current)}      = {Folder.Current}");
+            Console.WriteLine($"{nameof(Folder.Programs)}     = {Folder.Programs}");
         }
     }
 }
