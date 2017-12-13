@@ -20,15 +20,8 @@ namespace KitchenSink.Collections
 
         public TValue this[TKey key]
         {
-            get
-            {
-                TValue value;
-                return Primary.TryGetValue(key, out value) ? value : Secondary[key];
-            }
-            set
-            {
-                Secondary[key] = value;
-            }
+            get => Primary.TryGetValue(key, out var value) ? value : Secondary[key];
+            set => Secondary[key] = value;
         }
 
         public ICollection<TKey> Keys

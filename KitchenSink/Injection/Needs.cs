@@ -164,9 +164,7 @@ namespace KitchenSink.Injection
         // Throws ImplementationUnresolvedException if impl is not found.
         private Maybe<object> GetInternal(Type contractType, bool multiUse)
         {
-            Factory factory;
-
-            if (factories.TryGetValue(contractType, out factory))
+            if (factories.TryGetValue(contractType, out var factory))
             {
                 return Some(factory());
             }
@@ -200,7 +198,7 @@ namespace KitchenSink.Injection
         {
             if (implType.HasAttribute<SingleUse>())
             {
-                Factory factory = () => New(contractType, implType, multiUse);
+                object factory() => New(contractType, implType, multiUse);
                 factories[contractType] = factory;
                 return factory();
             }

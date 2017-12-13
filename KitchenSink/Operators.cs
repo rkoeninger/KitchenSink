@@ -139,9 +139,8 @@ namespace KitchenSink
         public static readonly Func<IEnumerable, bool> NonEmpty = x =>
         {
             var e = x.GetEnumerator();
-            var disposable = e as IDisposable;
 
-            if (disposable != null)
+            if (e is IDisposable disposable)
             {
                 using (disposable)
                 {

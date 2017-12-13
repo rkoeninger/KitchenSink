@@ -93,7 +93,7 @@ namespace KitchenSink
     /// </summary>
     public struct Maybe<A>
     {
-        internal static readonly Maybe<A> None = default(Maybe<A>);
+        internal static readonly Maybe<A> None = default;
 
         public static implicit operator Maybe<A>(A val)
         {

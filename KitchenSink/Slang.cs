@@ -11,6 +11,9 @@ using System.Text.RegularExpressions;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
+// TODO: needs serious overhaul
+// TODO: the need for an external language is reduced by the existence of Roslyn
+
 namespace KitchenSink
 {
     public static class Slang

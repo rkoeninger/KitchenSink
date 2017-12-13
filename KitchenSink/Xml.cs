@@ -8,7 +8,7 @@ namespace KitchenSink
     public class Xml
     {
         /// <summary>Starts new XML document.</summary>
-        public static XmlStart Doc => default(XmlStart);
+        public static XmlStart Doc => default;
 
         /// <summary>Starts new indented XML document.</summary>
         public static XmlStart IndentedDoc

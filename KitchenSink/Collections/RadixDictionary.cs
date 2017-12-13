@@ -7,7 +7,7 @@ namespace KitchenSink.Collections
 {
     public class RadixDictionary<A> : IDictionary<string, A>, IReadOnlyDictionary<string, A>
     {
-        private readonly Node root = new Node(null, default(A));
+        private readonly Node root = new Node(null, default);
 
         public A this[string key]
         {
@@ -140,11 +140,7 @@ namespace KitchenSink.Collections
 
         public bool ContainsKey(string key) => Search(key).Target != null;
 
-        public bool Contains(KeyValuePair<string, A> pair)
-        {
-            A value;
-            return TryGetValue(pair.Key, out value) && Equals(value, pair.Value);
-        }
+        public bool Contains(KeyValuePair<string, A> pair) => TryGetValue(pair.Key, out var value) && Equals(value, pair.Value);
 
         public bool TryGetValue(string key, out A value)
         {
@@ -152,7 +148,7 @@ namespace KitchenSink.Collections
 
             if (result.Target == null)
             {
-                value = default(A);
+                value = default;
                 return false;
             }
 
@@ -244,7 +240,7 @@ namespace KitchenSink.Collections
 
         private class Node
         {
-            public string Key;
+            public readonly string Key;
             public A Value;
             public readonly List<Edge> Edges;
 

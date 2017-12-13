@@ -8,10 +8,7 @@ namespace KitchenSink.Collections
     {
         private readonly KeyValuePair<TKey, IEnumerable<TElement>> _pair;
 
-        public DictionaryGrouping(KeyValuePair<TKey, IEnumerable<TElement>> pair)
-        {
-            _pair = pair;
-        }
+        public DictionaryGrouping(KeyValuePair<TKey, IEnumerable<TElement>> pair) => _pair = pair;
 
         public TKey Key => _pair.Key;
 

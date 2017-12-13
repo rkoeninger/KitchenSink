@@ -121,8 +121,8 @@ namespace KitchenSink
 
         public static FilePath Current
         {
-            get { return new FilePath(CurrentDirectory); }
-            set { CurrentDirectory = value; }
+            get => new FilePath(CurrentDirectory);
+            set => CurrentDirectory = value;
         }
     }
 

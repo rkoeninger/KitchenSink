@@ -1,5 +1,5 @@
-[![Visual Studio Version](https://img.shields.io/badge/vs-2015-68217a.svg)](https://www.visualstudio.com/vs/older-downloads/)
-[![C# Version](https://img.shields.io/badge/C%23-6.0-green.svg)](https://msdn.microsoft.com/en-us/magazine/dn802602.aspx)
+[![Visual Studio Version](https://img.shields.io/badge/vs-2017_%2815.5.1%29-68217a.svg)](https://www.visualstudio.com/vs/older-downloads/)
+[![C# Version](https://img.shields.io/badge/C%23-7.2-green.svg)](https://msdn.microsoft.com/en-us/magazine/dn802602.aspx)
 [![.Net Build Status](https://img.shields.io/appveyor/ci/rkoeninger/KitchenSink/master.svg?label=.Net%20Build)](https://ci.appveyor.com/project/rkoeninger/kitchensink/branch/master)
 [![Mono Build Status](https://img.shields.io/travis/rkoeninger/KitchenSink/master.svg?label=Mono%20Build)](https://travis-ci.org/rkoeninger/KitchenSink)
 
@@ -128,7 +128,7 @@ new Dictionary<string, int> {
 }
 ```
 
-```
+```clojure
 [1 2 3 4 5]
 {"one" 1 "two" 2 "three" 3}
 ```
@@ -141,7 +141,7 @@ x + y + z + w
 (x == y) && (x == z) && (x == w)
 ```
 
-```
+```clojure
 (+ x y z)
 (>= x y z)
 (== x y z)

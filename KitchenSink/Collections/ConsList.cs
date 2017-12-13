@@ -69,15 +69,9 @@ namespace KitchenSink.Collections
         public bool IsEmpty => true;
         public int Count => 0;
 
-        public A Head
-        {
-            get { throw new Exception(); }
-        }
+        public A Head => throw new Exception();
 
-        public IConsList<A> Tail
-        {
-            get { throw new Exception(); }
-        }
+        public IConsList<A> Tail => throw new Exception();
 
         public IConsList<A> Cons(A value) => new ConsList<A>(value, this);
 

@@ -10,40 +10,34 @@ namespace KitchenSink
             Func<A> consequent,
             Func<B> alternative) =>
             condition()
-            ? new Either<A, B>(true, consequent(), default(B))
-            : new Either<A, B>(false, default(A), alternative());
+            ? new Either<A, B>(true, consequent(), default)
+            : new Either<A, B>(false, default, alternative());
 
         public static Either<C, B> Select<A, B, C>(
             this Either<A, B> e,
             Func<A, C> selector) =>
             e.IsLeft
-            ? new Either<C, B>(true, selector(e.Left), default(B))
-            : new Either<C, B>(false, default(C), e.Right);
+            ? new Either<C, B>(true, selector(e.Left), default)
+            : new Either<C, B>(false, default, e.Right);
 
         public static Either<A, C> SelectRight<A, B, C>(
             this Either<A, B> e,
             Func<B, C> selector) =>
             e.IsLeft
-            ? new Either<A, C>(true, e.Left, default(C))
-            : new Either<A, C>(false, default(A), selector(e.Right));
+            ? new Either<A, C>(true, e.Left, default)
+            : new Either<A, C>(false, default, selector(e.Right));
     }
 
     public class Either<A, B>
     {
         public static implicit operator Either<A, B>(A val)
         {
-            return new Either<A, B>(true, val, default(B));
+            return new Either<A, B>(true, val, default);
         }
 
-        public static bool operator ==(Either<A, B> x, Either<A, B> y)
-        {
-            return Equals(x, y);
-        }
+        public static bool operator ==(Either<A, B> x, Either<A, B> y) => Equals(x, y);
 
-        public static bool operator !=(Either<A, B> x, Either<A, B> y)
-        {
-            return !Equals(x, y);
-        }
+        public static bool operator !=(Either<A, B> x, Either<A, B> y) => !Equals(x, y);
 
         internal Either(bool isLeft, A left, B right)
         {

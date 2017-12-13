@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using KitchenSink.Collections;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 

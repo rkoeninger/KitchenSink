@@ -49,15 +49,12 @@ namespace KitchenSink.Collections
 
         public TValue this[TKey1 a, TKey2 b]
         {
-            get { return this[TupleOf(a, b)]; }
-            set { this[TupleOf(a, b)] = value; }
+            get => this[TupleOf(a, b)];
+            set => this[TupleOf(a, b)] = value;
         }
 
-        public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b)
-        {
-            TValue result;
-            return TryGetValue(TupleOf(a, b), out result) ? Some(result) : None<TValue>();
-        }
+        public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b) =>
+            TryGetValue(TupleOf(a, b), out var result) ? Some(result) : None<TValue>();
     }
 
     /// <summary>
@@ -110,15 +107,12 @@ namespace KitchenSink.Collections
 
         public TValue this[TKey1 a, TKey2 b, TKey3 c]
         {
-            get { return this[TupleOf(a, b, c)]; }
-            set { this[TupleOf(a, b, c)] = value; }
+            get => this[TupleOf(a, b, c)];
+            set => this[TupleOf(a, b, c)] = value;
         }
 
-        public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b, TKey3 c)
-        {
-            TValue result;
-            return TryGetValue(TupleOf(a, b, c), out result) ? Some(result) : None<TValue>();
-        }
+        public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b, TKey3 c) =>
+            TryGetValue(TupleOf(a, b, c), out var result) ? Some(result) : None<TValue>();
     }
 
     /// <summary>
@@ -177,14 +171,11 @@ namespace KitchenSink.Collections
 
         public TValue this[TKey1 a, TKey2 b, TKey3 c, TKey4 d]
         {
-            get { return this[TupleOf(a, b, c, d)]; }
-            set { this[TupleOf(a, b, c, d)] = value; }
+            get => this[TupleOf(a, b, c, d)];
+            set => this[TupleOf(a, b, c, d)] = value;
         }
 
-        public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b, TKey3 c, TKey4 d)
-        {
-            TValue result;
-            return TryGetValue(TupleOf(a, b, c, d), out result) ? Some(result) : None<TValue>();
-        }
+        public Maybe<TValue> GetMaybe(TKey1 a, TKey2 b, TKey3 c, TKey4 d) =>
+            TryGetValue(TupleOf(a, b, c, d), out var result) ? Some(result) : None<TValue>();
     }
 }
