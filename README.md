@@ -118,38 +118,3 @@ which generates
   </book>
 </catalog>
 ```
-
-### Slang, an External Expression Language
-
-  * Parsed into expression trees
-  * Allows snippets of code to be declared in config files or database tables
-  * Doesn't support declaring classes or methods
-  * Type inference and collection literals:
-
-```csharp
-new List<int> { 1, 2, 3, 4, 5 }
-new Dictionary<string, int> {
-  {"one", 1}, {"two", 2}, {"three", 3}
-}
-```
-
-```clojure
-[1 2 3 4 5]
-{"one" 1 "two" 2 "three" 3}
-```
-
-  * Largely uses symbolic expression syntax and variadic functions that allow more terse expression of code:
-
-```csharp
-x + y + z + w
-(x >= y) && (y >= z) && (z >= w)
-(x == y) && (x == z) && (x == w)
-```
-
-```clojure
-(+ x y z)
-(>= x y z)
-(== x y z)
-```
-
-  * Nestable string characters: `« »`

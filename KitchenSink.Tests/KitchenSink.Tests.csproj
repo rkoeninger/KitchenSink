@@ -67,7 +67,6 @@
     <Compile Include="CheckTests.cs" />
     <Compile Include="StreamTests.cs" />
     <Compile Include="ComparableTests.cs" />
-    <Compile Include="SlangTests.cs" />
     <Compile Include="NewTypeTests.cs" />
     <Compile Include="IOTests.cs" />
     <Compile Include="FilePathTests.cs" />
