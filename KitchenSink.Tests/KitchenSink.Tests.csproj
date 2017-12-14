@@ -75,7 +75,7 @@
     <Compile Include="XmlTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\KitchenSink\KitchenSink.csproj">
+    <ProjectReference Include="..\KitchenSink.Lib\KitchenSink.Lib.csproj">
       <Project>{e993d487-e0d8-44ef-87d8-d335ecaa6cfa}</Project>
       <Name>KitchenSink</Name>
     </ProjectReference>

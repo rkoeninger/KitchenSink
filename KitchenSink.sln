@@ -2,7 +2,7 @@
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitchenSink", "KitchenSink\KitchenSink.csproj", "{E993D487-E0D8-44EF-87D8-D335ECAA6CFA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitchenSink.Lib", "KitchenSink.Lib\KitchenSink.Lib.csproj", "{E993D487-E0D8-44EF-87D8-D335ECAA6CFA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitchenSink.Tests", "KitchenSink.Tests\KitchenSink.Tests.csproj", "{833BBA2C-613E-4730-84B9-0D44DBA3AF55}"
 EndProject
