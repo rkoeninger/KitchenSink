@@ -63,10 +63,10 @@ namespace KitchenSink.Tests
                 Friends = friends ?? new List<Person>();
             }
 
-            public string FirstName { get; private set; }
-            public string LastName { get; private set; }
+            public string FirstName { get; }
+            public string LastName { get; }
             public Address Address { get; }
-            public List<Person> Friends { get; private set; }
+            public List<Person> Friends { get; }
         }
 
         public class Address
@@ -77,7 +77,7 @@ namespace KitchenSink.Tests
                 City = city;
             }
 
-            public string Street { get; private set; }
+            public string Street { get; }
             public string City { get; }
         }
     }

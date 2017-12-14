@@ -44,27 +44,18 @@ namespace KitchenSink
             return ((MethodCallExpression) expr.Body).Method.GetGenericMethodDefinition();
         }
 
-        public static A Null<A>() where A : class
-        {
-            return null;
-        }
+        public static A Null<A>() where A : class => null;
 
-        public static bool That<A>(Expression<Func<A>> expr)
-        {
-            return BoolThunk(MakeRobust(expr.Body)).Compile().Invoke();
-        }
+        public static bool That<A>(Expression<Func<A>> expr) => BoolThunk(MakeRobust(expr.Body)).Compile().Invoke();
 
         private static Expression Skip(Expression expr)
         {
-            var memberExpr = expr as MemberExpression;
-            var methodExpr = expr as MethodCallExpression;
-
-            if (memberExpr != null)
+            if (expr is MemberExpression memberExpr)
             {
                 return memberExpr.Expression;
             }
 
-            if (methodExpr != null)
+            if (expr is MethodCallExpression methodExpr)
             {
                 if (methodExpr.Object != null)
                 {
@@ -82,20 +73,16 @@ namespace KitchenSink
 
         private static Expression MakeRobust(Expression expr)
         {
-            if (expr is MemberExpression)
+            if (expr is MemberExpression mexpr1)
             {
-                var mexpr = (MemberExpression) expr;
-
-                if (mexpr.Expression != null) // local/static member with no subexpression
+                if (mexpr1.Expression != null) // local/static member with no subexpression
                 {
-                    return AndAlso(MakeRobust(mexpr.Expression), NotNullOrFalse(expr));
+                    return AndAlso(MakeRobust(mexpr1.Expression), NotNullOrFalse(mexpr1));
                 }
             }
 
-            if (expr is MethodCallExpression)
+            if (expr is MethodCallExpression mexpr)
             {
-                var mexpr = (MethodCallExpression)expr;
-
                 if (mexpr.Method.GetGenericMethodDefinition() == SkipVerifyMethodInfo)
                 {
                     return MakeRobust(Skip(mexpr.Arguments.First()));
@@ -108,31 +95,23 @@ namespace KitchenSink
 
                 if (mexpr.Object != null) // instance method
                 {
-                    return AndAlso(MakeRobust(mexpr.Object), NotNullOrFalse(expr));
+                    return AndAlso(MakeRobust(mexpr.Object), NotNullOrFalse(mexpr));
                 }
 
-                return AndAlso(mexpr.Arguments.Select(MakeRobust), NotNullOrFalse(expr)); // static or extension method
+                return AndAlso(mexpr.Arguments.Select(MakeRobust), NotNullOrFalse(mexpr)); // static or extension method
             }
-            
-            if (expr is BinaryExpression)
-            {
-                var bexpr = (BinaryExpression) expr;
 
+            if (expr is BinaryExpression bexpr)
+            {
                 return AndAlso(MakeRobust(bexpr.Left), MakeRobust(bexpr.Right), expr);
             }
 
             return NotNullOrFalse(expr);
         }
 
-        private static Expression AndAlso(IEnumerable<Expression> exprs0, params Expression[] exprs1)
-        {
-            return AndAlso(exprs0.Concat(exprs1));
-        }
+        private static Expression AndAlso(IEnumerable<Expression> exprs0, params Expression[] exprs1) => AndAlso(exprs0.Concat(exprs1));
 
-        private static Expression AndAlso(IEnumerable<Expression> exprs)
-        {
-            return AndAlso(exprs.ToArray());
-        }
+        private static Expression AndAlso(IEnumerable<Expression> exprs) => AndAlso(exprs.ToArray());
 
         private static Expression AndAlso(params Expression[] exprs)
         {
@@ -144,28 +123,17 @@ namespace KitchenSink
             }
         }
 
-        private static Expression<Func<bool>> BoolThunk(Expression expr)
-        {
-            return Expression.Lambda<Func<bool>>(expr);
-        }
+        private static Expression<Func<bool>> BoolThunk(Expression expr) => Expression.Lambda<Func<bool>>(expr);
 
-        private static Expression NotNullOrFalse(Expression expr)
-        {
-            if (expr.Type == typeof(bool))
-            {
-                return Expression.IsTrue(expr);
-            }
-
-            return Expression.NotEqual(Expression.Constant(null), expr);
-        }
+        private static Expression NotNullOrFalse(Expression expr) =>
+            expr.Type == typeof(bool)
+                ? (Expression) Expression.IsTrue(expr)
+                : Expression.NotEqual(Expression.Constant(null), expr);
     }
 
     public static class Validation
     {
-        public static Validation<A> Of<A>(A value)
-        {
-            return new Validation<A>(value);
-        }
+        public static Validation<A> Of<A>(A value) => new Validation<A>(value);
     }
 
     public struct Validation<A>
@@ -195,10 +163,7 @@ namespace KitchenSink
         public IEnumerable<Exception> Errors => ErrorList.AsEnumerable();
         public bool HasErrors => ErrorList.Length > 0;
 
-        public Validation<A> Cut()
-        {
-            return new Validation<A>(Value, Errors, HasErrors);
-        }
+        public Validation<A> Cut() => new Validation<A>(Value, Errors, HasErrors);
 
         public Validation<A> Try(Action<A> f)
         {
@@ -218,34 +183,22 @@ namespace KitchenSink
 
         public Validation<A> Is(bool cond, string message = null)
         {
-            if (Done)
-                return this;
-
-            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Concat(new ApplicationException(message ?? "")));
+            return Done ? this : new Validation<A>(Value, cond ? ErrorList : ErrorList.Concat(new ApplicationException(message ?? "")));
         }
 
         public Validation<A> Is(Func<A, bool> f, string message = null)
         {
-            if (Done)
-                return this;
-
-            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Concat(new ApplicationException(message ?? "")));
+            return Done ? this : new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Concat(new ApplicationException(message ?? "")));
         }
 
         public Validation<A> Is(bool cond, Exception exc)
         {
-            if (Done)
-                return this;
-
-            return new Validation<A>(Value, cond ? ErrorList : ErrorList.Concat(exc));
+            return Done ? this : new Validation<A>(Value, cond ? ErrorList : ErrorList.Concat(exc));
         }
 
         public Validation<A> Is(Func<A, bool> f, Exception exc)
         {
-            if (Done)
-                return this;
-
-            return new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Concat(exc));
+            return Done ? this : new Validation<A>(Value, f(Value) ? ErrorList : ErrorList.Concat(exc));
         }
 
         public Validation<A> Is(Action<A> f)
@@ -264,9 +217,6 @@ namespace KitchenSink
             }
         }
 
-        public Maybe<A> ToMaybe()
-        {
-            return HasErrors ? None<A>() : MaybeOf(Value);
-        }
+        public Maybe<A> ToMaybe() => HasErrors ? None<A>() : MaybeOf(Value);
     }
 }

@@ -41,7 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CollectionOperators.cs" />
+    <Compile Include="Operators.Collections.cs" />
     <Compile Include="Collections\ConsList.cs" />
     <Compile Include="Collections\DefaultingDictionary.cs" />
     <Compile Include="Collections\DictionaryGrouping.cs" />
@@ -62,7 +62,10 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\FuncExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
-    <Compile Include="Operators.cs" />
+    <Compile Include="Operators.Comparison.cs" />
+    <Compile Include="Operators.Control.cs" />
+    <Compile Include="Operators.Basic.cs" />
+    <Compile Include="Operators.Functions.cs" />
     <Compile Include="Scope.cs" />
     <Compile Include="Testing\All.cs" />
     <Compile Include="Testing\Check.cs" />

@@ -14,9 +14,6 @@ namespace KitchenSink
         /// </summary>
         public static readonly Void It = default;
 
-        private Void()
-        {
-            throw new InvalidOperationException("Void cannot be created");
-        }
+        private Void() => throw new InvalidOperationException("Void cannot be created");
     }
 }
