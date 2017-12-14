@@ -71,12 +71,12 @@ namespace KitchenSink.Purity
             return io.Eval();
         }
 
-        private static IO<B> Then<A, B>(IO<A> a, IO<B> b)
+        public static IO<B> Then<A, B>(IO<A> a, IO<B> b)
         {
             return a.Then(b);
         }
 
-        private static IO<A> Also<A, B>(IO<A> a, IO<B> b)
+        public static IO<A> Also<A, B>(IO<A> a, IO<B> b)
         {
             return a.Also(b);
         }
@@ -89,7 +89,7 @@ namespace KitchenSink.Purity
             Cont = cont;
         }
 
-        internal Func<A> Cont { get; set; }
+        internal Func<A> Cont { get; }
 
         public A Eval()
         {

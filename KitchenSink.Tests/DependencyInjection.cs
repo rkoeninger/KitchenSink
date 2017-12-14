@@ -7,13 +7,13 @@ namespace KitchenSink.Tests
     [TestFixture]
     public class DependencyInjection
     {
-        public interface InterfaceX { }
-        public interface InterfaceY { }
+        public interface IInterfaceX { }
+        public interface IInterfaceY { }
 
         public class ParentClass
         {
-            public class ImplementationX : InterfaceX { }
-            public class ImplementationY : InterfaceY { }
+            public class ImplementationX : IInterfaceX { }
+            public class ImplementationY : IInterfaceY { }
         }
 
         public interface ISomeInterface { }
@@ -25,7 +25,6 @@ namespace KitchenSink.Tests
         public interface IAnotherInterface { }
         public class DependentImplementation : IAnotherInterface
         {
-            // ReSharper disable once UnusedParameter.Local
             public DependentImplementation(IWhateverInterface whatever) { }
         }
 
@@ -33,7 +32,6 @@ namespace KitchenSink.Tests
         public class BlahImplementation : IBlahInterface
         {
             public BlahImplementation() { }
-            // ReSharper disable once UnusedParameter.Local
             public BlahImplementation(ISomeInterface some) { }
         }
 
@@ -41,16 +39,16 @@ namespace KitchenSink.Tests
         public void ReferringToNestedClass()
         {
             var needs = new Needs().Refer(typeof(ParentClass));
-            Assert.IsInstanceOf<ParentClass.ImplementationX>(needs.Get<InterfaceX>());
-            Assert.IsInstanceOf<ParentClass.ImplementationY>(needs.Get<InterfaceY>());
+            Assert.IsInstanceOf<ParentClass.ImplementationX>(needs.Get<IInterfaceX>());
+            Assert.IsInstanceOf<ParentClass.ImplementationY>(needs.Get<IInterfaceY>());
         }
 
         [Test]
         public void ReferringToAssembly()
         {
             var needs = new Needs().Refer(typeof(DependencyInjection).Assembly);
-            Assert.IsInstanceOf<ParentClass.ImplementationX>(needs.Get<InterfaceX>());
-            Assert.IsInstanceOf<ParentClass.ImplementationY>(needs.Get<InterfaceY>());
+            Assert.IsInstanceOf<ParentClass.ImplementationX>(needs.Get<IInterfaceX>());
+            Assert.IsInstanceOf<ParentClass.ImplementationY>(needs.Get<IInterfaceY>());
         }
 
         [Test]

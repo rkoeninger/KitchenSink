@@ -140,9 +140,9 @@ namespace KitchenSink
         {
             var e = x.GetEnumerator();
 
-            if (e is IDisposable disposable)
+            if (e is IDisposable)
             {
-                using (disposable)
+                using ((IDisposable) e)
                 {
                     return e.MoveNext();
                 }

@@ -87,7 +87,7 @@ namespace KitchenSink.Tests
         public void ClausesCanCastSubtypes()
         {
             Assert.AreEqual(1,
-                Case.Of<InterfaceX>(new ImplA { ValA = 1 })
+                Case.Of<IInterfaceX>(new ImplA { ValA = 1 })
                     .When<ImplA>()
                     .Then(x => x.ValA)
                     .When<ImplB>(x => x.ValB != null)
@@ -95,16 +95,16 @@ namespace KitchenSink.Tests
                     .Else(0));
         }
 
-        public interface InterfaceX
+        public interface IInterfaceX
         {
         }
 
-        public class ImplA : InterfaceX
+        public class ImplA : IInterfaceX
         {
             public int ValA { get; set; }
         }
 
-        public class ImplB : InterfaceX
+        public class ImplB : IInterfaceX
         {
             public string ValB { get; set; }
         }

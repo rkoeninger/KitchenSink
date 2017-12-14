@@ -51,20 +51,19 @@ namespace KitchenSink.Tests
         {
             var dict2 = ToDictionary(new
             {
-                // ReSharper disable once RedundantAnonymousTypePropertyName
-                Red = ConsoleColor.Red,
                 ConsoleColor.Green,
+                Crimson = ConsoleColor.Red,
                 blue = "blue",
                 Color_Yellow = TupleOf(255, 255, 0),
                 Func1 = new Func<int, int>(x => x + 5)
             });
             Assert.AreEqual(5, dict2.Count);
-            Assert.IsTrue(dict2.ContainsKey("Red"));
+            Assert.IsTrue(dict2.ContainsKey("Crimson"));
             Assert.IsTrue(dict2.ContainsKey("Green"));
             Assert.IsTrue(dict2.ContainsKey("blue"));
             Assert.IsTrue(dict2.ContainsKey("Color_Yellow"));
             Assert.IsTrue(dict2.ContainsKey("Func1"));
-            Assert.AreEqual(ConsoleColor.Red, dict2["Red"]);
+            Assert.AreEqual(ConsoleColor.Red, dict2["Crimson"]);
             Assert.AreEqual(ConsoleColor.Green, dict2["Green"]);
             Assert.AreEqual("blue", dict2["blue"]);
             Assert.AreEqual(TupleOf(255, 255, 0), dict2["Color_Yellow"]);
@@ -100,9 +99,9 @@ namespace KitchenSink.Tests
 
         public class Color
         {
-            public int R { get; set; }
-            public int G { get; set; }
-            public int B { get; set; }
+            public int R { get; }
+            public int G { get; }
+            public int B { get; }
             public Color(int r, int g, int b) { R = r; G = g; B = b; }
         }
 
@@ -152,20 +151,22 @@ namespace KitchenSink.Tests
             [Test]
             public void SimpleAddContainsGet()
             {
-                var tree = new RadixDictionary<int>();
-                tree.Add("zero", 0);
-                tree.Add("one", 1);
-                tree.Add("two", 2);
-                tree.Add("three", 3);
-                tree.Add("four", 4);
-                tree.Add("five", 5);
-                tree.Add("six", 6);
-                tree.Add("seven", 7);
-                tree.Add("eight", 8);
-                tree.Add("nine", 9);
-                tree.Add("ten", 10);
-                tree.Add("eleven", 11);
-                tree.Add("twelve", 12);
+                var tree = new RadixDictionary<int>
+                {
+                    {"zero", 0},
+                    {"one", 1},
+                    {"two", 2},
+                    {"three", 3},
+                    {"four", 4},
+                    {"five", 5},
+                    {"six", 6},
+                    {"seven", 7},
+                    {"eight", 8},
+                    {"nine", 9},
+                    {"ten", 10},
+                    {"eleven", 11},
+                    {"twelve", 12}
+                };
                 Assert.IsTrue(tree.ContainsKey("zero"));
                 Assert.IsTrue(tree.ContainsKey("one"));
                 Assert.IsTrue(tree.ContainsKey("two"));
@@ -208,11 +209,13 @@ namespace KitchenSink.Tests
             [Test]
             public void Enumeration()
             {
-                var tree = new RadixDictionary<int>();
-                tree.Add("zero", 0);
-                tree.Add("one", 1);
-                tree.Add("two", 2);
-                tree.Add("three", 3);
+                var tree = new RadixDictionary<int>
+                {
+                    { "zero", 0 },
+                    { "one", 1 },
+                    { "two", 2 },
+                    { "three", 3 }
+                };
                 var list = tree.ToList();
                 Assert.AreEqual(4, list.Count);
                 Assert.Contains(new KeyValuePair<string, int>("zero", 0), list);
