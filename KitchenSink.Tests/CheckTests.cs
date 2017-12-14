@@ -25,11 +25,11 @@ namespace KitchenSink.Tests
                 x => Math.Abs(x) >= 0);
 
             Check.EqualsAndHashCode(SeqOf(
-                Date.On(2001, 4, 13),
-                Date.On(1947, 1, 20),
-                Date.On(2030, 11, 9),
-                Date.On(1994, 9, 16),
-                Date.On(2023, 8, 27)));
+                ExactDay.On(2001, 4, 13),
+                ExactDay.On(1947, 1, 20),
+                ExactDay.On(2030, 11, 9),
+                ExactDay.On(1994, 9, 16),
+                ExactDay.On(2023, 8, 27)));
 
             Check.EqualsAndHashCode(Forever(() => Rand.Ints().Take(Rand.Int(64))).Take(16));
         }

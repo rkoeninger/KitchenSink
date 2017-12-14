@@ -102,7 +102,7 @@ namespace KitchenSink.Timekeeping
                 DateTime.ParseExact(endString, format, CultureInfo.InvariantCulture));
         }
 
-        public static readonly string DateTimeSeparator = " to ";
+        public const string DateTimeSeparator = " to ";
 
         public DateSpan(DateTime begin, DateTime end) : this()
         {
@@ -122,8 +122,8 @@ namespace KitchenSink.Timekeeping
             End = begin + length;
         }
 
-        public DateSpan MinValue => new DateSpan(DateTime.MinValue, DateTime.MinValue);
-        public DateSpan MaxValue => new DateSpan(DateTime.MinValue, DateTime.MaxValue);
+        public static DateSpan MinValue => new DateSpan(DateTime.MinValue, DateTime.MinValue);
+        public static DateSpan MaxValue => new DateSpan(DateTime.MinValue, DateTime.MaxValue);
 
         public DateTime Begin { get; }
         public DateTime End { get; }
@@ -135,8 +135,8 @@ namespace KitchenSink.Timekeeping
 
         public bool Overlaps(DateSpan that) =>
             Contains(that)
-                || (that.Begin < End && that.End > Begin)
-                || (Begin < that.End && End > that.Begin);
+                || that.Begin < End && that.End > Begin
+                || Begin < that.End && End > that.Begin;
 
         public override int GetHashCode() => Begin.GetHashCode() ^ End.GetHashCode();
 
