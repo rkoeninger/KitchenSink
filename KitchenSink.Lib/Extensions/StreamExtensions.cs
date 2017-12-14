@@ -37,15 +37,9 @@ namespace KitchenSink.Extensions
             return new EnumerableStream(seq.Intersperse(separator).SelectMany(encoding.GetBytes));
         }
 
-        public static Stream ToStream(this IEnumerable<byte> bytes)
-        {
-            return new EnumerableStream(bytes);
-        }
+        public static Stream ToStream(this IEnumerable<byte> bytes) => new EnumerableStream(bytes);
 
-        public static Stream ToStream<A>(this IEnumerable<A> seq, Func<A, IEnumerable<byte>> f)
-        {
-            return new EnumerableStream(seq.SelectMany(f));
-        }
+        public static Stream ToStream<A>(this IEnumerable<A> seq, Func<A, IEnumerable<byte>> f) => new EnumerableStream(seq.SelectMany(f));
 
         private class EnumerableStream : Stream
         {
@@ -73,36 +67,21 @@ namespace KitchenSink.Extensions
             public override bool CanSeek => false;
             public override bool CanWrite => false;
 
-            public override long Length
-            {
-                get { throw new NotSupportedException(); }
-            }
+            public override long Length => throw new NotSupportedException();
 
-            public override void SetLength(long value)
-            {
-                throw new NotSupportedException();
-            }
+            public override void SetLength(long value) => throw new NotSupportedException();
 
             public override long Position
             {
-                get { throw new NotSupportedException(); }
-                set { throw new NotSupportedException(); }
+                get => throw new NotSupportedException();
+                set => throw new NotSupportedException();
             }
 
-            public override void Flush()
-            {
-                throw new NotSupportedException();
-            }
+            public override void Flush() => throw new NotSupportedException();
 
-            public override long Seek(long offset, SeekOrigin origin)
-            {
-                throw new NotSupportedException();
-            }
+            public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
-            public override void Write(byte[] buffer, int offset, int count)
-            {
-                throw new NotSupportedException();
-            }
+            public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
         }
     }
 }

@@ -7,9 +7,6 @@ namespace KitchenSink.Extensions
     public static class DictionaryExtensions
     {
         public static ILookup<TKey, TValue> AsLookup<TKey, TValue>(
-            this IDictionary<TKey, IEnumerable<TValue>> dict)
-        {
-            return new DictionaryLookup<TKey, TValue>(dict);
-        }
+            this IDictionary<TKey, IEnumerable<TValue>> dict) => new DictionaryLookup<TKey, TValue>(dict);
     }
 }

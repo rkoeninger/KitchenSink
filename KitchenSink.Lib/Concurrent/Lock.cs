@@ -39,16 +39,13 @@ namespace KitchenSink.Concurrent
 
         public A Value
         {
-            get { return @lock.Do(() => val); }
-            set { @lock.Do(() => { val = value; }); }
+            get => @lock.Do(() => val);
+            set => @lock.Do(() => { val = value; });
         }
 
         public A Do(Func<A, A> f) => @lock.Do(() => f(val));
 
-        public void Do(Action<A> f)
-        {
-            @lock.Do(() => f(val));
-        }
+        public void Do(Action<A> f) => @lock.Do(() => f(val));
 
         public A Map(Func<A, A> f) => @lock.Do(() => val = f(val));
     }

@@ -84,6 +84,7 @@
     <Compile Include="Maybe.cs" />
     <Compile Include="Timekeeping\Date.cs" />
     <Compile Include="HSet.cs" />
+    <Compile Include="Timekeeping\ExactDay.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="Validation.cs" />
     <Compile Include="Void.cs" />

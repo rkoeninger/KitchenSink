@@ -13,11 +13,8 @@ namespace KitchenSink.Timekeeping
         /// Returns <see cref="DateSpan"/> of entire day containing
         /// given <see cref="DateTime"/> starting at 00:00 that morning.
         /// </summary>
-        public static DateSpan EntireDay(DateTime dt)
-        {
-            return EntireDay(dt.Year, dt.Month, dt.Day);
-        }
-        
+        public static DateSpan EntireDay(DateTime dt) => EntireDay(dt.Year, dt.Month, dt.Day);
+
         /// <summary>
         /// Returns <see cref="DateSpan"/> of entire day containing
         /// given <see cref="DateTime"/> starting at 00:00 that morning.
@@ -43,20 +40,14 @@ namespace KitchenSink.Timekeeping
         /// Returns <see cref="DateSpan"/> of entire week containing
         /// given <see cref="DateTime"/> starting on Sunday.
         /// </summary>
-        public static DateSpan EntireWeek(int year, int month, int day)
-        {
-            return EntireWeek(new DateTime(year, month, day));
-        }
-        
+        public static DateSpan EntireWeek(int year, int month, int day) => EntireWeek(new DateTime(year, month, day));
+
         /// <summary>
         /// Returns <see cref="DateSpan"/> of entire month containing
         /// given <see cref="DateTime"/> starting on the 1st.
         /// </summary>
-        public static DateSpan EntireMonth(DateTime dt)
-        {
-            return EntireMonth(dt.Year, dt.Month);
-        }
-        
+        public static DateSpan EntireMonth(DateTime dt) => EntireMonth(dt.Year, dt.Month);
+
         /// <summary>
         /// Returns <see cref="DateSpan"/> of entire month containing
         /// given <see cref="DateTime"/> starting on the 1st.
@@ -71,11 +62,8 @@ namespace KitchenSink.Timekeeping
         /// Returns <see cref="DateSpan"/> of entire year containing
         /// given <see cref="DateTime"/> starting on the 1st of January.
         /// </summary>
-        public static DateSpan EntireYear(DateTime dt)
-        {
-            return EntireYear(dt.Year);
-        }
-        
+        public static DateSpan EntireYear(DateTime dt) => EntireYear(dt.Year);
+
         /// <summary>
         /// Returns <see cref="DateSpan"/> of entire year containing
         /// given <see cref="DateTime"/> starting on the 1st of January.

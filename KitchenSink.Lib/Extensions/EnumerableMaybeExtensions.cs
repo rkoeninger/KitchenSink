@@ -10,33 +10,20 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Attempts lookup at index, returning None if out of bounds.
         /// </summary>
-        public static Maybe<A> GetMaybe<A>(this IReadOnlyList<A> list, int index)
-        {
-            return 0 <= Cmp(index) < list.Count
-                ? Some(list[index])
-                : None<A>();
-        }
+        public static Maybe<A> GetMaybe<A>(this IReadOnlyList<A> list, int index) =>
+            0 <= Cmp(index) < list.Count ? Some(list[index]) : None<A>();
 
         /// <summary>
         /// Attempts lookup at index, returning None if out of bounds.
         /// </summary>
-        public static Maybe<A> GetMaybe<A>(this IList<A> list, int index)
-        {
-            return 0 <= Cmp(index) < list.Count
-                ? Some(list[index])
-                : None<A>();
-        }
+        public static Maybe<A> GetMaybe<A>(this IList<A> list, int index) =>
+            0 <= Cmp(index) < list.Count ? Some(list[index]) : None<A>();
 
         /// <summary>
         /// Attempts lookup by key, returning None if not found.
         /// </summary>
-        public static Maybe<B> GetMaybe<A, B>(this IDictionary<A, B> dict, A key)
-        {
-            B value;
-            return dict.TryGetValue(key, out value)
-                ? Some(value)
-                : None<B>();
-        }
+        public static Maybe<B> GetMaybe<A, B>(this IDictionary<A, B> dict, A key) =>
+            dict.TryGetValue(key, out var value) ? Some(value) : None<B>();
 
         /// <summary>
         /// Attempts to get first element in sequence, returning None if empty.
@@ -115,17 +102,13 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Filters elements that have Some value and return those values.
         /// </summary>
-        public static IEnumerable<A> WhereSome<A>(this IEnumerable<Maybe<A>> seq)
-        {
-            return seq.Where(x => x.HasValue).Select(x => x.Value);
-        }
+        public static IEnumerable<A> WhereSome<A>(this IEnumerable<Maybe<A>> seq) =>
+            seq.Where(x => x.HasValue).Select(x => x.Value);
 
         /// <summary>
         /// Applies selector to each element and returns results that have Some value.
         /// </summary>
-        public static IEnumerable<B> SelectMany<A, B>(this IEnumerable<A> seq, Func<A, Maybe<B>> selector)
-        {
-            return seq.Select(selector).WhereSome();
-        }
+        public static IEnumerable<B> SelectMany<A, B>(this IEnumerable<A> seq, Func<A, Maybe<B>> selector) =>
+            seq.Select(selector).WhereSome();
     }
 }

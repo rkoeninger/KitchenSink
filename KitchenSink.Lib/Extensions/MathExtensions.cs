@@ -7,36 +7,18 @@ namespace KitchenSink.Extensions
 {
     public static class MathExtensions
     {
-        public static bool IsReal(this double x)
-        {
-            return ! (double.IsInfinity(x) || double.IsNaN(x));
-        }
+        public static bool IsReal(this double x) => ! (double.IsInfinity(x) || double.IsNaN(x));
 
-        public static bool IsNotReal(this double x)
-        {
-            return double.IsInfinity(x) || double.IsNaN(x);
-        }
+        public static bool IsNotReal(this double x) => double.IsInfinity(x) || double.IsNaN(x);
 
-        public static bool IsEven(this int x)
-        {
-            return (x & 1) == 0;
-        }
+        public static bool IsEven(this int x) => (x & 1) == 0;
 
-        public static bool IsOdd(this int x)
-        {
-            return (x & 1) != 0;
-        }
+        public static bool IsOdd(this int x) => (x & 1) != 0;
 
-        public static bool IsDivisibleBy(this int x, int y)
-        {
-            return x % y == 0;
-        }
+        public static bool IsDivisibleBy(this int x, int y) => x % y == 0;
 
-        public static bool IsNotDivisibleBy(this int x, int y)
-        {
-            return x % y != 0;
-        }
-        
+        public static bool IsNotDivisibleBy(this int x, int y) => x % y != 0;
+
         /// <summary>Inclusive on start value, exclusive on end value.</summary>
         public static IEnumerable<int> To(this int start, int end)
         {

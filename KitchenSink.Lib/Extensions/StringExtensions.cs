@@ -17,100 +17,66 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Trims string and replaces sequences of whitespace with a single space.
         /// </summary>
-        public static string CollapseSpace(this string s)
-        {
-            return WhiteSpaceRegex.Replace(s.Trim(), " ");
-        }
+        public static string CollapseSpace(this string s) => WhiteSpaceRegex.Replace(s.Trim(), " ");
 
         /// <summary>
         /// Returns string with words captialized.
         /// </summary>
-        public static string ToTitleCase(this string x)
-        {
-            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x);
-        }
+        public static string ToTitleCase(this string x) => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x);
 
         /// <summary>
         /// Formats decimal value as currency.
         /// </summary>
-        public static string ToCurrencyString(this decimal x)
-        {
-            return $"{x:c}";
-        }
-        
+        public static string ToCurrencyString(this decimal x) => $"{x:c}";
+
         /// <summary>
         /// Attempts parse of string to int.
         /// </summary>
-        public static Maybe<int> ToInt(this string s)
-        {
-            int i;
-            return int.TryParse(s, out i) ? Some(i) : None<int>();
-        }
-        
+        public static Maybe<int> ToInt(this string s) => int.TryParse(s, out var i) ? Some(i) : None<int>();
+
         /// <summary>
         /// Attempts parse of string to double.
         /// </summary>
-        public static Maybe<double> ToDouble(this string s)
-        {
-            double d;
-            return double.TryParse(s, out d) ? Some(d) : None<double>();
-        }
-        
+        public static Maybe<double> ToDouble(this string s) => double.TryParse(s, out var d) ? Some(d) : None<double>();
+
         /// <summary>
         /// Attempts parse of string to enum.
         /// </summary>
-        public static Maybe<A> ToEnum<A>(this string s) where A : struct
-        {
-            A x;
-            return Enum.TryParse(s, out x) ? Some(x) : None<A>();
-        }
+        public static Maybe<A> ToEnum<A>(this string s) where A : struct => Enum.TryParse(s, out A x) ? Some(x) : None<A>();
 
         /// <summary>
         /// Converts items in sequence to string and concats them
         /// separated by <c>sep</c>, which defaults to empty string.
         /// </summary>
-        public static string MakeString<A>(this IEnumerable<A> seq, string sep = "")
-        {
-            return string.Join(sep, seq);
-        }
+        public static string MakeString<A>(this IEnumerable<A> seq, string sep = "") => string.Join(sep, seq);
 
         /// <summary>
         /// Converts sequence to character-separated string, using quotes
         /// to escape values containing the separator (comma by default).
         /// </summary>
-        public static string ToCsv(this IEnumerable<object> seq, string sep = ",")
-        {
-            return seq
-                .Select(Str)
-                .Select(s => s.Contains(sep)
-                    ? $"\"{s.Replace("\"", "\"\"")}\""
-                    : s)
+        public static string ToCsv(this IEnumerable<object> seq, string sep = ",") =>
+            seq
+                .Select(x =>
+                {
+                    var s = Str(x);
+                    return s.Contains(sep) ? $"\"{s.Replace("\"", "\"\"")}\"" : s;
+                })
                 .MakeString(sep);
-        }
 
         /// <summary>
         /// Converts string from Windows-style CRLF to Unix-style LF.
         /// </summary>
-        public static string ToLF(this string s)
-        {
-            return s.Replace("\r\n", "\n");
-        }
+        public static string ToLF(this string s) => s.Replace("\r\n", "\n");
 
         /// <summary>
         /// Converts string from Unix-style LF to Windows-style CRLF.
         /// </summary>
-        public static string ToCRLF(this string s)
-        {
-            return s.Replace("\r\n", "\n").Replace("\n", "\r\n");
-        }
+        public static string ToCRLF(this string s) => s.Replace("\r\n", "\n").Replace("\n", "\r\n");
 
         /// <summary>
         /// Returns true if two strings are equal ignoring case.
         /// </summary>
-        public static bool IsSimilar(this string x, string y)
-        {
-            return string.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
-        }
+        public static bool IsSimilar(this string x, string y) => string.Equals(x, y, StringComparison.InvariantCultureIgnoreCase);
 
         /// <summary>
         /// Splits a string according to given Regex.

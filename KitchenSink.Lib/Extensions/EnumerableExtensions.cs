@@ -11,34 +11,22 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Returns true if item is in sequence.
         /// </summary>
-        public static bool IsIn<A>(this A val, params A[] vals)
-        {
-            return IsIn(val, (IEnumerable<A>) vals);
-        }
+        public static bool IsIn<A>(this A val, params A[] vals) => IsIn(val, (IEnumerable<A>) vals);
 
         /// <summary>
         /// Returns true if item is in sequence.
         /// </summary>
-        public static bool IsIn<A>(this A val, IEnumerable<A> seq)
-        {
-            return seq.Any(Apply<A, A, bool>(Eq, val));
-        }
+        public static bool IsIn<A>(this A val, IEnumerable<A> seq) => seq.Any(Apply<A, A, bool>(Eq, val));
 
         /// <summary>
         /// Returns true if item is not in sequence.
         /// </summary>
-        public static bool IsNotIn<A>(this A val, params A[] vals)
-        {
-            return !IsIn(val, (IEnumerable<A>) vals);
-        }
+        public static bool IsNotIn<A>(this A val, params A[] vals) => !IsIn(val, (IEnumerable<A>) vals);
 
         /// <summary>
         /// Returns true if item is not in sequence.
         /// </summary>
-        public static bool IsNotIn<A>(this A val, IEnumerable<A> seq)
-        {
-            return !IsIn(val, seq);
-        }
+        public static bool IsNotIn<A>(this A val, IEnumerable<A> seq) => !IsIn(val, seq);
 
         /// <summary>
         /// Adapter for specialized collections that do not implement <see cref="IEnumerable{A}"/>.
@@ -80,50 +68,38 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Sorts elements by their natural order.
         /// </summary>
-        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq) where A : IComparable
-        {
-            return seq.OrderBy(x => x);
-        }
+        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq) where A : IComparable =>
+            seq.OrderBy(x => x);
 
         /// <summary>
         /// Sorts elements descending by their natural order.
         /// </summary>
-        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq) where A : IComparable
-        {
-            return seq.OrderByDescending(x => x);
-        }
+        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq) where A : IComparable =>
+            seq.OrderByDescending(x => x);
 
         /// <summary>
         /// Sorts elements according to given comparer.
         /// </summary>
-        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, IComparer<A> comparer)
-        {
-            return seq.OrderBy(x => x, comparer);
-        }
+        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, IComparer<A> comparer) =>
+            seq.OrderBy(x => x, comparer);
 
         /// <summary>
         /// Sorts elements descending according to given comparer.
         /// </summary>
-        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq, IComparer<A> comparer)
-        {
-            return seq.OrderByDescending(x => x, comparer);
-        }
+        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq, IComparer<A> comparer) =>
+            seq.OrderByDescending(x => x, comparer);
 
         /// <summary>
         /// Sorts elements according to given comparer.
         /// </summary>
-        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, Func<A, A, Comparison> f)
-        {
-            return seq.OrderBy(x => x, new ComparisonComparer<A>(f));
-        }
+        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, Func<A, A, Comparison> f) =>
+            seq.OrderBy(x => x, new ComparisonComparer<A>(f));
 
         /// <summary>
         /// Sorts elements descending according to given comparer.
         /// </summary>
-        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq, Func<A, A, Comparison> f)
-        {
-            return seq.OrderByDescending(x => x, new ComparisonComparer<A>(f));
-        }
+        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq, Func<A, A, Comparison> f) =>
+            seq.OrderByDescending(x => x, new ComparisonComparer<A>(f));
 
         private class ComparisonComparer<A> : IComparer<A>
         {
@@ -244,18 +220,12 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Creates a <see cref="HashSet{A}"/> from an <see cref="IEnumerable{A}"/>.
         /// </summary>
-        public static HashSet<A> ToSet<A>(this IEnumerable<A> seq)
-        {
-            return new HashSet<A>(seq);
-        }
+        public static HashSet<A> ToSet<A>(this IEnumerable<A> seq) => new HashSet<A>(seq);
 
         /// <summary>
         /// Forces entire sequence to be enumerated immediately.
         /// </summary>
-        public static IEnumerable<A> Force<A>(this IEnumerable<A> seq)
-        {
-            return seq.ToArray();
-        }
+        public static IEnumerable<A> Force<A>(this IEnumerable<A> seq) => seq.ToArray();
 
         /// <summary>
         /// Optimized version of Concat for Arrays.
@@ -283,10 +253,7 @@ namespace KitchenSink.Extensions
         /// Combines two sequences by pairing off their elements into tuples.
         /// Example: [1 2 3], [A B C] => [(1, A) (2, B) (3, C)]
         /// </summary>
-        public static IEnumerable<Tuple<A, B>> Zip<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys)
-        {
-            return xs.Zip(ys, TupleOf);
-        }
+        public static IEnumerable<Tuple<A, B>> Zip<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) => xs.Zip(ys, TupleOf);
 
         /// <summary>
         /// Returns a sequence of items paired with their index in the original sequence.
@@ -307,10 +274,8 @@ namespace KitchenSink.Extensions
         /// Returns sequence, excluding elements at given indicies.
         /// Example: [1 2 3 4 5 6 7 8], 3, 5 => [1 2 3 5 7 8]
         /// </summary>
-        public static IEnumerable<A> ExceptAt<A>(this IEnumerable<A> seq, params int[] indicies)
-        {
-            return seq.Where((_, i) => i.IsNotIn(indicies));
-        }
+        public static IEnumerable<A> ExceptAt<A>(this IEnumerable<A> seq, params int[] indicies) =>
+            seq.Where((_, i) => i.IsNotIn(indicies));
 
         /// <summary>
         /// Randomizes elements in sequence. This will enumerate the entire sequence.
