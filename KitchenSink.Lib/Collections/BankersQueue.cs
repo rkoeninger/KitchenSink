@@ -8,10 +8,8 @@ namespace KitchenSink.Collections
         private readonly IConsList<A> incoming;
         private readonly IConsList<A> outgoing;
 
-        public BankersQueue()
+        public BankersQueue() : this(ConsList.Empty<A>(), ConsList.Empty<A>())
         {
-            incoming = ConsList.Empty<A>();
-            outgoing = ConsList.Empty<A>();
         }
 
         private BankersQueue(IConsList<A> incoming, IConsList<A> outgoing)
