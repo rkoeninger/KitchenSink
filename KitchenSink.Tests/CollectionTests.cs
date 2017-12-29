@@ -4,6 +4,7 @@ using System.Linq;
 using KitchenSink.Collections;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
+using KitchenSink.Testing;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -222,6 +223,39 @@ namespace KitchenSink.Tests
                 Assert.Contains(new KeyValuePair<string, int>("one", 1), list);
                 Assert.Contains(new KeyValuePair<string, int>("two", 2), list);
                 Assert.Contains(new KeyValuePair<string, int>("three", 3), list);
+            }
+        }
+
+        [TestFixture]
+        public class BankersQueueTests
+        {
+            [Test]
+            public void EnqueueAndDequeue()
+            {
+                var q = new BankersQueue<int>();
+                Maybe<int> m;
+                q = q.Enqueue(1);
+                q = q.Enqueue(2);
+                q = q.Enqueue(3);
+                Expect.IsSome(1, q.Current);
+                (q, m) = q.Dequeue();
+                Expect.IsSome(1, m);
+                Expect.IsSome(2, q.Current);
+                (q, m) = q.Dequeue();
+                Expect.IsSome(2, m);
+                Expect.IsSome(3, q.Current);
+                (q, m) = q.Dequeue();
+                Expect.IsSome(3, m);
+                Expect.IsNone(q.Current);
+                q = q.Enqueue(4);
+                q = q.Enqueue(5);
+                Expect.IsSome(4, q.Current);
+                (q, m) = q.Dequeue();
+                Expect.IsSome(4, m);
+                Expect.IsSome(5, q.Current);
+                (q, m) = q.Dequeue();
+                Expect.IsSome(5, m);
+                Expect.IsNone(q.Current);
             }
         }
     }
