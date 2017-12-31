@@ -3,12 +3,17 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink.Collections
 {
+    public static class BankersQueue
+    {
+        public static BankersQueue<A> Empty<A>() => new BankersQueue<A>();
+    }
+
     public class BankersQueue<A>
     {
         private readonly IConsList<A> incoming;
         private readonly IConsList<A> outgoing;
 
-        public BankersQueue() : this(ConsList.Empty<A>(), ConsList.Empty<A>())
+        internal BankersQueue() : this(ConsList.Empty<A>(), ConsList.Empty<A>())
         {
         }
 

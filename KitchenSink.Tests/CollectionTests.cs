@@ -232,7 +232,7 @@ namespace KitchenSink.Tests
             [Test]
             public void EnqueueAndDequeue()
             {
-                var q = new BankersQueue<int>();
+                var q = BankersQueue.Empty<int>();
                 Maybe<int> m;
                 q = q.Enqueue(1);
                 q = q.Enqueue(2);
@@ -256,6 +256,40 @@ namespace KitchenSink.Tests
                 (q, m) = q.Dequeue();
                 Expect.IsSome(5, m);
                 Expect.IsNone(q.Current);
+            }
+        }
+
+        [TestFixture]
+        public class FingerTreeTests
+        {
+            [Test]
+            public void EnqueueAndDequeue()
+            {
+                var q = FingerTree.Empty<int>();
+                Maybe<int> m;
+                q = q.EnqueuePrefix(1);
+                q = q.EnqueuePrefix(2);
+                q = q.EnqueuePrefix(3);
+                Expect.IsSome(3, q.CurrentPrefix);
+                Expect.IsSome(1, q.CurrentSuffix);
+                (q, m) = q.DequeueSuffix();
+                Expect.IsSome(1, m);
+                Expect.IsSome(2, q.CurrentSuffix);
+                (q, m) = q.DequeueSuffix();
+                Expect.IsSome(2, m);
+                Expect.IsSome(3, q.CurrentSuffix);
+                (q, m) = q.DequeueSuffix();
+                Expect.IsSome(3, m);
+                Expect.IsNone(q.CurrentSuffix);
+                q = q.EnqueuePrefix(4);
+                q = q.EnqueuePrefix(5);
+                Expect.IsSome(4, q.CurrentSuffix);
+                (q, m) = q.DequeueSuffix();
+                Expect.IsSome(4, m);
+                Expect.IsSome(5, q.CurrentSuffix);
+                (q, m) = q.DequeueSuffix();
+                Expect.IsSome(5, m);
+                Expect.IsNone(q.CurrentSuffix);
             }
         }
     }

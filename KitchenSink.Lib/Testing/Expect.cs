@@ -55,7 +55,7 @@ namespace KitchenSink.Testing
         {
             if (Some(expected) != actual)
             {
-                throw new Exception();
+                throw new ExpectationFailedException($"{actual} is not the expected {Some(expected)}");
             }
         }
 

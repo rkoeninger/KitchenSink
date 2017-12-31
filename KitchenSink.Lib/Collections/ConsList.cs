@@ -33,7 +33,7 @@ namespace KitchenSink.Collections
 
     public class ConsList<A> : IConsList<A>
     {
-        public ConsList(A head, IConsList<A> tail)
+        internal ConsList(A head, IConsList<A> tail)
         {
             Head = head;
             Tail = tail;
@@ -65,6 +65,10 @@ namespace KitchenSink.Collections
     public class EmptyList<A> : IConsList<A>
     {
         public static readonly IConsList<A> It = new EmptyList<A>();
+
+        internal EmptyList()
+        {
+        }
 
         public bool IsEmpty => true;
         public int Count => 0;
