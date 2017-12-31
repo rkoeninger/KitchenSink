@@ -28,9 +28,13 @@ Not everything in this library is meant to be taken completely seriously. Some f
 
 ### Collection Enhancements
 
+  * `BankersQueue<A>` - persistent queue made from two `ConsList`s
+  * `ConsList<A>` - an immutable, singly-linked list
   * `Dictionary<K1, K2, V>` - `Dictionary`s that use `Tuple` for aggregate keys
-  * `RadixDictionary<A>` - dictionary optimized for string keys
-  * `RoseTree<A>` - tree data structure that braches arbitrarily
+  * `FingerTree<A>` - a persistent dequeue implemented as 2,3-finger tree
+  * `PairingHeap<A>` - a self-balancing, persistent, ordered heap
+  * `RadixDictionary<A>` - mutable dictionary optimized for string keys
+  * `RoseTree<A>` - mutable tree data structure that braches arbitrarily
 
 ### Composable Control Structures
 
