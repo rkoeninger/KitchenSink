@@ -292,5 +292,42 @@ namespace KitchenSink.Tests
                 Expect.IsNone(q.CurrentSuffix);
             }
         }
+
+        [TestFixture]
+        public class BitmappedTrieTests
+        {
+            [Test]
+            public void SuffixAndEnumerate()
+            {
+                var v = BitmappedTrie.Empty<string>();
+                Assert.AreEqual(0, v.Count);
+                v = v.Suffix("abc");
+                Assert.AreEqual(1, v.Count);
+                Assert.AreEqual("abc", v[0]);
+                v = v.Suffix("def");
+                Assert.AreEqual(2, v.Count);
+                Assert.AreEqual("def", v[1]);
+                v = v
+                    .Suffix("qwe")
+                    .Suffix("wer")
+                    .Suffix("ert")
+                    .Suffix("rty")
+                    .Suffix("tyu")
+                    .Suffix("yui")
+                    .Suffix("iuo")
+                    .Suffix("iop")
+                    .Suffix("asd")
+                    .Suffix("sdf")
+                    .Suffix("dfg")
+                    .Suffix("fgh")
+                    .Suffix("ghj")
+                    .Suffix("hjk");
+                Assert.AreEqual(16, v.Count);
+                Assert.AreEqual("hjk", v[15]);
+                v = v.Suffix("zxc");
+                Assert.AreEqual(17, v.Count);
+                Assert.AreEqual("zxc", v[16]);
+            }
+        }
     }
 }

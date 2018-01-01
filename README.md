@@ -26,9 +26,10 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `A.IsIn(IEnumerable<A>)`, `A.IsIn(params A[])` - reversed contains check
   * `IEnumerable.AsStream`, `Stream.AsEnumerable` - converts `IEnumerable`s to/from `Stream`s
 
-### Collection Enhancements
+### Specialized Collections
 
   * `BankersQueue<A>` - persistent queue made from two `ConsList`s
+  * `BitmappedTrie<A>` - persistent vector with tree structure
   * `ConsList<A>` - an immutable, singly-linked list
   * `Dictionary<K1, K2, V>` - `Dictionary`s that use `Tuple` for aggregate keys
   * `FingerTree<A>` - a persistent dequeue implemented as 2,3-finger tree
