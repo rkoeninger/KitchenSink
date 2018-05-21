@@ -2,6 +2,17 @@
 
 namespace KitchenSink.Injection
 {
+    public class InvalidImplementationException : Exception
+    {
+        public InvalidImplementationException(Type contractType, Type implType)
+            : base($"Object of type {implType} does not implement {contractType}")
+        {
+            ContractType = contractType;
+        }
+
+        public Type ContractType { get; }
+    }
+
     public class ImplementationUnresolvedException : Exception
     {
         public ImplementationUnresolvedException(Type contractType)
@@ -30,14 +41,12 @@ namespace KitchenSink.Injection
 
     public class MultipleConstructorsException : Exception
     {
-        public MultipleConstructorsException(Type contractType, Type implType, int ctorCount)
+        public MultipleConstructorsException(Type implType, int ctorCount)
             : base($"Type {implType} must have exactly 1 constructor, but has {ctorCount}")
         {
-            ContractType = contractType;
             ImplementationType = implType;
         }
-
-        public Type ContractType { get; }
+        
         public Type ImplementationType { get; }
     }
 }

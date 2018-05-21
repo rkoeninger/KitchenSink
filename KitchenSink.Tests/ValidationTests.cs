@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using static KitchenSink.Operators;
 using KitchenSink.Testing;
 using NUnit.Framework;
 
@@ -10,7 +11,7 @@ namespace KitchenSink.Tests
         [Test]
         public void ValidationIses()
         {
-            Assert.IsTrue(Verify.That(PersonA)
+            Assert.IsTrue(Verify.That(Person0)
                 .Is(x => x != null)
                 .Cut()
                 .Is(x => x.Address != null)
@@ -33,7 +34,9 @@ namespace KitchenSink.Tests
         [Test]
         public void ValidationPropertyChain()
         {
-            // IsSome of these verifications are purposely redundant to confirm that the expression destructuring process works
+            // Some of these verifications are purposely redundant to
+            // confirm that the expression destructuring process works
+
             // ReSharper disable EqualExpressionComparison
             Assert.IsFalse(Verify.That(() => PersonA.Address.City));
             Assert.IsFalse(Verify.That(() => PersonB.Address.City));
@@ -51,7 +54,7 @@ namespace KitchenSink.Tests
         private static readonly Person PersonA = new Person("John", "Smith", null);
         private static readonly Person PersonB = new Person("John", "Smith", new Address("123", null));
         private static readonly Person PersonC = new Person("John", "Smith", new Address("123", "qwerty"));
-        private static readonly Person PersonD = new Person("John", "Smith", new Address("123", "qwerty"), new List<Person> { PersonA, PersonB, PersonC });
+        private static readonly Person PersonD = new Person("John", "Smith", new Address("123", "qwerty"), ListOf(PersonA, PersonB, PersonC));
 
         public class Person
         {

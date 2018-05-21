@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using KitchenSink.Extensions;
-using static KitchenSink.Operators;
 
 namespace KitchenSink.Injection
 {
@@ -14,15 +13,67 @@ namespace KitchenSink.Injection
     /// </summary>
     public class Needs
     {
+        // TODO: document
+        /// <summary>
+        /// 
+        /// </summary>
+        public interface IResolver
+        {
+            object Resolve();
+        }
+
+        private class SingleUseResolver : IResolver
+        {
+            private Needs Container { get; }
+            private Type ContractType { get; }
+            private Type ImplementationType { get; }
+
+            public SingleUseResolver(Needs needs, Type contractType, Type implType)
+            {
+                Container = needs;
+                ContractType = contractType;
+                ImplementationType = implType;
+            }
+
+            public object Resolve() => Container.New(ContractType, ImplementationType);
+        }
+
+        private class MultiUseResolver : IResolver
+        {
+            private Lazy<object> Instance { get; }
+
+            public MultiUseResolver(object impl)
+            {
+                Instance = new Lazy<object>(() => impl);
+            }
+
+            public object Resolve() => Instance.Value;
+        }
+
+        // Decorators inherit the reliability of the type they decorate.
+        // This DecoratorResolver is for SingleUseResolvers.
+        // MultiUseResolvers just get replaced with another
+        // MultiUseResolver returning a decorated instance.
+        private class DecoratorResolver : IResolver
+        {
+            private IResolver Resolver { get; }
+            private Func<object, object> Decorate { get; }
+
+            public DecoratorResolver(IResolver resolver, Func<object, object> decorate)
+            {
+                Resolver = resolver;
+                Decorate = decorate;
+            }
+
+            public object Resolve() => Decorate(Resolver.Resolve());
+        }
+
+        // TODO: LazyDecoratorResolver?
+
         /// <summary>
         /// Returns a type implementing the given type, or null.
         /// </summary>
-        public delegate Type Source(Type contractType);
-
-        /// <summary>
-        /// Returns an object implementing an expected type.
-        /// </summary>
-        public delegate object Factory();
+        public delegate Maybe<Type> Source(Type contractType);
 
         /// <summary>
         /// A backup resolver that this Needs can defer to if it is unable to
@@ -30,7 +81,7 @@ namespace KitchenSink.Injection
         /// </summary>
         public delegate Maybe<object> Backup(Type contractType);
 
-        private readonly Dictionary<Type, Factory> factories = new Dictionary<Type, Factory>();
+        private readonly Dictionary<Type, IResolver> resolvers = new Dictionary<Type, IResolver>();
         private readonly List<Source> sources = new List<Source>();
         private readonly List<Backup> backups = new List<Backup>();
 
@@ -40,9 +91,18 @@ namespace KitchenSink.Injection
         public Needs Add<TContract>(TContract impl) => Add(typeof(TContract), impl);
 
         /// <summary>
-        /// Specifies an implementing object for a given contract type.
+        /// Specifies a multi-use implementing object for a given contract type.
         /// </summary>
-        public Needs Add(Type contractType, object impl) => Add(contractType, () => impl);
+        public Needs Add(Type contractType, object impl)
+        {
+            if (!contractType.IsInstanceOfType(impl))
+            {
+                throw new InvalidImplementationException(contractType, impl.GetType());
+            }
+
+            resolvers[contractType] = new MultiUseResolver(impl);
+            return this;
+        }
 
         /// <summary>
         /// Specifies an implementing type for a given contract type.
@@ -59,24 +119,69 @@ namespace KitchenSink.Injection
         /// </summary>
         public Needs Add(Type contractType, Type implType)
         {
+            if (!contractType.IsAssignableFrom(implType))
+            {
+                throw new InvalidImplementationException(contractType, implType);
+            }
+
             Persist(contractType, implType);
             return this;
         }
 
+        // TODO: document
         /// <summary>
-        /// Provides a factory for building an object implementing a given contract type.
+        /// 
         /// </summary>
-        public Needs Add(Type contractType, Factory factory)
+        public Needs Decorate<TContract, TDecorator>() where TDecorator : TContract =>
+            Decorate(typeof(TContract), typeof(TDecorator));
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Needs Decorate(Type contractType, Type decoratorType) =>
+            Decorate(contractType, x => Activator.CreateInstance(decoratorType, x));
+
+        // TODO: document
+        /// <summary>
+        /// 
+        /// </summary>
+        public Needs Decorate<TContract>(Func<TContract, TContract> decorator) =>
+            Decorate(typeof(TContract), x => decorator((TContract) x));
+
+        // TODO: document
+        /// <summary>
+        /// 
+        /// </summary>
+        public Needs Decorate(Type contractType, Func<object, object> decorator)
         {
-            factories[contractType] = factory;
-            return this;
+            // TODO: check for decorator reliability mismatch
+            // TODO: check in Add methods too
+
+            // TODO: acquire impl through Sources/Backups
+            if (resolvers.TryGetValue(contractType, out var resolver))
+            {
+                if (resolver is SingleUseResolver || resolver is DecoratorResolver)
+                {
+                    resolvers[contractType] = new DecoratorResolver(resolver, decorator);
+                }
+                else if (resolver is MultiUseResolver)
+                {
+                    resolvers[contractType] = new MultiUseResolver(decorator(resolver.Resolve()));
+                }
+
+                return this;
+            }
+
+            throw new ImplementationUnresolvedException(contractType);
         }
 
+        // TODO: replace with params/IEnumerable of arbibtrary types
         /// <summary>
         /// Registers the nested types of the given parent type as a source of implementations.
         /// </summary>
         public Needs Refer(Type parent) => Refer(SourceFrom(parent.GetNestedTypes()));
 
+        // TODO: add optional filter
         /// <summary>
         /// Registers the exported types in the given assembly as a source of implementations.
         /// </summary>
@@ -90,9 +195,6 @@ namespace KitchenSink.Injection
             sources.Add(source);
             return this;
         }
-
-        private static Source SourceFrom(IEnumerable<Type> types) =>
-            contractType => types.FirstOrDefault(t => t.GetInterfaces().Contains(contractType));
 
         /// <summary>
         /// Registers the given Needs as a backup to this Needs.
@@ -133,61 +235,31 @@ namespace KitchenSink.Injection
         // Throws ImplementationUnresolvedException if impl is not found.
         private Maybe<object> GetInternal(Type contractType)
         {
-            if (factories.TryGetValue(contractType, out var factory))
-            {
-                return Some(factory());
-            }
-
-            foreach (var source in sources)
-            {
-                var implType = source(contractType);
-
-                if (implType != null)
-                {
-                    return Some(Persist(contractType, implType));
-                }
-            }
-
-            foreach (var backup in backups)
-            {
-                var implMaybe = backup(contractType);
-
-                if (implMaybe.HasValue)
-                {
-                    return implMaybe;
-                }
-            }
-
-            return None<object>();
+            return resolvers.GetMaybe(contractType).Select(r => r.Resolve())
+                .OrDo(() => sources.FirstSome(s => s(contractType)).Select(t => Persist(contractType, t)))
+                .OrDo(() => backups.FirstSome(b => b(contractType)));
         }
 
-        // Create and store Factory. Factory returns singleton instance if
+        // Create and store Resolver. Resolver returns same instance for each call if
         // implType is multi-use, returns new instance on each call if single-use.
         private object Persist(Type contractType, Type implType)
         {
             if (IsSingleUse(implType))
             {
-                object factory() => New(contractType, implType);
-                factories[contractType] = factory;
-                return factory();
+                var resolver = new SingleUseResolver(this, contractType, implType);
+                resolvers[contractType] = resolver;
+                return resolver.Resolve();
             }
 
             var impl = New(contractType, implType);
-            factories[contractType] = () => impl;
+            resolvers[contractType] = new MultiUseResolver(impl);
             return impl;
         }
 
         // Resolve all nested dependencies and create instance.
         private object New(Type contractType, Type implType)
         {
-            var ctors = implType.GetConstructors();
-
-            if (ctors.Length != 1)
-            {
-                throw new MultipleConstructorsException(contractType, implType, ctors.Length);
-            }
-            
-            var ctor = ctors[0];
+            var ctor = GetConstructor(implType);
             var multiUse = !IsSingleUse(implType);
             var args = new List<object>();
 
@@ -208,8 +280,29 @@ namespace KitchenSink.Injection
             return ctor.Invoke(args.ToArray());
         }
 
+        // Explicitly reject decorators
+        private static Source SourceFrom(IEnumerable<Type> types) =>
+            contractType =>
+                types.FirstMaybe(t =>
+                    t.GetInterfaces().Contains(contractType) && !IsDecoratorOf(t, contractType));
+
+        private static ConstructorInfo GetConstructor(Type type)
+        {
+            var ctors = type.GetConstructors();
+
+            if (ctors.Length != 1)
+            {
+                throw new MultipleConstructorsException(type, ctors.Length);
+            }
+
+            return ctors[0];
+        }
+
         private static bool IsSingleUse(Type type) =>
             type.HasAttribute<SingleUse>()
             || type.GetMembers(BindingFlags.NonPublic).Any(m => m.Name.IsSimilar("DeclareSingleUse"));
+
+        private static bool IsDecoratorOf(Type decoratorType, Type contractType) =>
+            decoratorType.GetConstructors().Any(c => c.GetParameters().Any(p => p.ParameterType == contractType));
     }
 }
