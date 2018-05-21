@@ -138,7 +138,7 @@ namespace KitchenSink.Tests
         public void EnumerablePartition()
         {
             var p = SeqOf(1, 2, 3, 4, 5, 6, 7, 8);
-            var actual = p.Partition(3);
+            var actual = p.Batch(3);
             var expected = SeqOf(
                 SeqOf(1, 2, 3),
                 SeqOf(4, 5, 6),

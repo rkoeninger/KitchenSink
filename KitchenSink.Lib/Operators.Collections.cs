@@ -33,7 +33,7 @@ namespace KitchenSink
 
         /// <summary>
         /// Infinitely enumerates items returned from provided function.
-        /// Example: f => [f() f() f() ...]
+        /// Example: <c>f => [f() f() f() ...]</c>
         /// </summary>
         public static IEnumerable<A> Forever<A>(Func<A> f)
         {

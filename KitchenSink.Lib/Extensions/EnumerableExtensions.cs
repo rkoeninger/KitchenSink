@@ -124,9 +124,9 @@ namespace KitchenSink.Extensions
 
         /// <summary>
         /// Returns elements in given sequence as sub-sequences of given size.
-        /// Example: [1 2 3 4 5 6 7 8], 3 => [[1 2 3] [4 5 6] [7 8]]
+        /// Example: <c>[1 2 3 4 5 6 7 8], 3 => [[1 2 3] [4 5 6] [7 8]]</c>
         /// </summary>
-        public static IEnumerable<IEnumerable<A>> Partition<A>(this IEnumerable<A> seq, int count)
+        public static IEnumerable<IEnumerable<A>> Batch<A>(this IEnumerable<A> seq, int count)
         {
             var segment = new A[count];
             var i = 0;
@@ -151,27 +151,54 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
+        /// Returns sequence that eagerly reads from given sequence in groups of <c>count</c>.
+        /// </summary>
+        public static IEnumerable<A> Buffer<A>(this IEnumerable<A> seq, int count) =>
+            seq.Batch(count).Flatten();
+
+        /// <summary>
+        /// Combines a sequence of sub-sequences into one long sequence.
+        /// Example: <c>[[1 2 3] [4 5] [6 7 8]] => [1 2 3 4 5 6 7 8]</c>
+        /// </summary>
+        public static IEnumerable<A> Flatten<A>(this IEnumerable<IEnumerable<A>> seq) =>
+            seq.SelectMany(x => x);
+
+        /// <summary>
         /// Returns sequence of overlapping pairs of elements in given sequence.
-        /// Example: [1 2 3 4 5] => [[1 2] [2 3] [3 4] [4 5]]
+        /// Example: <c>[1 2 3 4 5] => [[1 2] [2 3] [3 4] [4 5]]</c>
         /// </summary>
         public static IEnumerable<Tuple<A, A>> OverlappingPairs<A>(this IEnumerable<A> seq)
         {
-            var array = seq.ToArray();
-
-            if (array.Length < 2)
+            using (var e = seq.GetEnumerator())
             {
-                throw new ArgumentException("too few elements");
-            }
+                if (!e.MoveNext())
+                {
+                    yield break;
+                }
 
-            return Enumerable
-                .Range(0, array.Length - 1)
-                .Select(i => TupleOf(array[i], array[i + 1]));
+                var previous = e.Current;
+
+                if (!e.MoveNext())
+                {
+                    throw new ArgumentException("too few elements");
+                }
+
+                var current = e.Current;
+                yield return TupleOf(previous, current);
+
+                while (e.MoveNext())
+                {
+                    previous = current;
+                    current = e.Current;
+                    yield return TupleOf(previous, current);
+                }
+            }
         }
 
         /// <summary>
         /// Returns a sequence with a copy of <c>separator</c> between each
         /// element of the original sequence.
-        /// Example: [1 2 3], 0 => [1 0 2 0 3]
+        /// Example: <c>[1 2 3], 0 => [1 0 2 0 3]</c>
         /// </summary>
         public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, A seperator)
         {
@@ -194,7 +221,7 @@ namespace KitchenSink.Extensions
 
         /// <summary>
         /// Infinitely enumerates sequence.
-        /// Example: [1 2 3] => [1 2 3 1 2 3 1 2 3 1 2 ...]
+        /// Example: <c>[1 2 3] => [1 2 3 1 2 3 1 2 3 1 2 ...]</c>
         /// </summary>
         public static IEnumerable<A> Cycle<A>(this IEnumerable<A> seq)
         {
@@ -251,35 +278,35 @@ namespace KitchenSink.Extensions
 
         /// <summary>
         /// Combines two sequences by pairing off their elements into tuples.
-        /// Example: [1 2 3], [A B C] => [(1, A) (2, B) (3, C)]
+        /// Example: <c>[1 2 3], [A B C] => [(1, A) (2, B) (3, C)]</c>
         /// </summary>
         public static IEnumerable<Tuple<A, B>> Zip<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) => xs.Zip(ys, TupleOf);
 
         /// <summary>
         /// Returns a sequence of items paired with their index in the original sequence.
-        /// Example: [A B C] => [(A, 0) (B, 1) (C, 2)]
+        /// Example: <c>[A B C] => [(0, A) (1, B) (2, C)]</c>
         /// </summary>
-        public static IEnumerable<Tuple<A, int>> ZipWithIndicies<A>(this IEnumerable<A> seq)
+        public static IEnumerable<Tuple<int, A>> ZipWithIndex<A>(this IEnumerable<A> seq)
         {
             var i = 0;
 
             foreach (var item in seq)
             {
-                yield return Tuple.Create(item, i);
+                yield return Tuple.Create(i, item);
                 i++;
             }
         }
 
         /// <summary>
         /// Returns sequence, excluding elements at given indicies.
-        /// Example: [1 2 3 4 5 6 7 8], 3, 5 => [1 2 3 5 7 8]
+        /// Example: <c>[1 2 3 4 5 6 7 8], 3, 5 => [1 2 3 5 7 8]</c>
         /// </summary>
         public static IEnumerable<A> ExceptAt<A>(this IEnumerable<A> seq, params int[] indicies) =>
             seq.Where((_, i) => i.IsNotIn(indicies));
 
         /// <summary>
         /// Randomizes elements in sequence. This will enumerate the entire sequence.
-        /// Example: [1 2 3 4 5] => [3 5 2 1 4]
+        /// Example: <c>[1 2 3 4 5] => [3 5 2 1 4]</c>
         /// </summary>
         public static IEnumerable<A> Shuffle<A>(this IEnumerable<A> seq, Random rand = null)
         {
