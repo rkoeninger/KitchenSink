@@ -1,4 +1,4 @@
-[![Visual Studio Version](https://img.shields.io/badge/vs-2017_%2815.5.1%29-68217a.svg)](https://www.visualstudio.com/vs/older-downloads/)
+[![Visual Studio Version](https://img.shields.io/badge/vs-2017-68217a.svg)](https://www.visualstudio.com/vs/older-downloads/)
 [![C# Version](https://img.shields.io/badge/C%23-7.2-green.svg)](https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-7-2)
 [![.Net Build Status](https://img.shields.io/appveyor/ci/rkoeninger/KitchenSink/master.svg?label=.Net%20Build)](https://ci.appveyor.com/project/rkoeninger/kitchensink/branch/master)
 [![Mono Build Status](https://img.shields.io/travis/rkoeninger/KitchenSink/master.svg?label=Mono%20Build)](https://travis-ci.org/rkoeninger/KitchenSink)
@@ -26,11 +26,16 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `A.IsIn(IEnumerable<A>)`, `A.IsIn(params A[])` - reversed contains check
   * `IEnumerable.AsStream`, `Stream.AsEnumerable` - converts `IEnumerable`s to/from `Stream`s
 
-### Collection Enhancements
+### Specialized Collections
 
+  * `BankersQueue<A>` - persistent queue made from two `ConsList`s
+  * `BitmappedTrie<A>` - persistent vector with tree structure
+  * `ConsList<A>` - an immutable, singly-linked list
   * `Dictionary<K1, K2, V>` - `Dictionary`s that use `Tuple` for aggregate keys
-  * `RadixDictionary<A>` - dictionary optimized for string keys
-  * `RoseTree<A>` - tree data structure that braches arbitrarily
+  * `FingerTree<A>` - a persistent dequeue implemented as 2,3-finger tree
+  * `PairingHeap<A>` - a self-balancing, persistent, ordered heap
+  * `RadixDictionary<A>` - mutable dictionary optimized for string keys
+  * `RoseTree<A>` - mutable tree data structure that braches arbitrarily
 
 ### Composable Control Structures
 

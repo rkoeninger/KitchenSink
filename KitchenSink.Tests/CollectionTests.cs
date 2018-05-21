@@ -4,6 +4,7 @@ using System.Linq;
 using KitchenSink.Collections;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
+using KitchenSink.Testing;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -222,6 +223,110 @@ namespace KitchenSink.Tests
                 Assert.Contains(new KeyValuePair<string, int>("one", 1), list);
                 Assert.Contains(new KeyValuePair<string, int>("two", 2), list);
                 Assert.Contains(new KeyValuePair<string, int>("three", 3), list);
+            }
+        }
+
+        [TestFixture]
+        public class BankersQueueTests
+        {
+            [Test]
+            public void EnqueueAndDequeue()
+            {
+                var q = BankersQueue.Empty<int>();
+                Maybe<int> m;
+                q = q.Enqueue(1);
+                q = q.Enqueue(2);
+                q = q.Enqueue(3);
+                Expect.IsSome(1, q.Current);
+                (q, m) = q.Dequeue();
+                Expect.IsSome(1, m);
+                Expect.IsSome(2, q.Current);
+                (q, m) = q.Dequeue();
+                Expect.IsSome(2, m);
+                Expect.IsSome(3, q.Current);
+                (q, m) = q.Dequeue();
+                Expect.IsSome(3, m);
+                Expect.IsNone(q.Current);
+                q = q.Enqueue(4);
+                q = q.Enqueue(5);
+                Expect.IsSome(4, q.Current);
+                (q, m) = q.Dequeue();
+                Expect.IsSome(4, m);
+                Expect.IsSome(5, q.Current);
+                (q, m) = q.Dequeue();
+                Expect.IsSome(5, m);
+                Expect.IsNone(q.Current);
+            }
+        }
+
+        [TestFixture]
+        public class FingerTreeTests
+        {
+            [Test]
+            public void EnqueueAndDequeue()
+            {
+                var q = FingerTree.Empty<int>();
+                Maybe<int> m;
+                q = q.EnqueuePrefix(1);
+                q = q.EnqueuePrefix(2);
+                q = q.EnqueuePrefix(3);
+                Expect.IsSome(3, q.CurrentPrefix);
+                Expect.IsSome(1, q.CurrentSuffix);
+                (q, m) = q.DequeueSuffix();
+                Expect.IsSome(1, m);
+                Expect.IsSome(2, q.CurrentSuffix);
+                (q, m) = q.DequeueSuffix();
+                Expect.IsSome(2, m);
+                Expect.IsSome(3, q.CurrentSuffix);
+                (q, m) = q.DequeueSuffix();
+                Expect.IsSome(3, m);
+                Expect.IsNone(q.CurrentSuffix);
+                q = q.EnqueuePrefix(4);
+                q = q.EnqueuePrefix(5);
+                Expect.IsSome(4, q.CurrentSuffix);
+                (q, m) = q.DequeueSuffix();
+                Expect.IsSome(4, m);
+                Expect.IsSome(5, q.CurrentSuffix);
+                (q, m) = q.DequeueSuffix();
+                Expect.IsSome(5, m);
+                Expect.IsNone(q.CurrentSuffix);
+            }
+        }
+
+        [TestFixture]
+        public class BitmappedTrieTests
+        {
+            [Test]
+            public void SuffixAndEnumerate()
+            {
+                var v = BitmappedTrie.Empty<string>();
+                Assert.AreEqual(0, v.Count);
+                v = v.Suffix("abc");
+                Assert.AreEqual(1, v.Count);
+                Assert.AreEqual("abc", v[0]);
+                v = v.Suffix("def");
+                Assert.AreEqual(2, v.Count);
+                Assert.AreEqual("def", v[1]);
+                v = v
+                    .Suffix("qwe")
+                    .Suffix("wer")
+                    .Suffix("ert")
+                    .Suffix("rty")
+                    .Suffix("tyu")
+                    .Suffix("yui")
+                    .Suffix("iuo")
+                    .Suffix("iop")
+                    .Suffix("asd")
+                    .Suffix("sdf")
+                    .Suffix("dfg")
+                    .Suffix("fgh")
+                    .Suffix("ghj")
+                    .Suffix("hjk");
+                Assert.AreEqual(16, v.Count);
+                Assert.AreEqual("hjk", v[15]);
+                v = v.Suffix("zxc");
+                Assert.AreEqual(17, v.Count);
+                Assert.AreEqual("zxc", v[16]);
             }
         }
     }

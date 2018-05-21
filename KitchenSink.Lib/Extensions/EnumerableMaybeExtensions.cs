@@ -39,6 +39,23 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
+        /// Attempts to get last element in sequence, returning None if empty.
+        /// </summary>
+        public static Maybe<A> LastMaybe<A>(this IEnumerable<A> seq)
+        {
+            A result = default;
+            var nonEmpty = false;
+
+            foreach (var item in seq)
+            {
+                nonEmpty = true;
+                result = item;
+            }
+
+            return Maybe.If(result, _ => nonEmpty);
+        }
+
+        /// <summary>
         /// Attempts to get first element in sequence that
         /// satisfies predicate, returning None if empty.
         /// </summary>
