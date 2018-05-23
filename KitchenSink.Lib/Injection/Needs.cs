@@ -3,21 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using KitchenSink.Extensions;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Injection
 {
     /// <summary>
     /// A simple IoC container. Resolves dependencies that are explicity
-    /// registered, by discovering them in assemblies and parent classes,
-    /// or by deferring to backup providers.
+    /// specified, by discovering them in registered assemblies and classes,
+    /// or by deferring to backup containers.
     /// </summary>
     public class Needs
     {
-        // TODO: document
-        /// <summary>
-        /// 
-        /// </summary>
-        public interface IResolver
+        // Resolvers use an interface instead of Func so it can
+        // be determined if a given Resolver concerns a decorator
+        private interface IResolver
         {
             object Resolve();
         }
@@ -50,25 +49,30 @@ namespace KitchenSink.Injection
             public object Resolve() => Instance.Value;
         }
 
-        // Decorators inherit the reliability of the type they decorate.
+        // Decorators that are multi-use must
+        // decorate objects that are multi-use.
         // This DecoratorResolver is for SingleUseResolvers.
         // MultiUseResolvers just get replaced with another
         // MultiUseResolver returning a decorated instance.
-        private class DecoratorResolver : IResolver
+        private class SingleUseDecoratorResolver : IResolver
         {
             private IResolver Resolver { get; }
             private Func<object, object> Decorate { get; }
 
-            public DecoratorResolver(IResolver resolver, Func<object, object> decorate)
+            public SingleUseDecoratorResolver(IResolver resolver, Func<object, object> decorate)
             {
                 Resolver = resolver;
                 Decorate = decorate;
             }
 
-            public object Resolve() => Decorate(Resolver.Resolve());
+            public object Resolve()
+            {
+                var inner = Resolver.Resolve();
+                var outer = Decorate(inner);
+                CheckReliablitiy(inner.GetType(), outer.GetType(), inner.GetType());
+                return outer;
+            }
         }
-
-        // TODO: LazyDecoratorResolver?
 
         /// <summary>
         /// Returns a type implementing the given type, or null.
@@ -128,64 +132,79 @@ namespace KitchenSink.Injection
             return this;
         }
 
-        // TODO: document
         /// <summary>
-        /// 
+        /// Decorates specified contract type with decorator type.
         /// </summary>
         public Needs Decorate<TContract, TDecorator>() where TDecorator : TContract =>
             Decorate(typeof(TContract), typeof(TDecorator));
 
         /// <summary>
-        /// 
+        /// Decorates specified contract type with decorator type.
         /// </summary>
-        public Needs Decorate(Type contractType, Type decoratorType) =>
-            Decorate(contractType, x => Activator.CreateInstance(decoratorType, x));
+        public Needs Decorate(Type contractType, Type decoratorType)
+        {
+            CheckReliablitiy(contractType, decoratorType, contractType);
+            return Decorate(contractType, x => Activator.CreateInstance(decoratorType, x));
+        }
 
-        // TODO: document
         /// <summary>
-        /// 
+        /// Decorates specified contract type with decorator function.
         /// </summary>
         public Needs Decorate<TContract>(Func<TContract, TContract> decorator) =>
             Decorate(typeof(TContract), x => decorator((TContract) x));
 
-        // TODO: document
         /// <summary>
-        /// 
+        /// Decorates specified contract type with decorator function.
         /// </summary>
-        public Needs Decorate(Type contractType, Func<object, object> decorator)
+        public Needs Decorate(Type contractType, Func<object, object> decorate)
         {
-            // TODO: check for decorator reliability mismatch
-            // TODO: check in Add methods too
-
-            // TODO: acquire impl through Sources/Backups
             if (resolvers.TryGetValue(contractType, out var resolver))
             {
-                if (resolver is SingleUseResolver || resolver is DecoratorResolver)
+                if (resolver is MultiUseResolver)
                 {
-                    resolvers[contractType] = new DecoratorResolver(resolver, decorator);
+                    resolvers[contractType] = new MultiUseResolver(decorate(resolver.Resolve()));
                 }
-                else if (resolver is MultiUseResolver)
+                else
                 {
-                    resolvers[contractType] = new MultiUseResolver(decorator(resolver.Resolve()));
+                    resolvers[contractType] = new SingleUseDecoratorResolver(resolver, decorate);
                 }
-
-                return this;
+            }
+            else
+            {
+                var inner = GetMaybe(contractType).OrElseThrow(new ImplementationUnresolvedException(contractType));
+                var outer = decorate(inner);
+                CheckReliablitiy(contractType, outer.GetType(), inner.GetType());
+                resolvers[contractType] = new MultiUseResolver(outer);
             }
 
-            throw new ImplementationUnresolvedException(contractType);
+            return this;
         }
 
-        // TODO: replace with params/IEnumerable of arbibtrary types
+        /// <summary>
+        /// Registers the given types as sources of implementations.
+        /// </summary>
+        public Needs Refer(params Type[] impls) => Refer(SourceFrom(impls));
+
+        /// <summary>
+        /// Registers the given types as sources of implementations.
+        /// </summary>
+        public Needs Refer(IEnumerable<Type> impls) => Refer(SourceFrom(impls));
+
         /// <summary>
         /// Registers the nested types of the given parent type as a source of implementations.
         /// </summary>
-        public Needs Refer(Type parent) => Refer(SourceFrom(parent.GetNestedTypes()));
+        public Needs ReferChildren(Type parent) => Refer(SourceFrom(parent.GetNestedTypes()));
 
-        // TODO: add optional filter
         /// <summary>
         /// Registers the exported types in the given assembly as a source of implementations.
         /// </summary>
-        public Needs Refer(Assembly assembly) => Refer(SourceFrom(assembly.GetExportedTypes()));
+        public Needs Refer(Assembly assembly) => Refer(assembly, _ => true);
+
+        /// <summary>
+        /// Registers the exported types in the given assembly as a source of implementations, filtered per given function.
+        /// </summary>
+        public Needs Refer(Assembly assembly, Func<Type, bool> filter) =>
+            Refer(SourceFrom(assembly.GetExportedTypes().Where(filter)));
 
         /// <summary>
         /// Registers the given delegate as an arbitrary source of implementations.
@@ -260,7 +279,6 @@ namespace KitchenSink.Injection
         private object New(Type contractType, Type implType)
         {
             var ctor = GetConstructor(implType);
-            var multiUse = !IsSingleUse(implType);
             var args = new List<object>();
 
             foreach (var param in ctor.GetParameters())
@@ -268,12 +286,7 @@ namespace KitchenSink.Injection
                 var arg = GetInternal(param.ParameterType)
                     .OrElseThrow(new ImplementationUnresolvedException(param.ParameterType));
                 var argType = arg.GetType();
-
-                if (multiUse && IsSingleUse(argType))
-                {
-                    throw new ImplementationReliabilityException(contractType, implType, argType);
-                }
-
+                CheckReliablitiy(contractType, implType, argType);
                 args.Add(arg);
             }
 
@@ -296,6 +309,14 @@ namespace KitchenSink.Injection
             }
 
             return ctors[0];
+        }
+
+        private static void CheckReliablitiy(Type contractType, Type implType, Type argType)
+        {
+            if (Not(IsSingleUse(implType)) && IsSingleUse(argType))
+            {
+                throw new ImplementationReliabilityException(contractType, implType, argType);
+            }
         }
 
         private static bool IsSingleUse(Type type) =>

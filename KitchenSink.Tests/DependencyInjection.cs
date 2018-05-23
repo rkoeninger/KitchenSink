@@ -38,7 +38,7 @@ namespace KitchenSink.Tests
         [Test]
         public void ReferringToNestedClass()
         {
-            var needs = new Needs().Refer(typeof(ParentClass));
+            var needs = new Needs().ReferChildren(typeof(ParentClass));
             Assert.IsInstanceOf<ParentClass.ImplementationX>(needs.Get<IInterfaceX>());
             Assert.IsInstanceOf<ParentClass.ImplementationY>(needs.Get<IInterfaceY>());
         }
@@ -105,14 +105,14 @@ namespace KitchenSink.Tests
         [Test]
         public void MultiUseCantDependOnSingleUse()
         {
-            var needs = new Needs().Refer(typeof(DependencyInjection));
+            var needs = new Needs().ReferChildren(typeof(DependencyInjection));
             Expect.Error<ImplementationReliabilityException>(() => needs.Get<IAnotherInterface>());
         }
 
         [Test]
         public void ImplementationWithMultipleConstructors()
         {
-            var needs = new Needs().Refer(typeof(DependencyInjection));
+            var needs = new Needs().ReferChildren(typeof(DependencyInjection));
             Expect.Error<MultipleConstructorsException>(() => needs.Get<IBlahInterface>());
         }
 
@@ -148,6 +148,45 @@ namespace KitchenSink.Tests
                 needs.Add(new PearVariant(new SomeImplementation()));
                 needs.Add(new PlumVariant(new SomeImplementation()));
                 Assert.AreNotEqual(needs.Get<PearVariant>().Value, needs.Get<PlumVariant>().Value);
+            }
+        }
+
+        public class Decoration
+        {
+            public interface IFacility
+            {
+                int Facilitate();
+            }
+
+            public class BasicFacility : IFacility
+            {
+                public int Facilitate() => 1;
+            }
+
+            public class AdvancedFacility : IFacility
+            {
+                private readonly IFacility inner;
+
+                public AdvancedFacility(IFacility inner)
+                {
+                    this.inner = inner;
+                }
+
+                public int Facilitate() => inner.Facilitate() + 1;
+            }
+
+            [Test]
+            public void SimpleMultiUseDecoration()
+            {
+                var needs = new Needs();
+                needs.Add<IFacility, BasicFacility>();
+                Assert.AreEqual(1, needs.Get<IFacility>().Facilitate());
+                needs.Decorate<IFacility, AdvancedFacility>();
+                Assert.AreEqual(2, needs.Get<IFacility>().Facilitate());
+
+                // Decorator can be re-applied/re-wrapped multiple times
+                needs.Decorate<IFacility, AdvancedFacility>();
+                Assert.AreEqual(3, needs.Get<IFacility>().Facilitate());
             }
         }
     }
