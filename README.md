@@ -26,7 +26,7 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `A.IsIn(IEnumerable<A>)`, `A.IsIn(params A[])` - reversed contains check
   * `IEnumerable.AsStream`, `Stream.AsEnumerable` - converts `IEnumerable`s to/from `Stream`s
 
-### Specialized Collections
+### Optimally Specialized Collections
 
   * `BankersQueue<A>` - persistent queue made from two `ConsList`s
   * `BitmappedTrie<A>` - persistent vector with tree structure
@@ -37,10 +37,10 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `RadixDictionary<A>` - mutable dictionary optimized for string keys
   * `RoseTree<A>` - mutable tree data structure that braches arbitrarily
 
-### Concurrency Primitives
+### Powerful Concurrency Primitives
 
-  * `Atom<A>` - mutually exclusive reference cell with **s**ynchronous updates.
-  * `Agent<A>` - mutually exclusive reference cell with **a**synchronous updates.
+  * `Atom<A>` - mutually exclusive reference cell with synchronous updates
+  * `Agent<A>` - like an `Atom`, but with asynchronous updates
 
 ### Composable Control Structures
 
@@ -51,7 +51,7 @@ Not everything in this library is meant to be taken completely seriously. Some f
 
   * `Scope.Push`, `Scope.Get` - controlled, thread local, global variables that are only defined farther down the call chain
 
-### Dependency Injection
+### Simple Dependency Injection
 
   * `Needs` - a minimal-configuration IoC container that can search assemblies and parent types and failover to other IoC containers
   * `SingleUse` - an attribute indicating that a dependency implementation is not threadsafe or can only be used once
