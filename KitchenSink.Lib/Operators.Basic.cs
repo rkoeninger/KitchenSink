@@ -140,6 +140,11 @@ namespace KitchenSink
         public static A Id<A>(A val) => val;
 
         /// <summary>
+        /// Constant function.
+        /// </summary>
+        public static Func<A> Const<A>(A val) => () => val;
+
+        /// <summary>
         /// Inline dynamic cast.
         /// </summary>
         public static dynamic Dyn(dynamic val) => val;

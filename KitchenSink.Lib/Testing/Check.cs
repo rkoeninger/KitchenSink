@@ -1,7 +1,7 @@
-﻿using System.Linq;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using static KitchenSink.Operators;
 
 namespace KitchenSink.Testing
@@ -81,7 +81,7 @@ namespace KitchenSink.Testing
             {
                 dynamic dx = x;
                 dynamic dy = y;
-                return (dx > dy) == !(dx <= dy) && (dx < dy) == !(dx >= dy);
+                return dx > dy == !(dx <= dy) && dx < dy == !(dx >= dy);
             });
         }
 
