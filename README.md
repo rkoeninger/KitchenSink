@@ -37,6 +37,11 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `RadixDictionary<A>` - mutable dictionary optimized for string keys
   * `RoseTree<A>` - mutable tree data structure that braches arbitrarily
 
+### Concurrency Primitives
+
+  * `Atom<A>` - mutually exclusive reference cell with **s**ynchronous updates.
+  * `Agent<A>` - mutually exclusive reference cell with **a**synchronous updates.
+
 ### Composable Control Structures
 
   * `Cond` - builds a list of clauses and conditionally evaluates consequents

@@ -53,6 +53,8 @@
     <Compile Include="Collections\RadixDictionary.cs" />
     <Compile Include="Collections\RoseTree.cs" />
     <Compile Include="Comparison.cs" />
+    <Compile Include="Concurrent\Agent.cs" />
+    <Compile Include="Concurrent\Atom.cs" />
     <Compile Include="Concurrent\Lock.cs" />
     <Compile Include="Control\Case.cs" />
     <Compile Include="Control\Cond.cs" />

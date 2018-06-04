@@ -20,9 +20,9 @@ namespace KitchenSink
         {
             var e = x.GetEnumerator();
 
-            if (e is IDisposable)
+            if (e is IDisposable d)
             {
-                using ((IDisposable)e)
+                using (d)
                 {
                     return e.MoveNext();
                 }
@@ -33,7 +33,7 @@ namespace KitchenSink
 
         /// <summary>
         /// Infinitely enumerates items returned from provided function.
-        /// Example: <c>f => [f() f() f() ...]</c>
+        /// Example: <c>f => [f(), f(), f(), ...]</c>
         /// </summary>
         public static IEnumerable<A> Forever<A>(Func<A> f)
         {
@@ -51,18 +51,26 @@ namespace KitchenSink
         /// </summary>
         public static IEnumerable<A> Expand<A>(Func<Maybe<A>> f)
         {
-            while (true)
+            var x = f();
+
+            while (x.HasValue)
             {
-                var x = f();
-
-                if (x.HasValue)
-                {
-                    yield return x.Value;
-                }
+                yield return x.Value;
+                x = f();
             }
-
-            // ReSharper disable once IteratorNeverReturns
         }
+
+        /// <summary>
+        /// Returns sequence of same value given number of times.
+        /// Example: <c>Repeat(5, 'a') => ['a', 'a', 'a', 'a', 'a']</c>
+        /// </summary>
+        public static IEnumerable<A> Repeat<A>(int count, A value) => Forever(Const(value)).Take(count);
+
+        /// <summary>
+        /// Returns sequence populated by calling function given number of times.
+        /// Example: <c>Repeatedly(5, Rand) => [2354, 7456, 9623, 3764, 6475]</c>
+        /// </summary>
+        public static IEnumerable<A> Repeatedly<A>(int count, Func<A> f) => Forever(f).Take(count);
 
         /// <summary>
         /// Creates a Maybe that has the given value if it is not null.
