@@ -18,7 +18,7 @@ Not everything in this library is meant to be taken completely seriously. Some f
 
 ### Convenient Operators and Extensions
 
-  * `ListOf`, `SeqOf`, `DictOf` - concise collection creation: `DictOf("one", 1, "two" 2, "three", 3)`
+  * `ListOf`, `SeqOf`, `DictOf` - concise collection creation: `DictOf("one", 1, "two", 2, "three", 3)`
   * `Cmp` - sets up expressive bound comparisons: `0 <= Cmp(x) < 10`
   * `Eq`, `Same`, `Str`, `Hash` - null-safe basic object operations
   * `Apply` - partially apply functions
