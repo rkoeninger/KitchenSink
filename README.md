@@ -41,6 +41,7 @@ Not everything in this library is meant to be taken completely seriously. Some f
 
   * `Atom<A>` - mutually exclusive reference cell with synchronous updates
   * `Agent<A>` - like an `Atom`, but with asynchronous updates
+  * `Stm`, `Ref<A>`, `Tran` - simple transactional memory system for co-ordinated synchronous updates
 
 ### Composable Control Structures
 
