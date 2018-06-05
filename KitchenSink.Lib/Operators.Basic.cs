@@ -171,6 +171,11 @@ namespace KitchenSink
         public static bool Is<A>(object val) => val is A;
 
         /// <summary>
+        /// Type check for type parameter.
+        /// </summary>
+        public static Func<A, bool> Is<A, B>() => val => val is B;
+
+        /// <summary>
         /// Negative type check for type parameter.
         /// </summary>
         public static bool IsNot<A>(object val) => !Is<A>(val);
