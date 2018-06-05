@@ -194,6 +194,49 @@ namespace KitchenSink.Tests
             Assert.AreEqual(3, r.Value);
         }
 
+        [Test]
+        public void NestedTranFailure()
+        {
+            var stm = new Stm();
+            var r = stm.NewRef(0);
+
+            stm.InTran(() =>
+            {
+                Assert.AreEqual(0, r.Value);
+                r.Update(Inc);
+                Assert.AreEqual(1, r.Value);
+
+                Assert.Throws<SomeException>(() =>
+                {
+                    stm.InTran(() =>
+                    {
+                        Assert.AreEqual(1, r.Value);
+                        r.Update(Inc);
+                        Assert.AreEqual(2, r.Value);
+                        throw new SomeException();
+                    });
+                });
+
+                Assert.AreEqual(1, r.Value);
+                r.Update(Inc);
+                Assert.AreEqual(2, r.Value);
+            });
+
+            Assert.AreEqual(2, r.Value);
+        }
+
+        [Test]
+        public void UncommitedValuesNotVisibleOutsideTran()
+        {
+            var stm = new Stm();
+            var r = stm.NewRef(0);
+            var tran = stm.BeginTran();
+            r.Update(tran, Inc);
+            Assert.AreEqual(0, r.Value);
+            tran.Dispose();
+            Assert.AreEqual(1, r.Value);
+        }
+
         public class SomeException : Exception
         {
         }
