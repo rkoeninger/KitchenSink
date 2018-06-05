@@ -166,10 +166,16 @@ namespace KitchenSink
         public Maybe<A> OrThrow(Func<Exception> f) => HasValue ? this : throw f();
 
         [Pure]
+        public Maybe<A> OrThrow<E>() where E : Exception, new() => OrThrow(new E());
+
+        [Pure]
         public A OrElseThrow(string message) => OrElseThrow(() => new Exception(message));
 
         [Pure]
         public A OrElseThrow(Exception e) => OrElseThrow(Const(e));
+
+        [Pure]
+        public A OrElseThrow<E>() where E : Exception, new() => OrElseThrow(new E());
 
         [Pure]
         public A OrElseThrow(Func<Exception> f) => HasValue ? Value : throw f();
