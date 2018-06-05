@@ -102,6 +102,9 @@ namespace KitchenSink
         public Maybe<B> Cast<B>() => HasValue && Value is B ? Some((B) (object) Value) : None<B>();
 
         [Pure]
+        public Maybe<B> OfType<B>() => Where(Is<A, B>()).Cast<B>();
+
+        [Pure]
         public Maybe<B> Select<B>(Func<A, B> f) => HasValue ? Some(f(Value)) : None<B>();
 
         [Pure]

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
@@ -28,6 +29,11 @@ namespace KitchenSink
         public static object Get(string key) => Me.Get(key);
 
         /// <summary>
+        /// Resolves registered value in this thread's dynamic scope.
+        /// </summary>
+        public static Maybe<object> GetMaybe(string key) => Me.GetMaybe(key);
+
+        /// <summary>
         /// Pushes value onto this thread's dynamic stack, named after its type.
         /// </summary>
         public static IDisposable Push<TValue>(TValue value) => Me.Push(value);
@@ -36,6 +42,11 @@ namespace KitchenSink
         /// Resolves registered value in this thread's dynamic scope by its type.
         /// </summary>
         public static TValue Get<TValue>() => Me.Get<TValue>();
+
+        /// <summary>
+        /// Resolves registered value in this thread's dynamic scope by its type.
+        /// </summary>
+        public static Maybe<TValue> GetMaybe<TValue>() => Me.GetMaybe<TValue>();
     }
 
     /// <remarks>
@@ -64,6 +75,15 @@ namespace KitchenSink
         }
 
         /// <summary>
+        /// Resolves registered value in this scope.
+        /// </summary>
+        public Maybe<object> GetMaybe(string key)
+        {
+            var stack = index.GetOrAdd(key, _ => new Stack<object>());
+            return stack.Count > 0 ? Some(stack.Peek()) : None<object>();
+        }
+
+        /// <summary>
         /// Pushes value onto stack, named after its type.
         /// </summary>
         public IDisposable Push<TValue>(TValue value) => Push(typeof(TValue).FullName, value);
@@ -72,6 +92,11 @@ namespace KitchenSink
         /// Resolves registered value in this scope by its type.
         /// </summary>
         public TValue Get<TValue>() => (TValue) Get(typeof(TValue).FullName);
+
+        /// <summary>
+        /// Resolves registered value in this scope by its type.
+        /// </summary>
+        public Maybe<TValue> GetMaybe<TValue>() => GetMaybe(typeof(TValue).FullName).OfType<TValue>();
 
         private static Func<string, Stack<object>, Stack<object>> Existing(object value) => (key, stack) =>
         {
