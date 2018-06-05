@@ -42,7 +42,7 @@ namespace KitchenSink.Concurrent
         /// </summary>
         public bool IsAmbient { get; }
 
-        internal void Join(Ref r) => refs.Add(r);
+        internal bool Join(Ref r) => refs.Add(r);
 
         /// <summary>
         /// Attempts to apply prepared changes in order.

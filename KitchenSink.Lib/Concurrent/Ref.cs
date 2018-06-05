@@ -1,29 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using KitchenSink.Extensions;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Concurrent
 {
     /// <summary>
     /// Internal base class.
     /// </summary>
-    public class Ref
+    public abstract class Ref
     {
-        internal bool pending;
         internal object value;
-        internal object previous;
-
+        internal List<object> previous = new List<object>();
         internal Ref(object initial) => value = initial;
-
-        internal void Commit()
-        {
-            pending = false;
-            previous = default;
-        }
-
-        internal void Rollback()
-        {
-            pending = false;
-            value = previous;
-        }
+        internal void Commit() => previous.Pop();
+        internal void Rollback() => value = previous.Pop();
     }
 
     /// <summary>
@@ -36,25 +28,53 @@ namespace KitchenSink.Concurrent
         /// <summary>
         /// Create new Ref with given initial value.
         /// </summary>
-        public Ref(Stm stm, A initial) : base(initial)
+        internal Ref(Stm stm, A initial) : base(initial)
         {
             this.stm = stm;
         }
 
         /// <summary>
-        /// Gets current committed value, regardless of pending value.
-        /// Setting is done in single-statement transaction.
+        /// TODO: document
         /// </summary>
         public A Value
         {
-            get => (A) value; // TODO: return previous value when accessor is outside current Tran
+            //get => Get();
+            //set => Set(value);
+            get => Cast<A>(Scope.GetMaybe<Tran>().HasValue || previous.Count == 0 ? value : previous.Last());
             set => stm.InTran(() => Update(_ => value));
         }
+
+        public A Get()
+        {
+            // TODO: get value in ambient tran or committed value
+            return default;
+        }
+
+        public A Get(Tran tran)
+        {
+            // TODO: get current value in tran
+            return default;
+        }
+
+        public A Set(A a)
+        {
+            // TODO: set value in ambient tran or single-statement tran
+            return a;
+        }
+
+        public A Set(Tran tran, A a)
+        {
+            // TODO: set value for given tran, join if needed
+            return a;
+        }
+
+        // TODO: each Tran needs to have its own current value
 
         /// <summary>
         /// Prepare update to contained value in ambient scope.
         /// </summary>
-        public void Update(Func<A, A> f) => Update(Scope.Get<Tran>(), f);
+        public void Update(Func<A, A> f) =>
+            Update(Scope.GetMaybe<Tran>().OrElseThrow<OutsideTranScopeException>(), f);
 
         /// <summary>
         /// Prepare update to contained value in given scope.
@@ -66,11 +86,9 @@ namespace KitchenSink.Concurrent
                 throw new OutsideTranScopeException();
             }
 
-            if (!pending)
+            if (tran.Join(this))
             {
-                pending = true;
-                tran.Join(this);
-                previous = value;
+                previous.Push(value);
             }
 
             value = f((A) value);
