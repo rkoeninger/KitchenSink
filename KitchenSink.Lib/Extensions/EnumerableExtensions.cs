@@ -250,7 +250,7 @@ namespace KitchenSink.Extensions
         public static HashSet<A> ToSet<A>(this IEnumerable<A> seq) => new HashSet<A>(seq);
 
         /// <summary>
-        /// Creates a <see cref="Func{Maybe{A}}"/> from an <see cref="IEnumerable{A}"/>.
+        /// Creates a <see cref="Func{B}"/> of <see cref="Maybe{A}"/> from an <see cref="IEnumerable{A}"/>.
         /// </summary>
         public static Func<Maybe<A>> AsFunc<A>(this IEnumerable<A> seq)
         {

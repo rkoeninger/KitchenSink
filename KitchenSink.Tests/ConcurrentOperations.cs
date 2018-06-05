@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using KitchenSink.Concurrent;
 using static KitchenSink.Operators;
@@ -50,6 +51,151 @@ namespace KitchenSink.Tests
                         .ToArray()))).ToArray();
             Task.WaitAll(tasks);
             Assert.AreEqual(total, agent.Value);
+        }
+
+        [Test]
+        public void SuccessfulExplicitTran()
+        {
+            var stm = new Stm();
+            var ref1 = stm.NewRef(0);
+            var ref2 = stm.NewRef("a");
+            var ref3 = stm.NewRef(false);
+
+            using (var tran = stm.BeginTran())
+            {
+                ref1.Update(tran, x => x + 1);
+                ref2.Update(tran, x => x + "b");
+                ref3.Update(tran, x => true);
+            }
+
+            Assert.AreEqual(1, ref1.Value);
+            Assert.AreEqual("ab", ref2.Value);
+            Assert.IsTrue(ref3.Value);
+        }
+
+        [Test]
+        public void FailedExplicitTran()
+        {
+            var stm = new Stm();
+            var ref1 = stm.NewRef(0);
+            var ref2 = stm.NewRef("a");
+            var ref3 = stm.NewRef(false);
+
+            Assert.Throws<SomeException>(() =>
+            {
+                using (var tran = stm.BeginTran())
+                {
+                    ref1.Update(tran, x => x + 1);
+                    ref2.Update(tran, x => x + "b");
+                    ref3.Update(tran, x => throw new SomeException());
+                }
+            });
+
+            Assert.AreEqual(0, ref1.Value);
+            Assert.AreEqual("a", ref2.Value);
+            Assert.IsFalse(ref3.Value);
+        }
+
+        [Test]
+        public void SuccessfulAmbientTran()
+        {
+            var stm = new Stm();
+            var ref1 = stm.NewRef(0);
+            var ref2 = stm.NewRef("a");
+            var ref3 = stm.NewRef(false);
+
+            using (stm.BeginTran(true))
+            {
+                ref1.Update(x => x + 1);
+                ref2.Update(x => x + "b");
+                ref3.Update(x => true);
+            }
+
+            Assert.AreEqual(1, ref1.Value);
+            Assert.AreEqual("ab", ref2.Value);
+            Assert.IsTrue(ref3.Value);
+        }
+
+        [Test]
+        public void FailedAmbientTran()
+        {
+            var stm = new Stm();
+            var ref1 = stm.NewRef(0);
+            var ref2 = stm.NewRef("a");
+            var ref3 = stm.NewRef(false);
+
+            Assert.Throws<SomeException>(() =>
+            {
+                using (stm.BeginTran(true))
+                {
+                    ref1.Update(x => x + 1);
+                    ref2.Update(x => x + "b");
+                    ref3.Update(x => throw new SomeException());
+                }
+            });
+
+            Assert.AreEqual(0, ref1.Value);
+            Assert.AreEqual("a", ref2.Value);
+            Assert.IsFalse(ref3.Value);
+        }
+
+        [Test]
+        public void TentativeRefValueInTran()
+        {
+            var stm = new Stm();
+            var r = stm.NewRef(0);
+
+            Assert.Throws<SomeException>(() =>
+            {
+                stm.InTran(() =>
+                {
+                    r.Update(Inc);
+                    Assert.AreEqual(1, r.Value);
+                    throw new SomeException();
+                });
+            });
+
+            Assert.AreEqual(0, r.Value);
+        }
+
+        [Test]
+        public void RefAssignment()
+        {
+            var stm = new Stm();
+            var r = stm.NewRef(0);
+            r.Value = 1;
+            Assert.AreEqual(1, r.Value);
+        }
+
+        [Test]
+        public void NestedTrans()
+        {
+            var stm = new Stm();
+            var r = stm.NewRef(0);
+
+            stm.InTran(() =>
+            {
+                Assert.AreEqual(0, r.Value);
+                r.Update(Inc);
+                Assert.AreEqual(1, r.Value);
+
+                stm.InTran(() =>
+                {
+                    Assert.AreEqual(1, r.Value);
+                    r.Update(Inc);
+                    Assert.AreEqual(2, r.Value);
+                });
+
+                Assert.AreEqual(2, r.Value);
+                r.Update(Inc);
+                Assert.AreEqual(3, r.Value);
+            });
+
+            Assert.AreEqual(3, r.Value);
+        }
+
+        public class SomeException : Exception
+        {
         }
     }
 }

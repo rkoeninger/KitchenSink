@@ -2,10 +2,16 @@
 
 namespace KitchenSink.Concurrent
 {
+    /// <summary>
+    /// A mechanism to co-ordinate operations using basic CLR <c>lock</c>.
+    /// </summary>
     public class Lock
     {
         private readonly object handle = new object();
 
+        /// <summary>
+        /// Invokes function without any overlapping invocations.
+        /// </summary>
         public A Do<A>(Func<A> f)
         {
             lock (handle)
@@ -14,6 +20,9 @@ namespace KitchenSink.Concurrent
             }
         }
 
+        /// <summary>
+        /// Invokes function without any overlapping invocations.
+        /// </summary>
         public void Do(Action f)
         {
             lock (handle)
@@ -21,32 +30,5 @@ namespace KitchenSink.Concurrent
                 f();
             }
         }
-    }
-
-    public class Lock<A>
-    {
-        private readonly Lock @lock = new Lock();
-        private A val;
-
-        public Lock()
-        {
-        }
-
-        public Lock(A val)
-        {
-            this.val = val;
-        }
-
-        public A Value
-        {
-            get => @lock.Do(() => val);
-            set => @lock.Do(() => { val = value; });
-        }
-
-        public A Do(Func<A, A> f) => @lock.Do(() => f(val));
-
-        public void Do(Action<A> f) => @lock.Do(() => f(val));
-
-        public A Map(Func<A, A> f) => @lock.Do(() => val = f(val));
     }
 }

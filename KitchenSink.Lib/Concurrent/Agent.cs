@@ -66,7 +66,7 @@ namespace KitchenSink.Concurrent
         {
             if (!running)
             {
-                throw new ThreadStateException("Agent has already been disposed");
+                throw new AgentDisposedException();
             }
 
             var task = new Task<A>(() => Value = f(Value));

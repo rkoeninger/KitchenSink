@@ -55,7 +55,11 @@
     <Compile Include="Comparison.cs" />
     <Compile Include="Concurrent\Agent.cs" />
     <Compile Include="Concurrent\Atom.cs" />
+    <Compile Include="Concurrent\Exceptions.cs" />
     <Compile Include="Concurrent\Lock.cs" />
+    <Compile Include="Concurrent\Ref.cs" />
+    <Compile Include="Concurrent\Stm.cs" />
+    <Compile Include="Concurrent\Tran.cs" />
     <Compile Include="Control\Case.cs" />
     <Compile Include="Control\Cond.cs" />
     <Compile Include="Either.cs" />
