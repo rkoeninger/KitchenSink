@@ -54,6 +54,26 @@ namespace KitchenSink.Tests
         }
 
         [Test]
+        public void RefAtomicitiy()
+        {
+            var stm = new Stm();
+            var r = stm.NewRef(0);
+            var lists = Repeatedly(ListCount, () =>
+                Rand.Ints()
+                    .Select(x => x & ValueMask)
+                    .Take(ListLength)
+                    .ToList()
+            ).ToList();
+            var total = lists.Sum(xs => xs.Sum());
+            var tasks = lists.Select(xs =>
+                Task.Run(() =>
+                    xs.ForEach(x =>  stm.InTran(() => r.Update(Curry(Add)(x))))
+                )).ToArray();
+            Task.WaitAll(tasks);
+            Assert.AreEqual(total, r.Value);
+        }
+
+        [Test]
         public void SuccessfulExplicitTran()
         {
             var stm = new Stm();
