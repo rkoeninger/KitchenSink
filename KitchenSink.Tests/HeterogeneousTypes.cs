@@ -23,8 +23,8 @@ namespace KitchenSink.Tests
             [Test]
             public void SubsetsCanBeExtracted()
             {
-                var source = Tuple.Create(true, DateTime.MinValue, 1, "a");
-                Assert.AreEqual(Tuple.Create(true, 1), HSet.Pick(source, Sig.Of<bool, int>()));
+                var source = (true, DateTime.MinValue, 1, "a");
+                Assert.AreEqual((true, 1), HSet.Pick(source, Sig.Of<bool, int>()));
             }
         }
     }

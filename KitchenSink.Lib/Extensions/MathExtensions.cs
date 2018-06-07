@@ -171,7 +171,7 @@ namespace KitchenSink.Extensions
 
         private static Func<IEnumerable<bool>, IEnumerable<A>> ZipWhere<A>(IEnumerable<A> seq)
         {
-            return selectors => seq.Zip(selectors, TupleOf).Where(x => x.Item2).Select(x => x.Item1);
+            return selectors => seq.Zip(selectors).Where(x => x.Item2).Select(x => x.Item1);
         }
     }
 }

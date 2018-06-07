@@ -167,7 +167,7 @@ namespace KitchenSink.Extensions
         /// Returns sequence of overlapping pairs of elements in given sequence.
         /// Example: <c>[1, 2, 3, 4, 5] => [[1, 2], [2, 3], [3, 4], [4, 5]]</c>
         /// </summary>
-        public static IEnumerable<Tuple<A, A>> OverlappingPairs<A>(this IEnumerable<A> seq)
+        public static IEnumerable<(A, A)> OverlappingPairs<A>(this IEnumerable<A> seq)
         {
             using (var e = seq.GetEnumerator())
             {
@@ -184,13 +184,13 @@ namespace KitchenSink.Extensions
                 }
 
                 var current = e.Current;
-                yield return TupleOf(previous, current);
+                yield return (previous, current);
 
                 while (e.MoveNext())
                 {
                     previous = current;
                     current = e.Current;
-                    yield return TupleOf(previous, current);
+                    yield return (previous, current);
                 }
             }
         }
@@ -304,19 +304,19 @@ namespace KitchenSink.Extensions
         /// Combines two sequences by pairing off their elements into tuples.
         /// Example: <c>[1, 2, 3], [A, B, C] => [(1, A), (2, B), (3, C)]</c>
         /// </summary>
-        public static IEnumerable<Tuple<A, B>> Zip<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) => xs.Zip(ys, TupleOf);
+        public static IEnumerable<(A, B)> Zip<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) => xs.Zip(ys, TupleOf);
 
         /// <summary>
         /// Returns a sequence of items paired with their index in the original sequence.
         /// Example: <c>[A, B, C] => [(0, A), (1, B), (2, C)]</c>
         /// </summary>
-        public static IEnumerable<Tuple<int, A>> ZipWithIndex<A>(this IEnumerable<A> seq)
+        public static IEnumerable<(int, A)> ZipWithIndex<A>(this IEnumerable<A> seq)
         {
             var i = 0;
 
             foreach (var item in seq)
             {
-                yield return Tuple.Create(i, item);
+                yield return (i, item);
                 i++;
             }
         }

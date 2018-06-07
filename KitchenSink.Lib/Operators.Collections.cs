@@ -247,23 +247,23 @@ namespace KitchenSink
 
         public static Queue<A> QueueOf<A>(params A[] values) => new Queue<A>(values);
 
-        public static Tuple<A, B> TupleOf<A, B>(A a, B b) =>
-            Tuple.Create(a, b);
+        public static (A, B) TupleOf<A, B>(A a, B b) =>
+            (a, b);
 
-        public static Tuple<A, B, C> TupleOf<A, B, C>(A a, B b, C c) =>
-            Tuple.Create(a, b, c);
+        public static (A, B, C) TupleOf<A, B, C>(A a, B b, C c) =>
+            (a, b, c);
 
-        public static Tuple<A, B, C, D> TupleOf<A, B, C, D>(A a, B b, C c, D d) =>
-            Tuple.Create(a, b, c, d);
+        public static (A, B, C, D) TupleOf<A, B, C, D>(A a, B b, C c, D d) =>
+            (a, b, c, d);
 
-        public static Tuple<A, B, C, D, E> TupleOf<A, B, C, D, E>(A a, B b, C c, D d, E e) =>
-            Tuple.Create(a, b, c, d, e);
+        public static (A, B, C, D, E) TupleOf<A, B, C, D, E>(A a, B b, C c, D d, E e) =>
+            (a, b, c, d, e);
 
-        public static Tuple<A, B, C, D, E, F> TupleOf<A, B, C, D, E, F>(A a, B b, C c, D d, E e, F f) =>
-            Tuple.Create(a, b, c, d, e, f);
+        public static (A, B, C, D, E, F) TupleOf<A, B, C, D, E, F>(A a, B b, C c, D d, E e, F f) =>
+            (a, b, c, d, e, f);
 
-        public static Tuple<A, B, C, D, E, F, G> TupleOf<A, B, C, D, E, F, G>(A a, B b, C c, D d, E e, F f, G g) =>
-            Tuple.Create(a, b, c, d, e, f, g);
+        public static (A, B, C, D, E, F, G) TupleOf<A, B, C, D, E, F, G>(A a, B b, C c, D d, E e, F f, G g) =>
+            (a, b, c, d, e, f, g);
 
         /// <summary>
         /// Creates a new Dictionary from the properties of an object.

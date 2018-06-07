@@ -18,10 +18,10 @@ namespace KitchenSink.Tests
             });
             Assert.IsTrue(
                 SeqOf(
-                    TupleOf(1, 2),
-                    TupleOf(2, 3),
-                    TupleOf(3, 4),
-                    TupleOf(4, 5)).SequenceEqual(
+                    (1, 2),
+                    (2, 3),
+                    (3, 4),
+                    (4, 5)).SequenceEqual(
                     SeqOf(1, 2, 3, 4, 5).OverlappingPairs()));
         }
     }
