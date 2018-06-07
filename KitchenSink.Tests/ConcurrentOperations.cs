@@ -257,6 +257,25 @@ namespace KitchenSink.Tests
             Assert.AreEqual(1, r.Value);
         }
 
+        [Test]
+        public void AtomFocus()
+        {
+            var atomTuple = Atom.Of((1, "a"));
+            var atomInt = atomTuple.Focus(x => x.Item1, (x, y) => (y, x.Item2));
+            var atomString = atomTuple.Focus(x => x.Item2, (x, y) => (x.Item1, y));
+            Assert.AreEqual((1, "a"), atomTuple.Value);
+            atomInt.Update(Inc);
+            Assert.AreEqual((2, "a"), atomTuple.Value);
+            atomString.Update(x => x + "b");
+            Assert.AreEqual((2, "ab"), atomTuple.Value);
+            atomTuple.Update(t =>
+            {
+                var (x, y) = t;
+                return (x + 1, y + "c");
+            });
+            Assert.AreEqual((3, "abc"), atomTuple.Value);
+        }
+
         public class SomeException : Exception
         {
         }

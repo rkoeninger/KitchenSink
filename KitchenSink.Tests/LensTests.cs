@@ -24,9 +24,9 @@ namespace KitchenSink.Tests
         [Test]
         public void GenFromPropertyExpression()
         {
-            var fn = Lens.For((Person x) => x.FirstName);
-            var ln = Lens.For((Person x) => x.LastName);
-            var ct = Lens.For((Address x) => x.City);
+            var fn = Lens.Of((Person x) => x.FirstName);
+            var ln = Lens.Of((Person x) => x.LastName);
+            var ct = Lens.Of((Address x) => x.City);
 
             var address = new Address("123 Fake Street", "Anytown");
             var person = new Person("John", "Doe", address);
