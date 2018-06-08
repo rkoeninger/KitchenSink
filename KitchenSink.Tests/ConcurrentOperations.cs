@@ -34,9 +34,9 @@ namespace KitchenSink.Tests
         }
 
         [Test]
-        public void AgentAtomicity()
+        public void AtomAsyncAtomicity()
         {
-            var agent = Agent.Of(0);
+            var atom = Atom.Of(0);
             var lists = Repeatedly(ListCount, () =>
                 Rand.Ints()
                     .Select(Mask(ValueMask))
@@ -47,10 +47,10 @@ namespace KitchenSink.Tests
             var tasks = lists.Select(xs =>
                 Task.Run(() =>
                     Task.WaitAll(xs
-                        .Select(x => (Task)agent.Update(Curry(Add)(x)))
+                        .Select(x => (Task)atom.UpdateAsync(Curry(Add)(x)))
                         .ToArray()))).ToArray();
             Task.WaitAll(tasks);
-            Assert.AreEqual(total, agent.Value);
+            Assert.AreEqual(total, atom.Value);
         }
 
         [Test]
