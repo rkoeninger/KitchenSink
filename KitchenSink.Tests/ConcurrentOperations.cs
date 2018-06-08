@@ -274,6 +274,8 @@ namespace KitchenSink.Tests
                 return (x + 1, y + "c");
             });
             Assert.AreEqual((3, "abc"), atomTuple.Value);
+            Assert.AreEqual(3, atomInt.Value);
+            Assert.AreEqual("abc", atomString.Value);
         }
 
         public class SomeException : Exception
