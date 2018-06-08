@@ -95,6 +95,7 @@
     <Compile Include="Timekeeping\DateSpan.cs" />
     <Compile Include="Timekeeping\ExactDay.cs" />
     <Compile Include="Timekeeping\ExactMonth.cs" />
+    <Compile Include="Timekeeping\ExactYear.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="Void.cs" />
     <Compile Include="Xml.cs" />

@@ -61,6 +61,11 @@ Not everything in this library is meant to be taken completely seriously. Some f
 private const int DeclareSingleUse = 0;
 ```
 
+### Precise Timekeeping Representations
+
+  * `DateSpan` - region of time between two dates
+  * `ExactDay` - a region of time covering an entire calendar day
+
 ### Testing and Validation
 
   * `Expect` - testing for exceptions and invalid syntax; companion to Assert

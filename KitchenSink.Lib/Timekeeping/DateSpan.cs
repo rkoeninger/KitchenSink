@@ -130,7 +130,6 @@ namespace KitchenSink.Timekeeping
         public TimeSpan Length => End - Begin;
 
         public bool Contains(DateTime time) => time >= Begin && time < End;
-
         public bool Contains(DateSpan that) => that.Begin >= Begin && that.End <= End;
 
         public bool Overlaps(DateSpan that) =>
@@ -139,7 +138,6 @@ namespace KitchenSink.Timekeeping
                 || Begin < that.End && End > that.Begin;
 
         public override int GetHashCode() => Begin.GetHashCode() ^ End.GetHashCode();
-
         public override bool Equals(object obj) => obj is DateSpan && Equals((DateSpan)obj);
 
         public bool Equals(DateSpan that) => Begin == that.Begin && End == that.End;
@@ -150,18 +148,13 @@ namespace KitchenSink.Timekeeping
         public override string ToString() =>
             ToString(CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern);
 
-        public string ToString(string format) => $"{Begin:format} to {End:format}";
+        public string ToString(string format) => $"{Begin:format}{DateTimeSeparator}{End:format}";
 
         public static bool operator ==(DateSpan x, DateSpan y) => x.Equals(y);
-
         public static bool operator !=(DateSpan x, DateSpan y) => !x.Equals(y);
-
         public static bool operator <(DateSpan x, DateSpan y) => x.CompareTo(y) < 0;
-
         public static bool operator >(DateSpan x, DateSpan y) => x.CompareTo(y) > 0;
-
         public static bool operator <=(DateSpan x, DateSpan y) => x.CompareTo(y) <= 0;
-
         public static bool operator >=(DateSpan x, DateSpan y) => x.CompareTo(y) >= 0;
     }
 }
