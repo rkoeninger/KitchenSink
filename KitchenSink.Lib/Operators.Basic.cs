@@ -219,5 +219,10 @@ namespace KitchenSink
         /// Negative type check for type parameter.
         /// </summary>
         public static bool IsNot<A>(object val) => !Is<A>(val);
+
+        /// <summary>
+        /// Builds an AutoCache around given interface implementation.
+        /// </summary>
+        public static A Cache<A>(A inner) where A : class => AutoCache.Build(inner);
     }
 }

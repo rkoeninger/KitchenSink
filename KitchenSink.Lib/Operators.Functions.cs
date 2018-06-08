@@ -144,8 +144,8 @@ namespace KitchenSink
         /// </summary>
         public static Func<A, Z> Memo<A, Z>(Func<A, Z> f)
         {
-            var hash = new ConcurrentDictionary<A, Z>();
-            return a => hash.GetOrAdd(a, f);
+            var cache = new ConcurrentDictionary<A, Z>();
+            return a => cache.GetOrAdd(a, f);
         }
 
         /// <summary>
@@ -153,8 +153,8 @@ namespace KitchenSink
         /// </summary>
         public static Func<A, B, Z> Memo<A, B, Z>(Func<A, B, Z> f)
         {
-            var hash = new ConcurrentDictionary<(A, B), Z>();
-            return (a, b) => hash.GetOrAdd((a, b), _ => f(a, b));
+            var cache = new ConcurrentDictionary<(A, B), Z>();
+            return (a, b) => cache.GetOrAdd((a, b), _ => f(a, b));
         }
 
         /// <summary>
@@ -162,8 +162,8 @@ namespace KitchenSink
         /// </summary>
         public static Func<A, B, C, Z> Memo<A, B, C, Z>(Func<A, B, C, Z> f)
         {
-            var hash = new ConcurrentDictionary<(A, B, C), Z>();
-            return (a, b, c) => hash.GetOrAdd((a, b, c), _ => f(a, b, c));
+            var cache = new ConcurrentDictionary<(A, B, C), Z>();
+            return (a, b, c) => cache.GetOrAdd((a, b, c), _ => f(a, b, c));
         }
 
         /// <summary>
@@ -171,8 +171,8 @@ namespace KitchenSink
         /// </summary>
         public static Func<A, B, C, D, Z> Memo<A, B, C, D, Z>(Func<A, B, C, D, Z> f)
         {
-            var hash = new ConcurrentDictionary<(A, B, C, D), Z>();
-            return (a, b, c, d) => hash.GetOrAdd((a, b, c, d), _ => f(a, b, c, d));
+            var cache = new ConcurrentDictionary<(A, B, C, D), Z>();
+            return (a, b, c, d) => cache.GetOrAdd((a, b, c, d), _ => f(a, b, c, d));
         }
     }
 }

@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoCache.cs" />
     <Compile Include="Collections\BankersQueue.cs" />
     <Compile Include="Collections\BitmappedTrie.cs" />
     <Compile Include="Collections\ConsList.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Extensions\EnumerableMaybeExtensions.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Extensions\MathExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\StreamExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\FuncExtensions.cs" />
