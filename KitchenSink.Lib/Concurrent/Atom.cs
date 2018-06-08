@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using KitchenSink.Purity;
 
 namespace KitchenSink.Concurrent
@@ -11,31 +12,41 @@ namespace KitchenSink.Concurrent
 
     public abstract class Atom<A>
     {
+        internal Atom()
+        {
+        }
+
+        internal abstract Lock Lock { get; }
+
         public abstract A Value { get; set; }
         public abstract A Update(Func<A, A> f);
 
+        public A Reset(A value) => Update(_ => value);
+        public Task<A> UpdateAsync(Func<A, A> f) => Task.Run(() => Update(f));
+        public Task<A> ResetAsync(A value) => Task.Run(() => Reset(value));
         public Atom<B> Focus<B>(Expression<Func<A, B>> expr) => Focus(Lens.Of(expr));
         public Atom<B> Focus<B>(Func<A, B> get, Func<A, B, A> set) => Focus(Lens.Of(get, set));
         public Atom<B> Focus<B>(Lens<A, B> lens) => new FocusedAtom<A, B>(this, lens);
     }
 
-    public class BasicAtom<A> : Atom<A>
+    public sealed class BasicAtom<A> : Atom<A>
     {
         private A value;
-        private readonly Lock @lock = new Lock();
 
         public BasicAtom(A initial) => value = initial;
+
+        internal override Lock Lock { get; } = new Lock();
 
         public override A Value
         {
             get => value;
-            set => @lock.Do(() => this.value = value);
+            set => Lock.Do(() => this.value = value);
         }
 
-        public override A Update(Func<A, A> f) => @lock.Do(() => value = f(value));
+        public override A Update(Func<A, A> f) => Lock.Do(() => value = f(value));
     }
 
-    public class FocusedAtom<A, B> : Atom<B>
+    public sealed class FocusedAtom<A, B> : Atom<B>
     {
         private readonly Atom<A> target;
         private readonly Lens<A, B> lens;
@@ -45,6 +56,8 @@ namespace KitchenSink.Concurrent
             this.target = target;
             this.lens = lens;
         }
+
+        internal override Lock Lock => target.Lock;
 
         public override B Value
         {
