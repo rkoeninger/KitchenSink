@@ -64,13 +64,15 @@ namespace KitchenSink
 
                 if (method.ReturnType == typeof(void))
                 {
+                    methodIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
+
                     foreach (var argIndex in Enumerable.Range(1, paramz.Length))
                     {
                         methodIl.Emit(OpCodes.Ldc_I4_S, argIndex);
                         methodIl.Emit(OpCodes.Ldarg_S);
                     }
 
-                    // TODO: call inner method
+                    // TODO: methodIl.EmitCall(OpCode, method, ArrayOf<Type>());
                 }
                 else
                 {
@@ -111,6 +113,8 @@ namespace KitchenSink
                         }
 
                         // TODO: load ref to same method on inner
+                        // TODO: methodIl.Emit(OpCodes.Ldftn, {{ method }});
+                        // TODO: methodIl.Emit(OpCodes.Newobj, typeof(Func<...>).GetConstructor(...));
                         var getOrAddMethod = cacheType.GetMethod("GetOrAdd").NonNull();
                         // TODO: methodIl.EmitCall(OpCode, getOrAddMethod, ArrayOf<Type>());
                     }
