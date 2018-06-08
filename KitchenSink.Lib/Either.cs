@@ -30,10 +30,7 @@ namespace KitchenSink
 
     public class Either<A, B>
     {
-        public static implicit operator Either<A, B>(A val)
-        {
-            return new Either<A, B>(true, val, default);
-        }
+        public static implicit operator Either<A, B>(A val) => new Either<A, B>(true, val, default);
 
         public static bool operator ==(Either<A, B> x, Either<A, B> y) => Equals(x, y);
 

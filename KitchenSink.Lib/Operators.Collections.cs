@@ -73,6 +73,16 @@ namespace KitchenSink
         public static IEnumerable<A> Repeatedly<A>(int count, Func<A> f) => Forever(f).Take(count);
 
         /// <summary>
+        /// Adds up all numeric values in sequence.
+        /// </summary>
+        public static int Sum(IEnumerable<int> seq) => seq.Sum();
+
+        /// <summary>
+        /// Adds up all numeric values in sequence.
+        /// </summary>
+        public static long Sum(IEnumerable<long> seq) => seq.Sum();
+
+        /// <summary>
         /// Creates a Maybe that has the given value if it is not null.
         /// </summary>
         public static Maybe<A> MaybeOf<A>(A value) => new Maybe<A>(value);
@@ -265,21 +275,27 @@ namespace KitchenSink
         public static (A, B, C, D, E, F, G) TupleOf<A, B, C, D, E, F, G>(A a, B b, C c, D d, E e, F f, G g) =>
             (a, b, c, d, e, f, g);
 
+        public static (A, B, C, D, E, F, G, H) TupleOf<A, B, C, D, E, F, G, H>(A a, B b, C c, D d, E e, F f, G g, H h) =>
+            (a, b, c, d, e, f, g, h);
+
         /// <summary>
         /// Creates a new Dictionary from the properties of an object.
         /// </summary>
         /// <remarks>
         /// Intended to be used with an anonymous object, but can be used with any object.
         /// </remarks>
-        public static Dictionary<string, object> ToDictionary(object obj)
-        {
-            return obj?
+        public static Dictionary<string, object> ToDictionary(object obj) =>
+            obj?
                 .GetType()
                 .GetProperties()
                 .Where(x => x.GetIndexParameters().Length == 0)
                 .ToDictionary(x => x.Name, x => x.GetValue(obj, null))
             ?? new Dictionary<string, object>();
-        }
+
+        public static Dictionary<A, V> ToDictionary<A, V>(this (A, V)[] pairs) =>
+            pairs.ToDictionary(x => x.Item1, x => x.Item2);
+
+        public static Dictionary<A, V> DictOf<A, V>(params (A, V)[] pairs) => pairs.ToDictionary();
 
         public static Dictionary<A, V> DictOf<A, V>() => new Dictionary<A, V>();
 

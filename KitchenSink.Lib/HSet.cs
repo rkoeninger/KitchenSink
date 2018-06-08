@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace KitchenSink
+﻿namespace KitchenSink
 {
     // ReSharper disable UnusedTypeParameter
     public interface ISig<A> { }
@@ -31,10 +29,10 @@ namespace KitchenSink
         public static (B, C) Pick<A, B, C>((A, B, C) t, ISig<B, C> _) => (t.Item2, t.Item3);
         public static (A, B, C) Pick<A, B, C>((A, B, C) t, ISig<A, B, C> _) => t;
 
-        public static A Pick<A, B, C, D>(Tuple<A, B, C, D> t, ISig<A> _) => t.Item1;
-        public static B Pick<A, B, C, D>(Tuple<A, B, C, D> t, ISig<B> _) => t.Item2;
-        public static C Pick<A, B, C, D>(Tuple<A, B, C, D> t, ISig<C> _) => t.Item3;
-        public static D Pick<A, B, C, D>(Tuple<A, B, C, D> t, ISig<D> _) => t.Item4;
+        public static A Pick<A, B, C, D>((A, B, C, D) t, ISig<A> _) => t.Item1;
+        public static B Pick<A, B, C, D>((A, B, C, D) t, ISig<B> _) => t.Item2;
+        public static C Pick<A, B, C, D>((A, B, C, D) t, ISig<C> _) => t.Item3;
+        public static D Pick<A, B, C, D>((A, B, C, D) t, ISig<D> _) => t.Item4;
         public static (A, B) Pick<A, B, C, D>((A, B, C, D) t, ISig<A, B> _) => (t.Item1, t.Item2);
         public static (A, C) Pick<A, B, C, D>((A, B, C, D) t, ISig<A, C> _) => (t.Item1, t.Item3);
         public static (A, D) Pick<A, B, C, D>((A, B, C, D) t, ISig<A, D> _) => (t.Item1, t.Item4);

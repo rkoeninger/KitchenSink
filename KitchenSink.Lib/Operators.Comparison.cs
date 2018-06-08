@@ -41,9 +41,9 @@ namespace KitchenSink
         /// Null values are always less than non-null values.
         /// </summary>
         public static Comparison Compare<A>(A x, A y) where A : IComparable<A> =>
-            If(x == null && y == null).Then(EQ)
-            .If(x == null).Then(LT)
-            .If(y == null).Then(GT)
+            If(Null(x) && Null(y)).Then(EQ)
+            .If(Null(x)).Then(LT)
+            .If(Null(y)).Then(GT)
             .Else(() =>
                 Switch(x?.CompareTo(y) ?? 0)
                 .When(Neg).Then(LT)

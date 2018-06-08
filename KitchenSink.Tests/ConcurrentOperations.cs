@@ -20,11 +20,11 @@ namespace KitchenSink.Tests
             var atom = Atom.Of(0);
             var lists = Repeatedly(ListCount, () =>
                 Rand.Ints()
-                    .Select(x => x & ValueMask)
+                    .Select(Mask(ValueMask))
                     .Take(ListLength)
                     .ToList()
                 ).ToList();
-            var total = lists.Sum(xs => xs.Sum());
+            var total = lists.Sum(Sum);
             var tasks = lists.Select(xs =>
                 Task.Run(() =>
                     xs.ForEach(x => atom.Update(Curry(Add)(x)))
@@ -39,11 +39,11 @@ namespace KitchenSink.Tests
             var agent = Agent.Of(0);
             var lists = Repeatedly(ListCount, () =>
                 Rand.Ints()
-                    .Select(x => x & ValueMask)
+                    .Select(Mask(ValueMask))
                     .Take(ListLength)
                     .ToList()
                 ).ToList();
-            var total = lists.Sum(xs => xs.Sum());
+            var total = lists.Sum(Sum);
             var tasks = lists.Select(xs =>
                 Task.Run(() =>
                     Task.WaitAll(xs
@@ -60,14 +60,14 @@ namespace KitchenSink.Tests
             var r = stm.NewRef(0);
             var lists = Repeatedly(ListCount, () =>
                 Rand.Ints()
-                    .Select(x => x & ValueMask)
+                    .Select(Mask(ValueMask))
                     .Take(ListLength)
                     .ToList()
             ).ToList();
-            var total = lists.Sum(xs => xs.Sum());
+            var total = lists.Sum(Sum);
             var tasks = lists.Select(xs =>
                 Task.Run(() =>
-                    xs.ForEach(x =>  stm.InTran(() => r.Update(Curry(Add)(x))))
+                    xs.ForEach(x => stm.InTran(() => r.Update(Curry(Add)(x))))
                 )).ToArray();
             Task.WaitAll(tasks);
             Assert.AreEqual(total, r.Value);
@@ -261,8 +261,8 @@ namespace KitchenSink.Tests
         public void AtomFocus()
         {
             var atomTuple = Atom.Of((1, "a"));
-            var atomInt = atomTuple.Focus(x => x.Item1, (x, y) => (y, x.Item2));
-            var atomString = atomTuple.Focus(x => x.Item2, (x, y) => (x.Item1, y));
+            var atomInt = atomTuple.Focus(x => x.Item1, (t, x) => (x, t.Item2));
+            var atomString = atomTuple.Focus(x => x.Item2, (t, y) => (t.Item1, y));
             Assert.AreEqual((1, "a"), atomTuple.Value);
             atomInt.Update(Inc);
             Assert.AreEqual((2, "a"), atomTuple.Value);

@@ -90,6 +90,46 @@ namespace KitchenSink
         public static readonly Func<int, int> Dec = x => x - 1;
 
         /// <summary>
+        /// Bitwise mask.
+        /// </summary>
+        public static Func<byte, byte> Mask(byte x) => y => (byte)(x & y);
+
+        /// <summary>
+        /// Bitwise mask.
+        /// </summary>
+        public static Func<sbyte, sbyte> Mask(sbyte x) => y => (sbyte)(x & y);
+
+        /// <summary>
+        /// Bitwise mask.
+        /// </summary>
+        public static Func<short, short> Mask(short x) => y => (short)(x & y);
+
+        /// <summary>
+        /// Bitwise mask.
+        /// </summary>
+        public static Func<ushort, ushort> Mask(ushort x) => y => (ushort)(x & y);
+
+        /// <summary>
+        /// Bitwise mask.
+        /// </summary>
+        public static Func<int, int> Mask(int x) => y => x & y;
+
+        /// <summary>
+        /// Bitwise mask.
+        /// </summary>
+        public static Func<uint, uint> Mask(uint x) => y => x & y;
+
+        /// <summary>
+        /// Bitwise mask.
+        /// </summary>
+        public static Func<long, long> Mask(long x) => y => x & y;
+
+        /// <summary>
+        /// Bitwise mask.
+        /// </summary>
+        public static Func<ulong, ulong> Mask(ulong x) => y => x & y;
+
+        /// <summary>
         /// Get object's type.
         /// </summary>
         public static readonly Func<object, Type> TypeOf = x => x.GetType();
