@@ -73,6 +73,16 @@ namespace KitchenSink
         public static IEnumerable<A> Repeatedly<A>(int count, Func<A> f) => Forever(f).Take(count);
 
         /// <summary>
+        /// Adds up all numeric values in sequence.
+        /// </summary>
+        public static int Sum(IEnumerable<int> seq) => seq.Sum();
+
+        /// <summary>
+        /// Adds up all numeric values in sequence.
+        /// </summary>
+        public static long Sum(IEnumerable<long> seq) => seq.Sum();
+
+        /// <summary>
         /// Creates a Maybe that has the given value if it is not null.
         /// </summary>
         public static Maybe<A> MaybeOf<A>(A value) => new Maybe<A>(value);

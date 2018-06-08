@@ -87,37 +87,55 @@ namespace KitchenSink
         /// <summary>
         /// Partially apply 2-parameter function to 1 argument.
         /// </summary>
-        public static Func<B, Z> Apply<A, B, Z>(Func<A, B, Z> f, A a)
-            => b => f.Invoke(a, b);
+        public static Func<B, Z> Apply<A, B, Z>(Func<A, B, Z> f, A a) =>
+            b => f.Invoke(a, b);
 
         /// <summary>
         /// Partially apply 3-parameter function to 1 argument.
         /// </summary>
-        public static Func<B, C, Z> Apply<A, B, C, Z>(Func<A, B, C, Z> f, A a)
-            => (b, c) => f.Invoke(a, b, c);
+        public static Func<B, C, Z> Apply<A, B, C, Z>(Func<A, B, C, Z> f, A a) =>
+            (b, c) => f.Invoke(a, b, c);
 
         /// <summary>
         /// Partially apply 3-parameter function to 2 arguments.
         /// </summary>
-        public static Func<C, Z> Apply<A, B, C, Z>(Func<A, B, C, Z> f, A a, B b)
-            => c => f.Invoke(a, b, c);
+        public static Func<C, Z> Apply<A, B, C, Z>(Func<A, B, C, Z> f, A a, B b) =>
+            c => f.Invoke(a, b, c);
 
         /// <summary>
         /// Partially apply 4-parameter function to 1 argument.
         /// </summary>
-        public static Func<B, C, D, Z> Apply<A, B, C, D, Z>(Func<A, B, C, D, Z> f, A a)
-            => (b, c, d) => f.Invoke(a, b, c, d);
+        public static Func<B, C, D, Z> Apply<A, B, C, D, Z>(Func<A, B, C, D, Z> f, A a) =>
+            (b, c, d) => f.Invoke(a, b, c, d);
 
         /// <summary>
         /// Partially apply 4-parameter function to 2 arguments.
         /// </summary>
-        public static Func<C, D, Z> Apply<A, B, C, D, Z>(Func<A, B, C, D, Z> f, A a, B b)
-            => (c, d) => f.Invoke(a, b, c, d);
+        public static Func<C, D, Z> Apply<A, B, C, D, Z>(Func<A, B, C, D, Z> f, A a, B b) =>
+            (c, d) => f.Invoke(a, b, c, d);
 
         /// <summary>
         /// Partially apply 4-parameter function to 3 arguments.
         /// </summary>
-        public static Func<D, Z> Apply<A, B, C, D, Z>(Func<A, B, C, D, Z> f, A a, B b, C c)
-            => d => f.Invoke(a, b, c, d);
+        public static Func<D, Z> Apply<A, B, C, D, Z>(Func<A, B, C, D, Z> f, A a, B b, C c) =>
+            d => f.Invoke(a, b, c, d);
+
+        /// <summary>
+        /// Flip function arguments.
+        /// </summary>
+        public static Func<B, A, Z> Flip<A, B, Z>(Func<A, B, Z> f) =>
+            (b, a) => f(a, b);
+
+        /// <summary>
+        /// Rotate function arguments forward.
+        /// </summary>
+        public static Func<C, A, B, Z> Rotate<A, B, C, Z>(Func<A, B, C, Z> f) =>
+            (c, a, b) => f(a, b, c);
+
+        /// <summary>
+        /// Rotate function arguments backward.
+        /// </summary>
+        public static Func<B, C, A, Z> RotateBack<A, B, C, Z>(Func<A, B, C, Z> f) =>
+            (b, c, a) => f(a, b, c);
     }
 }
