@@ -86,37 +86,37 @@ namespace KitchenSink
             (x, y, z, w) => f(x)(y)(z)(w);
 
         /// <summary>
-        /// Partially apply 2-parameter function to 1 argument.
+        /// Partially apply function.
         /// </summary>
         public static Func<B, Z> Apply<A, B, Z>(Func<A, B, Z> f, A a) =>
             b => f(a, b);
 
         /// <summary>
-        /// Partially apply 3-parameter function to 1 argument.
+        /// Partially apply function.
         /// </summary>
         public static Func<B, C, Z> Apply<A, B, C, Z>(Func<A, B, C, Z> f, A a) =>
             (b, c) => f(a, b, c);
 
         /// <summary>
-        /// Partially apply 3-parameter function to 2 arguments.
+        /// Partially apply function.
         /// </summary>
         public static Func<C, Z> Apply<A, B, C, Z>(Func<A, B, C, Z> f, A a, B b) =>
             c => f(a, b, c);
 
         /// <summary>
-        /// Partially apply 4-parameter function to 1 argument.
+        /// Partially apply function.
         /// </summary>
         public static Func<B, C, D, Z> Apply<A, B, C, D, Z>(Func<A, B, C, D, Z> f, A a) =>
             (b, c, d) => f(a, b, c, d);
 
         /// <summary>
-        /// Partially apply 4-parameter function to 2 arguments.
+        /// Partially apply function.
         /// </summary>
         public static Func<C, D, Z> Apply<A, B, C, D, Z>(Func<A, B, C, D, Z> f, A a, B b) =>
             (c, d) => f(a, b, c, d);
 
         /// <summary>
-        /// Partially apply 4-parameter function to 3 arguments.
+        /// Partially apply function.
         /// </summary>
         public static Func<D, Z> Apply<A, B, C, D, Z>(Func<A, B, C, D, Z> f, A a, B b, C c) =>
             d => f(a, b, c, d);
@@ -154,7 +154,7 @@ namespace KitchenSink
         public static Func<A, B, Z> Memo<A, B, Z>(Func<A, B, Z> f)
         {
             var hash = new ConcurrentDictionary<(A, B), Z>();
-            return (a, b) => hash.GetOrAdd((a, b), t => f(t.Item1, t.Item2));
+            return (a, b) => hash.GetOrAdd((a, b), _ => f(a, b));
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace KitchenSink
         public static Func<A, B, C, Z> Memo<A, B, C, Z>(Func<A, B, C, Z> f)
         {
             var hash = new ConcurrentDictionary<(A, B, C), Z>();
-            return (a, b, c) => hash.GetOrAdd((a, b, c), t => f(t.Item1, t.Item2, t.Item3));
+            return (a, b, c) => hash.GetOrAdd((a, b, c), _ => f(a, b, c));
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace KitchenSink
         public static Func<A, B, C, D, Z> Memo<A, B, C, D, Z>(Func<A, B, C, D, Z> f)
         {
             var hash = new ConcurrentDictionary<(A, B, C, D), Z>();
-            return (a, b, c, d) => hash.GetOrAdd((a, b, c, d), t => f(t.Item1, t.Item2, t.Item3, t.Item4));
+            return (a, b, c, d) => hash.GetOrAdd((a, b, c, d), _ => f(a, b, c, d));
         }
     }
 }
