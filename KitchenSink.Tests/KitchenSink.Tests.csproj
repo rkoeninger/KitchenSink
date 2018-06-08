@@ -52,6 +52,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Caching.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="CondTests.cs" />
     <Compile Include="DateTimeTests.cs" />
