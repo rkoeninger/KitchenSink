@@ -99,7 +99,6 @@
     <Compile Include="Timekeeping\ExactDay.cs" />
     <Compile Include="Timekeeping\ExactMonth.cs" />
     <Compile Include="Unit.cs" />
-    <Compile Include="Validation.cs" />
     <Compile Include="Void.cs" />
     <Compile Include="Xml.cs" />
   </ItemGroup>

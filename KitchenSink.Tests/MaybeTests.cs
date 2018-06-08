@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 using KitchenSink.Testing;
@@ -87,16 +86,6 @@ namespace KitchenSink.Tests
             Assert.AreEqual(2, None<int>() | Some(2) | 3);
             Expect.IsSome(2, None<int>() | Some(2) | None<int>());
             Expect.IsNone(None<string>() | None<string>());
-        }
-
-        [Test]
-        public void ValidationTests()
-        {
-            var v = Validation.Of("abcdefg")
-                .Is(x => x.StartsWith("abc"))
-                .Is(x => x.EndsWith("abc"))
-                .Is(x => { if (x.Length < 10) throw new Exception("asdfasdfa"); });
-            Assert.AreEqual(2, v.Errors.Count());
         }
     }
 }

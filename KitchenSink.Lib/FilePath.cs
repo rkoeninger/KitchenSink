@@ -131,15 +131,9 @@ namespace KitchenSink
     /// </summary>
     public static class UNC
     {
-        public static FilePath Path(string host, string share)
-        {
-            return Host(host).Share(share);
-        }
+        public static FilePath Path(string host, string share) => Host(host).Share(share);
 
-        public static UNCHost Host(string host)
-        {
-            return new UNCHost(host);
-        }
+        public static UNCHost Host(string host) => new UNCHost(host);
     }
 
     /// <summary>
@@ -149,20 +143,12 @@ namespace KitchenSink
     {
         internal UNCHost(string host) : base(host) {}
 
-        public FilePath Share(string share)
-        {
-            return new FilePath(Path.Combine(Value.StartsWith(@"\\") ? Value : @"\\" + Value, share));
-        }
+        public FilePath Share(string share) =>
+            new FilePath(Path.Combine(Value.StartsWith(@"\\") ? Value : @"\\" + Value, share));
 
-        public static FilePath operator /(UNCHost host, FilePath end)
-        {
-            return host.Share(end.Value);
-        }
+        public static FilePath operator /(UNCHost host, FilePath end) => host.Share(end.Value);
 
-        public static FilePath operator /(UNCHost host, string end)
-        {
-            return host.Share(end);
-        }
+        public static FilePath operator /(UNCHost host, string end) => host.Share(end);
     }
 
     public sealed class FilePath : NewType<string>
@@ -172,30 +158,21 @@ namespace KitchenSink
         /// <summary>
         /// Concatenates two file paths.
         /// </summary>
-        public static FilePath operator /(FilePath begin, FilePath end)
-        {
-            return new FilePath(Path.Combine(begin.Value, end.Value));
-        }
+        public static FilePath operator /(FilePath begin, FilePath end) =>
+            new FilePath(Path.Combine(begin.Value, end.Value));
 
         /// <summary>
         /// Concatenates two file paths.
         /// </summary>
-        public static FilePath operator /(FilePath begin, string end)
-        {
-            return new FilePath(Path.Combine(begin.Value, end));
-        }
+        public static FilePath operator /(FilePath begin, string end) =>
+            new FilePath(Path.Combine(begin.Value, end));
 
         /// <summary>
         /// Concatenates two file paths.
         /// </summary>
-        public static FilePath operator /(string begin, FilePath end)
-        {
-            return new FilePath(Path.Combine(begin, end.Value));
-        }
+        public static FilePath operator /(string begin, FilePath end) =>
+            new FilePath(Path.Combine(begin, end.Value));
 
-        public static implicit operator string(FilePath filePath)
-        {
-            return filePath.Value;
-        }
+        public static implicit operator string(FilePath filePath) => filePath.Value;
     }
 }
