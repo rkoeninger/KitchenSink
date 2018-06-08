@@ -43,7 +43,7 @@ namespace KitchenSink
             Right = right;
         }
 
-        internal bool IsLeft { get; }
+        public bool IsLeft { get; }
         public bool IsRight => !IsLeft;
         public A Left { get; }
         public B Right { get; }
@@ -94,8 +94,8 @@ namespace KitchenSink
                 return false;
 
             var that = (Either<A, B>) other;
-            return (IsLeft && that.IsLeft && Equals(Left, that.Left))
-                || (IsRight && that.IsRight && Equals(Right, that.Right));
+            return IsLeft && that.IsLeft && Equals(Left, that.Left)
+                || IsRight && that.IsRight && Equals(Right, that.Right);
         }
     }
 }

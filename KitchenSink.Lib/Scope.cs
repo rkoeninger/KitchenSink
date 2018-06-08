@@ -105,11 +105,7 @@ namespace KitchenSink
         };
 
         private static Func<string, Stack<object>> New(object value) => key =>
-        {
-            var stack = new Stack<object>();
-            stack.Push(value);
-            return stack;
-        };
+            Existing(value)(key, new Stack<object>());
 
         private class Pop : IDisposable
         {
