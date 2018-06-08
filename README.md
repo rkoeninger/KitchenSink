@@ -40,7 +40,6 @@ Not everything in this library is meant to be taken completely seriously. Some f
 ### Powerful Concurrency Primitives
 
   * `Atom<A>` - mutually exclusive reference cell with synchronous updates
-  * `Agent<A>` - like an `Atom`, but with asynchronous updates
   * `Stm`, `Ref<A>`, `Tran` - simple transactional memory system for co-ordinated synchronous updates
 
 ### Composable Control Structures
@@ -66,8 +65,6 @@ private const int DeclareSingleUse = 0;
 
   * `Expect` - testing for exceptions and invalid syntax; companion to Assert
   * `Check` - property based testing
-  * `Verify` - structural examination of data
-  * `Validation` - appies a series of validation predicates to a value, collecting exceptions
   * `Rand` - produces random test data
   * `Sample` - provides common and edge-case test values
   * `All` - enumerates all values of certain types
@@ -76,7 +73,6 @@ private const int DeclareSingleUse = 0;
 
   * `IO` - a type for modeling and composing I/O operations and side effects
   * `Lens` - composable get and set pair for immutable types
-  * `HList` - allows for abstraction over arity
 
 ### Questionable File Path Building Facility using Operator Overloading
 
