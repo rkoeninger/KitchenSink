@@ -2,17 +2,8 @@
 
 namespace KitchenSink.Concurrent
 {
-    public class AgentDisposedException : ObjectDisposedException
+    public class InvalidSubtypeException : Exception
     {
-        public AgentDisposedException() : base("Agent has already been disposed")
-        {
-        }
-    }
-
-    public class OutsideTranScopeException : Exception
-    {
-        public OutsideTranScopeException() : base("Must provide a Tran or be in scope of an ambient Tran")
-        {
-        }
+        public InvalidSubtypeException() : base("Class hierarchy is supposed to be closed") { }
     }
 }
