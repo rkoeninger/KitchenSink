@@ -73,8 +73,11 @@ namespace KitchenSink.Concurrent
         /// <summary>
         /// Prepare update to contained value in ambient scope.
         /// </summary>
-        public void Update(Func<A, A> f) =>
-            Update(Scope.GetMaybe<Tran>().OrElseThrow<OutsideTranScopeException>(), f);
+        public void Update(Func<A, A> f)
+        {
+        }
+
+        //Update(Scope.GetMaybe<Tran>().OrElseThrow<OutsideTranScopeException>(), f);
 
         /// <summary>
         /// Prepare update to contained value in given scope.
@@ -83,7 +86,8 @@ namespace KitchenSink.Concurrent
         {
             if (tran == null)
             {
-                throw new OutsideTranScopeException();
+            //    throw new OutsideTranScopeException();
+                return;
             }
 
             if (tran.Join(this))
