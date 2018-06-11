@@ -44,6 +44,7 @@ namespace KitchenSink.Concurrent
             get => Update(x => x);
             set => Update(_ => value);
         }
+
         public Task<A> UpdateAsync(Func<A, A> f) => Task.Run(() => Update(f));
         public Task<A> ResetAsync(A value) => UpdateAsync(_ => value);
         public Atom<B> Focus<B>(Expression<Func<A, B>> expr) => Focus(Lens.Of(expr));
