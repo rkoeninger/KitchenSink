@@ -77,5 +77,50 @@ namespace KitchenSink.Extensions
         /// Curries 4-parameter function.
         /// </summary>
         public static Func<A, Func<B, Func<C, Func<D, E>>>> Curry<A, B, C, D, E>(this Func<A, B, C, D, E> f) => a => b => c => d => f(a, b, c, d);
+
+        /// <summary>
+        /// Converts <c>Action&lt;...&gt;</c> to <c>Func&lt;..., Unit&gt;.</c>
+        /// </summary>
+        public static Func<Unit> AsFunc(this Action f) => () =>
+        {
+            f();
+            return Unit.It;
+        };
+
+        /// <summary>
+        /// Converts <c>Action&lt;...&gt;</c> to <c>Func&lt;..., Unit&gt;.</c>
+        /// </summary>
+        public static Func<A, Unit> AsFunc<A>(this Action<A> f) => a =>
+        {
+            f(a);
+            return Unit.It;
+        };
+
+        /// <summary>
+        /// Converts <c>Action&lt;...&gt;</c> to <c>Func&lt;..., Unit&gt;.</c>
+        /// </summary>
+        public static Func<A, B, Unit> AsFunc<A, B>(this Action<A, B> f) => (a, b) =>
+        {
+            f(a, b);
+            return Unit.It;
+        };
+
+        /// <summary>
+        /// Converts <c>Action&lt;...&gt;</c> to <c>Func&lt;..., Unit&gt;.</c>
+        /// </summary>
+        public static Func<A, B, C, Unit> AsFunc<A, B, C>(this Action<A, B, C> f) => (a, b, c) =>
+        {
+            f(a, b, c);
+            return Unit.It;
+        };
+
+        /// <summary>
+        /// Converts <c>Action&lt;...&gt;</c> to <c>Func&lt;..., Unit&gt;.</c>
+        /// </summary>
+        public static Func<A, B, C, D, Unit> AsFunc<A, B, C, D>(this Action<A, B, C, D> f) => (a, b, c, d) =>
+        {
+            f(a, b, c, d);
+            return Unit.It;
+        };
     }
 }
