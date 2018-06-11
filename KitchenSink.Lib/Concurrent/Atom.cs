@@ -37,9 +37,13 @@ namespace KitchenSink.Concurrent
 
         internal abstract Lock Lock { get; }
 
-        public abstract A Value { get; set; }
         public abstract A Update(Func<A, A> f);
 
+        public A Value
+        {
+            get => Update(x => x);
+            set => Update(_ => value);
+        }
         public Task<A> UpdateAsync(Func<A, A> f) => Task.Run(() => Update(f));
         public Task<A> ResetAsync(A value) => UpdateAsync(_ => value);
         public Atom<B> Focus<B>(Expression<Func<A, B>> expr) => Focus(Lens.Of(expr));
@@ -54,12 +58,6 @@ namespace KitchenSink.Concurrent
         public BasicAtom(A initial) => value = initial;
 
         internal override Lock Lock { get; } = Lock.New();
-
-        public override A Value
-        {
-            get => value;
-            set => Update(_ => value);
-        }
 
         public override A Update(Func<A, A> f) => Lock.Do(() => value = f(value));
     }
@@ -76,12 +74,6 @@ namespace KitchenSink.Concurrent
         }
 
         internal override Lock Lock => target.Lock;
-
-        public override B Value
-        {
-            get => lens.Get(target.Value);
-            set => Update(_ => value);
-        }
 
         public override B Update(Func<B, B> f) =>
             lens.Get(target.Update(x => lens.Set(x, f(lens.Get(x)))));
@@ -109,16 +101,10 @@ namespace KitchenSink.Concurrent
 
         internal override Lock Lock { get; }
 
-        public override Z Value
-        {
-            get => combine(atomA.Value, atomB.Value);
-            set => Update(_ => value);
-        }
-
         public override Z Update(Func<Z, Z> f) =>
             Lock.Do(() =>
             {
-                var z = f(Value);
+                var z = f(combine(atomA.Value, atomB.Value));
                 (atomA.Value, atomB.Value) = split(z);
                 return z;
             });
@@ -149,16 +135,10 @@ namespace KitchenSink.Concurrent
 
         internal override Lock Lock { get; }
 
-        public override Z Value
-        {
-            get => combine(atomA.Value, atomB.Value, atomC.Value);
-            set => Update(_ => value);
-        }
-
         public override Z Update(Func<Z, Z> f) =>
             Lock.Do(() =>
             {
-                var z = f(Value);
+                var z = f(combine(atomA.Value, atomB.Value, atomC.Value));
                 (atomA.Value, atomB.Value, atomC.Value) = split(z);
                 return z;
             });
@@ -192,16 +172,10 @@ namespace KitchenSink.Concurrent
 
         internal override Lock Lock { get; }
 
-        public override Z Value
-        {
-            get => combine(atomA.Value, atomB.Value, atomC.Value, atomD.Value);
-            set => Update(_ => value);
-        }
-
         public override Z Update(Func<Z, Z> f) =>
             Lock.Do(() =>
             {
-                var z = f(Value);
+                var z = f(combine(atomA.Value, atomB.Value, atomC.Value, atomD.Value));
                 (atomA.Value, atomB.Value, atomC.Value, atomD.Value) = split(z);
                 return z;
             });
