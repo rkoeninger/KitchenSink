@@ -83,6 +83,16 @@ namespace KitchenSink
         public static long Sum(IEnumerable<long> seq) => seq.Sum();
 
         /// <summary>
+        /// Creates an Either with the given Left value.
+        /// </summary>
+        public static Either<A, B> LeftOf<A, B>(A value) => new Either<A, B>(true, value, default);
+
+        /// <summary>
+        /// Creates an Either with the given Right value.
+        /// </summary>
+        public static Either<A, B> RightOf<A, B>(B value) => new Either<A, B>(false, default, value);
+
+        /// <summary>
         /// Creates a Maybe that has the given value if it is not null.
         /// </summary>
         public static Maybe<A> MaybeOf<A>(A value) => new Maybe<A>(value);
