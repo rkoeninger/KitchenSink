@@ -39,8 +39,8 @@ Not everything in this library is meant to be taken completely seriously. Some f
 
 ### Powerful Concurrency Primitives
 
-  * `Atom<A>` - mutually exclusive reference cell with synchronous updates
-  * `Stm`, `Ref<A>`, `Tran` - simple transactional memory system for co-ordinated synchronous updates
+  * `Atom<A>` - mutually exclusive reference cell with synchronous updates that is both divisible and composable
+  * `Lock` - exclusive locking primitive built on `Monitor.Enter`/`.Exit` that is composible
 
 ### Composable Control Structures
 
