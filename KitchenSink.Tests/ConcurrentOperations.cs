@@ -27,7 +27,7 @@ namespace KitchenSink.Tests
             var total = lists.Sum(Sum);
             var tasks = lists.Select(xs =>
                 Task.Run(() =>
-                    xs.ForEach(x => atom.Update(Curry(Add)(x)))
+                    xs.ForEach(x => atom.Update(y => y + x))
                 )).ToArray();
             Task.WaitAll(tasks);
             Assert.AreEqual(total, atom.Value);
@@ -47,17 +47,47 @@ namespace KitchenSink.Tests
             var tasks = lists.Select(xs =>
                 Task.Run(() =>
                     Task.WaitAll(xs
-                        .Select(x => (Task)atom.UpdateAsync(Curry(Add)(x)))
+                        .Select(x => (Task)atom.UpdateAsync(y => y + x))
                         .ToArray()))).ToArray();
             Task.WaitAll(tasks);
             Assert.AreEqual(total, atom.Value);
         }
 
         [Test]
-        public void RefAtomicitiy()
+        public void AtomZippedAtomicity()
         {
-            var stm = new Stm();
-            var r = stm.NewRef(0);
+            var atomA = Atom.Of(0);
+            var atomB = Atom.Of(0);
+            var atomC = Atom.Of(0);
+            var atomD = Atom.Of(0);
+            var atomA2 = Atom.Zip(
+                atomA,
+                atomB,
+                atomC,
+                atomD,
+                (a_, b_, c_, d_) => a_,
+                x => (x, atomB.Value, atomC.Value, atomD.Value));
+            var atomB2 = Atom.Zip(
+                atomA,
+                atomB,
+                atomC,
+                atomD,
+                (a_, b_, c_, d_) => b_,
+                x => (atomA.Value, x, atomC.Value, atomD.Value));
+            var atomC2 = Atom.Zip(
+                atomA,
+                atomB,
+                atomC,
+                atomD,
+                (a_, b_, c_, d_) => c_,
+                x => (atomA.Value, atomB.Value, x, atomD.Value));
+            var atomD2 = Atom.Zip(
+                atomA,
+                atomB,
+                atomC,
+                atomD,
+                (a_, b_, c_, d_) => d_,
+                x => (atomA.Value, atomB.Value, atomC.Value, x));
             var lists = Repeatedly(ListCount, () =>
                 Rand.Ints()
                     .Select(Mask(ValueMask))
@@ -67,194 +97,29 @@ namespace KitchenSink.Tests
             var total = lists.Sum(Sum);
             var tasks = lists.Select(xs =>
                 Task.Run(() =>
-                    xs.ForEach(x => stm.InTran(() => r.Update(Curry(Add)(x))))
+                    xs.ForEach(x =>
+                    {
+                        switch (Abs(x) % 4)
+                        {
+                            case 0:
+                                atomA2.Update(y => y + x);
+                                break;
+                            case 1:
+                                atomB2.Update(y => y + x);
+                                break;
+                            case 2:
+                                atomC2.Update(y => y + x);
+                                break;
+                            case 3:
+                                atomD2.Update(y => y + x);
+                                break;
+                            default:
+                                throw new ArithmeticException();
+                        }
+                    })
                 )).ToArray();
             Task.WaitAll(tasks);
-            Assert.AreEqual(total, r.Value);
-        }
-
-        [Test]
-        public void SuccessfulExplicitTran()
-        {
-            var stm = new Stm();
-            var ref1 = stm.NewRef(0);
-            var ref2 = stm.NewRef("a");
-            var ref3 = stm.NewRef(false);
-
-            using (var tran = stm.BeginTran())
-            {
-                ref1.Update(tran, x => x + 1);
-                ref2.Update(tran, x => x + "b");
-                ref3.Update(tran, x => true);
-            }
-
-            Assert.AreEqual(1, ref1.Value);
-            Assert.AreEqual("ab", ref2.Value);
-            Assert.IsTrue(ref3.Value);
-        }
-
-        [Test]
-        public void FailedExplicitTran()
-        {
-            var stm = new Stm();
-            var ref1 = stm.NewRef(0);
-            var ref2 = stm.NewRef("a");
-            var ref3 = stm.NewRef(false);
-
-            Assert.Throws<SomeException>(() =>
-            {
-                using (var tran = stm.BeginTran())
-                {
-                    ref1.Update(tran, x => x + 1);
-                    ref2.Update(tran, x => x + "b");
-                    ref3.Update(tran, x => throw new SomeException());
-                }
-            });
-
-            Assert.AreEqual(0, ref1.Value);
-            Assert.AreEqual("a", ref2.Value);
-            Assert.IsFalse(ref3.Value);
-        }
-
-        [Test]
-        public void SuccessfulAmbientTran()
-        {
-            var stm = new Stm();
-            var ref1 = stm.NewRef(0);
-            var ref2 = stm.NewRef("a");
-            var ref3 = stm.NewRef(false);
-
-            using (stm.BeginTran(true))
-            {
-                ref1.Update(x => x + 1);
-                ref2.Update(x => x + "b");
-                ref3.Update(x => true);
-            }
-
-            Assert.AreEqual(1, ref1.Value);
-            Assert.AreEqual("ab", ref2.Value);
-            Assert.IsTrue(ref3.Value);
-        }
-
-        [Test]
-        public void FailedAmbientTran()
-        {
-            var stm = new Stm();
-            var ref1 = stm.NewRef(0);
-            var ref2 = stm.NewRef("a");
-            var ref3 = stm.NewRef(false);
-
-            Assert.Throws<SomeException>(() =>
-            {
-                using (stm.BeginTran(true))
-                {
-                    ref1.Update(x => x + 1);
-                    ref2.Update(x => x + "b");
-                    ref3.Update(x => throw new SomeException());
-                }
-            });
-
-            Assert.AreEqual(0, ref1.Value);
-            Assert.AreEqual("a", ref2.Value);
-            Assert.IsFalse(ref3.Value);
-        }
-
-        [Test]
-        public void TentativeRefValueInTran()
-        {
-            var stm = new Stm();
-            var r = stm.NewRef(0);
-
-            Assert.Throws<SomeException>(() =>
-            {
-                stm.InTran(() =>
-                {
-                    r.Update(Inc);
-                    Assert.AreEqual(1, r.Value);
-                    throw new SomeException();
-                });
-            });
-
-            Assert.AreEqual(0, r.Value);
-        }
-
-        [Test]
-        public void RefAssignment()
-        {
-            var stm = new Stm();
-            var r = stm.NewRef(0);
-            r.Value = 1;
-            Assert.AreEqual(1, r.Value);
-        }
-
-        [Test]
-        public void NestedTrans()
-        {
-            var stm = new Stm();
-            var r = stm.NewRef(0);
-
-            stm.InTran(() =>
-            {
-                Assert.AreEqual(0, r.Value);
-                r.Update(Inc);
-                Assert.AreEqual(1, r.Value);
-
-                stm.InTran(() =>
-                {
-                    Assert.AreEqual(1, r.Value);
-                    r.Update(Inc);
-                    Assert.AreEqual(2, r.Value);
-                });
-
-                Assert.AreEqual(2, r.Value);
-                r.Update(Inc);
-                Assert.AreEqual(3, r.Value);
-            });
-
-            Assert.AreEqual(3, r.Value);
-        }
-
-        [Test]
-        public void NestedTranFailure()
-        {
-            var stm = new Stm();
-            var r = stm.NewRef(0);
-
-            stm.InTran(() =>
-            {
-                Assert.AreEqual(0, r.Value);
-                r.Update(Inc);
-                Assert.AreEqual(1, r.Value);
-
-                Assert.Throws<SomeException>(() =>
-                {
-                    stm.InTran(() =>
-                    {
-                        Assert.AreEqual(1, r.Value);
-                        r.Update(Inc);
-                        Assert.AreEqual(2, r.Value);
-                        throw new SomeException();
-                    });
-                });
-
-                Assert.AreEqual(1, r.Value);
-                r.Update(Inc);
-                Assert.AreEqual(2, r.Value);
-            });
-
-            Assert.AreEqual(2, r.Value);
-        }
-
-        [Test]
-        public void UncommitedValuesNotVisibleOutsideTran()
-        {
-            var stm = new Stm();
-            var r = stm.NewRef(0);
-            var tran = stm.BeginTran();
-            r.Update(tran, Inc);
-            Assert.AreEqual(0, r.Value);
-            tran.Dispose();
-            Assert.AreEqual(1, r.Value);
+            Assert.AreEqual(total, atomA.Value + atomB.Value + atomC.Value + atomD.Value);
         }
 
         [Test]
@@ -276,6 +141,25 @@ namespace KitchenSink.Tests
             Assert.AreEqual((3, "abc"), atomTuple.Value);
             Assert.AreEqual(3, atomInt.Value);
             Assert.AreEqual("abc", atomString.Value);
+        }
+
+        [Test]
+        public void AtomZipping()
+        {
+            var atomA = Atom.Of("abc");
+            var atomB = Atom.Of("def");
+            var atomZ = Atom.Zip(
+                atomA,
+                atomB,
+                (x, y) => x + '|' + y,
+                x => (x.Split('|')[0], x.Split('|')[1]));
+            Assert.AreEqual("abc|def", atomZ.Value);
+            atomA.Value = "xyz";
+            Assert.AreEqual("xyz|def", atomZ.Value);
+            atomZ.Update(x => new string(x.Reverse().ToArray()));
+            Assert.AreEqual("fed|zyx", atomZ.Value);
+            Assert.AreEqual("fed", atomA.Value);
+            Assert.AreEqual("zyx", atomB.Value);
         }
 
         public class SomeException : Exception
