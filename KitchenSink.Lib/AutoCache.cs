@@ -91,26 +91,24 @@ namespace KitchenSink
                 }
 
                 var methodIl = methodBuilder.GetILGenerator();
+                methodIl.Emit(OpCodes.Ldarg_0);
 
                 if (method.ReturnType == typeof(void))
                 {
                     methodIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
-
-                    foreach (var argIndex in Enumerable.Range(1, paramz.Length))
-                    {
-                        methodIl.Emit(OpCodes.Ldc_I4_S, argIndex);
-                        methodIl.Emit(OpCodes.Ldarg_S);
-                    }
-
+                    1.To(paramz.Length).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
                     methodIl.Emit(OpCodes.Call, method);
                 }
                 else
                 {
-                    var keyType = method.GetParameters().Length > 1
-                        ? Type.GetType($"System.ValueTuple`{paramz.Length}")
-                            .NonNull()
-                            .MakeGenericType(paramz.Select(x => x.ParameterType).ToArray())
-                        : paramz.Single().ParameterType;
+                    var keyType = 
+                        paramz.Length > 0 ?
+                            paramz.Length > 1
+                                ? Type.GetType($"System.ValueTuple`{paramz.Length}")
+                                    .NonNull()
+                                    .MakeGenericType(paramz.Select(x => x.ParameterType).ToArray())
+                                : paramz.Single().ParameterType
+                            : null;
                     var cacheType = paramz.Length == 0
                         ? typeof(Lazy<>).MakeGenericType(method.ReturnType)
                         : typeof(ConcurrentDictionary<,>).MakeGenericType(keyType, method.ReturnType);
@@ -119,10 +117,28 @@ namespace KitchenSink
                         cacheType,
                         FieldAttributes.Private);
                     ctorIl.Emit(OpCodes.Ldarg_0);
-                    ctorIl.Emit(OpCodes.Newobj, cacheType.GetConstructors().Single(x => Empty(x.GetParameters())));
-                    // TODO: Lazy needs to be initialized with reference to _inner.Method
+
+                    if (paramz.Length == 0)
+                    {
+                        ctorIl.Emit(OpCodes.Ldvirtftn, method);
+                        var funcType = typeof(Func<>)
+                            .MakeGenericType(
+                                paramz.Select(x => x.ParameterType)
+                                    .ToArray()
+                                    .Concat(method.ReturnType));
+                        ctorIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
+                        var lazyCtor = cacheType.GetConstructors().Single(x =>
+                            x.GetParameters().Length == 1
+                            && x.GetParameters()[0].ParameterType.Name.Contains("Func"));
+                        ctorIl.Emit(OpCodes.Newobj, lazyCtor);
+                    }
+                    else
+                    {
+                        var dictCtor = cacheType.GetConstructors().Single(x => Empty(x.GetParameters()));
+                        ctorIl.Emit(OpCodes.Newobj, dictCtor);
+                    }
+
                     ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
-                    methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
 
                     if (paramz.Length == 0)
@@ -138,13 +154,8 @@ namespace KitchenSink
                         }
                         else if (paramz.Length > 1)
                         {
-                            1.To(paramz.Length).ForEach(i =>
-                            {
-                                methodIl.Emit(OpCodes.Ldc_I4_S, i);
-                                methodIl.Emit(OpCodes.Ldarg_S);
-                            });
-
-                            methodIl.Emit(OpCodes.Newobj, keyType.GetConstructors().Single());
+                            1.To(paramz.Length).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
+                            methodIl.Emit(OpCodes.Newobj, keyType.NonNull().GetConstructors().Single());
                         }
 
                         methodIl.Emit(OpCodes.Ldarg_0);
