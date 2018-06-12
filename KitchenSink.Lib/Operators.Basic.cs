@@ -90,6 +90,36 @@ namespace KitchenSink
         public static readonly Func<int, int> Dec = x => x - 1;
 
         /// <summary>
+        /// Absolute value.
+        /// </summary>
+        public static short Abs(short x) => Math.Abs(x);
+
+        /// <summary>
+        /// Absolute value.
+        /// </summary>
+        public static int Abs(int x) => Math.Abs(x);
+
+        /// <summary>
+        /// Absolute value.
+        /// </summary>
+        public static long Abs(long x) => Math.Abs(x);
+
+        /// <summary>
+        /// Absolute value.
+        /// </summary>
+        public static float Abs(float x) => Math.Abs(x);
+
+        /// <summary>
+        /// Absolute value.
+        /// </summary>
+        public static double Abs(double x) => Math.Abs(x);
+
+        /// <summary>
+        /// Absolute value.
+        /// </summary>
+        public static decimal Abs(decimal x) => Math.Abs(x);
+
+        /// <summary>
         /// Bitwise mask.
         /// </summary>
         public static Func<byte, byte> Mask(byte x) => y => (byte)(x & y);

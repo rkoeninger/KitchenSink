@@ -164,6 +164,14 @@ namespace KitchenSink.Extensions
             seq.SelectMany(x => x);
 
         /// <summary>
+        /// Combines sub-sequences of arbitrary and varied depth, as determined
+        /// by given <c>Either</c> function.
+        /// Example: <c>[[1, [2, 3]], [[4], 5], [[6, 7], 8]] => [1, 2, 3, 4, 5, 6, 7, 8]</c>
+        /// </summary>
+        public static IEnumerable<A> Flatten<A>(this IEnumerable<A> seq, Func<A, Either<A, IEnumerable<A>>> f) =>
+            seq.SelectMany(x => f(x).Branch(y => SeqOf(y), ys => Flatten(ys, f)));
+
+        /// <summary>
         /// Returns sequence of overlapping pairs of elements in given sequence.
         /// Example: <c>[1, 2, 3, 4, 5] => [[1, 2], [2, 3], [3, 4], [4, 5]]</c>
         /// </summary>
