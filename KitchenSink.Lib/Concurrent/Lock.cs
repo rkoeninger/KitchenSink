@@ -62,6 +62,7 @@ namespace KitchenSink.Concurrent
                     .End()
                     .OrElseThrow<InvalidSubtypeException>())
                 .Cast<SimpleLock>()
+                .Distinct()
                 .OrderBy(x => x.id)
                 .ToArray();
         }
