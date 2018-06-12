@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using KitchenSink.Extensions;
 
 namespace KitchenSink
@@ -249,6 +252,31 @@ namespace KitchenSink
         /// Negative type check for type parameter.
         /// </summary>
         public static bool IsNot<A>(object val) => !Is<A>(val);
+
+        /// <summary>
+        /// Deep-clones given object.
+        /// </summary>
+        public static T Clone<T>(T source)
+        {
+            if (Not(typeof(T).IsSerializable))
+            {
+                throw new ArgumentException("The type must be serializable.", nameof(source));
+            }
+
+            if (source == null)
+            {
+                return default;
+            }
+
+            var formatter = new BinaryFormatter();
+
+            using (var stream = new MemoryStream())
+            {
+                formatter.Serialize(stream, source);
+                stream.Seek(0, SeekOrigin.Begin);
+                return (T)formatter.Deserialize(stream);
+            }
+        }
 
         /// <summary>
         /// Builds an AutoCache around given interface implementation.
