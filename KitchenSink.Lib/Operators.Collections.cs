@@ -73,6 +73,30 @@ namespace KitchenSink
         public static IEnumerable<A> Repeatedly<A>(int count, Func<A> f) => Forever(f).Take(count);
 
         /// <summary>
+        /// Returns infinite sequence counting up from the given starting value.
+        /// </summary>
+        public static IEnumerable<int> From(int start) => From(start, Inc);
+
+        /// <summary>
+        /// Returns infinite sequence counting up from the given starting value.
+        /// </summary>
+        public static IEnumerable<int> From(int start, int inc) => From(start, Curry(Add)(inc));
+
+        /// <summary>
+        /// Returns infinite sequence counting up from the given starting value.
+        /// </summary>
+        public static IEnumerable<A> From<A>(A start, Func<A, A> inc)
+        {
+            while (true)
+            {
+                yield return start;
+                start = inc(start);
+            }
+
+            // ReSharper disable once IteratorNeverReturns
+        }
+
+        /// <summary>
         /// Adds up all numeric values in sequence.
         /// </summary>
         public static int Sum(IEnumerable<int> seq) => seq.Sum();

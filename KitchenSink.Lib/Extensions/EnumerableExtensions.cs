@@ -318,16 +318,7 @@ namespace KitchenSink.Extensions
         /// Returns a sequence of items paired with their index in the original sequence.
         /// Example: <c>[A, B, C] => [(0, A), (1, B), (2, C)]</c>
         /// </summary>
-        public static IEnumerable<(int, A)> ZipWithIndex<A>(this IEnumerable<A> seq)
-        {
-            var i = 0;
-
-            foreach (var item in seq)
-            {
-                yield return (i, item);
-                i++;
-            }
-        }
+        public static IEnumerable<(int, A)> ZipWithIndex<A>(this IEnumerable<A> seq) => From(0).Zip(seq);
 
         /// <summary>
         /// Returns sequence, excluding elements at given indicies.
