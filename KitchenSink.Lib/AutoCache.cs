@@ -10,8 +10,15 @@ namespace KitchenSink
 {
     internal static class AutoCache
     {
+        private static readonly ConcurrentDictionary<Type, Type> cachedTypes = new ConcurrentDictionary<Type, Type>();
+
         internal static A Build<A>(A inner) where A : class
         {
+            if (Null(inner))
+            {
+                throw new ArgumentNullException(nameof(inner));
+            }
+
             if (Not(typeof(A).IsInterface))
             {
                 throw new ArgumentException($"Given type {typeof(A).FullName} is not an interface type");
@@ -22,7 +29,13 @@ namespace KitchenSink
                 throw new ArgumentException($"Given type {typeof(A).FullName} should not have properties");
             }
 
-            var interfaceType = typeof(A);
+            var generatedType = cachedTypes.GetOrAdd(typeof(A), Build);
+            var instance = generatedType.GetConstructors().Single().Invoke(ArrayOf((object) inner));
+            return (A) instance;
+        }
+
+        private static Type Build(Type interfaceType)
+        {
             var noise = Guid.NewGuid().ToString().Substring(0, 8);
             var assemblyName = new AssemblyName($"{interfaceType.Name}_Assembly_{noise}");
             var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
@@ -31,29 +44,38 @@ namespace KitchenSink
             var typeBuilder = moduleBuilder.DefineType(
                 typeName,
                 TypeAttributes.Public
-                | TypeAttributes.Class
                 | TypeAttributes.AutoClass
                 | TypeAttributes.AnsiClass
+                | TypeAttributes.Class
                 | TypeAttributes.BeforeFieldInit
                 | TypeAttributes.AutoLayout,
                 null);
+            typeBuilder.SetParent(typeof(object));
             typeBuilder.AddInterfaceImplementation(interfaceType);
-            var innerFieldBuilder = typeBuilder.DefineField("_inner", interfaceType, FieldAttributes.Private);
+            var innerFieldBuilder = typeBuilder.DefineField(
+                "_inner",
+                interfaceType,
+                FieldAttributes.Private
+                | FieldAttributes.InitOnly);
             var ctorBuilder = typeBuilder.DefineConstructor(
-                MethodAttributes.Public,
+                MethodAttributes.Public
+                | MethodAttributes.HideBySig
+                | MethodAttributes.SpecialName
+                | MethodAttributes.RTSpecialName,
                 CallingConventions.Standard,
                 ArrayOf(interfaceType));
             var ctorIl = ctorBuilder.GetILGenerator();
-            ctorIl.Emit(OpCodes.Ldarg_0);
-            ctorIl.Emit(OpCodes.Stfld, innerFieldBuilder);
-            ctorIl.Emit(OpCodes.Ret);
 
             foreach (var (counter, method) in interfaceType.GetMethods().ZipWithIndex())
             {
                 var paramz = method.GetParameters();
                 var methodBuilder = typeBuilder.DefineMethod(
                     method.Name,
-                    MethodAttributes.Public | MethodAttributes.Virtual,
+                    MethodAttributes.Public
+                    | MethodAttributes.Final
+                    | MethodAttributes.HideBySig
+                    | MethodAttributes.NewSlot
+                    | MethodAttributes.Virtual,
                     CallingConventions.Standard,
                     method.ReturnType,
                     paramz.Select(x => x.ParameterType).ToArray());
@@ -85,7 +107,7 @@ namespace KitchenSink
                 else
                 {
                     var keyType = method.GetParameters().Length > 1
-                        ? Type.GetType($"System.ValueType`{paramz.Length}")
+                        ? Type.GetType($"System.ValueTuple`{paramz.Length}")
                             .NonNull()
                             .MakeGenericType(paramz.Select(x => x.ParameterType).ToArray())
                         : paramz.Single().ParameterType;
@@ -96,6 +118,11 @@ namespace KitchenSink
                         $"_cache{counter}",
                         cacheType,
                         FieldAttributes.Private);
+                    ctorIl.Emit(OpCodes.Ldarg_0);
+                    ctorIl.Emit(OpCodes.Newobj, cacheType.GetConstructors().Single(x => Empty(x.GetParameters())));
+                    // TODO: Lazy needs to be initialized with reference to _inner.Method
+                    ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
+                    methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
 
                     if (paramz.Length == 0)
@@ -111,16 +138,19 @@ namespace KitchenSink
                         }
                         else if (paramz.Length > 1)
                         {
-                            foreach (var argIndex in Enumerable.Range(1, paramz.Length))
+                            1.To(paramz.Length).ForEach(i =>
                             {
-                                methodIl.Emit(OpCodes.Ldc_I4_S, argIndex);
+                                methodIl.Emit(OpCodes.Ldc_I4_S, i);
                                 methodIl.Emit(OpCodes.Ldarg_S);
-                            }
+                            });
 
                             methodIl.Emit(OpCodes.Newobj, keyType.GetConstructors().Single());
                         }
 
-                        methodIl.Emit(OpCodes.Ldftn, method);
+                        methodIl.Emit(OpCodes.Ldarg_0);
+                        methodIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
+                        methodIl.Emit(OpCodes.Dup);
+                        methodIl.Emit(OpCodes.Ldvirtftn, method);
                         var funcType = Type.GetType($"System.Func`{paramz.Length + 1}")
                             .NonNull()
                             .MakeGenericType(
@@ -139,10 +169,14 @@ namespace KitchenSink
                 methodIl.Emit(OpCodes.Ret);
             }
 
-            var generatedType = typeBuilder.CreateType();
-            // TODO: InvalidProgramException: Common Language Runtime detected an invalid program.
-            var instance = generatedType.GetConstructors().Single().Invoke(ArrayOf((object) inner));
-            return (A) instance;
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Call, typeof(object).GetConstructors().Single());
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Ldarg_1);
+            ctorIl.Emit(OpCodes.Stfld, innerFieldBuilder);
+            ctorIl.Emit(OpCodes.Ret);
+
+            return typeBuilder.CreateType();
         }
     }
 }
