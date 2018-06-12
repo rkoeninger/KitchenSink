@@ -8,20 +8,16 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
-    public static class AutoCache
+    internal static class AutoCache
     {
-        /// <summary>
-        /// Raises error if interface has properties,
-        /// void methods will just pass-through.
-        /// </summary>
-        public static A Build<A>(A inner) where A : class
+        internal static A Build<A>(A inner) where A : class
         {
-            if (!typeof(A).IsInterface)
+            if (Not(typeof(A).IsInterface))
             {
                 throw new ArgumentException($"Given type {typeof(A).FullName} is not an interface type");
             }
 
-            if (typeof(A).GetProperties().Length > 0)
+            if (NonEmpty(typeof(A).GetProperties()))
             {
                 throw new ArgumentException($"Given type {typeof(A).FullName} should not have properties");
             }
@@ -54,13 +50,25 @@ namespace KitchenSink
 
             foreach (var (counter, method) in interfaceType.GetMethods().ZipWithIndex())
             {
+                var paramz = method.GetParameters();
                 var methodBuilder = typeBuilder.DefineMethod(
                     method.Name,
-                    method.Attributes,
-                    CallingConventions.Standard);
-                methodBuilder.SetReturnType(method.ReturnType);
+                    MethodAttributes.Public | MethodAttributes.Virtual,
+                    CallingConventions.Standard,
+                    method.ReturnType,
+                    paramz.Select(x => x.ParameterType).ToArray());
+
+                foreach (var (i, param) in paramz.ZipWithIndex())
+                {
+                    var paramBuilder = methodBuilder.DefineParameter(i, param.Attributes, param.Name);
+
+                    if (param.HasDefaultValue)
+                    {
+                        paramBuilder.SetConstant(param.DefaultValue);
+                    }
+                }
+
                 var methodIl = methodBuilder.GetILGenerator();
-                var paramz = method.GetParameters();
 
                 if (method.ReturnType == typeof(void))
                 {
@@ -72,7 +80,7 @@ namespace KitchenSink
                         methodIl.Emit(OpCodes.Ldarg_S);
                     }
 
-                    // TODO: methodIl.EmitCall(OpCode, method, ArrayOf<Type>());
+                    methodIl.Emit(OpCodes.Call, method);
                 }
                 else
                 {
@@ -93,7 +101,7 @@ namespace KitchenSink
                     if (paramz.Length == 0)
                     {
                         var valueMethod = cacheType.GetProperty("Value").NonNull().GetGetMethod();
-                        // TODO: methodIl.EmitCall(OpCode, valueMethod, ArrayOf<Type>());
+                        methodIl.Emit(OpCodes.Call, valueMethod);
                     }
                     else
                     {
@@ -112,11 +120,19 @@ namespace KitchenSink
                             methodIl.Emit(OpCodes.Newobj, keyType.GetConstructors().Single());
                         }
 
-                        // TODO: load ref to same method on inner
-                        // TODO: methodIl.Emit(OpCodes.Ldftn, {{ method }});
-                        // TODO: methodIl.Emit(OpCodes.Newobj, typeof(Func<...>).GetConstructor(...));
-                        var getOrAddMethod = cacheType.GetMethod("GetOrAdd").NonNull();
-                        // TODO: methodIl.EmitCall(OpCode, getOrAddMethod, ArrayOf<Type>());
+                        methodIl.Emit(OpCodes.Ldftn, method);
+                        var funcType = Type.GetType($"System.Func`{paramz.Length + 1}")
+                            .NonNull()
+                            .MakeGenericType(
+                                paramz.Select(x => x.ParameterType)
+                                    .ToArray()
+                                    .Concat(method.ReturnType));
+                        methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
+                        var getOrAddMethod = cacheType.GetMethods()
+                            .Single(x => x.Name == "GetOrAdd"
+                                && x.GetParameters().Length == 2
+                                && x.GetParameters()[1].ParameterType.Name.Contains("Func"));
+                        methodIl.Emit(OpCodes.Call, getOrAddMethod);
                     }
                 }
 
@@ -124,6 +140,7 @@ namespace KitchenSink
             }
 
             var generatedType = typeBuilder.CreateType();
+            // TODO: InvalidProgramException: Common Language Runtime detected an invalid program.
             var instance = generatedType.GetConstructors().Single().Invoke(ArrayOf((object) inner));
             return (A) instance;
         }

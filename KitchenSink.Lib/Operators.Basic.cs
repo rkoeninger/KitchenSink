@@ -222,6 +222,8 @@ namespace KitchenSink
 
         /// <summary>
         /// Builds an AutoCache around given interface implementation.
+        /// Raises error if interface has properties,
+        /// void methods will just pass-through.
         /// </summary>
         public static A Cache<A>(A inner) where A : class => AutoCache.Build(inner);
     }
