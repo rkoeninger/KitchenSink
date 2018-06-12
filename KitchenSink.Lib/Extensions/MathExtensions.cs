@@ -7,7 +7,7 @@ namespace KitchenSink.Extensions
 {
     public static class MathExtensions
     {
-        public static bool IsReal(this double x) => ! (double.IsInfinity(x) || double.IsNaN(x));
+        public static bool IsReal(this double x) => Not(x.IsNotReal());
 
         public static bool IsNotReal(this double x) => double.IsInfinity(x) || double.IsNaN(x);
 
@@ -19,32 +19,50 @@ namespace KitchenSink.Extensions
 
         public static bool IsNotDivisibleBy(this int x, int y) => x % y != 0;
 
+        /// <summary>
+        /// Returns first value, but no less than the second.
+        /// </summary>
+        public static A NoLessThan<A>(this A x, A min) where A : IComparable<A> => x.CompareTo(min) < 0 ? min : x;
+
+        /// <summary>
+        /// Returns first value, but no more than the second.
+        /// </summary>
+        public static A NoMoreThan<A>(this A x, A max) where A : IComparable<A> => x.CompareTo(max) > 0 ? max : x;
+
+        /// <summary>
+        /// Returns first value, but no less than the second.
+        /// </summary>
+        public static Func<A, A> NoLessThan<A>(this A x) where A : IComparable<A> => min => x.NoLessThan(min);
+
+        /// <summary>
+        /// Returns first value, but no more than the second.
+        /// </summary>
+        public static Func<A, A> NoMoreThan<A>(this A x) where A : IComparable<A> => max => x.NoMoreThan(max);
+
         /// <summary>Inclusive on start value, exclusive on end value.</summary>
-        public static IEnumerable<int> To(this int start, int end)
-        {
-            for (var i = start; i < end; ++i)
-                yield return i;
-        }
+        public static IEnumerable<int> To(this int start, int end) => Enumerable.Range(start, end - start);
 
         /// <summary>Inclusive on start and end value.</summary>
-        public static IEnumerable<int> ToIncluding(this int start, int end)
-        {
-            for (var i = start; i <= end; ++i)
-                yield return i;
-        }
+        public static IEnumerable<int> ToIncluding(this int start, int end) => start.To(end + 1);
 
         public static int Factorial(this int n)
         {
             if (n < 0)
+            {
                 throw new ArgumentException("Factorial not valid on integers less than 0");
+            }
 
             if (n == 0 || n == 1)
+            {
                 return 1;
+            }
 
             var result = 2;
 
             for (var i = 3; i <= n; ++i)
+            {
                 result *= i;
+            }
 
             return result;
         }
@@ -52,20 +70,36 @@ namespace KitchenSink.Extensions
         public static int Permutations(this int n, int r)
         {
             if (n < 0)
+            {
                 throw new ArgumentException("Permutations not valid on negative set sizes (n)");
+            }
+
             if (r < 0)
+            {
                 throw new ArgumentException("Permutations not valid on negative set sizes (r)");
+            }
+
             if (r > n)
+            {
                 throw new ArgumentException("Permutations not valid on take sizes greater than set sizes");
+            }
+
             if (r == 0)
+            {
                 return 1;
+            }
+
             if (n == r)
+            {
                 return Factorial(n);
+            }
 
             var result = 1;
 
             for (var i = n - r + 1; i <= n; ++i)
+            {
                 result *= i;
+            }
 
             return result;
         }
@@ -109,21 +143,36 @@ namespace KitchenSink.Extensions
         public static int Combinations(this int n, int r)
         {
             if (n < 0)
+            {
                 throw new ArgumentException("Combinations not valid on negative set sizes (n)");
+            }
+
             if (r < 0)
+            {
                 throw new ArgumentException("Combinations not valid on negative set sizes (r)");
+            }
+
             if (r > n)
+            {
                 throw new ArgumentException("Combinations not valid on take sizes greater than set sizes");
+            }
+
             if (r == 0 || n == r)
+            {
                 return 1;
+            }
 
             var result = 1;
 
             for (var i = n - r + 1; i <= n; ++i)
+            {
                 result *= i;
+            }
 
             for (var i = 2; i <= r; ++i)
+            {
                 result /= i;
+            }
 
             return result;
         }
@@ -131,9 +180,14 @@ namespace KitchenSink.Extensions
         public static IEnumerable<IEnumerable<A>> Combinations<A>(this IEnumerable<A> seq, int r)
         {
             if (seq == null)
+            {
                 throw new ArgumentNullException();
+            }
+
             if (r < 0)
+            {
                 throw new ArgumentException();
+            }
 
             var array = seq.ToArray();
             return CombHelper(array.Length, r).Select(ZipWhere(array));
@@ -146,6 +200,7 @@ namespace KitchenSink.Extensions
                 yield return EmptyBoolSeq;
                 yield break;
             }
+
             if (n < r)
             {
                 yield break;

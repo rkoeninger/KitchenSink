@@ -86,6 +86,54 @@ namespace KitchenSink
             (x, y, z, w) => f(x)(y)(z)(w);
 
         /// <summary>
+        /// Join parameters into tuple.
+        /// </summary>
+        public static Func<(A, B), Z> Tuplize<A, B, Z>(Func<A, B, Z> f) =>
+            t =>
+            {
+                var (a, b) = t;
+                return f(a, b);
+            };
+
+        /// <summary>
+        /// Join parameters into tuple.
+        /// </summary>
+        public static Func<(A, B, C), Z> Tuplize<A, B, C, Z>(Func<A, B, C, Z> f) =>
+            t =>
+            {
+                var (a, b, c) = t;
+                return f(a, b, c);
+            };
+
+        /// <summary>
+        /// Join parameters into tuple.
+        /// </summary>
+        public static Func<(A, B, C, D), Z> Tuplize<A, B, C, D, Z>(Func<A, B, C, D, Z> f) =>
+            t =>
+            {
+                var (a, b, c, d) = t;
+                return f(a, b, c, d);
+            };
+
+        /// <summary>
+        /// Split parameters from tuple.
+        /// </summary>
+        public static Func<A, B, Z> Detuplize<A, B, Z>(Func<(A, B), Z> f) =>
+            (a, b) => f((a, b));
+
+        /// <summary>
+        /// Split parameters from tuple.
+        /// </summary>
+        public static Func<A, B, C, Z> Detuplize<A, B, C, Z>(Func<(A, B, C), Z> f) =>
+            (a, b, c) => f((a, b, c));
+
+        /// <summary>
+        /// Split parameters from tuple.
+        /// </summary>
+        public static Func<A, B, C, D, Z> Detuplize<A, B, C, D, Z>(Func<(A, B, C, D), Z> f) =>
+            (a, b, c, d) => f((a, b, c, d));
+
+        /// <summary>
         /// Partially apply function.
         /// </summary>
         public static Func<B, Z> Apply<A, B, Z>(Func<A, B, Z> f, A a) =>
@@ -154,7 +202,7 @@ namespace KitchenSink
         public static Func<A, B, Z> Memo<A, B, Z>(Func<A, B, Z> f)
         {
             var cache = new ConcurrentDictionary<(A, B), Z>();
-            return (a, b) => cache.GetOrAdd((a, b), _ => f(a, b));
+            return (a, b) => cache.GetOrAdd((a, b), Tuplize(f));
         }
 
         /// <summary>
@@ -163,7 +211,7 @@ namespace KitchenSink
         public static Func<A, B, C, Z> Memo<A, B, C, Z>(Func<A, B, C, Z> f)
         {
             var cache = new ConcurrentDictionary<(A, B, C), Z>();
-            return (a, b, c) => cache.GetOrAdd((a, b, c), _ => f(a, b, c));
+            return (a, b, c) => cache.GetOrAdd((a, b, c), Tuplize(f));
         }
 
         /// <summary>
@@ -172,7 +220,7 @@ namespace KitchenSink
         public static Func<A, B, C, D, Z> Memo<A, B, C, D, Z>(Func<A, B, C, D, Z> f)
         {
             var cache = new ConcurrentDictionary<(A, B, C, D), Z>();
-            return (a, b, c, d) => cache.GetOrAdd((a, b, c, d), _ => f(a, b, c, d));
+            return (a, b, c, d) => cache.GetOrAdd((a, b, c, d), Tuplize(f));
         }
     }
 }

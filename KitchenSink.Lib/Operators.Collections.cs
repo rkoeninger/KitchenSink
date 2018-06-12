@@ -64,7 +64,7 @@ namespace KitchenSink
         /// Returns sequence of same value given number of times.
         /// Example: <c>Repeat(5, 'a') => ['a', 'a', 'a', 'a', 'a']</c>
         /// </summary>
-        public static IEnumerable<A> Repeat<A>(int count, A value) => Forever(Const(value)).Take(count);
+        public static IEnumerable<A> Repeat<A>(int count, A value) => Repeatedly(count, Const(value));
 
         /// <summary>
         /// Returns sequence populated by calling function given number of times.

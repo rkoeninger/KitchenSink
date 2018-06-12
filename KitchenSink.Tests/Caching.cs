@@ -7,11 +7,13 @@ namespace KitchenSink.Tests
 {
     public class Caching
     {
+        private static readonly Random rand = new Random();
+        private static readonly Func<string, int> g = _ => rand.Next();
+
         [Test]
         public void FunctionMemoization()
         {
-            var rand = new Random();
-            var f = Memo<string, int>(s => rand.Next());
+            var f = Memo(g);
             Assert.AreEqual(f("a"), f("a"));
             Assert.AreEqual(f("b"), f("b"));
             Assert.AreEqual(f("c"), f("c"));
