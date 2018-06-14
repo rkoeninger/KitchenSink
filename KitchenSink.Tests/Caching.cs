@@ -24,7 +24,7 @@ namespace KitchenSink.Tests
         {
             string Get(int id);
             int GetB(string id);
-            //string Get2(int id, string x);
+            string Get2(int id, string x);
             string Get0();
             void Do(int id);
         }
@@ -35,7 +35,7 @@ namespace KitchenSink.Tests
         {
             public string Get(int id) => Rand.AsciiString(16);
             public int GetB(string id) => Rand.Int();
-            //public string Get2(int id, string x) => Rand.AsciiString(32);
+            public string Get2(int id, string x) => Rand.AsciiString(32);
             public string Get0() => Rand.AsciiString(8);
             public void Do(int id) => doCalled = true;
         }
@@ -45,7 +45,7 @@ namespace KitchenSink.Tests
             private readonly IUserRepostiory _inner;
             private readonly ConcurrentDictionary<int, string> _cache0;
             private readonly ConcurrentDictionary<string, int> _cache5;
-            //private readonly ConcurrentDictionary<(int, string), string> _cache1;
+            private readonly ConcurrentDictionary<(int, string), string> _cache1;
             private readonly Lazy<string> _cache2;
 
             public CachedUserRepository(IUserRepostiory inner)
@@ -53,13 +53,13 @@ namespace KitchenSink.Tests
                 _inner = inner;
                 _cache0 = new ConcurrentDictionary<int, string>();
                 _cache5 = new ConcurrentDictionary<string, int>();
-                //_cache1 = new ConcurrentDictionary<(int, string), string>();
+                _cache1 = new ConcurrentDictionary<(int, string), string>();
                 _cache2 = new Lazy<string>(_inner.Get0);
             }
 
             public string Get(int id) => _cache0.GetOrAdd(id, _inner.Get);
             public int GetB(string id) => _cache5.GetOrAdd(id, _inner.GetB);
-            //public string Get2(int id, string x) => _cache1.GetOrAdd((id, x), t => _inner.Get2(t.Item1, t.Item2));
+            public string Get2(int id, string x) => _cache1.GetOrAdd((id, x), t => _inner.Get2(t.Item1, t.Item2));
             public void Do(int id) => _inner.Do(id);
             public string Get0() => _cache2.Value;
         }

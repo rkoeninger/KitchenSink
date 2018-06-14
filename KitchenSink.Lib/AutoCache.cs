@@ -161,6 +161,8 @@ namespace KitchenSink
                         {
                             1.ToIncluding(paramz.Length).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
                             methodIl.Emit(OpCodes.Newobj, keyType.NonNull().GetConstructors().Single());
+
+                            // TODO: generate separate lambda and refer when making Func ~10 lines below
                         }
 
                         methodIl.Emit(OpCodes.Ldarg_0);
@@ -186,7 +188,6 @@ namespace KitchenSink
             }
 
             ctorIl.Emit(OpCodes.Ret);
-
             return typeBuilder.CreateType();
         }
     }
