@@ -65,6 +65,11 @@ namespace KitchenSink
                 CallingConventions.Standard,
                 ArrayOf(interfaceType));
             var ctorIl = ctorBuilder.GetILGenerator();
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Call, typeof(object).GetConstructors().Single());
+            ctorIl.Emit(OpCodes.Ldarg_0);
+            ctorIl.Emit(OpCodes.Ldarg_1);
+            ctorIl.Emit(OpCodes.Stfld, innerFieldBuilder);
 
             foreach (var (counter, method) in interfaceType.GetMethods().ZipWithIndex())
             {
@@ -121,16 +126,15 @@ namespace KitchenSink
 
                     if (paramz.Length == 0)
                     {
+                        ctorIl.Emit(OpCodes.Ldarg_0);
+                        ctorIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
+                        ctorIl.Emit(OpCodes.Dup);
                         ctorIl.Emit(OpCodes.Ldvirtftn, method);
-                        var funcType = typeof(Func<>)
-                            .MakeGenericType(
-                                paramz.Select(x => x.ParameterType)
-                                    .ToArray()
-                                    .Concat(method.ReturnType));
+                        var funcType = typeof(Func<>).MakeGenericType(ArrayOf(method.ReturnType));
                         ctorIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
                         var lazyCtor = cacheType.GetConstructors().Single(x =>
                             x.GetParameters().Length == 1
-                            && x.GetParameters()[0].ParameterType.Name.Contains("Func"));
+                            && x.GetParameters().Single().ParameterType.Name.Contains("Func"));
                         ctorIl.Emit(OpCodes.Newobj, lazyCtor);
                     }
                     else
@@ -181,11 +185,6 @@ namespace KitchenSink
                 methodIl.Emit(OpCodes.Ret);
             }
 
-            ctorIl.Emit(OpCodes.Ldarg_0);
-            ctorIl.Emit(OpCodes.Call, typeof(object).GetConstructors().Single());
-            ctorIl.Emit(OpCodes.Ldarg_0);
-            ctorIl.Emit(OpCodes.Ldarg_1);
-            ctorIl.Emit(OpCodes.Stfld, innerFieldBuilder);
             ctorIl.Emit(OpCodes.Ret);
 
             return typeBuilder.CreateType();
