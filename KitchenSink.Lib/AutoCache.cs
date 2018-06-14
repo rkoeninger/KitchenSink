@@ -96,8 +96,9 @@ namespace KitchenSink
                 if (method.ReturnType == typeof(void))
                 {
                     methodIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
-                    1.To(paramz.Length).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
+                    1.ToIncluding(paramz.Length).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
                     methodIl.Emit(OpCodes.Call, method);
+                    methodIl.Emit(OpCodes.Nop);
                 }
                 else
                 {
@@ -152,9 +153,9 @@ namespace KitchenSink
                         {
                             methodIl.Emit(OpCodes.Ldarg_1);
                         }
-                        else if (paramz.Length > 1)
+                        else
                         {
-                            1.To(paramz.Length).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
+                            1.ToIncluding(paramz.Length).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
                             methodIl.Emit(OpCodes.Newobj, keyType.NonNull().GetConstructors().Single());
                         }
 
