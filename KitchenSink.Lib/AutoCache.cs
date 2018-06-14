@@ -163,7 +163,55 @@ namespace KitchenSink
                             methodIl.Emit(OpCodes.Newobj, keyType.NonNull().GetConstructors().Single());
 
                             // TODO: generate separate lambda and refer when making Func ~10 lines below
+                            /*
+    .method private hidebysig 
+		instance string '<Get2>b__8_0' (
+			valuetype [mscorlib]System.ValueTuple`2<int32, string> t
+		) cil managed 
+	{
+		.custom instance void [mscorlib]System.Runtime.CompilerServices.CompilerGeneratedAttribute::.ctor() = (
+			01 00 00 00
+		)
+		// Method begins at RVA 0x4fc2
+		// Code size 24 (0x18)
+		.maxstack 8
+
+		IL_0000: ldarg.0
+		IL_0001: ldfld class KitchenSink.Tests.Caching/IUserRepostiory KitchenSink.Tests.Caching/CachedUserRepository::_inner
+		IL_0006: ldarg.1
+		IL_0007: ldfld !0 valuetype [mscorlib]System.ValueTuple`2<int32, string>::Item1
+		IL_000c: ldarg.1
+		IL_000d: ldfld !1 valuetype [mscorlib]System.ValueTuple`2<int32, string>::Item2
+		IL_0012: callvirt instance string KitchenSink.Tests.Caching/IUserRepostiory::Get2(int32, string)
+		IL_0017: ret
+	} // end of method CachedUserRepository::'<Get2>b__8_0'
+                             */
                         }
+
+                        // TODO: this section is very different for multi-arg methods
+                        /*
+	.method public final hidebysig newslot virtual 
+		instance string Get2 (
+			int32 id,
+			string x
+		) cil managed 
+	{
+		// Method begins at RVA 0x4f86
+		// Code size 31 (0x1f)
+		.maxstack 8
+
+		IL_0000: ldarg.0
+		IL_0001: ldfld class [mscorlib]System.Collections.Concurrent.ConcurrentDictionary`2<valuetype [mscorlib]System.ValueTuple`2<int32, string>, string> KitchenSink.Tests.Caching/CachedUserRepository::_cache1
+		IL_0006: ldarg.1
+		IL_0007: ldarg.2
+		IL_0008: newobj instance void valuetype [mscorlib]System.ValueTuple`2<int32, string>::.ctor(!0, !1)
+		IL_000d: ldarg.0
+		IL_000e: ldftn instance string KitchenSink.Tests.Caching/CachedUserRepository::'<Get2>b__8_0'(valuetype [mscorlib]System.ValueTuple`2<int32, string>)
+		IL_0014: newobj instance void class [mscorlib]System.Func`2<valuetype [mscorlib]System.ValueTuple`2<int32, string>, string>::.ctor(object, native int)
+		IL_0019: callvirt instance !1 class [mscorlib]System.Collections.Concurrent.ConcurrentDictionary`2<valuetype [mscorlib]System.ValueTuple`2<int32, string>, string>::GetOrAdd(!0, class [mscorlib]System.Func`2<!0, !1>)
+		IL_001e: ret
+	} // end of method CachedUserRepository::Get2
+                         */
 
                         methodIl.Emit(OpCodes.Ldarg_0);
                         methodIl.Emit(OpCodes.Ldfld, innerFieldBuilder);

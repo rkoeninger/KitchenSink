@@ -40,6 +40,7 @@ namespace KitchenSink.Tests
             public void Do(int id) => doCalled = true;
         }
 
+        // TODO: remove this example when no longer needed
         public class CachedUserRepository : IUserRepostiory
         {
             private readonly IUserRepostiory _inner;
@@ -77,6 +78,7 @@ namespace KitchenSink.Tests
             Assert.AreEqual(cachedRepo.GetB("def"), cachedRepo.GetB("def"));
             Assert.AreEqual(cachedRepo.GetB("ghi"), cachedRepo.GetB("ghi"));
 
+            // TODO: get this to work
             //Assert.AreEqual(cachedRepo.Get2(1, "abc"), cachedRepo.Get2(1, "abc"));
             //Assert.AreEqual(cachedRepo.Get2(2, "def"), cachedRepo.Get2(2, "def"));
             //Assert.AreEqual(cachedRepo.Get2(3, "ghi"), cachedRepo.Get2(3, "ghi"));
