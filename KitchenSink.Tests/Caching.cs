@@ -33,11 +33,35 @@ namespace KitchenSink.Tests
 
         public class UserRepository : IUserRepostiory
         {
-            public string Get(int id) => Rand.AsciiString(16);
-            public int GetB(string id) => Rand.Int();
-            public string Get2(int id, string x) => Rand.AsciiString(32);
-            public string Get0() => Rand.AsciiString(8);
-            public void Do(int id) => doCalled = true;
+            public string Get(int id)
+            {
+                Console.WriteLine("Get");
+                return Rand.AsciiString(16);
+            }
+
+            public int GetB(string id)
+            {
+                Console.WriteLine("GetB");
+                return Rand.Int();
+            }
+
+            public string Get2(int id, string x)
+            {
+                Console.WriteLine("Get2");
+                return Rand.AsciiString(32);
+            }
+
+            public string Get0()
+            {
+                Console.WriteLine("Get0");
+                return Rand.AsciiString(8);
+            }
+
+            public void Do(int id)
+            {
+                Console.WriteLine("Do");
+                doCalled = true;
+            }
         }
 
         // TODO: remove this example when no longer needed
@@ -78,16 +102,16 @@ namespace KitchenSink.Tests
             Assert.AreEqual(cachedRepo.GetB("def"), cachedRepo.GetB("def"));
             Assert.AreEqual(cachedRepo.GetB("ghi"), cachedRepo.GetB("ghi"));
 
-            // TODO: get this to work
-            //Assert.AreEqual(cachedRepo.Get2(1, "abc"), cachedRepo.Get2(1, "abc"));
-            //Assert.AreEqual(cachedRepo.Get2(2, "def"), cachedRepo.Get2(2, "def"));
-            //Assert.AreEqual(cachedRepo.Get2(3, "ghi"), cachedRepo.Get2(3, "ghi"));
-
             Assert.IsFalse(doCalled);
             cachedRepo.Do(0);
             Assert.IsTrue(doCalled);
 
             Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
+
+            // TODO: get this to work
+            //Assert.AreEqual(cachedRepo.Get2(1, "abc"), cachedRepo.Get2(1, "abc"));
+            //Assert.AreEqual(cachedRepo.Get2(2, "def"), cachedRepo.Get2(2, "def"));
+            //Assert.AreEqual(cachedRepo.Get2(3, "ghi"), cachedRepo.Get2(3, "ghi"));
         }
     }
 }

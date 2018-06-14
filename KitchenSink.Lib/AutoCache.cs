@@ -50,6 +50,7 @@ namespace KitchenSink
                 | TypeAttributes.BeforeFieldInit
                 | TypeAttributes.AutoLayout,
                 null);
+            typeBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
             typeBuilder.SetParent(typeof(object));
             typeBuilder.AddInterfaceImplementation(interfaceType);
             var innerFieldBuilder = typeBuilder.DefineField(
@@ -57,6 +58,7 @@ namespace KitchenSink
                 interfaceType,
                 FieldAttributes.Private
                 | FieldAttributes.InitOnly);
+            innerFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
             var ctorBuilder = typeBuilder.DefineConstructor(
                 MethodAttributes.Public
                 | MethodAttributes.HideBySig
@@ -64,6 +66,7 @@ namespace KitchenSink
                 | MethodAttributes.RTSpecialName,
                 CallingConventions.Standard,
                 ArrayOf(interfaceType));
+            ctorBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
             var ctorIl = ctorBuilder.GetILGenerator();
             ctorIl.Emit(OpCodes.Ldarg_0);
             ctorIl.Emit(OpCodes.Call, typeof(object).GetConstructors().Single());
@@ -84,25 +87,15 @@ namespace KitchenSink
                     CallingConventions.Standard,
                     method.ReturnType,
                     paramz.Select(x => x.ParameterType).ToArray());
-
-                foreach (var (i, param) in paramz.ZipWithIndex())
-                {
-                    var paramBuilder = methodBuilder.DefineParameter(i, param.Attributes, param.Name);
-
-                    if (param.HasDefaultValue)
-                    {
-                        paramBuilder.SetConstant(param.DefaultValue);
-                    }
-                }
-
+                methodBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
                 var methodIl = methodBuilder.GetILGenerator();
-                methodIl.Emit(OpCodes.Ldarg_0);
 
                 if (method.ReturnType == typeof(void))
                 {
+                    methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
                     1.ToIncluding(paramz.Length).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
-                    methodIl.Emit(OpCodes.Call, method);
+                    EmitCall(methodIl, method);
                     methodIl.Emit(OpCodes.Nop);
                 }
                 else
@@ -122,6 +115,7 @@ namespace KitchenSink
                         $"_cache{counter}",
                         cacheType,
                         FieldAttributes.Private);
+                    cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
                     ctorIl.Emit(OpCodes.Ldarg_0);
 
                     if (paramz.Length == 0)
@@ -136,83 +130,27 @@ namespace KitchenSink
                             x.GetParameters().Length == 1
                             && x.GetParameters().Single().ParameterType.Name.Contains("Func"));
                         ctorIl.Emit(OpCodes.Newobj, lazyCtor);
+                        ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
                     }
                     else
                     {
                         var dictCtor = cacheType.GetConstructors().Single(x => Empty(x.GetParameters()));
                         ctorIl.Emit(OpCodes.Newobj, dictCtor);
+                        ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
                     }
-
-                    ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
-                    methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
 
                     if (paramz.Length == 0)
                     {
+                        methodIl.Emit(OpCodes.Ldarg_0);
+                        methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
                         var valueMethod = cacheType.GetProperty("Value").NonNull().GetGetMethod();
-                        methodIl.Emit(OpCodes.Call, valueMethod);
+                        EmitCall(methodIl, valueMethod);
                     }
-                    else
+                    else if (paramz.Length == 1)
                     {
-                        if (paramz.Length == 1)
-                        {
-                            methodIl.Emit(OpCodes.Ldarg_1);
-                        }
-                        else
-                        {
-                            1.ToIncluding(paramz.Length).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
-                            methodIl.Emit(OpCodes.Newobj, keyType.NonNull().GetConstructors().Single());
-
-                            // TODO: generate separate lambda and refer when making Func ~10 lines below
-                            /*
-    .method private hidebysig 
-		instance string '<Get2>b__8_0' (
-			valuetype [mscorlib]System.ValueTuple`2<int32, string> t
-		) cil managed 
-	{
-		.custom instance void [mscorlib]System.Runtime.CompilerServices.CompilerGeneratedAttribute::.ctor() = (
-			01 00 00 00
-		)
-		// Method begins at RVA 0x4fc2
-		// Code size 24 (0x18)
-		.maxstack 8
-
-		IL_0000: ldarg.0
-		IL_0001: ldfld class KitchenSink.Tests.Caching/IUserRepostiory KitchenSink.Tests.Caching/CachedUserRepository::_inner
-		IL_0006: ldarg.1
-		IL_0007: ldfld !0 valuetype [mscorlib]System.ValueTuple`2<int32, string>::Item1
-		IL_000c: ldarg.1
-		IL_000d: ldfld !1 valuetype [mscorlib]System.ValueTuple`2<int32, string>::Item2
-		IL_0012: callvirt instance string KitchenSink.Tests.Caching/IUserRepostiory::Get2(int32, string)
-		IL_0017: ret
-	} // end of method CachedUserRepository::'<Get2>b__8_0'
-                             */
-                        }
-
-                        // TODO: this section is very different for multi-arg methods
-                        /*
-	.method public final hidebysig newslot virtual 
-		instance string Get2 (
-			int32 id,
-			string x
-		) cil managed 
-	{
-		// Method begins at RVA 0x4f86
-		// Code size 31 (0x1f)
-		.maxstack 8
-
-		IL_0000: ldarg.0
-		IL_0001: ldfld class [mscorlib]System.Collections.Concurrent.ConcurrentDictionary`2<valuetype [mscorlib]System.ValueTuple`2<int32, string>, string> KitchenSink.Tests.Caching/CachedUserRepository::_cache1
-		IL_0006: ldarg.1
-		IL_0007: ldarg.2
-		IL_0008: newobj instance void valuetype [mscorlib]System.ValueTuple`2<int32, string>::.ctor(!0, !1)
-		IL_000d: ldarg.0
-		IL_000e: ldftn instance string KitchenSink.Tests.Caching/CachedUserRepository::'<Get2>b__8_0'(valuetype [mscorlib]System.ValueTuple`2<int32, string>)
-		IL_0014: newobj instance void class [mscorlib]System.Func`2<valuetype [mscorlib]System.ValueTuple`2<int32, string>, string>::.ctor(object, native int)
-		IL_0019: callvirt instance !1 class [mscorlib]System.Collections.Concurrent.ConcurrentDictionary`2<valuetype [mscorlib]System.ValueTuple`2<int32, string>, string>::GetOrAdd(!0, class [mscorlib]System.Func`2<!0, !1>)
-		IL_001e: ret
-	} // end of method CachedUserRepository::Get2
-                         */
-
+                        methodIl.Emit(OpCodes.Ldarg_0);
+                        methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
+                        methodIl.Emit(OpCodes.Ldarg_1);
                         methodIl.Emit(OpCodes.Ldarg_0);
                         methodIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
                         methodIl.Emit(OpCodes.Dup);
@@ -226,9 +164,50 @@ namespace KitchenSink
                         methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
                         var getOrAddMethod = cacheType.GetMethods()
                             .Single(x => x.Name == "GetOrAdd"
-                                && x.GetParameters().Length == 2
-                                && x.GetParameters()[1].ParameterType.Name.Contains("Func"));
-                        methodIl.Emit(OpCodes.Call, getOrAddMethod);
+                                         && x.GetParameters().Length == 2
+                                         && x.GetParameters()[1].ParameterType.Name.Contains("Func"));
+                        EmitCall(methodIl, getOrAddMethod);
+                    }
+                    else
+                    {
+                        var lambdaBuilder = typeBuilder.DefineMethod(
+                            $"<{method.Name}>_{counter}_{noise}",
+                            MethodAttributes.Private
+                            | MethodAttributes.HideBySig,
+                            CallingConventions.Standard,
+                            method.ReturnType,
+                            ArrayOf(keyType));
+                        lambdaBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
+                        var lambdaIl = lambdaBuilder.GetILGenerator();
+                        lambdaIl.Emit(OpCodes.Ldarg_0);
+                        lambdaIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
+                        1.ToIncluding(paramz.Length).ForEach(i =>
+                        {
+                            var itemField = keyType.NonNull().GetField($"Item{i}").NonNull();
+                            lambdaIl.Emit(OpCodes.Ldarg_1);
+                            lambdaIl.Emit(OpCodes.Ldfld, itemField);
+                        });
+                        EmitCall(lambdaIl, method);
+                        lambdaIl.Emit(OpCodes.Ret);
+
+                        methodIl.Emit(OpCodes.Ldarg_0);
+                        methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
+                        1.ToIncluding(paramz.Length).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
+                        methodIl.Emit(OpCodes.Newobj, keyType.NonNull().GetConstructors().Single());
+                        methodIl.Emit(OpCodes.Ldarg_0);
+                        methodIl.Emit(OpCodes.Ldftn, lambdaBuilder);
+                        var funcType = Type.GetType($"System.Func`{paramz.Length + 1}")
+                            .NonNull()
+                            .MakeGenericType(
+                                paramz.Select(x => x.ParameterType)
+                                    .ToArray()
+                                    .Concat(method.ReturnType));
+                        methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
+                        var getOrAddMethod = cacheType.GetMethods()
+                            .Single(x => x.Name == "GetOrAdd"
+                                 && x.GetParameters().Length == 2
+                                 && x.GetParameters()[1].ParameterType.Name.Contains("Func"));
+                        EmitCall(methodIl, getOrAddMethod);
                     }
                 }
 
@@ -238,5 +217,14 @@ namespace KitchenSink
             ctorIl.Emit(OpCodes.Ret);
             return typeBuilder.CreateType();
         }
+
+        private static CustomAttributeBuilder MakeCompilerGeneratedAttribute() =>
+            new CustomAttributeBuilder(
+                typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute)
+                    .GetConstructors().Single(x => Empty(x.GetParameters())),
+                new object[0]);
+
+        private static void EmitCall(ILGenerator il, MethodInfo method) =>
+            il.Emit(method.IsVirtual ? OpCodes.Callvirt : OpCodes.Call, method);
     }
 }
