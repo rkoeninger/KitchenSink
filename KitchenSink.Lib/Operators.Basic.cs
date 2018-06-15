@@ -40,7 +40,12 @@ namespace KitchenSink
         /// <summary>
         /// Attempts parse of string to enum.
         /// </summary>
-        public static Maybe<A> ToEnum<A>(string x) where A : struct => x.ToEnum<A>();
+        public static Maybe<A> ToEnumMaybe<A>(string x) where A : struct => x.ToEnumMaybe<A>();
+
+        /// <summary>
+        /// Attempts parse of string to enum.
+        /// </summary>
+        public static A ToEnum<A>(string x) where A : struct => x.ToEnum<A>();
 
         /// <summary>
         /// Positive integer predicate.

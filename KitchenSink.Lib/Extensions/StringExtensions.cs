@@ -42,7 +42,12 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Attempts parse of string to enum.
         /// </summary>
-        public static Maybe<A> ToEnum<A>(this string s) where A : struct => Enum.TryParse(s, out A x) ? Some(x) : None<A>();
+        public static Maybe<A> ToEnumMaybe<A>(this string s) where A : struct => Enum.TryParse(s, out A x) ? Some(x) : None<A>();
+
+        /// <summary>
+        /// Attempts parse of string to enum.
+        /// </summary>
+        public static A ToEnum<A>(this string s) where A : struct => s.ToEnumMaybe<A>().OrElseThrow($"Not a value of enum {typeof(A)}");
 
         /// <summary>
         /// Converts items in sequence to string and concats them

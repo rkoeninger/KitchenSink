@@ -1,5 +1,5 @@
 [![Visual Studio Version](https://img.shields.io/badge/vs-2017-68217a.svg)](https://www.visualstudio.com/vs/older-downloads/)
-[![C# Version](https://img.shields.io/badge/C%23-7.2-green.svg)](https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-7-2)
+[![C# Version](https://img.shields.io/badge/C%23-7.3-green.svg)](https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-7-2)
 [![.Net Build Status](https://img.shields.io/appveyor/ci/rkoeninger/KitchenSink/master.svg?label=.Net%20Build)](https://ci.appveyor.com/project/rkoeninger/kitchensink/branch/master)
 [![Mono Build Status](https://img.shields.io/travis/rkoeninger/KitchenSink/master.svg?label=Mono%20Build)](https://travis-ci.org/rkoeninger/KitchenSink)
 
