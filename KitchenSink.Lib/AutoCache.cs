@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
@@ -39,6 +40,7 @@ namespace KitchenSink
             var noise = Guid.NewGuid().ToString().Substring(0, 8);
             var assemblyName = new AssemblyName($"{interfaceType.Name}_Assembly_{noise}");
             var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+            assemblyBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
             var typeName = $"{interfaceType.Name}_Cached_{noise}";
             var moduleBuilder = assemblyBuilder.DefineDynamicModule($"{interfaceType.Name}_Module_{noise}");
             var typeBuilder = moduleBuilder.DefineType(
@@ -220,9 +222,9 @@ namespace KitchenSink
 
         private static CustomAttributeBuilder MakeCompilerGeneratedAttribute() =>
             new CustomAttributeBuilder(
-                typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute)
+                typeof(CompilerGeneratedAttribute)
                     .GetConstructors().Single(x => Empty(x.GetParameters())),
-                new object[0]);
+                ArrayOf<object>());
 
         private static void EmitCall(ILGenerator il, MethodInfo method) =>
             il.Emit(method.IsVirtual ? OpCodes.Callvirt : OpCodes.Call, method);
