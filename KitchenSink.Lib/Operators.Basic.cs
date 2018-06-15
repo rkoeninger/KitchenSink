@@ -273,6 +273,11 @@ namespace KitchenSink
                 return default;
             }
 
+            if (source is ICloneable c)
+            {
+                return (T) c.Clone();
+            }
+
             var formatter = new BinaryFormatter();
 
             using (var stream = new MemoryStream())

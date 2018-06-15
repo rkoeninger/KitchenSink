@@ -1,4 +1,5 @@
 ﻿using System;
+using static KitchenSink.Operators;
 
 namespace KitchenSink.Extensions
 {
@@ -13,11 +14,6 @@ namespace KitchenSink.Extensions
             return x;
         }
 
-        public static A Copy<A>(this A x, Action<A> f) where A : ICloneable
-        {
-            var copy = (A) x.Clone();
-            f(copy);
-            return copy;
-        }
+        public static A Copy<A>(this A x, Action<A> f) => Clone(x).With(f);
     }
 }
