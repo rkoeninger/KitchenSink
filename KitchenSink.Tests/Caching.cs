@@ -22,7 +22,6 @@ namespace KitchenSink.Tests
         public interface IUserRepostiory
         {
             string Get(int id);
-            int GetB(string id);
             string Get2(int id, string x);
             string Get0();
             void Do(int id);
@@ -32,35 +31,10 @@ namespace KitchenSink.Tests
 
         public class UserRepository : IUserRepostiory
         {
-            public string Get(int id)
-            {
-                Console.WriteLine("Get");
-                return Rand.AsciiString(16);
-            }
-
-            public int GetB(string id)
-            {
-                Console.WriteLine("GetB");
-                return Rand.Int();
-            }
-
-            public string Get2(int id, string x)
-            {
-                Console.WriteLine("Get2");
-                return Rand.AsciiString(32);
-            }
-
-            public string Get0()
-            {
-                Console.WriteLine("Get0");
-                return Rand.AsciiString(8);
-            }
-
-            public void Do(int id)
-            {
-                Console.WriteLine("Do");
-                doCalled = true;
-            }
+            public string Get(int id) => Rand.AsciiString(16);
+            public string Get2(int id, string x) => Rand.AsciiString(32);
+            public string Get0() => Rand.AsciiString(8);
+            public void Do(int id) => doCalled = true;
         }
 
         [Test]
@@ -71,10 +45,6 @@ namespace KitchenSink.Tests
             Assert.AreEqual(cachedRepo.Get(1), cachedRepo.Get(1));
             Assert.AreEqual(cachedRepo.Get(2), cachedRepo.Get(2));
             Assert.AreEqual(cachedRepo.Get(3), cachedRepo.Get(3));
-
-            Assert.AreEqual(cachedRepo.GetB("abc"), cachedRepo.GetB("abc"));
-            Assert.AreEqual(cachedRepo.GetB("def"), cachedRepo.GetB("def"));
-            Assert.AreEqual(cachedRepo.GetB("ghi"), cachedRepo.GetB("ghi"));
 
             Assert.IsFalse(doCalled);
             cachedRepo.Do(0);
