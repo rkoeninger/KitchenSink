@@ -1,10 +1,13 @@
 ﻿using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using Microsoft.CSharp;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
@@ -31,9 +34,172 @@ namespace KitchenSink
                 throw new ArgumentException($"Given type {typeof(A).FullName} should not have properties");
             }
 
+            if (typeof(A).IsGenericTypeDefinition)
+            {
+                throw new ArgumentException($"Given type {typeof(A).FullName} should not be generic");
+            }
+
             var generatedType = cachedTypes.GetOrAdd(typeof(A), Build);
-            var instance = generatedType.GetConstructors().Single().Invoke(ArrayOf((object) inner));
-            return (A) instance;
+            return (A) Activator.CreateInstance(generatedType, inner);
+        }
+
+        private static Type BuildTheCodeDomWay(Type interfaceType)
+        {
+            var noise = Guid.NewGuid().ToString().Substring(0, 8);
+            var type = new CodeTypeDeclaration($"{interfaceType.Name}_Cached_{noise}")
+            {
+                Attributes = MemberAttributes.Public
+            };
+            type.BaseTypes.Add(interfaceType);
+            var innerField = new CodeMemberField(interfaceType, "_inner")
+            {
+                Attributes = MemberAttributes.Private
+            };
+            type.Members.Add(innerField);
+            var ctor = new CodeConstructor
+            {
+                Attributes = MemberAttributes.Public
+            };
+            var innerParam = new CodeParameterDeclarationExpression(interfaceType, "inner");
+            ctor.Parameters.Add(innerParam);
+            ctor.Statements.Add(new CodeAssignStatement(
+                new CodeFieldReferenceExpression(
+                    new CodeThisReferenceExpression(),
+                    innerField.Name),
+                new CodeArgumentReferenceExpression(innerParam.Name)));
+            type.Members.Add(ctor);
+
+            foreach (var (counter, method) in interfaceType.GetMethods().ZipWithIndex())
+            {
+                var paramz = method.GetParameters();
+                var methodDecl = new CodeMemberMethod
+                {
+                    Name = method.Name,
+                    ReturnType = new CodeTypeReference(method.ReturnType),
+                };
+                methodDecl.Attributes = MemberAttributes.Public;
+                methodDecl.Parameters.AddRange(paramz.Select(p =>
+                    new CodeParameterDeclarationExpression(p.ParameterType, p.Name)).ToArray());
+                type.Members.Add(methodDecl);
+
+                if (method.ReturnType == typeof(void))
+                {
+                    methodDecl.Statements.Add(
+                        new CodeMethodInvokeExpression(
+                            new CodeFieldReferenceExpression(
+                                new CodeThisReferenceExpression(),
+                                innerField.Name),
+                            method.Name,
+                            methodDecl.Parameters
+                                .Cast<CodeParameterDeclarationExpression>()
+                                .Select(p => new CodeArgumentReferenceExpression(p.Name))
+                                .ToArray()));
+                }
+                else if (Empty(paramz))
+                {
+                    var cacheName = $"_cache{counter}";
+                    var cacheType = typeof(Lazy<>).MakeGenericType(method.ReturnType);
+                    var cacheField = new CodeMemberField(cacheType, cacheName);
+                    type.Members.Add(cacheField);
+                    ctor.Statements.Add(
+                        new CodeAssignStatement(
+                            new CodeFieldReferenceExpression(
+                                new CodeThisReferenceExpression(),
+                                cacheField.Name),
+                            new CodeObjectCreateExpression(
+                                cacheType,
+                                new CodeMethodReferenceExpression(
+                                    new CodeFieldReferenceExpression(
+                                        new CodeThisReferenceExpression(),
+                                        innerField.Name),
+                                    method.Name))));
+                    methodDecl.Statements.Add(
+                        new CodeMethodReturnStatement(
+                            new CodePropertyReferenceExpression(
+                                new CodeFieldReferenceExpression(
+                                    new CodeThisReferenceExpression(),
+                                    cacheField.Name),
+                                "Value")));
+                }
+                else if (One(paramz))
+                {
+                    var cacheName = $"_cache{counter}";
+                    var cacheType = typeof(ConcurrentDictionary<,>)
+                        .MakeGenericType(paramz.Single().ParameterType, method.ReturnType);
+                    var cacheField = new CodeMemberField(cacheType, cacheName);
+                    type.Members.Add(cacheField);
+                    ctor.Statements.Add(
+                        new CodeAssignStatement(
+                            new CodeFieldReferenceExpression(
+                                new CodeThisReferenceExpression(),
+                                cacheField.Name),
+                            new CodeObjectCreateExpression(cacheType)));
+                    methodDecl.Statements.Add(
+                        new CodeMethodReturnStatement(
+                            new CodeMethodInvokeExpression(
+                                new CodeFieldReferenceExpression(
+                                    new CodeThisReferenceExpression(),
+                                    cacheField.Name),
+                                "GetOrAdd",
+                                ArrayOf<CodeExpression>(
+                                    new CodeArgumentReferenceExpression(methodDecl.Parameters[0].Name),
+                                    new CodeMethodReferenceExpression(
+                                        new CodeFieldReferenceExpression(
+                                            new CodeThisReferenceExpression(),
+                                            innerField.Name),
+                                        method.Name)))));
+                }
+                else
+                {
+                    var keyType =
+                        Type.GetType($"System.ValueTuple`{paramz.Length}").NonNull()
+                            .MakeGenericType(paramz.Select(x => x.ParameterType).ToArray());
+                    var funcType = typeof(Func<,>).MakeGenericType(keyType, method.ReturnType);
+                    var cacheName = $"_cache{counter}";
+                    var cacheType = typeof(ConcurrentDictionary<,>).MakeGenericType(keyType, method.ReturnType);
+                    var cacheField = new CodeMemberField(cacheType, cacheName);
+                    type.Members.Add(cacheField);
+                    ctor.Statements.Add(
+                        new CodeAssignStatement(
+                            new CodeFieldReferenceExpression(
+                                new CodeThisReferenceExpression(),
+                                cacheField.Name),
+                            new CodeObjectCreateExpression(cacheType)));
+                    methodDecl.Statements.Add(
+                        new CodeMethodReturnStatement(
+                            new CodeMethodInvokeExpression(
+                                new CodeFieldReferenceExpression(
+                                    new CodeThisReferenceExpression(),
+                                    cacheField.Name),
+                                "GetOrAdd",
+                                ArrayOf<CodeExpression>(
+                                    new CodeObjectCreateExpression(
+                                        new CodeTypeReference(keyType),
+                                        paramz.Select(p => new CodeArgumentReferenceExpression(p.Name)).ToArray()),
+                                    new CodeObjectCreateExpression(
+                                        funcType,
+                                        new CodeSnippetExpression($"t => _inner.{method.Name}({1.ToIncluding(paramz.Length).Select(i => $"t.Item{i}").MakeString(",")})"))))));
+                }
+            }
+
+            var ns = new CodeNamespace($"{interfaceType.Name}_Namespace_{noise}");
+            ns.Types.Add(type);
+            var compileUnit = new CodeCompileUnit();
+            compileUnit.Namespaces.Add(ns);
+            var provider = new CSharpCodeProvider();
+            var buffer = new StringWriter();
+            provider.GenerateCodeFromCompileUnit(compileUnit, buffer, new CodeGeneratorOptions());
+            Console.WriteLine(buffer);
+            var parameters = new CompilerParameters();
+            parameters.ReferencedAssemblies.Add(new Uri(interfaceType.Assembly.CodeBase).LocalPath);
+            var results = provider.CompileAssemblyFromDom(parameters, compileUnit);
+
+            if (results.Errors.Count > 0)
+            {
+                throw new Exception(results.Errors.Cast<CompilerError>().MakeString("\r\n\r\n"));
+            }
+
+            return results.CompiledAssembly.GetType(ns.Name + "." + type.Name);
         }
 
         private static Type Build(Type interfaceType)
@@ -199,12 +365,13 @@ namespace KitchenSink
                         methodIl.Emit(OpCodes.Newobj, keyType.NonNull().GetConstructors().Single());
                         methodIl.Emit(OpCodes.Ldarg_0);
                         methodIl.Emit(OpCodes.Ldftn, lambdaBuilder);
-                        var funcType = Type.GetType($"System.Func`{paramz.Length + 1}")
-                            .NonNull()
-                            .MakeGenericType(
-                                paramz.Select(x => x.ParameterType)
-                                    .ToArray()
-                                    .Concat(method.ReturnType));
+                        //var funcType = Type.GetType($"System.Func`{paramz.Length + 1}")
+                        //    .NonNull()
+                        //    .MakeGenericType(
+                        //        paramz.Select(x => x.ParameterType)
+                        //            .ToArray()
+                        //            .Concat(method.ReturnType));
+                        var funcType = typeof(Func<,>).MakeGenericType(keyType, method.ReturnType);
                         methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
                         var getOrAddMethod = cacheType.GetMethods()
                             .Single(x => x.Name == "GetOrAdd"

@@ -11,13 +11,18 @@ namespace KitchenSink
         /// <summary>
         /// Check if collection is empty.
         /// </summary>
-        public static readonly Func<IEnumerable, bool> Empty = x => !NonEmpty(x);
+        public static bool Empty(IEnumerable x) => !NonEmpty(x);
 
         /// <summary>
         /// Check if collection is non-empty.
         /// </summary>
-        public static readonly Func<IEnumerable, bool> NonEmpty = x =>
+        public static bool NonEmpty(IEnumerable x)
         {
+            if (x is ICollection c)
+            {
+                return c.Count > 0;
+            }
+
             var e = x.GetEnumerator();
 
             if (e is IDisposable d)
@@ -29,7 +34,30 @@ namespace KitchenSink
             }
 
             return e.MoveNext();
-        };
+        }
+
+        /// <summary>
+        /// Check if collection contains exactly 1 element.
+        /// </summary>
+        public static bool One(IEnumerable x)
+        {
+            if (x is ICollection c)
+            {
+                return c.Count == 1;
+            }
+
+            var e = x.GetEnumerator();
+
+            if (e is IDisposable d)
+            {
+                using (d)
+                {
+                    return e.MoveNext() && !e.MoveNext();
+                }
+            }
+
+            return e.MoveNext() && !e.MoveNext();
+        }
 
         /// <summary>
         /// Infinitely enumerates items returned from provided function.
