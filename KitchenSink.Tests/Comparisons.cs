@@ -4,8 +4,7 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class ComparableTests
+    public class Comparisons
     {
         [Test]
         public void CompareOperator()

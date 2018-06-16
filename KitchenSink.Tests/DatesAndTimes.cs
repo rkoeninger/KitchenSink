@@ -4,8 +4,7 @@ using KitchenSink.Timekeeping;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class DateTimeTests
+    public class DatesAndTimes
     {
         [Test]
         public void DateRangeTests()

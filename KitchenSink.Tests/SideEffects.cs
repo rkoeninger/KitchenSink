@@ -5,8 +5,7 @@ using KitchenSink.Purity;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class IOTests
+    public class SideEffects
     {
         [Test]
         public void IOChaining()

@@ -2,8 +2,7 @@
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class XmlTests
+    public class XmlConstruction
     {
         [Test]
         public void XmlBuilding()

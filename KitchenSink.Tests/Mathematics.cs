@@ -6,8 +6,7 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class NumbersTests
+    public class Mathematics
     {
         [Test]
         public void Divisibility()

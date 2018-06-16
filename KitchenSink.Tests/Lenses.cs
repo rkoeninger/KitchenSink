@@ -3,8 +3,7 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class LensTests
+    public class Lenses
     {
         [Test]
         public void LensComposition()

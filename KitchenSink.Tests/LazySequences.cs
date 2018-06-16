@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    public class EnumerableTests
+    public class LazySequences
     {
         [Test]
         public void OverlappingPairsTest()

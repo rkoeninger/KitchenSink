@@ -7,8 +7,7 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class CheckTests
+    public class PropertyBasedTesting
     {
         [Test]
         public void CheckWithDefaultInputs()

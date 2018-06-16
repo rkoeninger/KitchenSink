@@ -3,7 +3,6 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
     public class DynamicScoping
     {
         [Test]

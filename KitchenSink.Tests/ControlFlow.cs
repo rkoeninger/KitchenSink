@@ -3,10 +3,8 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class CondTests
+    public class ControlFlow
     {
-        [TestFixture]
         public class SpecifyingReturnType
         {
             [Test]
@@ -47,8 +45,7 @@ namespace KitchenSink.Tests
     namespace UsingStatic
     {
         using static Operators;
-
-        [TestFixture]
+        
         public class CondUsingStaticTests
         {
             [Test]
@@ -64,8 +61,7 @@ namespace KitchenSink.Tests
             }
         }
     }
-
-    [TestFixture]
+    
     public class CaseTests
     {
         [Test]

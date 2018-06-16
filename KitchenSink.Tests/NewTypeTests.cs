@@ -3,7 +3,6 @@ using static NUnit.Framework.Assert;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
     public class NewTypeTests
     {
         public sealed class CustomerId : NewType<int> { public CustomerId(int x) : base(x) {} }

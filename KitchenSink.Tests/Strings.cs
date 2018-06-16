@@ -6,8 +6,7 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class StringTests
+    public class Strings
     {
         [Test]
         public void StringSeqTest()

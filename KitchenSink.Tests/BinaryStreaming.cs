@@ -7,8 +7,7 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class StreamTests
+    public class BinaryStreaming
     {
         [Test]
         public void StreamSerialization()

@@ -6,8 +6,7 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class MaybeTests
+    public class Maybes
     {
         [Test]
         public void AllDefined()

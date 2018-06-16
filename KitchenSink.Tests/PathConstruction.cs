@@ -3,8 +3,7 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
-    public class FilePathTests
+    public class PathConstruction
     {
         [Test, Category("WindowsOnly")]
         public void ConcatPaths()

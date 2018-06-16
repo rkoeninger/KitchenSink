@@ -4,7 +4,6 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    [TestFixture]
     public class DependencyInjection
     {
         public interface IInterfaceX { }
