@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -219,6 +220,29 @@ namespace KitchenSink
             ctorIl.Emit(OpCodes.Ret);
             return typeBuilder.CreateType();
         }
+
+        //public static object MultiParam(object wrapper, object key, int counter, string methodName)
+        //{
+        //    var wrapperType = wrapper.GetType();
+        //    var innerField = wrapperType.GetField("_inner");
+        //    var inner = innerField.GetValue(wrapper);
+        //    var innerType = inner.GetType();
+        //    var cacheField = wrapperType.GetField("_cache" + counter);
+        //    var cache = cacheField.GetValue(wrapper);
+        //    var cacheType = cache.GetType();
+        //    var keyType = cacheType.GetGenericArguments()[0];
+        //    var valueType = cacheType.GetGenericArguments()[1];
+        //    var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
+        //    var getOrAdd = cacheType.GetMethod("GetOrAdd", ArrayOf(keyType, funcType));
+        //    var keyParam = Expression.Parameter(keyType);
+        //    var funcParam = Expression.Parameter(funcType);
+        //    var argTypes = keyType.GetGenericArguments();
+        //    var innerMethod = innerType.GetMethod(methodName, argTypes);
+        //    var body = Expression.Call(innerMethod, ArrayOf(inner).Concat(args)); // TODO: Expression.Call(inner, innerMethod, key.Item1, key.Item2)
+        //    var lambda = Expression.Lambda(body, keyParam, funcParam);
+        //    var func = lambda.Compile();
+        //    return getOrAdd.Invoke(cache, ArrayOf(key, func));
+        //}
 
         private static CustomAttributeBuilder MakeCompilerGeneratedAttribute() =>
             new CustomAttributeBuilder(
