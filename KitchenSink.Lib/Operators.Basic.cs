@@ -293,12 +293,5 @@ namespace KitchenSink
         /// void methods will just pass-through.
         /// </summary>
         public static A Cache<A>(A inner) where A : class => AutoCache.Build(inner);
-
-        /// <summary>
-        /// Builds an AutoTrace around given interface implementation.
-        /// Raises error if interface has properties or is generic.
-        /// Given Action is called when each method begins and ends.
-        /// </summary>
-        public static A Trace<A>(A inner, Action<A, string> f) where A : class => AutoTrace.Build(inner, f, f);
     }
 }
