@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoCache.cs" />
+    <Compile Include="AutoTrace.cs" />
     <Compile Include="Collections\BankersQueue.cs" />
     <Compile Include="Collections\BitmappedTrie.cs" />
     <Compile Include="Collections\ConsList.cs" />
