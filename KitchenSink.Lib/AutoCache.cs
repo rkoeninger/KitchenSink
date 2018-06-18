@@ -17,23 +17,32 @@ namespace KitchenSink
         public Dictionary<MethodInfo, TimeSpan> Expirations { get; } = new Dictionary<MethodInfo, TimeSpan>();
 
         public override bool Equals(object obj) =>
-            obj is AutoCacheConfig that && Exclusions.SetEquals(that.Exclusions);
+            obj is AutoCacheConfig that
+            && Exclusions.SetEquals(that.Exclusions)
+            && Expirations.OrderBy(x => x.Key).SequenceEqual(that.Expirations.OrderBy(x => x.Key));
 
-        public override int GetHashCode() => Exclusions
-            .Aggregate(1, (hash, method) => hash + 31 * method.GetHashCode());
+        public override int GetHashCode() =>
+            Exclusions.Aggregate(1, (h, m) => h + 31 * m.GetHashCode())
+            + Expirations.OrderBy(x => x.Key).Aggregate(7, (h, m) => h + 37 * m.GetHashCode());
     }
 
     public class AutoCacheConfig<A> : AutoCacheConfig
     {
         public AutoCacheConfig<A> Exclude(Expression<Action<A>> expr)
         {
-            var method = (expr.Body as MethodCallExpression)?.Method
-                ?? throw new ArgumentException("Expression must be a method call");
-            Exclusions.Add(method);
+            Exclusions.Add(GetMethod(expr));
             return this;
         }
 
-        // TODO: public void Expire(TimeSpan time) => parent.expirations[method] = time;
+        public AutoCacheConfig<A> Expire(TimeSpan time, Expression<Action<A>> expr)
+        {
+            Expirations[GetMethod(expr)] = time;
+            return this;
+        }
+
+        private static MethodInfo GetMethod(Expression<Action<A>> expr) =>
+            (expr.Body as MethodCallExpression)?.Method
+                ?? throw new ArgumentException("Expression must be a method call");
     }
 
     internal static class AutoCache
@@ -141,7 +150,8 @@ namespace KitchenSink
                     var cacheFieldBuilder = typeBuilder.DefineField(
                         $"_cache{counter}",
                         cacheType,
-                        FieldAttributes.Private);
+                        FieldAttributes.Private
+                        | FieldAttributes.InitOnly);
                     cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
 
                     ctorIl.Emit(OpCodes.Ldarg_0);
@@ -169,7 +179,8 @@ namespace KitchenSink
                     var cacheFieldBuilder = typeBuilder.DefineField(
                         $"_cache{counter}",
                         cacheType,
-                        FieldAttributes.Private);
+                        FieldAttributes.Private
+                        | FieldAttributes.InitOnly);
                     cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
 
                     ctorIl.Emit(OpCodes.Ldarg_0);
@@ -201,7 +212,8 @@ namespace KitchenSink
                     var cacheFieldBuilder = typeBuilder.DefineField(
                         $"_cache{counter}",
                         cacheType,
-                        FieldAttributes.Private);
+                        FieldAttributes.Private
+                        | FieldAttributes.InitOnly);
                     cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
 
                     ctorIl.Emit(OpCodes.Ldarg_0);
