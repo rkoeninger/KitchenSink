@@ -51,7 +51,8 @@ namespace KitchenSink
 
     internal static class AutoCache
     {
-        private static readonly ConcurrentDictionary<Type, Type> cachedTypes = new ConcurrentDictionary<Type, Type>();
+        // TODO: account for configuration differences
+        //private static readonly ConcurrentDictionary<Type, Type> cachedTypes = new ConcurrentDictionary<Type, Type>();
 
         internal static A Build<A>(A inner, AutoCacheConfig<A> config) where A : class
         {
@@ -75,7 +76,8 @@ namespace KitchenSink
                 throw new ArgumentException($"Given type {typeof(A).FullName} should not be generic");
             }
 
-            var generatedType = cachedTypes.GetOrAdd(typeof(A), Build(config));
+            //var generatedType = cachedTypes.GetOrAdd(typeof(A), Build(config));
+            var generatedType = Build(config)(typeof(A));
             return (A) Activator.CreateInstance(generatedType, inner);
         }
 

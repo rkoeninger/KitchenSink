@@ -27,14 +27,14 @@ namespace KitchenSink.Tests
             void Do(int id);
         }
 
-        private static bool doCalled;
+        private static int callCount;
 
         public class UserRepository : IUserRepostiory
         {
             public string Get(int id) => Rand.AsciiString(16);
             public string Get2(int id, string x) => Rand.AsciiString(32);
             public string Get0() => Rand.AsciiString(8);
-            public void Do(int id) => doCalled = true;
+            public void Do(int id) => callCount++;
         }
 
         [Test]
@@ -46,9 +46,9 @@ namespace KitchenSink.Tests
             Assert.AreEqual(cachedRepo.Get(2), cachedRepo.Get(2));
             Assert.AreEqual(cachedRepo.Get(3), cachedRepo.Get(3));
 
-            Assert.IsFalse(doCalled);
+            Assert.AreEqual(0, callCount);
             cachedRepo.Do(0);
-            Assert.IsTrue(doCalled);
+            Assert.AreEqual(1, callCount);
 
             Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
 
