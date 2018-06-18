@@ -51,6 +51,8 @@ namespace KitchenSink.Tests
             Assert.AreEqual(prevCallCount + 1, callCount);
 
             Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
+            Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
+            Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
 
             Assert.AreEqual(cachedRepo.Get2(1, "abc"), cachedRepo.Get2(1, "abc"));
             Assert.AreEqual(cachedRepo.Get2(2, "def"), cachedRepo.Get2(2, "def"));
