@@ -56,5 +56,20 @@ namespace KitchenSink.Tests
             Assert.AreEqual(cachedRepo.Get2(2, "def"), cachedRepo.Get2(2, "def"));
             Assert.AreEqual(cachedRepo.Get2(3, "ghi"), cachedRepo.Get2(3, "ghi"));
         }
+
+        [Test]
+        public void SelectiveExclusion()
+        {
+            IUserRepostiory repo = new UserRepository();
+            var cachedRepo = Cache(repo, c => c.For(m => m.Get2(default, default), m => m.Exclude()));
+
+            Assert.AreEqual(cachedRepo.Get(1), cachedRepo.Get(1));
+            Assert.AreEqual(cachedRepo.Get(2), cachedRepo.Get(2));
+            Assert.AreEqual(cachedRepo.Get(3), cachedRepo.Get(3));
+
+            Assert.AreNotEqual(cachedRepo.Get2(1, "abc"), cachedRepo.Get2(1, "abc"));
+            Assert.AreNotEqual(cachedRepo.Get2(2, "def"), cachedRepo.Get2(2, "def"));
+            Assert.AreNotEqual(cachedRepo.Get2(3, "ghi"), cachedRepo.Get2(3, "ghi"));
+        }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -9,11 +11,41 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
+    public class AutoCacheConfig<A>
+    {
+        internal readonly List<MethodInfo> exclusions = new List<MethodInfo>();
+        internal readonly Dictionary<MethodInfo, TimeSpan> expirations = new Dictionary<MethodInfo, TimeSpan>();
+
+        public AutoCacheConfig<A> For(Expression<Action<A>> expr, Action<AutoCacheConfigMethod<A>> doConfig)
+        {
+            var method = (expr.Body as MethodCallExpression)?.Method
+                ?? throw new ArgumentException("Expression must be a method call");
+            doConfig(new AutoCacheConfigMethod<A>(this, method));
+            return this;
+        }
+    }
+
+    public class AutoCacheConfigMethod<A>
+    {
+        private readonly AutoCacheConfig<A> parent;
+        private readonly MethodInfo method;
+
+        internal AutoCacheConfigMethod(AutoCacheConfig<A> parent, MethodInfo method)
+        {
+            this.parent = parent;
+            this.method = method;
+        }
+
+        public void Exclude() => parent.exclusions.Add(method);
+
+        public void Expire(TimeSpan time) => parent.expirations[method] = time;
+    }
+
     internal static class AutoCache
     {
         private static readonly ConcurrentDictionary<Type, Type> cachedTypes = new ConcurrentDictionary<Type, Type>();
 
-        internal static A Build<A>(A inner) where A : class
+        internal static A Build<A>(A inner, AutoCacheConfig<A> config) where A : class
         {
             if (Null(inner))
             {
@@ -35,15 +67,16 @@ namespace KitchenSink
                 throw new ArgumentException($"Given type {typeof(A).FullName} should not be generic");
             }
 
-            var generatedType = cachedTypes.GetOrAdd(typeof(A), Build);
+            var generatedType = cachedTypes.GetOrAdd(typeof(A), Build(config));
             return (A) Activator.CreateInstance(generatedType, inner);
         }
 
-        private static Type Build(Type interfaceType)
+        private static Func<Type, Type> Build<A>(AutoCacheConfig<A> config) => interfaceType =>
         {
             var noise = Guid.NewGuid().ToString().Substring(0, 8);
             var assemblyName = new AssemblyName($"{interfaceType.Name}_Assembly_{noise}");
-            var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+            var assemblyBuilder =
+                AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
             assemblyBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
             var typeName = $"{interfaceType.Name}_Cached_{noise}";
             var moduleBuilder = assemblyBuilder.DefineDynamicModule($"{interfaceType.Name}_Module_{noise}");
@@ -97,7 +130,7 @@ namespace KitchenSink
                 methodBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
                 var methodIl = methodBuilder.GetILGenerator();
 
-                if (method.ReturnType == typeof(void))
+                if (method.ReturnType == typeof(void) || config.exclusions.Contains(method))
                 {
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
@@ -219,7 +252,7 @@ namespace KitchenSink
 
             ctorIl.Emit(OpCodes.Ret);
             return typeBuilder.CreateType();
-        }
+        };
 
         private static CustomAttributeBuilder MakeCompilerGeneratedAttribute() =>
             new CustomAttributeBuilder(

@@ -292,6 +292,7 @@ namespace KitchenSink
         /// Raises error if interface has properties or is generic.
         /// void methods will just pass-through.
         /// </summary>
-        public static A Cache<A>(A inner) where A : class => AutoCache.Build(inner);
+        public static A Cache<A>(A inner, Action<AutoCacheConfig<A>> doConfig = null) where A : class =>
+            AutoCache.Build(inner, new AutoCacheConfig<A>().With(doConfig ?? (_ => { })));
     }
 }
