@@ -46,9 +46,9 @@ namespace KitchenSink.Tests
             Assert.AreEqual(cachedRepo.Get(2), cachedRepo.Get(2));
             Assert.AreEqual(cachedRepo.Get(3), cachedRepo.Get(3));
 
-            Assert.AreEqual(0, callCount);
+            var prevCallCount = callCount;
             cachedRepo.Do(0);
-            Assert.AreEqual(1, callCount);
+            Assert.AreEqual(prevCallCount + 1, callCount);
 
             Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
 
@@ -70,6 +70,14 @@ namespace KitchenSink.Tests
             Assert.AreNotEqual(cachedRepo.Get2(1, "abc"), cachedRepo.Get2(1, "abc"));
             Assert.AreNotEqual(cachedRepo.Get2(2, "def"), cachedRepo.Get2(2, "def"));
             Assert.AreNotEqual(cachedRepo.Get2(3, "ghi"), cachedRepo.Get2(3, "ghi"));
+        }
+
+        [Test]
+        public void ConfigSpecificCachiingOfGeneratedTypes()
+        {
+            // Run other tests again to confirm caching works as it should
+            SelectiveExclusion();
+            AutoCaching();
         }
     }
 }

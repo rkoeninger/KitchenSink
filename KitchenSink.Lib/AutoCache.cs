@@ -11,48 +11,35 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
-    public class AutoCacheConfig<A>
+    public class AutoCacheConfig
     {
-        internal readonly List<MethodInfo> exclusions = new List<MethodInfo>();
-        internal readonly Dictionary<MethodInfo, TimeSpan> expirations = new Dictionary<MethodInfo, TimeSpan>();
+        public ISet<MethodInfo> Exclusions { get; } = new HashSet<MethodInfo>();
+        public Dictionary<MethodInfo, TimeSpan> Expirations { get; } = new Dictionary<MethodInfo, TimeSpan>();
 
+        public override bool Equals(object obj) =>
+            obj is AutoCacheConfig that && Exclusions.SetEquals(that.Exclusions);
+
+        public override int GetHashCode() => Exclusions
+            .Aggregate(1, (hash, method) => hash + 31 * method.GetHashCode());
+    }
+
+    public class AutoCacheConfig<A> : AutoCacheConfig
+    {
         public AutoCacheConfig<A> Exclude(Expression<Action<A>> expr)
         {
             var method = (expr.Body as MethodCallExpression)?.Method
                 ?? throw new ArgumentException("Expression must be a method call");
-            exclusions.Add(method);
+            Exclusions.Add(method);
             return this;
         }
 
-        public AutoCacheConfig<A> For(Expression<Action<A>> expr, Action<AutoCacheConfigMethod<A>> doConfig)
-        {
-            var method = (expr.Body as MethodCallExpression)?.Method
-                ?? throw new ArgumentException("Expression must be a method call");
-            doConfig(new AutoCacheConfigMethod<A>(this, method));
-            return this;
-        }
-    }
-
-    public class AutoCacheConfigMethod<A>
-    {
-        private readonly AutoCacheConfig<A> parent;
-        private readonly MethodInfo method;
-
-        internal AutoCacheConfigMethod(AutoCacheConfig<A> parent, MethodInfo method)
-        {
-            this.parent = parent;
-            this.method = method;
-        }
-
-        public void Exclude() => parent.exclusions.Add(method);
-
-        public void Expire(TimeSpan time) => parent.expirations[method] = time;
+        // TODO: public void Expire(TimeSpan time) => parent.expirations[method] = time;
     }
 
     internal static class AutoCache
     {
-        // TODO: account for configuration differences
-        //private static readonly ConcurrentDictionary<Type, Type> cachedTypes = new ConcurrentDictionary<Type, Type>();
+        private static readonly ConcurrentDictionary<(AutoCacheConfig, Type), Type> cachedTypes =
+            new ConcurrentDictionary<(AutoCacheConfig, Type), Type>();
 
         internal static A Build<A>(A inner, AutoCacheConfig<A> config) where A : class
         {
@@ -76,13 +63,13 @@ namespace KitchenSink
                 throw new ArgumentException($"Given type {typeof(A).FullName} should not be generic");
             }
 
-            //var generatedType = cachedTypes.GetOrAdd(typeof(A), Build(config));
-            var generatedType = Build(config)(typeof(A));
+            var generatedType = cachedTypes.GetOrAdd((config, typeof(A)), Build);
             return (A) Activator.CreateInstance(generatedType, inner);
         }
 
-        private static Func<Type, Type> Build<A>(AutoCacheConfig<A> config) => interfaceType =>
+        private static Type Build((AutoCacheConfig, Type) args)
         {
+            var (config, interfaceType) = args;
             var noise = Guid.NewGuid().ToString().Substring(0, 8);
             var assemblyName = new AssemblyName($"{interfaceType.Name}_Assembly_{noise}");
             var assemblyBuilder =
@@ -140,7 +127,7 @@ namespace KitchenSink
                 methodBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
                 var methodIl = methodBuilder.GetILGenerator();
 
-                if (method.ReturnType == typeof(void) || config.exclusions.Contains(method))
+                if (method.ReturnType == typeof(void) || config.Exclusions.Contains(method))
                 {
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
@@ -262,7 +249,7 @@ namespace KitchenSink
 
             ctorIl.Emit(OpCodes.Ret);
             return typeBuilder.CreateType();
-        };
+        }
 
         private static CustomAttributeBuilder MakeCompilerGeneratedAttribute() =>
             new CustomAttributeBuilder(
