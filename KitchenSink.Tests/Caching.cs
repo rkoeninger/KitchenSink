@@ -61,7 +61,7 @@ namespace KitchenSink.Tests
         public void SelectiveExclusion()
         {
             IUserRepostiory repo = new UserRepository();
-            var cachedRepo = Cache(repo, c => c.For(m => m.Get2(default, default), m => m.Exclude()));
+            var cachedRepo = Cache(repo, c => c.Exclude(m => m.Get2(default, default)));
 
             Assert.AreEqual(cachedRepo.Get(1), cachedRepo.Get(1));
             Assert.AreEqual(cachedRepo.Get(2), cachedRepo.Get(2));

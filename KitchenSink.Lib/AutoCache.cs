@@ -16,6 +16,14 @@ namespace KitchenSink
         internal readonly List<MethodInfo> exclusions = new List<MethodInfo>();
         internal readonly Dictionary<MethodInfo, TimeSpan> expirations = new Dictionary<MethodInfo, TimeSpan>();
 
+        public AutoCacheConfig<A> Exclude(Expression<Action<A>> expr)
+        {
+            var method = (expr.Body as MethodCallExpression)?.Method
+                ?? throw new ArgumentException("Expression must be a method call");
+            exclusions.Add(method);
+            return this;
+        }
+
         public AutoCacheConfig<A> For(Expression<Action<A>> expr, Action<AutoCacheConfigMethod<A>> doConfig)
         {
             var method = (expr.Body as MethodCallExpression)?.Method
