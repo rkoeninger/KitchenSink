@@ -177,7 +177,6 @@ namespace KitchenSink
                     lambdaIl.Emit(OpCodes.Ret);
 
                     ctorIl.Emit(OpCodes.Ldarg_0);
-                    ctorIl.Emit(OpCodes.Ldarg_0);
 
                     if (hasExpiration)
                     {
@@ -186,6 +185,7 @@ namespace KitchenSink
                         ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
                     }
 
+                    ctorIl.Emit(OpCodes.Ldarg_0);
                     ctorIl.Emit(OpCodes.Ldftn, lambdaBuilder);
                     var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
                     ctorIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
@@ -206,7 +206,7 @@ namespace KitchenSink
                 else if (arity == 1)
                 {
                     // Field:
-                    // private readonly GenericCache<string, int> _cache1;
+                    // private readonly GenericCache<int, string> _cache0;
                     var keyType = method.GetParameters().Single().ParameterType;
                     var valueType = method.ReturnType;
                     var cacheType = typeof(GenericCache<,>).MakeGenericType(keyType, valueType);
@@ -218,7 +218,7 @@ namespace KitchenSink
                     cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
 
                     // Ctor:
-                    // this._cache1 = new GenericCache<string, int>(new TimeSpan(X), x => this._inner.Get(x));
+                    // this._cache0 = new GenericCache<int, string>((int k) => this._inner.Get(k));
                     var lambdaBuilder = typeBuilder.DefineMethod(
                         $"<{method.Name}>_{counter}_{noise}",
                         MethodAttributes.Private
@@ -243,6 +243,7 @@ namespace KitchenSink
                         ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
                     }
 
+                    ctorIl.Emit(OpCodes.Ldarg_0);
                     ctorIl.Emit(OpCodes.Ldftn, lambdaBuilder);
                     var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
                     ctorIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
@@ -252,7 +253,7 @@ namespace KitchenSink
                     ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
 
                     // Method:
-                    // public string Get(string x) => this._cache0.Get(x);
+                    // public string Get(int id) => this._cache0.Get(id);
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
                     methodIl.Emit(OpCodes.Ldarg_1);
@@ -306,6 +307,7 @@ namespace KitchenSink
                         ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
                     }
 
+                    ctorIl.Emit(OpCodes.Ldarg_0);
                     ctorIl.Emit(OpCodes.Ldftn, lambdaBuilder);
                     var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
                     ctorIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
