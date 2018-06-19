@@ -121,6 +121,7 @@ namespace KitchenSink
 
             foreach (var (counter, method) in interfaceType.GetMethods().ZipWithIndex())
             {
+                var hasExpiration = config.Expirations.TryGetValue(method, out var timeSpan);
                 var paramz = method.GetParameters();
                 var arity = paramz.Length;
                 var methodBuilder = typeBuilder.DefineMethod(
@@ -143,18 +144,28 @@ namespace KitchenSink
                     1.ToIncluding(arity).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
                     EmitCall(methodIl, method);
                     methodIl.Emit(OpCodes.Nop);
+                    methodIl.Emit(OpCodes.Ret);
                 }
                 else if (arity == 0)
                 {
                     var keyType = typeof(int);
-                    var (cacheType, cacheFieldBuilder) = InitCacheField(ctorIl, typeBuilder, keyType, method, counter);
+                    var valueType = hasExpiration
+                        ? typeof(ValueTuple<,>).MakeGenericType(typeof(DateTime), method.ReturnType)
+                        : method.ReturnType;
+                    var (cacheType, cacheFieldBuilder) = InitCacheField(
+                        ctorIl,
+                        typeBuilder,
+                        keyType,
+                        valueType,
+                        method,
+                        counter);
 
                     var lambdaBuilder = typeBuilder.DefineMethod(
                         $"<{method.Name}>_{counter}_{noise}",
                         MethodAttributes.Private
                         | MethodAttributes.HideBySig,
                         CallingConventions.Standard,
-                        method.ReturnType,
+                        valueType,
                         ArrayOf(keyType));
                     lambdaBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
                     var lambdaIl = lambdaBuilder.GetILGenerator();
@@ -172,11 +183,21 @@ namespace KitchenSink
                     methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
                     var getOrAddMethod = GetGetOrAddMethod(cacheType);
                     EmitCall(methodIl, getOrAddMethod);
+                    methodIl.Emit(OpCodes.Ret);
                 }
                 else if (arity == 1)
                 {
                     var keyType = paramz.Single().ParameterType;
-                    var (cacheType, cacheFieldBuilder) = InitCacheField(ctorIl, typeBuilder, keyType, method, counter);
+                    var valueType = hasExpiration
+                        ? typeof(ValueTuple<,>).MakeGenericType(typeof(DateTime), method.ReturnType)
+                        : method.ReturnType;
+                    var (cacheType, cacheFieldBuilder) = InitCacheField(
+                        ctorIl,
+                        typeBuilder,
+                        keyType,
+                        valueType,
+                        method,
+                        counter);
 
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
@@ -189,47 +210,96 @@ namespace KitchenSink
                     methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
                     var getOrAddMethod = GetGetOrAddMethod(cacheType);
                     EmitCall(methodIl, getOrAddMethod);
+                    methodIl.Emit(OpCodes.Ret);
                 }
                 else
                 {
                     var keyType = Type.GetType($"System.ValueTuple`{arity}")
                         .NonNull()
                         .MakeGenericType(paramz.Select(x => x.ParameterType).ToArray());
-                    var (cacheType, cacheFieldBuilder) = InitCacheField(ctorIl, typeBuilder, keyType, method, counter);
+                    var valueType = hasExpiration
+                        ? typeof(ValueTuple<,>).MakeGenericType(typeof(DateTime), method.ReturnType)
+                        : method.ReturnType;
+                    var (cacheType, cacheFieldBuilder) = InitCacheField(
+                        ctorIl,
+                        typeBuilder,
+                        keyType,
+                        valueType,
+                        method,
+                        counter);
 
-                    var lambdaBuilder = typeBuilder.DefineMethod(
-                        $"<{method.Name}>_{counter}_{noise}",
-                        MethodAttributes.Private
-                        | MethodAttributes.HideBySig,
-                        CallingConventions.Standard,
-                        method.ReturnType,
-                        ArrayOf(keyType));
-                    lambdaBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
-                    var lambdaIl = lambdaBuilder.GetILGenerator();
-                    lambdaIl.Emit(OpCodes.Ldarg_0);
-                    lambdaIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
-                    1.ToIncluding(arity).ForEach(i =>
-                    {
-                        var itemField = keyType.NonNull().GetField($"Item{i}").NonNull();
-                        lambdaIl.Emit(OpCodes.Ldarg_1);
-                        lambdaIl.Emit(OpCodes.Ldfld, itemField);
-                    });
-                    EmitCall(lambdaIl, method);
-                    lambdaIl.Emit(OpCodes.Ret);
+                    var addLambdaBuilder = BuildLambda(
+                        typeBuilder,
+                        $"<{method.Name}>_add_{counter}_{noise}",
+                        valueType,
+                        ArrayOf(keyType),
+                        il =>
+                        {
+                            il.Emit(OpCodes.Ldarg_0);
+                            il.Emit(OpCodes.Ldfld, innerFieldBuilder);
+                            1.ToIncluding(arity).ForEach(i =>
+                            {
+                                var itemField = keyType.NonNull().GetField($"Item{i}").NonNull();
+                                il.Emit(OpCodes.Ldarg_1);
+                                il.Emit(OpCodes.Ldfld, itemField);
+                            });
+                            EmitCall(il, method);
+
+                            if (hasExpiration)
+                            {
+                                // TODO: if expirable, get current time and build tuple
+                            }
+
+                            il.Emit(OpCodes.Ret);
+                        });
+
+                    var updateLambdaBuilder = BuildLambda(
+                        typeBuilder,
+                        $"<{method.Name}>_update_{counter}_{noise}",
+                        valueType,
+                        ArrayOf(keyType, valueType),
+                        il =>
+                        {
+                            // OpCodes.Ldarg_0 = this
+                            // OpCodes.Ldarg_1 = key
+                            // OpCodes.Ldarg_2 = (refreshTime, value)
+
+                            // determine if expired (currentValue.Item1 > DateTime.Utc + ExpirationPeriod)
+                            // jump if false
+                            // get current time
+                            il.Emit(OpCodes.Ldarg_0);
+                            il.Emit(OpCodes.Ldfld, innerFieldBuilder);
+                            1.ToIncluding(arity).ForEach(i =>
+                            {
+                                var itemField = keyType.NonNull().GetField($"Item{i}").NonNull();
+                                il.Emit(OpCodes.Ldarg_1);
+                                il.Emit(OpCodes.Ldfld, itemField);
+                            });
+                            EmitCall(il, method);
+                            // build ValueTuple
+                            il.Emit(OpCodes.Ret);
+                            // else jump here
+                            il.Emit(OpCodes.Ldarg_2);
+                            il.Emit(OpCodes.Ret);
+                        });
 
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
                     1.ToIncluding(arity).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
                     methodIl.Emit(OpCodes.Newobj, keyType.NonNull().GetConstructors().Single());
                     methodIl.Emit(OpCodes.Ldarg_0);
-                    methodIl.Emit(OpCodes.Ldftn, lambdaBuilder);
-                    var funcType = typeof(Func<,>).MakeGenericType(keyType, method.ReturnType);
-                    methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
-                    var getOrAddMethod = GetGetOrAddMethod(cacheType);
-                    EmitCall(methodIl, getOrAddMethod);
+                    methodIl.Emit(OpCodes.Ldftn, addLambdaBuilder);
+                    var addFuncType = typeof(Func<,>).MakeGenericType(keyType, valueType);
+                    methodIl.Emit(OpCodes.Newobj, addFuncType.GetConstructors().Single());
+                    methodIl.Emit(OpCodes.Ldarg_0);
+                    methodIl.Emit(OpCodes.Ldftn, updateLambdaBuilder);
+                    var updateFuncType = typeof(Func<,,>).MakeGenericType(keyType, valueType, valueType);
+                    methodIl.Emit(OpCodes.Newobj, updateFuncType.GetConstructors().Single());
+                    var addOrUpdateMethod = GetAddOrUpdateMethod(cacheType);
+                    EmitCall(methodIl, addOrUpdateMethod);
+                    // TODO: if expirable, get Item2 of tuple
+                    methodIl.Emit(OpCodes.Ret);
                 }
-
-                methodIl.Emit(OpCodes.Ret);
             }
 
             ctorIl.Emit(OpCodes.Ret);
@@ -246,10 +316,11 @@ namespace KitchenSink
             ILGenerator il,
             TypeBuilder typeBuilder,
             Type keyType,
+            Type valueType,
             MethodInfo method,
             int counter)
         {
-            var cacheType = typeof(ConcurrentDictionary<,>).MakeGenericType(keyType, method.ReturnType);
+            var cacheType = typeof(ConcurrentDictionary<,>).MakeGenericType(keyType, valueType);
             var cacheFieldBuilder = typeBuilder.DefineField(
                 $"_cache{counter}",
                 cacheType,
@@ -265,10 +336,36 @@ namespace KitchenSink
             return (cacheType, cacheFieldBuilder);
         }
 
+        private static MethodBuilder BuildLambda(
+            TypeBuilder typeBuilder,
+            string name,
+            Type returnType,
+            Type[] parameterTypes,
+            Action<ILGenerator> generateIl)
+        {
+            var lambdaBuilder = typeBuilder.DefineMethod(
+                name,
+                MethodAttributes.Private
+                | MethodAttributes.HideBySig,
+                CallingConventions.Standard,
+                returnType,
+                parameterTypes);
+            lambdaBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
+            var lambdaIl = lambdaBuilder.GetILGenerator();
+            generateIl(lambdaIl);
+            return lambdaBuilder;
+        }
+
         private static MethodInfo GetGetOrAddMethod(Type type) =>
             type.GetMethods()
                 .Single(x => x.Name == "GetOrAdd"
                      && x.GetParameters().Length == 2
+                     && x.GetParameters()[1].ParameterType.Name.Contains("Func"));
+
+        private static MethodInfo GetAddOrUpdateMethod(Type type) =>
+            type.GetMethods()
+                .Single(x => x.Name == "AddOrUpdate"
+                     && x.GetParameters().Length == 3
                      && x.GetParameters()[1].ParameterType.Name.Contains("Func"));
 
         private static void EmitCall(ILGenerator il, MethodInfo method) =>

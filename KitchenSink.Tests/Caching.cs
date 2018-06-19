@@ -5,6 +5,7 @@ using KitchenSink.Testing;
 
 namespace KitchenSink.Tests
 {
+    [Ignore("WIP")]
     public class Caching
     {
         private static readonly Random rand = new Random();
