@@ -186,9 +186,9 @@ namespace KitchenSink
                         ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
                     }
 
-                    methodIl.Emit(OpCodes.Ldftn, lambdaBuilder);
+                    ctorIl.Emit(OpCodes.Ldftn, lambdaBuilder);
                     var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
-                    methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
+                    ctorIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
                     var cacheCtor = cacheType.GetConstructors()
                         .Single(x => x.GetParameters().Length == (hasExpiration ? 2 : 1));
                     ctorIl.Emit(OpCodes.Newobj, cacheCtor);
@@ -243,9 +243,9 @@ namespace KitchenSink
                         ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
                     }
 
-                    methodIl.Emit(OpCodes.Ldftn, lambdaBuilder);
+                    ctorIl.Emit(OpCodes.Ldftn, lambdaBuilder);
                     var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
-                    methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
+                    ctorIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
                     var cacheCtor = cacheType.GetConstructors()
                         .Single(x => x.GetParameters().Length == (hasExpiration ? 2 : 1));
                     ctorIl.Emit(OpCodes.Newobj, cacheCtor);
@@ -306,9 +306,9 @@ namespace KitchenSink
                         ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
                     }
 
-                    methodIl.Emit(OpCodes.Ldftn, lambdaBuilder);
+                    ctorIl.Emit(OpCodes.Ldftn, lambdaBuilder);
                     var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
-                    methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
+                    ctorIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
                     var cacheCtor = cacheType.GetConstructors()
                         .Single(x => x.GetParameters().Length == (hasExpiration ? 2 : 1));
                     ctorIl.Emit(OpCodes.Newobj, cacheCtor);

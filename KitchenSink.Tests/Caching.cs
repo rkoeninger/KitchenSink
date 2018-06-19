@@ -23,7 +23,7 @@ namespace KitchenSink.Tests
         {
             //string Get(int id);
             //string Get2(int id, string x);
-            //string Get0();
+            string Get0();
             void Do(int id);
         }
 
@@ -49,7 +49,7 @@ namespace KitchenSink.Tests
                 _inner = inner;
                 //_cache0 = new GenericCache<int, string>(k => _inner.Get(k));
                 //_cache1 = new GenericCache<(int, string), string>(k => _inner.Get2(k.Item1, k.Item2));
-                //_cache2 = new GenericCache<int, string>(k => _inner.Get0());
+                _cache2 = new GenericCache<int, string>(k => _inner.Get0());
             }
 
             public string Get(int id) => _cache0.Get(id);
@@ -71,9 +71,9 @@ namespace KitchenSink.Tests
             cachedRepo.Do(0);
             Assert.AreEqual(prevCallCount + 1, callCount);
 
-            //Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
-            //Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
-            //Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
+            Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
+            Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
+            Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
 
             //Assert.AreEqual(cachedRepo.Get2(1, "abc"), cachedRepo.Get2(1, "abc"));
             //Assert.AreEqual(cachedRepo.Get2(2, "def"), cachedRepo.Get2(2, "def"));
@@ -83,7 +83,7 @@ namespace KitchenSink.Tests
         [Test]
         public void SelectiveExclusion()
         {
-            IUserRepostiory repo = new UserRepository();
+            //IUserRepostiory repo = new UserRepository();
             //var cachedRepo = Cache(repo, c => c.Exclude(m => m.Get2(default, default)));
 
             //Assert.AreEqual(cachedRepo.Get(1), cachedRepo.Get(1));
