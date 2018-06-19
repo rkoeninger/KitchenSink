@@ -19,11 +19,13 @@ namespace KitchenSink
         }
 
         public B Get(A key) =>
-            cache.AddOrUpdate(
+            (duration == TimeSpan.MaxValue
+            ? cache.GetOrAdd(key, k => (DateTime.UtcNow, lookup(k)))
+            : cache.AddOrUpdate(
                 key,
                 k => (DateTime.UtcNow, lookup(k)),
                 (k, v) => v.Item1 < DateTime.UtcNow + duration
                     ? (DateTime.UtcNow, lookup(k))
-                    : v).Item2;
+                    : v)).Item2;
     }
 }

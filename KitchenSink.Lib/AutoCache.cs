@@ -121,7 +121,7 @@ namespace KitchenSink
 
             foreach (var (counter, method) in interfaceType.GetMethods().ZipWithIndex())
             {
-                var hasExpiration = config.Expirations.TryGetValue(method, out var timeSpan);
+                var hasExpiration = config.Expirations.TryGetValue(method, out var duration);
                 var paramz = method.GetParameters();
                 var arity = paramz.Length;
                 var methodBuilder = typeBuilder.DefineMethod(
@@ -148,18 +148,20 @@ namespace KitchenSink
                 }
                 else if (arity == 0)
                 {
+                    // Field:
+                    // private readonly GenericCache<int, string> _cache0;
                     var keyType = typeof(int);
-                    var valueType = hasExpiration
-                        ? typeof(ValueTuple<,>).MakeGenericType(typeof(DateTime), method.ReturnType)
-                        : method.ReturnType;
-                    var (cacheType, cacheFieldBuilder) = InitCacheField(
-                        ctorIl,
-                        typeBuilder,
-                        keyType,
-                        valueType,
-                        method,
-                        counter);
+                    var valueType = method.ReturnType;
+                    var cacheType = typeof(GenericCache<,>).MakeGenericType(keyType, valueType);
+                    var cacheFieldBuilder = typeBuilder.DefineField(
+                        $"_cache{counter}",
+                        cacheType,
+                        FieldAttributes.Private
+                        | FieldAttributes.InitOnly);
+                    cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
 
+                    // Ctor:
+                    // this._cache0 = new GenericCache<int, string>(new TimeSpan(X), _ => this._inner.Get());
                     var lambdaBuilder = typeBuilder.DefineMethod(
                         $"<{method.Name}>_{counter}_{noise}",
                         MethodAttributes.Private
@@ -174,130 +176,152 @@ namespace KitchenSink
                     EmitCall(lambdaIl, method);
                     lambdaIl.Emit(OpCodes.Ret);
 
+                    ctorIl.Emit(OpCodes.Ldarg_0);
+                    ctorIl.Emit(OpCodes.Ldarg_0);
+
+                    if (hasExpiration)
+                    {
+                        ctorIl.Emit(OpCodes.Ldc_I8, duration.Ticks);
+                        var timeSpanCtor = typeof(TimeSpan).GetConstructor(ArrayOf(typeof(long))).NonNull();
+                        ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
+                    }
+
+                    methodIl.Emit(OpCodes.Ldftn, lambdaBuilder);
+                    var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
+                    methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
+                    var cacheCtor = cacheType.GetConstructors()
+                        .Single(x => x.GetParameters().Length == (hasExpiration ? 2 : 1));
+                    ctorIl.Emit(OpCodes.Newobj, cacheCtor);
+                    ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
+
+                    // Method:
+                    // public string Get() => this._cache0.Get(0);
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
                     methodIl.Emit(OpCodes.Ldc_I4_0);
-                    methodIl.Emit(OpCodes.Ldarg_0);
-                    methodIl.Emit(OpCodes.Ldftn, lambdaBuilder);
-                    var funcType = typeof(Func<,>).MakeGenericType(keyType, method.ReturnType);
-                    methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
-                    var getOrAddMethod = GetGetOrAddMethod(cacheType);
-                    EmitCall(methodIl, getOrAddMethod);
+                    var getMethod = cacheType.GetMethod("Get").NonNull();
+                    EmitCall(methodIl, getMethod);
                     methodIl.Emit(OpCodes.Ret);
                 }
                 else if (arity == 1)
                 {
-                    var keyType = paramz.Single().ParameterType;
-                    var valueType = hasExpiration
-                        ? typeof(ValueTuple<,>).MakeGenericType(typeof(DateTime), method.ReturnType)
-                        : method.ReturnType;
-                    var (cacheType, cacheFieldBuilder) = InitCacheField(
-                        ctorIl,
-                        typeBuilder,
-                        keyType,
-                        valueType,
-                        method,
-                        counter);
+                    // Field:
+                    // private readonly GenericCache<string, int> _cache1;
+                    var keyType = method.GetParameters().Single().ParameterType;
+                    var valueType = method.ReturnType;
+                    var cacheType = typeof(GenericCache<,>).MakeGenericType(keyType, valueType);
+                    var cacheFieldBuilder = typeBuilder.DefineField(
+                        $"_cache{counter}",
+                        cacheType,
+                        FieldAttributes.Private
+                        | FieldAttributes.InitOnly);
+                    cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
 
+                    // Ctor:
+                    // this._cache1 = new GenericCache<string, int>(new TimeSpan(X), x => this._inner.Get(x));
+                    var lambdaBuilder = typeBuilder.DefineMethod(
+                        $"<{method.Name}>_{counter}_{noise}",
+                        MethodAttributes.Private
+                        | MethodAttributes.HideBySig,
+                        CallingConventions.Standard,
+                        valueType,
+                        ArrayOf(keyType));
+                    lambdaBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
+                    var lambdaIl = lambdaBuilder.GetILGenerator();
+                    lambdaIl.Emit(OpCodes.Ldarg_0);
+                    lambdaIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
+                    lambdaIl.Emit(OpCodes.Ldarg_1);
+                    EmitCall(lambdaIl, method);
+                    lambdaIl.Emit(OpCodes.Ret);
+
+                    ctorIl.Emit(OpCodes.Ldarg_0);
+
+                    if (hasExpiration)
+                    {
+                        ctorIl.Emit(OpCodes.Ldc_I8, duration.Ticks);
+                        var timeSpanCtor = typeof(TimeSpan).GetConstructor(ArrayOf(typeof(long))).NonNull();
+                        ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
+                    }
+
+                    methodIl.Emit(OpCodes.Ldftn, lambdaBuilder);
+                    var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
+                    methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
+                    var cacheCtor = cacheType.GetConstructors()
+                        .Single(x => x.GetParameters().Length == (hasExpiration ? 2 : 1));
+                    ctorIl.Emit(OpCodes.Newobj, cacheCtor);
+                    ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
+
+                    // Method:
+                    // public string Get(string x) => this._cache0.Get(x);
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
                     methodIl.Emit(OpCodes.Ldarg_1);
-                    methodIl.Emit(OpCodes.Ldarg_0);
-                    methodIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
-                    methodIl.Emit(OpCodes.Dup);
-                    methodIl.Emit(OpCodes.Ldvirtftn, method);
-                    var funcType = typeof(Func<,>).MakeGenericType(keyType, method.ReturnType);
-                    methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
-                    var getOrAddMethod = GetGetOrAddMethod(cacheType);
-                    EmitCall(methodIl, getOrAddMethod);
+                    var getMethod = cacheType.GetMethod("Get").NonNull();
+                    EmitCall(methodIl, getMethod);
                     methodIl.Emit(OpCodes.Ret);
                 }
                 else
                 {
-                    var keyType = Type.GetType($"System.ValueTuple`{arity}")
-                        .NonNull()
+                    // Field:
+                    // private readonly GenericCache<(string, char), int> _cache1;
+                    var keyType = Type.GetType($"System.ValueTuple`{arity}").NonNull()
                         .MakeGenericType(paramz.Select(x => x.ParameterType).ToArray());
-                    var valueType = hasExpiration
-                        ? typeof(ValueTuple<,>).MakeGenericType(typeof(DateTime), method.ReturnType)
-                        : method.ReturnType;
-                    var (cacheType, cacheFieldBuilder) = InitCacheField(
-                        ctorIl,
-                        typeBuilder,
-                        keyType,
+                    var valueType = method.ReturnType;
+                    var cacheType = typeof(GenericCache<,>).MakeGenericType(keyType, valueType);
+                    var cacheFieldBuilder = typeBuilder.DefineField(
+                        $"_cache{counter}",
+                        cacheType,
+                        FieldAttributes.Private
+                        | FieldAttributes.InitOnly);
+                    cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
+
+                    // Ctor:
+                    // this._cache1 = new GenericCache<(string, char), int>(new TimeSpan(X), k => this._inner.Get(k.Item1, k.Item2));
+                    var lambdaBuilder = typeBuilder.DefineMethod(
+                        $"<{method.Name}>_{counter}_{noise}",
+                        MethodAttributes.Private
+                        | MethodAttributes.HideBySig,
+                        CallingConventions.Standard,
                         valueType,
-                        method,
-                        counter);
+                        ArrayOf(keyType));
+                    lambdaBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
+                    var lambdaIl = lambdaBuilder.GetILGenerator();
+                    lambdaIl.Emit(OpCodes.Ldarg_0);
+                    lambdaIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
+                    1.ToIncluding(arity).ForEach(i =>
+                    {
+                        var itemField = keyType.GetField($"Item{i}").NonNull();
+                        lambdaIl.Emit(OpCodes.Ldarg_1);
+                        lambdaIl.Emit(OpCodes.Ldfld, itemField);
+                    });
+                    EmitCall(lambdaIl, method);
+                    lambdaIl.Emit(OpCodes.Ret);
 
-                    var addLambdaBuilder = BuildLambda(
-                        typeBuilder,
-                        $"<{method.Name}>_add_{counter}_{noise}",
-                        valueType,
-                        ArrayOf(keyType),
-                        il =>
-                        {
-                            il.Emit(OpCodes.Ldarg_0);
-                            il.Emit(OpCodes.Ldfld, innerFieldBuilder);
-                            1.ToIncluding(arity).ForEach(i =>
-                            {
-                                var itemField = keyType.NonNull().GetField($"Item{i}").NonNull();
-                                il.Emit(OpCodes.Ldarg_1);
-                                il.Emit(OpCodes.Ldfld, itemField);
-                            });
-                            EmitCall(il, method);
+                    ctorIl.Emit(OpCodes.Ldarg_0);
 
-                            if (hasExpiration)
-                            {
-                                // TODO: if expirable, get current time and build tuple
-                            }
+                    if (hasExpiration)
+                    {
+                        ctorIl.Emit(OpCodes.Ldc_I8, duration.Ticks);
+                        var timeSpanCtor = typeof(TimeSpan).GetConstructor(ArrayOf(typeof(long))).NonNull();
+                        ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
+                    }
 
-                            il.Emit(OpCodes.Ret);
-                        });
+                    methodIl.Emit(OpCodes.Ldftn, lambdaBuilder);
+                    var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
+                    methodIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
+                    var cacheCtor = cacheType.GetConstructors()
+                        .Single(x => x.GetParameters().Length == (hasExpiration ? 2 : 1));
+                    ctorIl.Emit(OpCodes.Newobj, cacheCtor);
+                    ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
 
-                    var updateLambdaBuilder = BuildLambda(
-                        typeBuilder,
-                        $"<{method.Name}>_update_{counter}_{noise}",
-                        valueType,
-                        ArrayOf(keyType, valueType),
-                        il =>
-                        {
-                            // OpCodes.Ldarg_0 = this
-                            // OpCodes.Ldarg_1 = key
-                            // OpCodes.Ldarg_2 = (refreshTime, value)
-
-                            // determine if expired (currentValue.Item1 > DateTime.Utc + ExpirationPeriod)
-                            // jump if false
-                            // get current time
-                            il.Emit(OpCodes.Ldarg_0);
-                            il.Emit(OpCodes.Ldfld, innerFieldBuilder);
-                            1.ToIncluding(arity).ForEach(i =>
-                            {
-                                var itemField = keyType.NonNull().GetField($"Item{i}").NonNull();
-                                il.Emit(OpCodes.Ldarg_1);
-                                il.Emit(OpCodes.Ldfld, itemField);
-                            });
-                            EmitCall(il, method);
-                            // build ValueTuple
-                            il.Emit(OpCodes.Ret);
-                            // else jump here
-                            il.Emit(OpCodes.Ldarg_2);
-                            il.Emit(OpCodes.Ret);
-                        });
-
+                    // Method:
+                    // public string Get(string x, char y) => this._cache0.Get((x, y));
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
                     1.ToIncluding(arity).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
-                    methodIl.Emit(OpCodes.Newobj, keyType.NonNull().GetConstructors().Single());
-                    methodIl.Emit(OpCodes.Ldarg_0);
-                    methodIl.Emit(OpCodes.Ldftn, addLambdaBuilder);
-                    var addFuncType = typeof(Func<,>).MakeGenericType(keyType, valueType);
-                    methodIl.Emit(OpCodes.Newobj, addFuncType.GetConstructors().Single());
-                    methodIl.Emit(OpCodes.Ldarg_0);
-                    methodIl.Emit(OpCodes.Ldftn, updateLambdaBuilder);
-                    var updateFuncType = typeof(Func<,,>).MakeGenericType(keyType, valueType, valueType);
-                    methodIl.Emit(OpCodes.Newobj, updateFuncType.GetConstructors().Single());
-                    var addOrUpdateMethod = GetAddOrUpdateMethod(cacheType);
-                    EmitCall(methodIl, addOrUpdateMethod);
-                    // TODO: if expirable, get Item2 of tuple
+                    methodIl.Emit(OpCodes.Newobj, keyType.GetConstructors().Single());
+                    var getMethod = cacheType.GetMethod("Get").NonNull();
+                    EmitCall(methodIl, getMethod);
                     methodIl.Emit(OpCodes.Ret);
                 }
             }
@@ -311,62 +335,6 @@ namespace KitchenSink
                 typeof(CompilerGeneratedAttribute)
                     .GetConstructors().Single(x => Empty(x.GetParameters())),
                 ArrayOf<object>());
-
-        private static (Type, FieldBuilder) InitCacheField(
-            ILGenerator il,
-            TypeBuilder typeBuilder,
-            Type keyType,
-            Type valueType,
-            MethodInfo method,
-            int counter)
-        {
-            var cacheType = typeof(ConcurrentDictionary<,>).MakeGenericType(keyType, valueType);
-            var cacheFieldBuilder = typeBuilder.DefineField(
-                $"_cache{counter}",
-                cacheType,
-                FieldAttributes.Private
-                | FieldAttributes.InitOnly);
-            cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
-
-            il.Emit(OpCodes.Ldarg_0);
-            var dictCtor = cacheType.GetConstructors().Single(x => Empty(x.GetParameters()));
-            il.Emit(OpCodes.Newobj, dictCtor);
-            il.Emit(OpCodes.Stfld, cacheFieldBuilder);
-
-            return (cacheType, cacheFieldBuilder);
-        }
-
-        private static MethodBuilder BuildLambda(
-            TypeBuilder typeBuilder,
-            string name,
-            Type returnType,
-            Type[] parameterTypes,
-            Action<ILGenerator> generateIl)
-        {
-            var lambdaBuilder = typeBuilder.DefineMethod(
-                name,
-                MethodAttributes.Private
-                | MethodAttributes.HideBySig,
-                CallingConventions.Standard,
-                returnType,
-                parameterTypes);
-            lambdaBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
-            var lambdaIl = lambdaBuilder.GetILGenerator();
-            generateIl(lambdaIl);
-            return lambdaBuilder;
-        }
-
-        private static MethodInfo GetGetOrAddMethod(Type type) =>
-            type.GetMethods()
-                .Single(x => x.Name == "GetOrAdd"
-                     && x.GetParameters().Length == 2
-                     && x.GetParameters()[1].ParameterType.Name.Contains("Func"));
-
-        private static MethodInfo GetAddOrUpdateMethod(Type type) =>
-            type.GetMethods()
-                .Single(x => x.Name == "AddOrUpdate"
-                     && x.GetParameters().Length == 3
-                     && x.GetParameters()[1].ParameterType.Name.Contains("Func"));
 
         private static void EmitCall(ILGenerator il, MethodInfo method) =>
             il.Emit(method.IsVirtual ? OpCodes.Callvirt : OpCodes.Call, method);
