@@ -188,7 +188,7 @@ namespace KitchenSink
                     EmitCall(lambdaIl, method);
                     lambdaIl.Emit(OpCodes.Ret);
 
-                    // this._cacheN = new GenericCache<TKey, TReturn>(?timespan, this.Lambda)
+                    // this._cacheN = Memo<TKey, TReturn>(?timespan, this.Lambda)
                     ctorIl.Emit(OpCodes.Ldarg_0);
                     EmitTimeout(ctorIl, hasExpiration, timeout);
                     ctorIl.Emit(OpCodes.Ldarg_0);
@@ -198,7 +198,7 @@ namespace KitchenSink
                     EmitCall(ctorIl, MemoMethod(hasExpiration, keyType, valueType));
                     ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
 
-                    // this._cacheN.Get(~key)
+                    // this._cacheN.Invoke(~key)
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
                     EmitLoadCacheMethodArgs(methodIl, keyType, paramz.Length);
