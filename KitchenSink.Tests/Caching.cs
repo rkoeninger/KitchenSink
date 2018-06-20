@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using static KitchenSink.Operators;
 using KitchenSink.Testing;
+using System.Threading;
 
 namespace KitchenSink.Tests
 {
@@ -80,6 +81,19 @@ namespace KitchenSink.Tests
             // Run other tests again to confirm caching works as it should
             SelectiveExclusion();
             AutoCaching();
+        }
+
+        [Test]
+        public void ExpirableValuesAreRegenerated()
+        {
+            IUserRepostiory repo = new UserRepository();
+            var cachedRepo = Cache(repo, c => c.Expire(TimeSpan.FromMilliseconds(100), m => m.Get0()));
+            var prev = cachedRepo.Get0();
+            Assert.AreEqual(prev, cachedRepo.Get0());
+            Assert.AreEqual(prev, cachedRepo.Get0());
+            Assert.AreEqual(prev, cachedRepo.Get0());
+            Thread.Sleep(150);
+            Assert.AreNotEqual(prev, cachedRepo.Get0());
         }
     }
 }

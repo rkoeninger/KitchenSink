@@ -24,7 +24,7 @@ namespace KitchenSink
             : cache.AddOrUpdate(
                 key,
                 k => (DateTime.UtcNow, lookup(k)),
-                (k, v) => v.Item1 < DateTime.UtcNow + duration
+                (k, v) => DateTime.UtcNow - v.Item1 > duration
                     ? (DateTime.UtcNow, lookup(k))
                     : v)).Item2;
     }
