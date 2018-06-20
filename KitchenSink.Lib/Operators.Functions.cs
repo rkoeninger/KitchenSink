@@ -222,5 +222,75 @@ namespace KitchenSink
             var cache = new ConcurrentDictionary<(A, B, C, D), Z>();
             return (a, b, c, d) => cache.GetOrAdd((a, b, c, d), Tuplize(f));
         }
+
+        /// <summary>
+        /// Wrap function with memoizing cache with an expiration timeout.
+        /// </summary>
+        public static Func<Z> Memo<Z>(TimeSpan timeout, Func<Z> f)
+        {
+            var cache = new ConcurrentDictionary<int, (DateTime, Z)>();
+            return () => cache.AddOrUpdate(
+                0,
+                _ => (DateTime.UtcNow, f()),
+                (_, current) => DateTime.UtcNow - current.Item1 > timeout
+                    ? (DateTime.UtcNow, f())
+                    : current).Item2;
+        }
+
+        /// <summary>
+        /// Wrap function with memoizing cache with an expiration timeout.
+        /// </summary>
+        public static Func<A, Z> Memo<A, Z>(TimeSpan timeout, Func<A, Z> f)
+        {
+            var cache = new ConcurrentDictionary<A, (DateTime, Z)>();
+            return a => cache.AddOrUpdate(
+                a,
+                _ => (DateTime.UtcNow, f(a)),
+                (_, current) => DateTime.UtcNow - current.Item1 > timeout
+                    ? (DateTime.UtcNow, f(a))
+                    : current).Item2;
+        }
+
+        /// <summary>
+        /// Wrap function with memoizing cache with an expiration timeout.
+        /// </summary>
+        public static Func<A, B, Z> Memo<A, B, Z>(TimeSpan timeout, Func<A, B, Z> f)
+        {
+            var cache = new ConcurrentDictionary<(A, B), (DateTime, Z)>();
+            return (a, b) => cache.AddOrUpdate(
+                (a, b),
+                _ => (DateTime.UtcNow, f(a, b)),
+                (_, current) => DateTime.UtcNow - current.Item1 > timeout
+                    ? (DateTime.UtcNow, f(a, b))
+                    : current).Item2;
+        }
+
+        /// <summary>
+        /// Wrap function with memoizing cache with an expiration timeout.
+        /// </summary>
+        public static Func<A, B, C, Z> Memo<A, B, C, Z>(TimeSpan timeout, Func<A, B, C, Z> f)
+        {
+            var cache = new ConcurrentDictionary<(A, B, C), (DateTime, Z)>();
+            return (a, b, c) => cache.AddOrUpdate(
+                (a, b, c),
+                _ => (DateTime.UtcNow, f(a, b, c)),
+                (_, current) => DateTime.UtcNow - current.Item1 > timeout
+                    ? (DateTime.UtcNow, f(a, b, c))
+                    : current).Item2;
+        }
+
+        /// <summary>
+        /// Wrap function with memoizing cache with an expiration timeout.
+        /// </summary>
+        public static Func<A, B, C, D, Z> Memo<A, B, C, D, Z>(TimeSpan timeout, Func<A, B, C, D, Z> f)
+        {
+            var cache = new ConcurrentDictionary<(A, B, C, D), (DateTime, Z)>();
+            return (a, b, c, d) => cache.AddOrUpdate(
+                (a, b, c, d),
+                _ => (DateTime.UtcNow, f(a, b, c, d)),
+                (_, current) => DateTime.UtcNow - current.Item1 > timeout
+                    ? (DateTime.UtcNow, f(a, b, c, d))
+                    : current).Item2;
+        }
     }
 }
