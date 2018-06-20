@@ -13,8 +13,8 @@ namespace KitchenSink
 {
     public class AutoCacheConfig
     {
-        public ISet<MethodInfo> Exclusions { get; } = new HashSet<MethodInfo>();
-        public Dictionary<MethodInfo, TimeSpan> Expirations { get; } = new Dictionary<MethodInfo, TimeSpan>();
+        internal ISet<MethodInfo> Exclusions { get; } = new HashSet<MethodInfo>();
+        internal Dictionary<MethodInfo, TimeSpan> Expirations { get; } = new Dictionary<MethodInfo, TimeSpan>();
 
         public override bool Equals(object obj) =>
             obj is AutoCacheConfig that
@@ -86,6 +86,8 @@ namespace KitchenSink
             assemblyBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
             var typeName = $"{interfaceType.Name}_Cached_{noise}";
             var moduleBuilder = assemblyBuilder.DefineDynamicModule($"{interfaceType.Name}_Module_{noise}");
+
+            // public class TypeName : object, InterfaceType { ...
             var typeBuilder = moduleBuilder.DefineType(
                 typeName,
                 TypeAttributes.Public
@@ -98,12 +100,16 @@ namespace KitchenSink
             typeBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
             typeBuilder.SetParent(typeof(object));
             typeBuilder.AddInterfaceImplementation(interfaceType);
+
+            // private readonly InterfaceType _inner;
             var innerFieldBuilder = typeBuilder.DefineField(
                 "_inner",
                 interfaceType,
                 FieldAttributes.Private
                 | FieldAttributes.InitOnly);
             innerFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
+
+            // public TypeName(InterfaceType inner) : base() { this._inner = inner; ...
             var ctorBuilder = typeBuilder.DefineConstructor(
                 MethodAttributes.Public
                 | MethodAttributes.HideBySig
@@ -121,9 +127,10 @@ namespace KitchenSink
 
             foreach (var (counter, method) in interfaceType.GetMethods().ZipWithIndex())
             {
-                var hasExpiration = config.Expirations.TryGetValue(method, out var duration);
+                var hasExpiration = config.Expirations.TryGetValue(method, out var timeout);
                 var paramz = method.GetParameters();
-                var arity = paramz.Length;
+
+                // public TReturn Method(TParam0 param0, TParam1 param1, ...) { ...
                 var methodBuilder = typeBuilder.DefineMethod(
                     method.Name,
                     MethodAttributes.Public
@@ -139,136 +146,21 @@ namespace KitchenSink
 
                 if (method.ReturnType == typeof(void) || config.Exclusions.Contains(method))
                 {
+                    // ?return _inner.Method(args...)
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
-                    1.ToIncluding(arity).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
+                    1.ToIncluding(paramz.Length).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
                     EmitCall(methodIl, method);
                     methodIl.Emit(OpCodes.Nop);
                     methodIl.Emit(OpCodes.Ret);
                 }
-                else if (arity == 0)
-                {
-                    // Field:
-                    // private readonly GenericCache<int, string> _cache0;
-                    var keyType = KeyType(paramz);
-                    var valueType = method.ReturnType;
-                    var cacheType = typeof(GenericCache<,>).MakeGenericType(keyType, valueType);
-                    var cacheFieldBuilder = typeBuilder.DefineField(
-                        $"_cache{counter}",
-                        cacheType,
-                        FieldAttributes.Private
-                        | FieldAttributes.InitOnly);
-                    cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
-
-                    // Ctor:
-                    // this._cache0 = new GenericCache<int, string>(new TimeSpan(X), _ => this._inner.Get());
-                    var lambdaBuilder = typeBuilder.DefineMethod(
-                        $"<{method.Name}>_{counter}_{noise}",
-                        MethodAttributes.Private
-                        | MethodAttributes.HideBySig,
-                        CallingConventions.Standard,
-                        valueType,
-                        ArrayOf(keyType));
-                    lambdaBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
-                    var lambdaIl = lambdaBuilder.GetILGenerator();
-                    lambdaIl.Emit(OpCodes.Ldarg_0);
-                    lambdaIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
-                    LambdaBody(lambdaIl, keyType, arity);
-                    EmitCall(lambdaIl, method);
-                    lambdaIl.Emit(OpCodes.Ret);
-
-                    ctorIl.Emit(OpCodes.Ldarg_0);
-
-                    if (hasExpiration)
-                    {
-                        ctorIl.Emit(OpCodes.Ldc_I8, duration.Ticks);
-                        var timeSpanCtor = typeof(TimeSpan).GetConstructor(ArrayOf(typeof(long))).NonNull();
-                        ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
-                    }
-
-                    ctorIl.Emit(OpCodes.Ldarg_0);
-                    ctorIl.Emit(OpCodes.Ldftn, lambdaBuilder);
-                    var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
-                    ctorIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
-                    var cacheCtor = cacheType.GetConstructors()
-                        .Single(x => x.GetParameters().Length == (hasExpiration ? 2 : 1));
-                    ctorIl.Emit(OpCodes.Newobj, cacheCtor);
-                    ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
-
-                    // Method:
-                    // public string Get() => this._cache0.Get(0);
-                    methodIl.Emit(OpCodes.Ldarg_0);
-                    methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
-                    MethodBody(methodIl, keyType, arity);
-                    var getMethod = cacheType.GetMethod("Get").NonNull();
-                    EmitCall(methodIl, getMethod);
-                    methodIl.Emit(OpCodes.Ret);
-                }
-                else if (arity == 1)
-                {
-                    // Field:
-                    // private readonly GenericCache<int, string> _cache0;
-                    var keyType = KeyType(paramz);
-                    var valueType = method.ReturnType;
-                    var cacheType = typeof(GenericCache<,>).MakeGenericType(keyType, valueType);
-                    var cacheFieldBuilder = typeBuilder.DefineField(
-                        $"_cache{counter}",
-                        cacheType,
-                        FieldAttributes.Private
-                        | FieldAttributes.InitOnly);
-                    cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
-
-                    // Ctor:
-                    // this._cache0 = new GenericCache<int, string>((int k) => this._inner.Get(k));
-                    var lambdaBuilder = typeBuilder.DefineMethod(
-                        $"<{method.Name}>_{counter}_{noise}",
-                        MethodAttributes.Private
-                        | MethodAttributes.HideBySig,
-                        CallingConventions.Standard,
-                        valueType,
-                        ArrayOf(keyType));
-                    lambdaBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
-                    var lambdaIl = lambdaBuilder.GetILGenerator();
-                    lambdaIl.Emit(OpCodes.Ldarg_0);
-                    lambdaIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
-                    LambdaBody(lambdaIl, keyType, arity);
-                    EmitCall(lambdaIl, method);
-                    lambdaIl.Emit(OpCodes.Ret);
-
-                    ctorIl.Emit(OpCodes.Ldarg_0);
-
-                    if (hasExpiration)
-                    {
-                        ctorIl.Emit(OpCodes.Ldc_I8, duration.Ticks);
-                        var timeSpanCtor = typeof(TimeSpan).GetConstructor(ArrayOf(typeof(long))).NonNull();
-                        ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
-                    }
-
-                    ctorIl.Emit(OpCodes.Ldarg_0);
-                    ctorIl.Emit(OpCodes.Ldftn, lambdaBuilder);
-                    var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
-                    ctorIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
-                    var cacheCtor = cacheType.GetConstructors()
-                        .Single(x => x.GetParameters().Length == (hasExpiration ? 2 : 1));
-                    ctorIl.Emit(OpCodes.Newobj, cacheCtor);
-                    ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
-
-                    // Method:
-                    // public string Get(int id) => this._cache0.Get(id);
-                    methodIl.Emit(OpCodes.Ldarg_0);
-                    methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
-                    MethodBody(methodIl, keyType, arity);
-                    var getMethod = cacheType.GetMethod("Get").NonNull();
-                    EmitCall(methodIl, getMethod);
-                    methodIl.Emit(OpCodes.Ret);
-                }
                 else
                 {
-                    // Field:
-                    // private readonly GenericCache<(string, char), int> _cache1;
                     var keyType = KeyType(paramz);
                     var valueType = method.ReturnType;
                     var cacheType = typeof(GenericCache<,>).MakeGenericType(keyType, valueType);
+
+                    // private readonly GenericCache<TKey, TReturn> _cacheN;
                     var cacheFieldBuilder = typeBuilder.DefineField(
                         $"_cache{counter}",
                         cacheType,
@@ -276,8 +168,10 @@ namespace KitchenSink
                         | FieldAttributes.InitOnly);
                     cacheFieldBuilder.SetCustomAttribute(MakeCompilerGeneratedAttribute());
 
-                    // Ctor:
-                    // this._cache1 = new GenericCache<(string, char), int>(new TimeSpan(X), k => this._inner.Get(k.Item1, k.Item2));
+                    // private TReturn Lambda(TKey key) =>
+                    //     this._inner.Method();
+                    //  OR this._inner.Method(key);
+                    //  OR this._inner.Method(key.Item1, key.Item2, ...);
                     var lambdaBuilder = typeBuilder.DefineMethod(
                         $"<{method.Name}>_{counter}_{noise}",
                         MethodAttributes.Private
@@ -289,19 +183,13 @@ namespace KitchenSink
                     var lambdaIl = lambdaBuilder.GetILGenerator();
                     lambdaIl.Emit(OpCodes.Ldarg_0);
                     lambdaIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
-                    LambdaBody(lambdaIl, keyType, arity);
+                    EmitLoadInnerMethodArgs(lambdaIl, keyType, paramz.Length);
                     EmitCall(lambdaIl, method);
                     lambdaIl.Emit(OpCodes.Ret);
 
+                    // this._cacheN = new GenericCache<TKey, TReturn>(?timespan, this.Lambda)
                     ctorIl.Emit(OpCodes.Ldarg_0);
-
-                    if (hasExpiration)
-                    {
-                        ctorIl.Emit(OpCodes.Ldc_I8, duration.Ticks);
-                        var timeSpanCtor = typeof(TimeSpan).GetConstructor(ArrayOf(typeof(long))).NonNull();
-                        ctorIl.Emit(OpCodes.Newobj, timeSpanCtor);
-                    }
-
+                    EmitTimeout(ctorIl, hasExpiration, timeout);
                     ctorIl.Emit(OpCodes.Ldarg_0);
                     ctorIl.Emit(OpCodes.Ldftn, lambdaBuilder);
                     var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
@@ -311,11 +199,10 @@ namespace KitchenSink
                     ctorIl.Emit(OpCodes.Newobj, cacheCtor);
                     ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
 
-                    // Method:
-                    // public string Get(string x, char y) => this._cache0.Get((x, y));
+                    // this._cacheN.Get(~key)
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
-                    MethodBody(methodIl, keyType, arity);
+                    EmitLoadCacheMethodArgs(methodIl, keyType, paramz.Length);
                     var getMethod = cacheType.GetMethod("Get").NonNull();
                     EmitCall(methodIl, getMethod);
                     methodIl.Emit(OpCodes.Ret);
@@ -332,9 +219,6 @@ namespace KitchenSink
                     .GetConstructors().Single(x => Empty(x.GetParameters())),
                 ArrayOf<object>());
 
-        private static void EmitCall(ILGenerator il, MethodInfo method) =>
-            il.Emit(method.IsVirtual ? OpCodes.Callvirt : OpCodes.Call, method);
-
         private static Type KeyType(IReadOnlyCollection<ParameterInfo> paramz)
         {
             switch (paramz.Count)
@@ -349,7 +233,7 @@ namespace KitchenSink
             }
         }
 
-        private static void LambdaBody(ILGenerator il, Type keyType, int arity)
+        private static void EmitLoadInnerMethodArgs(ILGenerator il, Type keyType, int arity)
         {
             switch (arity)
             {
@@ -367,7 +251,7 @@ namespace KitchenSink
             }
         }
 
-        private static void MethodBody(ILGenerator il, Type keyType, int arity)
+        private static void EmitLoadCacheMethodArgs(ILGenerator il, Type keyType, int arity)
         {
             switch (arity)
             {
@@ -383,5 +267,19 @@ namespace KitchenSink
                     return;
             }
         }
+
+        private static void EmitTimeout(ILGenerator il, bool hasExpiration, TimeSpan timeout)
+        {
+            if (hasExpiration)
+            {
+                // new TimeSpan(...)
+                il.Emit(OpCodes.Ldc_I8, timeout.Ticks);
+                var timeSpanCtor = typeof(TimeSpan).GetConstructor(ArrayOf(typeof(long))).NonNull();
+                il.Emit(OpCodes.Newobj, timeSpanCtor);
+            }
+        }
+
+        private static void EmitCall(ILGenerator il, MethodInfo method) =>
+            il.Emit(method.IsVirtual ? OpCodes.Callvirt : OpCodes.Call, method);
     }
 }
