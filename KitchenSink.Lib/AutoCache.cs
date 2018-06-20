@@ -150,7 +150,7 @@ namespace KitchenSink
                 {
                     // Field:
                     // private readonly GenericCache<int, string> _cache0;
-                    var keyType = typeof(int);
+                    var keyType = KeyType(paramz);
                     var valueType = method.ReturnType;
                     var cacheType = typeof(GenericCache<,>).MakeGenericType(keyType, valueType);
                     var cacheFieldBuilder = typeBuilder.DefineField(
@@ -173,6 +173,7 @@ namespace KitchenSink
                     var lambdaIl = lambdaBuilder.GetILGenerator();
                     lambdaIl.Emit(OpCodes.Ldarg_0);
                     lambdaIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
+                    LambdaBody(lambdaIl, keyType, arity);
                     EmitCall(lambdaIl, method);
                     lambdaIl.Emit(OpCodes.Ret);
 
@@ -198,7 +199,7 @@ namespace KitchenSink
                     // public string Get() => this._cache0.Get(0);
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
-                    methodIl.Emit(OpCodes.Ldc_I4_0);
+                    MethodBody(methodIl, keyType, arity);
                     var getMethod = cacheType.GetMethod("Get").NonNull();
                     EmitCall(methodIl, getMethod);
                     methodIl.Emit(OpCodes.Ret);
@@ -207,7 +208,7 @@ namespace KitchenSink
                 {
                     // Field:
                     // private readonly GenericCache<int, string> _cache0;
-                    var keyType = method.GetParameters().Single().ParameterType;
+                    var keyType = KeyType(paramz);
                     var valueType = method.ReturnType;
                     var cacheType = typeof(GenericCache<,>).MakeGenericType(keyType, valueType);
                     var cacheFieldBuilder = typeBuilder.DefineField(
@@ -230,7 +231,7 @@ namespace KitchenSink
                     var lambdaIl = lambdaBuilder.GetILGenerator();
                     lambdaIl.Emit(OpCodes.Ldarg_0);
                     lambdaIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
-                    lambdaIl.Emit(OpCodes.Ldarg_1);
+                    LambdaBody(lambdaIl, keyType, arity);
                     EmitCall(lambdaIl, method);
                     lambdaIl.Emit(OpCodes.Ret);
 
@@ -256,7 +257,7 @@ namespace KitchenSink
                     // public string Get(int id) => this._cache0.Get(id);
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
-                    methodIl.Emit(OpCodes.Ldarg_1);
+                    MethodBody(methodIl, keyType, arity);
                     var getMethod = cacheType.GetMethod("Get").NonNull();
                     EmitCall(methodIl, getMethod);
                     methodIl.Emit(OpCodes.Ret);
@@ -265,8 +266,7 @@ namespace KitchenSink
                 {
                     // Field:
                     // private readonly GenericCache<(string, char), int> _cache1;
-                    var keyType = Type.GetType($"System.ValueTuple`{arity}").NonNull()
-                        .MakeGenericType(paramz.Select(x => x.ParameterType).ToArray());
+                    var keyType = KeyType(paramz);
                     var valueType = method.ReturnType;
                     var cacheType = typeof(GenericCache<,>).MakeGenericType(keyType, valueType);
                     var cacheFieldBuilder = typeBuilder.DefineField(
@@ -289,12 +289,7 @@ namespace KitchenSink
                     var lambdaIl = lambdaBuilder.GetILGenerator();
                     lambdaIl.Emit(OpCodes.Ldarg_0);
                     lambdaIl.Emit(OpCodes.Ldfld, innerFieldBuilder);
-                    1.ToIncluding(arity).ForEach(i =>
-                    {
-                        var itemField = keyType.GetField($"Item{i}").NonNull();
-                        lambdaIl.Emit(OpCodes.Ldarg_1);
-                        lambdaIl.Emit(OpCodes.Ldfld, itemField);
-                    });
+                    LambdaBody(lambdaIl, keyType, arity);
                     EmitCall(lambdaIl, method);
                     lambdaIl.Emit(OpCodes.Ret);
 
@@ -320,8 +315,7 @@ namespace KitchenSink
                     // public string Get(string x, char y) => this._cache0.Get((x, y));
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
-                    1.ToIncluding(arity).ForEach(i => methodIl.Emit(OpCodes.Ldarg_S, i));
-                    methodIl.Emit(OpCodes.Newobj, keyType.GetConstructors().Single());
+                    MethodBody(methodIl, keyType, arity);
                     var getMethod = cacheType.GetMethod("Get").NonNull();
                     EmitCall(methodIl, getMethod);
                     methodIl.Emit(OpCodes.Ret);
@@ -340,5 +334,54 @@ namespace KitchenSink
 
         private static void EmitCall(ILGenerator il, MethodInfo method) =>
             il.Emit(method.IsVirtual ? OpCodes.Callvirt : OpCodes.Call, method);
+
+        private static Type KeyType(IReadOnlyCollection<ParameterInfo> paramz)
+        {
+            switch (paramz.Count)
+            {
+                case 0:
+                    return typeof(int);
+                case 1:
+                    return paramz.Single().ParameterType;
+                default:
+                    return Type.GetType($"System.ValueTuple`{paramz.Count}").NonNull()
+                        .MakeGenericType(paramz.Select(x => x.ParameterType).ToArray());
+            }
+        }
+
+        private static void LambdaBody(ILGenerator il, Type keyType, int arity)
+        {
+            switch (arity)
+            {
+                case 1:
+                    il.Emit(OpCodes.Ldarg_1);
+                    return;
+                default:
+                    1.ToIncluding(arity).ForEach(i =>
+                    {
+                        var itemField = keyType.GetField($"Item{i}").NonNull();
+                        il.Emit(OpCodes.Ldarg_1);
+                        il.Emit(OpCodes.Ldfld, itemField);
+                    });
+                    return;
+            }
+        }
+
+        private static void MethodBody(ILGenerator il, Type keyType, int arity)
+        {
+            switch (arity)
+            {
+                case 0:
+                    il.Emit(OpCodes.Ldc_I4_0);
+                    return;
+                case 1:
+                    il.Emit(OpCodes.Ldarg_1);
+                    return;
+                default:
+                    1.ToIncluding(arity).ForEach(i => il.Emit(OpCodes.Ldarg_S, i));
+                    il.Emit(OpCodes.Newobj, keyType.GetConstructors().Single());
+                    return;
+            }
+        }
     }
 }
