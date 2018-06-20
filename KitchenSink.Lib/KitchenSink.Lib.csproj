@@ -5,7 +5,7 @@
     <Authors>Robert Koeninger</Authors>
     <PackageId>KitchenSink</PackageId>
     <Description>A library for multi-paradigm programming in C#.</Description>
-    <Copyright>Copyright © 2014-2017 Robert Koeninger</Copyright>
+    <Copyright>Copyright © 2014-2018 Robert Koeninger</Copyright>
     <PackageProjectUrl>https://github.com/rkoeninger/KitchenSink</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rkoeninger/KitchenSink</RepositoryUrl>
     <RootNamespace>KitchenSink</RootNamespace>
