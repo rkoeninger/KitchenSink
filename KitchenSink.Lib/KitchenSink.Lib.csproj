@@ -73,7 +73,6 @@
     <Compile Include="Extensions\FuncExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="FilePath.cs" />
-    <Compile Include="GenericCache.cs" />
     <Compile Include="Injection\Attributes.cs" />
     <Compile Include="Injection\Exceptions.cs" />
     <Compile Include="Injection\Needs.cs" />

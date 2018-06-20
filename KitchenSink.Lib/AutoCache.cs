@@ -129,6 +129,7 @@ namespace KitchenSink
             {
                 var hasExpiration = config.Expirations.TryGetValue(method, out var timeout);
                 var paramz = method.GetParameters();
+                var parameterTypes = paramz.Select(x => x.ParameterType).ToArray();
 
                 // public TReturn Method(TParam0 param0, TParam1 param1, ...) { ...
                 var methodBuilder = typeBuilder.DefineMethod(
@@ -156,11 +157,11 @@ namespace KitchenSink
                 }
                 else
                 {
-                    var keyType = KeyType(paramz);
+                    var keyType = KeyType(parameterTypes);
                     var valueType = method.ReturnType;
-                    var cacheType = typeof(GenericCache<,>).MakeGenericType(keyType, valueType);
+                    var cacheType = typeof(Func<,>).MakeGenericType(keyType, valueType);
 
-                    // private readonly GenericCache<TKey, TReturn> _cacheN;
+                    // private readonly Func<TKey, TReturn> _cacheN;
                     var cacheFieldBuilder = typeBuilder.DefineField(
                         $"_cache{counter}",
                         cacheType,
@@ -194,16 +195,14 @@ namespace KitchenSink
                     ctorIl.Emit(OpCodes.Ldftn, lambdaBuilder);
                     var funcType = typeof(Func<,>).MakeGenericType(keyType, valueType);
                     ctorIl.Emit(OpCodes.Newobj, funcType.GetConstructors().Single());
-                    var cacheCtor = cacheType.GetConstructors()
-                        .Single(x => x.GetParameters().Length == (hasExpiration ? 2 : 1));
-                    ctorIl.Emit(OpCodes.Newobj, cacheCtor);
+                    EmitCall(ctorIl, MemoMethod(hasExpiration, keyType, valueType));
                     ctorIl.Emit(OpCodes.Stfld, cacheFieldBuilder);
 
                     // this._cacheN.Get(~key)
                     methodIl.Emit(OpCodes.Ldarg_0);
                     methodIl.Emit(OpCodes.Ldfld, cacheFieldBuilder);
                     EmitLoadCacheMethodArgs(methodIl, keyType, paramz.Length);
-                    var getMethod = cacheType.GetMethod("Get").NonNull();
+                    var getMethod = cacheType.GetMethod("Invoke").NonNull();
                     EmitCall(methodIl, getMethod);
                     methodIl.Emit(OpCodes.Ret);
                 }
@@ -219,19 +218,27 @@ namespace KitchenSink
                     .GetConstructors().Single(x => Empty(x.GetParameters())),
                 ArrayOf<object>());
 
-        private static Type KeyType(IReadOnlyCollection<ParameterInfo> paramz)
+        private static Type KeyType(IReadOnlyCollection<Type> parameterTypes)
         {
-            switch (paramz.Count)
+            switch (parameterTypes.Count)
             {
                 case 0:
                     return typeof(int);
                 case 1:
-                    return paramz.Single().ParameterType;
+                    return parameterTypes.Single();
                 default:
-                    return Type.GetType($"System.ValueTuple`{paramz.Count}").NonNull()
-                        .MakeGenericType(paramz.Select(x => x.ParameterType).ToArray());
+                    return Type.GetType($"System.ValueTuple`{parameterTypes.Count}").NonNull()
+                        .MakeGenericType(parameterTypes.ToArray());
             }
         }
+
+        private static MethodInfo MemoMethod(bool hasExpiration, Type keyType, Type valueType) =>
+            typeof(Operators).GetMethods()
+                .Single(x =>
+                    x.Name == nameof(Memo)
+                    && x.GetParameters().Length == (hasExpiration ? 2 : 1)
+                    && x.GetParameters()[hasExpiration ? 1 : 0].ParameterType.GenericTypeArguments.Length == 2)
+                .MakeGenericMethod(ArrayOf(keyType, valueType));
 
         private static void EmitLoadInnerMethodArgs(ILGenerator il, Type keyType, int arity)
         {
