@@ -1,104 +1,26 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E993D487-E0D8-44EF-87D8-D335ECAA6CFA}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFramework>net47</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <Authors>Robert Koeninger</Authors>
+    <PackageId>KitchenSink</PackageId>
+    <Description>A library for multi-paradigm programming in C#.</Description>
+    <Copyright>Copyright © 2014-2017 Robert Koeninger</Copyright>
+    <PackageProjectUrl>https://github.com/rkoeninger/KitchenSink</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rkoeninger/KitchenSink</RepositoryUrl>
     <RootNamespace>KitchenSink</RootNamespace>
     <AssemblyName>KitchenSink</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>7.3</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AutoCache.cs" />
-    <Compile Include="Collections\BankersQueue.cs" />
-    <Compile Include="Collections\BitmappedTrie.cs" />
-    <Compile Include="Collections\ConsList.cs" />
-    <Compile Include="Collections\DefaultingDictionary.cs" />
-    <Compile Include="Collections\DictionaryGrouping.cs" />
-    <Compile Include="Collections\DictionaryLookup.cs" />
-    <Compile Include="Collections\FingerTree.cs" />
-    <Compile Include="Collections\MultiKeyDictionary.cs" />
-    <Compile Include="Collections\PairingHeap.cs" />
-    <Compile Include="Collections\RadixDictionary.cs" />
-    <Compile Include="Collections\RoseTree.cs" />
-    <Compile Include="Comparison.cs" />
-    <Compile Include="Concurrent\Atom.cs" />
-    <Compile Include="Concurrent\Exceptions.cs" />
-    <Compile Include="Concurrent\Lock.cs" />
-    <Compile Include="Control\Case.cs" />
-    <Compile Include="Control\Cond.cs" />
-    <Compile Include="Either.cs" />
-    <Compile Include="Extensions\DictionaryExtensions.cs" />
-    <Compile Include="Extensions\EnumerableExtensions.cs" />
-    <Compile Include="Extensions\DateTimeExtensions.cs" />
-    <Compile Include="Extensions\EnumerableMaybeExtensions.cs" />
-    <Compile Include="Extensions\ListExtensions.cs" />
-    <Compile Include="Extensions\MathExtensions.cs" />
-    <Compile Include="Extensions\ObjectExtensions.cs" />
-    <Compile Include="Extensions\StreamExtensions.cs" />
-    <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Extensions\FuncExtensions.cs" />
-    <Compile Include="Extensions\TypeExtensions.cs" />
-    <Compile Include="FilePath.cs" />
-    <Compile Include="Injection\Attributes.cs" />
-    <Compile Include="Injection\Exceptions.cs" />
-    <Compile Include="Injection\Needs.cs" />
-    <Compile Include="Maybe.cs" />
-    <Compile Include="NewType.cs" />
-    <Compile Include="Operators.Collections.cs" />
-    <Compile Include="Operators.Comparison.cs" />
-    <Compile Include="Operators.Control.cs" />
-    <Compile Include="Operators.Basic.cs" />
-    <Compile Include="Operators.Functions.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Purity\IO.cs" />
-    <Compile Include="Purity\Lens.cs" />
-    <Compile Include="Scope.cs" />
-    <Compile Include="Testing\All.cs" />
-    <Compile Include="Testing\Check.cs" />
-    <Compile Include="Testing\Expect.cs" />
-    <Compile Include="Testing\Rand.cs" />
-    <Compile Include="Testing\Sample.cs" />
-    <Compile Include="Timekeeping\DateSpan.cs" />
-    <Compile Include="Timekeeping\ExactDay.cs" />
-    <Compile Include="Timekeeping\ExactMonth.cs" />
-    <Compile Include="Timekeeping\ExactYear.cs" />
-    <Compile Include="Unit.cs" />
-    <Compile Include="Void.cs" />
-    <Compile Include="Xml.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
