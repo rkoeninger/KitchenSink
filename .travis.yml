@@ -1,6 +1,6 @@
 notifications:
   email: false
-language: generic # csharp
+language: csharp
 #solution: KitchenSink.sln
 #install:
   #- nuget restore KitchenSink.sln
