@@ -99,7 +99,7 @@ Drive.C / "Folder1" / "Folder2" / "File.txt"
 
 Folder.AppData / "MyApp" / "Config.xml"
     "C:\\Users\\Me\\AppData\\MyApp\\Config.xml" (Windows)
-	"/users/me/.config/"                        (Linux)
+	"/users/me/.config/MyApp/Config.xml"        (Linux)
 ```
 
 ### Crazy XML Building Facility using Operator Overloading
