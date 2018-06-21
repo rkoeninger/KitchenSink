@@ -94,14 +94,12 @@ private const int DeclareSingleUse = 0;
   * Works on .Net/Windows and Mono/Linux
   
 ```csharp
-(on Windows)
 Drive.C / "Folder1" / "Folder2" / "File.txt"
-    "C:\\Folder1\\Folder2\\File.txt"
+    "C:\\Folder1\\Folder2\\File.txt" (Windows)
 
-(on Linux)
 Folder.AppData / "MyApp" / "Config.xml"
-    "C:\\Users\\Me\\AppData\\MyApp\\Config.xml"
-	"/users/me/.config/"
+    "C:\\Users\\Me\\AppData\\MyApp\\Config.xml" (Windows)
+	"/users/me/.config/"                        (Linux)
 ```
 
 ### Crazy XML Building Facility using Operator Overloading
