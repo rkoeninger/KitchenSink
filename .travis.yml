@@ -8,5 +8,5 @@ install:
   - nuget restore KitchenSink.sln
   - nuget install NUnit.ConsoleRunner -Version $NUnitVersion -OutputDirectory testrunner
 script:
-  - xbuild /p:Configuration=Release KitchenSink.sln
+  - msbuild /p:Configuration=Release KitchenSink.sln
   - mono ./testrunner/NUnit.ConsoleRunner.$NUnitVersion/tools/nunit3-console.exe ./KitchenSink.Tests/bin/Release/KitchenSink.Tests.dll --where "cat != WindowsOnly"
