@@ -1,6 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using static System.Environment;
+using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
@@ -14,9 +14,9 @@ namespace KitchenSink
         /// </summary>
         public static FilePath Letter(char letter)
         {
-            if (! char.IsLetter(letter))
+            if (Not(char.IsLetter(letter)))
             {
-                throw new ArgumentException("Drive letter must be a letter, instead it was: " + letter);
+                throw new InvalidDriveLetterException(letter);
             }
 
             return new FilePath(letter + @":\");

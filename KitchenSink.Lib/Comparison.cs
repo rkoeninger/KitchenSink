@@ -5,11 +5,17 @@
     /// </summary>
     public enum Comparison
     {
-        /// <summary>Greater than.</summary>
+        /// <summary>
+        /// Greater than.
+        /// </summary>
         GT,
-        /// <summary>Lesser than.</summary>
+        /// <summary>
+        /// Lesser than.
+        /// </summary>
         LT,
-        /// <summary>Equal to.</summary>
+        /// <summary>
+        /// Equal to.
+        /// </summary>
         EQ
     }
 }

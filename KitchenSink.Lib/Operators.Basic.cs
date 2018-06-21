@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
+using System.Threading.Tasks;
 using KitchenSink.Extensions;
 
 namespace KitchenSink
@@ -262,11 +264,6 @@ namespace KitchenSink
         /// </summary>
         public static T Clone<T>(T source)
         {
-            if (Not(typeof(T).IsSerializable))
-            {
-                throw new ArgumentException("The type must be serializable.", nameof(source));
-            }
-
             if (source == null)
             {
                 return default;
@@ -275,6 +272,11 @@ namespace KitchenSink
             if (source is ICloneable c)
             {
                 return (T) c.Clone();
+            }
+
+            if (Not(typeof(T).IsSerializable))
+            {
+                throw new CloneNotSupportedException(typeof(T));
             }
 
             var formatter = new BinaryFormatter();
@@ -294,5 +296,23 @@ namespace KitchenSink
         /// </summary>
         public static A Cache<A>(A inner, Action<AutoCacheConfig<A>> doConfig = null) where A : class =>
             AutoCache.Build(inner, new AutoCacheConfig<A>().With(doConfig ?? (_ => { })));
+
+        /// <summary>
+        /// Repeated invokes the given action, waiting the given delay between invocations.
+        /// </summary>
+        public static IDisposable Repeat(TimeSpan timeout, Action f)
+        {
+            var cancel = new CancellationTokenSource();
+
+            Task.Run(() =>
+            {
+                while (Not(cancel.Token.WaitHandle.WaitOne(timeout)))
+                {
+                    f();
+                }
+            }, cancel.Token);
+
+            return Disposable(cancel.Cancel);
+        }
     }
 }

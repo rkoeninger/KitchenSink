@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using KitchenSink.Concurrent;
+using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
@@ -33,9 +32,7 @@ namespace KitchenSink
         private readonly Action<IReadOnlyList<A>> handler;
         private readonly List<A> items = new List<A>();
         private readonly Lock @lock = Lock.New();
-        private readonly CancellationTokenSource cancel;
-        private readonly Task flusher;
-        private bool running = true;
+        private readonly IDisposable worker;
 
         public Buffer(long limit, TimeSpan timeout, Action<IReadOnlyList<A>> handler)
         {
@@ -44,18 +41,9 @@ namespace KitchenSink
 
             if (timeout > TimeSpan.Zero)
             {
-                cancel = new CancellationTokenSource();
-                flusher = Task.Run(() =>
-                {
-                    while (running)
-                    {
-                        Task.Delay(timeout, cancel.Token).ContinueWith(_ => Flush()).Wait();
-                    }
-                });
+                worker = Repeat(timeout, Flush);
             }
         }
-
-        public bool IsAsyncFlushRunning => running && (flusher?.IsCompleted ?? false);
 
         public void Write(A item)
         {
@@ -84,9 +72,7 @@ namespace KitchenSink
 
         public void Dispose()
         {
-            running = false;
-            cancel?.Cancel();
-            flusher?.Wait();
+            worker?.Dispose();
             Flush();
         }
     }

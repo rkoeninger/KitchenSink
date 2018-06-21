@@ -341,5 +341,19 @@ namespace KitchenSink
         /// </summary>
         public static Action<A, B, C, D> Debounce<A, B, C, D>(TimeSpan timeout, Action<A, B, C, D> f) =>
             Detuplize(Debounce(timeout, Tuplize(f)));
+
+        /// <summary>
+        /// Returns an IDisposable that, when <c>Dispose</c>d, calls the given function.
+        /// </summary>
+        public static IDisposable Disposable(Action f) => new DisposableAction(f);
+
+        internal class DisposableAction : IDisposable
+        {
+            private readonly Action f;
+
+            internal DisposableAction(Action f) => this.f = f;
+
+            public void Dispose() => f();
+        }
     }
 }

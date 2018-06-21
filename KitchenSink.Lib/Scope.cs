@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
 namespace KitchenSink
@@ -62,7 +63,18 @@ namespace KitchenSink
         /// </summary>
         public IDisposable Push(string key, object value)
         {
-            return new Pop(index.AddOrUpdate(key, New(value), Existing(value)));
+            var stack = index.AddOrUpdate(key, New(value), Existing(value));
+            var size = stack.Count;
+
+            return Disposable(() =>
+            {
+                if (stack.Count != size)
+                {
+                    throw new DynamicScopeStackException(size, stack.Count);
+                }
+
+                stack.Pop();
+            });
         }
 
         /// <summary>
@@ -98,35 +110,10 @@ namespace KitchenSink
         /// </summary>
         public Maybe<TValue> GetMaybe<TValue>() => GetMaybe(typeof(TValue).FullName).OfType<TValue>();
 
-        private static Func<string, Stack<object>, Stack<object>> Existing(object value) => (key, stack) =>
-        {
-            stack.Push(value);
-            return stack;
-        };
+        private static Func<string, Stack<object>, Stack<object>> Existing(object value) =>
+            (key, stack) => stack.With(s => s.Push(value));
 
         private static Func<string, Stack<object>> New(object value) => key =>
             Existing(value)(key, new Stack<object>());
-
-        private class Pop : IDisposable
-        {
-            private readonly Stack<object> stack;
-            private readonly int size;
-
-            public Pop(Stack<object> stack)
-            {
-                this.stack = stack;
-                size = stack.Count;
-            }
-
-            public void Dispose()
-            {
-                if (stack.Count != size)
-                {
-                    throw new InvalidOperationException($"Stack was not of expected size: {size}");
-                }
-
-                stack.Pop();
-            }
-        }
     }
 }
