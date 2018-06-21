@@ -30,19 +30,15 @@ namespace KitchenSink
     {
         public AutoCacheConfig<A> Exclude(Expression<Action<A>> expr)
         {
-            Exclusions.Add(GetMethod(expr));
+            Exclusions.Add(expr.GetMethod());
             return this;
         }
 
         public AutoCacheConfig<A> Expire(TimeSpan time, Expression<Action<A>> expr)
         {
-            Expirations[GetMethod(expr)] = time;
+            Expirations[expr.GetMethod()] = time;
             return this;
         }
-
-        private static MethodInfo GetMethod(Expression<Action<A>> expr) =>
-            (expr.Body as MethodCallExpression)?.Method
-                ?? throw new ArgumentException("Expression must be a method call");
     }
 
     internal static class AutoCache

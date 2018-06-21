@@ -22,8 +22,7 @@ namespace KitchenSink.Purity
             new Lens<A, B>(getExpr.Compile(), Setter<A, B>(Parse(getExpr)));
 
         private static string Parse<A, B>(Expression<Func<A, B>> getExpr) =>
-            ((getExpr.Body as MemberExpression)?.Member as PropertyInfo)?.Name
-            ?? throw new ArgumentException("Expression must be a property");
+            getExpr.GetProperty().Name;
 
         private static Func<A, B, A> Setter<A, B>(string name)
         {
