@@ -19,13 +19,11 @@ namespace KitchenSink.Purity
         /// Builds a Lens by reflectively lookuping property referenced in given lambda.
         /// </summary>
         public static Lens<A, B> Of<A, B>(Expression<Func<A, B>> getExpr) =>
-            new Lens<A, B>(getExpr.Compile(), Setter<A, B>(Parse(getExpr)));
+            new Lens<A, B>(getExpr.Compile(), Setter(getExpr));
 
-        private static string Parse<A, B>(Expression<Func<A, B>> getExpr) =>
-            getExpr.GetProperty().Name;
-
-        private static Func<A, B, A> Setter<A, B>(string name)
+        private static Func<A, B, A> Setter<A, B>(Expression<Func<A, B>> getExpr)
         {
+            var name = getExpr.GetProperty().Name;
             var ctor = typeof(A)
                 .GetConstructors()
                 .SingleOrDefault(c => c.GetParameters().Length > 0)
