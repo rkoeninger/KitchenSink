@@ -94,11 +94,13 @@ private const int DeclareSingleUse = 0;
   * Works on .Net/Windows and Mono/Linux
   
 ```csharp
+(on Windows)
 Drive.C / "Folder1" / "Folder2" / "File.txt"
-    "C:\Folder1\Folder2\File.txt"
+    "C:\\Folder1\\Folder2\\File.txt"
 
+(on Linux)
 Folder.AppData / "MyApp" / "Config.xml"
-    "C:\Users\Me\AppData\MyApp\Config.xml"
+    "C:\\Users\\Me\\AppData\\MyApp\\Config.xml"
 	"/users/me/.config/"
 ```
 
