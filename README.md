@@ -49,7 +49,9 @@ Not everything in this library is meant to be taken completely seriously. Some f
 
 ### Easy Cache Implementation
 
+  * `Buffer` - accumulates arguments to `Write` method until limit is reached or `Flush` is called
   * `Cache` - uses code generation to build wrapper class around interface implementation that caches all methods
+  * `Debounce` - returns new version of an action that only passes through call after a time has passed since last call
   * `Memo` - returns new version of a function that caches return value for inputs, with optional expiration time
 
 ### Dynamic Scoping Emulation
