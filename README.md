@@ -47,7 +47,7 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `Cond` - builds a list of clauses and conditionally evaluates consequents
   * `Case` - like `Cond`, but clauses are applied to a key value
 
-## Easy Cache Builders
+### Easy Cache Implementation
 
   * `Cache` - uses code generation to build wrapper class around interface implementation that caches all methods
   * `Memo` - returns new version of a function that caches return value for inputs, with optional expiration time
