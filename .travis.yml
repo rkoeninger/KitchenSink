@@ -4,9 +4,11 @@ language: csharp
 solution: KitchenSink.sln
 env:
   - NUnitVer=3.8.0
+  - NUnitExe=./testrunner/NUnit.ConsoleRunner.$NUnitVer/tools/nunit3-console.exe
+  - TestDll=./KitchenSink.Tests/bin/Release/net47/KitchenSink.Tests.dll
 install:
   - nuget restore KitchenSink.sln
   - nuget install NUnit.ConsoleRunner -Version $NUnitVer -OutputDirectory testrunner
 script:
   - msbuild /p:Configuration=Release KitchenSink.sln
-  - mono ./testrunner/NUnit.ConsoleRunner.$NUnitVer/tools/nunit3-console.exe ./KitchenSink.Tests/bin/Release/net47/KitchenSink.Tests.dll --where "cat != WindowsOnly"
+  - mono $NUnitExe $TestDll --where "cat != WindowsOnly"
