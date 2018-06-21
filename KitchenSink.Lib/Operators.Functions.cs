@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using KitchenSink.Concurrent;
 
 namespace KitchenSink
 {
@@ -89,31 +90,37 @@ namespace KitchenSink
         /// Join parameters into tuple.
         /// </summary>
         public static Func<(A, B), Z> Tuplize<A, B, Z>(Func<A, B, Z> f) =>
-            t =>
-            {
-                var (a, b) = t;
-                return f(a, b);
-            };
+            t => f(t.Item1, t.Item2);
 
         /// <summary>
         /// Join parameters into tuple.
         /// </summary>
         public static Func<(A, B, C), Z> Tuplize<A, B, C, Z>(Func<A, B, C, Z> f) =>
-            t =>
-            {
-                var (a, b, c) = t;
-                return f(a, b, c);
-            };
+            t => f(t.Item1, t.Item2, t.Item3);
 
         /// <summary>
         /// Join parameters into tuple.
         /// </summary>
         public static Func<(A, B, C, D), Z> Tuplize<A, B, C, D, Z>(Func<A, B, C, D, Z> f) =>
-            t =>
-            {
-                var (a, b, c, d) = t;
-                return f(a, b, c, d);
-            };
+            t => f(t.Item1, t.Item2, t.Item3, t.Item4);
+
+        /// <summary>
+        /// Join parameters into tuple.
+        /// </summary>
+        public static Action<(A, B)> Tuplize<A, B>(Action<A, B> f) =>
+            t => f(t.Item1, t.Item2);
+
+        /// <summary>
+        /// Join parameters into tuple.
+        /// </summary>
+        public static Action<(A, B, C)> Tuplize<A, B, C>(Action<A, B, C> f) =>
+            t => f(t.Item1, t.Item2, t.Item3);
+
+        /// <summary>
+        /// Join parameters into tuple.
+        /// </summary>
+        public static Action<(A, B, C, D)> Tuplize<A, B, C, D>(Action<A, B, C, D> f) =>
+            t => f(t.Item1, t.Item2, t.Item3, t.Item4);
 
         /// <summary>
         /// Split parameters from tuple.
@@ -132,6 +139,44 @@ namespace KitchenSink
         /// </summary>
         public static Func<A, B, C, D, Z> Detuplize<A, B, C, D, Z>(Func<(A, B, C, D), Z> f) =>
             (a, b, c, d) => f((a, b, c, d));
+
+        /// <summary>
+        /// Split parameters from tuple.
+        /// </summary>
+        public static Action<A, B> Detuplize<A, B>(Action<(A, B)> f) =>
+            (a, b) => f((a, b));
+
+        /// <summary>
+        /// Split parameters from tuple.
+        /// </summary>
+        public static Action<A, B, C> Detuplize<A, B, C>(Action<(A, B, C)> f) =>
+            (a, b, c) => f((a, b, c));
+
+        /// <summary>
+        /// Split parameters from tuple.
+        /// </summary>
+        public static Action<A, B, C, D> Detuplize<A, B, C, D>(Action<(A, B, C, D)> f) =>
+            (a, b, c, d) => f((a, b, c, d));
+
+        /// <summary>
+        /// Wrap function with one that takes placeholder Unit.
+        /// </summary>
+        public static Func<Unit, Z> TakeUnit<Z>(Func<Z> f) => _ => f();
+
+        /// <summary>
+        /// Wrap function with one that takes placeholder Unit.
+        /// </summary>
+        public static Action<Unit> TakeUnit(Action f) => _ => f();
+
+        /// <summary>
+        /// Wrap function with one that gives placeholder Unit.
+        /// </summary>
+        public static Func<Z> GiveUnit<Z>(Func<Unit, Z> f) => () => f(Unit.It);
+
+        /// <summary>
+        /// Wrap function with one that gives placeholder Unit.
+        /// </summary>
+        public static Action GiveUnit(Action<Unit> f) => () => f(Unit.It);
 
         /// <summary>
         /// Partially apply function.
@@ -199,43 +244,26 @@ namespace KitchenSink
         /// <summary>
         /// Wrap function with memoizing cache.
         /// </summary>
-        public static Func<A, B, Z> Memo<A, B, Z>(Func<A, B, Z> f)
-        {
-            var cache = new ConcurrentDictionary<(A, B), Z>();
-            return (a, b) => cache.GetOrAdd((a, b), Tuplize(f));
-        }
+        public static Func<A, B, Z> Memo<A, B, Z>(Func<A, B, Z> f) =>
+            Detuplize(Memo(Tuplize(f)));
 
         /// <summary>
         /// Wrap function with memoizing cache.
         /// </summary>
-        public static Func<A, B, C, Z> Memo<A, B, C, Z>(Func<A, B, C, Z> f)
-        {
-            var cache = new ConcurrentDictionary<(A, B, C), Z>();
-            return (a, b, c) => cache.GetOrAdd((a, b, c), Tuplize(f));
-        }
+        public static Func<A, B, C, Z> Memo<A, B, C, Z>(Func<A, B, C, Z> f) =>
+            Detuplize(Memo(Tuplize(f)));
 
         /// <summary>
         /// Wrap function with memoizing cache.
         /// </summary>
-        public static Func<A, B, C, D, Z> Memo<A, B, C, D, Z>(Func<A, B, C, D, Z> f)
-        {
-            var cache = new ConcurrentDictionary<(A, B, C, D), Z>();
-            return (a, b, c, d) => cache.GetOrAdd((a, b, c, d), Tuplize(f));
-        }
+        public static Func<A, B, C, D, Z> Memo<A, B, C, D, Z>(Func<A, B, C, D, Z> f) =>
+            Detuplize(Memo(Tuplize(f)));
 
         /// <summary>
         /// Wrap function with memoizing cache with an expiration timeout.
         /// </summary>
-        public static Func<Z> Memo<Z>(TimeSpan timeout, Func<Z> f)
-        {
-            var cache = new ConcurrentDictionary<int, (DateTime, Z)>();
-            return () => cache.AddOrUpdate(
-                0,
-                _ => (DateTime.UtcNow, f()),
-                (_, current) => DateTime.UtcNow - current.Item1 > timeout
-                    ? (DateTime.UtcNow, f())
-                    : current).Item2;
-        }
+        public static Func<Z> Memo<Z>(TimeSpan timeout, Func<Z> f) =>
+            GiveUnit(Memo(timeout, TakeUnit(f)));
 
         /// <summary>
         /// Wrap function with memoizing cache with an expiration timeout.
@@ -254,43 +282,64 @@ namespace KitchenSink
         /// <summary>
         /// Wrap function with memoizing cache with an expiration timeout.
         /// </summary>
-        public static Func<A, B, Z> Memo<A, B, Z>(TimeSpan timeout, Func<A, B, Z> f)
-        {
-            var cache = new ConcurrentDictionary<(A, B), (DateTime, Z)>();
-            return (a, b) => cache.AddOrUpdate(
-                (a, b),
-                _ => (DateTime.UtcNow, f(a, b)),
-                (_, current) => DateTime.UtcNow - current.Item1 > timeout
-                    ? (DateTime.UtcNow, f(a, b))
-                    : current).Item2;
-        }
+        public static Func<A, B, Z> Memo<A, B, Z>(TimeSpan timeout, Func<A, B, Z> f) =>
+            Detuplize(Memo(timeout, Tuplize(f)));
 
         /// <summary>
         /// Wrap function with memoizing cache with an expiration timeout.
         /// </summary>
-        public static Func<A, B, C, Z> Memo<A, B, C, Z>(TimeSpan timeout, Func<A, B, C, Z> f)
-        {
-            var cache = new ConcurrentDictionary<(A, B, C), (DateTime, Z)>();
-            return (a, b, c) => cache.AddOrUpdate(
-                (a, b, c),
-                _ => (DateTime.UtcNow, f(a, b, c)),
-                (_, current) => DateTime.UtcNow - current.Item1 > timeout
-                    ? (DateTime.UtcNow, f(a, b, c))
-                    : current).Item2;
-        }
+        public static Func<A, B, C, Z> Memo<A, B, C, Z>(TimeSpan timeout, Func<A, B, C, Z> f) =>
+            Detuplize(Memo(timeout, Tuplize(f)));
 
         /// <summary>
         /// Wrap function with memoizing cache with an expiration timeout.
         /// </summary>
-        public static Func<A, B, C, D, Z> Memo<A, B, C, D, Z>(TimeSpan timeout, Func<A, B, C, D, Z> f)
+        public static Func<A, B, C, D, Z> Memo<A, B, C, D, Z>(TimeSpan timeout, Func<A, B, C, D, Z> f) =>
+            Detuplize(Memo(timeout, Tuplize(f)));
+
+        /// <summary>
+        /// Wraps action so it won't be called more frequently than given timeout.
+        /// </summary>
+        public static Action Debounce(TimeSpan timeout, Action f) =>
+            GiveUnit(Debounce(timeout, TakeUnit(f)));
+
+        /// <summary>
+        /// Wraps action so it won't be called more frequently than given timeout.
+        /// </summary>
+        public static Action<A> Debounce<A>(TimeSpan timeout, Action<A> f)
         {
-            var cache = new ConcurrentDictionary<(A, B, C, D), (DateTime, Z)>();
-            return (a, b, c, d) => cache.AddOrUpdate(
-                (a, b, c, d),
-                _ => (DateTime.UtcNow, f(a, b, c, d)),
-                (_, current) => DateTime.UtcNow - current.Item1 > timeout
-                    ? (DateTime.UtcNow, f(a, b, c, d))
-                    : current).Item2;
+            var atom = Atom.Of(DateTime.MinValue);
+            return a =>
+            {
+                atom.Update(prev =>
+                {
+                    if (DateTime.UtcNow - prev > timeout)
+                    {
+                        f(a);
+                        return DateTime.UtcNow;
+                    }
+
+                    return prev;
+                });
+            };
         }
+
+        /// <summary>
+        /// Wraps action so it won't be called more frequently than given timeout.
+        /// </summary>
+        public static Action<A, B> Debounce<A, B>(TimeSpan timeout, Action<A, B> f) =>
+            Detuplize(Debounce(timeout, Tuplize(f)));
+
+        /// <summary>
+        /// Wraps action so it won't be called more frequently than given timeout.
+        /// </summary>
+        public static Action<A, B, C> Debounce<A, B, C>(TimeSpan timeout, Action<A, B, C> f) =>
+            Detuplize(Debounce(timeout, Tuplize(f)));
+
+        /// <summary>
+        /// Wraps action so it won't be called more frequently than given timeout.
+        /// </summary>
+        public static Action<A, B, C, D> Debounce<A, B, C, D>(TimeSpan timeout, Action<A, B, C, D> f) =>
+            Detuplize(Debounce(timeout, Tuplize(f)));
     }
 }
