@@ -1,11 +1,12 @@
 notifications:
   email: false
 language: csharp
-#solution: KitchenSink.sln
-#install:
-  #- nuget restore KitchenSink.sln
-  #- nuget install NUnit.ConsoleRunner -Version 3.6.0 -OutputDirectory testrunner
+solution: KitchenSink.sln
+env:
+  - NUnitVersion=3.10.1
+install:
+  - nuget restore KitchenSink.sln
+  - nuget install NUnit.ConsoleRunner -Version $NUnitVersion -OutputDirectory testrunner
 script:
-  - echo "Travis doesn't support C-Sharp 7.3 yet"
-  #- xbuild /p:Configuration=Release KitchenSink.sln
-  #- mono ./testrunner/NUnit.ConsoleRunner.3.6.0/tools/nunit3-console.exe ./KitchenSink.Tests/bin/Release/KitchenSink.Tests.dll --where "cat != WindowsOnly"
+  - xbuild /p:Configuration=Release KitchenSink.sln
+  - mono ./testrunner/NUnit.ConsoleRunner.$NUnitVersion/tools/nunit3-console.exe ./KitchenSink.Tests/bin/Release/KitchenSink.Tests.dll --where "cat != WindowsOnly"
