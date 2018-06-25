@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
-    public class Reliability
+    public class Resiliency
     {
         [Test]
         public void FractalImmediateSuccess()

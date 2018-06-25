@@ -47,6 +47,12 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `Cond` - builds a list of clauses and conditionally evaluates consequents
   * `Case` - like `Cond`, but clauses are applied to a key value
 
+### Flexible Resiliency Mechanisms
+
+  * `Retry.Exponential` - waits double time between each successive attempt of an operation
+  * `Retry.Fractal` - subdivides workload of batch operations, retrying as series of smaller batches
+  * `Retry.Sequential` - attempts a series of alternate arguments to parameterized operation
+
 ### Easy Cache Implementation
 
   * `Buffer` - accumulates arguments to `Write` method until limit is reached or `Flush` is called
