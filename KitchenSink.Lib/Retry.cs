@@ -37,7 +37,7 @@ namespace KitchenSink
         public static void FixedAttempts(int count, Action f, Func<Exception, bool> p) =>
             FixedAttempts(count, f.AsFunc(), p);
 
-        public static SubdivisonResult Subdivide<A>(
+        public static SubdivisonResult Fractal<A>(
             int depth,
             int branchingFactor,
             IReadOnlyList<A> items,
@@ -66,7 +66,7 @@ namespace KitchenSink
 
                 foreach (var batch in items.Batch(batchSize))
                 {
-                    var currentResult = Subdivide(
+                    var currentResult = Fractal(
                         depth - 1,
                         branchingFactor,
                         batch.ToList(),
