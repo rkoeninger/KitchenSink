@@ -1,13 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using KitchenSink.Extensions;
 
 namespace KitchenSink
 {
     public static class Retry
     {
-        public static A FixedAttempts<A>(int count, Func<A> f, Func<Exception, bool> p)
+        /// <summary>
+        /// Repeatedly attempts operation, doubling the wait time between each successive attempt.
+        /// Useful for dealing with momentary connectivity issues.
+        /// </summary>
+        public static Either<A, Exception> Exponential<A>(
+            int count,
+            TimeSpan delay,
+            Func<A> action,
+            Func<Exception, bool> retryableError)
         {
             var n = count;
             var exceptions = new List<Exception>();
@@ -16,91 +25,151 @@ namespace KitchenSink
             {
                 try
                 {
-                    return f();
+                    return action();
                 }
                 catch (Exception e)
                 {
-                    if (!p(e))
+                    if (!retryableError(e))
                     {
-                        throw;
+                        return e;
                     }
 
                     exceptions.Add(e);
+                    Thread.Sleep(delay);
+                    delay = delay + delay;
                 }
 
                 n--;
             }
 
-            throw new AggregateException($"{nameof(FixedAttempts)} failed after {count} attempts", exceptions);
+            return new RetryExhaustedException(count, exceptions);
         }
 
-        public static void FixedAttempts(int count, Action f, Func<Exception, bool> p) =>
-            FixedAttempts(count, f.AsFunc(), p);
+        /// <summary>
+        /// Repeatedly attempts operation, doubling the wait time between each successive attempt.
+        /// Useful for dealing with momentary connectivity issues.
+        /// </summary>
+        public static Maybe<Exception> Exponential(
+            int count,
+            TimeSpan delay,
+            Action action,
+            Func<Exception, bool> retryableError) =>
+            Exponential(count, delay, action.AsFunc(), retryableError).RightMaybe;
 
-        public static SubdivisonResult Fractal<A>(
+        /// <summary>
+        /// Recursively subdivides a workload for an operation as attempts fail.
+        /// Useful for dealing with timeouts on batch operations.
+        /// </summary>
+        public static (int, B, Exception) Fractal<A, B>(
             int depth,
             int branchingFactor,
             IReadOnlyList<A> items,
-            Action<IReadOnlyList<A>> f,
-            Func<Exception, bool> p)
+            Func<IReadOnlyList<A>, B> action,
+            Func<B, B, B> reducer,
+            Func<Exception, bool> retryableError)
         {
             try
             {
                 if (items.Count == 0)
                 {
-                    return SubdivisonResult.Empty();
+                    return (0, default, null);
                 }
 
-                f(items);
-                return SubdivisonResult.Success(items.Count);
+                return (items.Count, action(items), null);
             }
             catch (Exception e)
             {
-                if (!p(e) || depth <= 0)
+                if (!retryableError(e) || depth <= 0)
                 {
-                    return SubdivisonResult.Failure(0, e);
+                    return (0, default, e);
                 }
 
                 var batchSize = items.Count / branchingFactor;
-                var result = SubdivisonResult.Empty();
+                var total = 0;
+                var result = default(B);
 
                 foreach (var batch in items.Batch(batchSize))
                 {
-                    var currentResult = Fractal(
+                    var (count, r0, error) = Fractal(
                         depth - 1,
                         branchingFactor,
                         batch.ToList(),
-                        f,
-                        p);
-                    result.SuccessCount += currentResult.SuccessCount;
+                        action,
+                        reducer,
+                        retryableError);
+                    total += count;
+                    result = reducer(result, r0);
 
-                    if (currentResult.HasError)
+                    if (error != null)
                     {
-                        result.Error = currentResult.Error;
-                        return result;
+                        return (total, result, error);
                     }
                 }
 
-                return result;
+                return (total, result, null);
             }
         }
 
-        public class SubdivisonResult
+        /// <summary>
+        /// Recursively subdivides a workload for an operation as attempts fail.
+        /// Useful for dealing with timeouts on batch operations.
+        /// </summary>
+        public static (int, Exception) Fractal<A>(
+            int depth,
+            int branchingFactor,
+            IReadOnlyList<A> items,
+            Action<IReadOnlyList<A>> action,
+            Func<Exception, bool> retryableError)
         {
-            public static SubdivisonResult Empty() => Success(0);
-
-            public static SubdivisonResult Success(int count) => Failure(count, null);
-
-            public static SubdivisonResult Failure(int count, Exception error) =>
-                new SubdivisonResult
-                {
-                    SuccessCount = count,
-                    Error = error
-                };
-
-            public int SuccessCount { get; set; }
-            public Exception Error { get; set; }
-            public bool HasError => Error != null;
+            var (count, _, error) = Fractal(
+                depth,
+                branchingFactor,
+                items,
+                action.AsFunc(),
+                (x, _) => x,
+                retryableError);
+            return (count, error);
         }
+
+        /// <summary>
+        /// Repeatedly attempts the same operation, providing a series of alternate arguments.
+        /// Useful for dealing with uncertain or varying details.
+        /// </summary>
+        public static Either<(A, B), Exception> Sequential<A, B>(
+            IReadOnlyList<A> options,
+            Func<A, B> action,
+            Func<Exception, bool> retryableError)
+        {
+            var exceptions = new List<Exception>();
+
+            foreach (var option in options)
+            {
+                try
+                {
+                    return (option, action(option));
+                }
+                catch (Exception e)
+                {
+                    if (!retryableError(e))
+                    {
+                        return e;
+                    }
+
+                    exceptions.Add(e);
+                }
+            }
+
+            return new RetryExhaustedException(options.Count, exceptions);
+        }
+
+        /// <summary>
+        /// Repeatedly attempts the same operation, providing a series of alternate arguments.
+        /// Useful for dealing with uncertain or varying details.
+        /// </summary>
+        public static Either<A, Exception> Sequential<A>(
+            IReadOnlyList<A> options,
+            Action<A> action,
+            Func<Exception, bool> retryableError) =>
+            Sequential(options, action.AsFunc(), retryableError).Select(x => x.Item1);
     }
 }

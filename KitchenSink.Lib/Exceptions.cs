@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace KitchenSink
 {
@@ -18,5 +19,11 @@ namespace KitchenSink
     {
         public InvalidDriveLetterException(char letter)
             : base($"Should be a drive letter, but was '{letter}'") { }
+    }
+
+    public class RetryExhaustedException : AggregateException
+    {
+        public RetryExhaustedException(int count, IEnumerable<Exception> exceptions)
+            : base($"Retry exhausted after {count} attempts", exceptions) { }
     }
 }
