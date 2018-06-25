@@ -26,11 +26,16 @@ namespace KitchenSink
             e.IsLeft
             ? new Either<A, C>(true, e.Left, default)
             : new Either<A, C>(false, default, selector(e.Right));
+
+        public static A OrElseThrow<A, E>(this Either<A, E> e) where E : Exception =>
+            e.IsLeft ? e.Left : throw new AggregateException(e.Right);
     }
 
     public class Either<A, B>
     {
         public static implicit operator Either<A, B>(A val) => new Either<A, B>(true, val, default);
+
+        public static implicit operator Either<A, B>(B val) => new Either<A, B>(false, default, val);
 
         public static bool operator ==(Either<A, B> x, Either<A, B> y) => Equals(x, y);
 
@@ -45,8 +50,8 @@ namespace KitchenSink
 
         public bool IsLeft { get; }
         public bool IsRight => !IsLeft;
-        public A Left { get; }
-        public B Right { get; }
+        internal A Left { get; }
+        internal B Right { get; }
 
         public Type LeftType => typeof(A);
         public Type RightType => typeof(B);
