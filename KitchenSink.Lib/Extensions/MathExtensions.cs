@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using static KitchenSink.Operators;
@@ -39,11 +40,43 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static Func<A, A> NoMoreThan<A>(this A x) where A : IComparable<A> => max => x.NoMoreThan(max);
 
-        /// <summary>Inclusive on start value, exclusive on end value.</summary>
-        public static IEnumerable<int> To(this int start, int end) => Enumerable.Range(start, end - start);
+        /// <summary>
+        /// Inclusive on start value, exclusive on end value.
+        /// </summary>
+        public static IReadOnlyList<int> To(this int start, int end) => new RangeList(start, end - 1);
 
-        /// <summary>Inclusive on start and end value.</summary>
-        public static IEnumerable<int> ToIncluding(this int start, int end) => start.To(end + 1);
+        /// <summary>
+        /// Inclusive on start and end value.
+        /// </summary>
+        public static IReadOnlyList<int> ToIncluding(this int start, int end) => new RangeList(start, end);
+
+        private class RangeList : IReadOnlyList<int>
+        {
+            private readonly int start;
+            private readonly int endInclusive;
+
+            public RangeList(int start, int endInclusive)
+            {
+                this.start = start;
+                this.endInclusive = endInclusive;
+            }
+
+            public int this[int index] => start + index;
+
+            public int Count => endInclusive - start + 1;
+
+            public IEnumerator<int> GetEnumerator()
+            {
+                var i = start;
+
+                while (start <= Cmp(i) <= endInclusive)
+                {
+                    yield return i++;
+                }
+            }
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
 
         public static int Factorial(this int n)
         {

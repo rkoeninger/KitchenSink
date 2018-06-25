@@ -37,38 +37,70 @@ namespace KitchenSink
         public static void FixedAttempts(int count, Action f, Func<Exception, bool> p) =>
             FixedAttempts(count, f.AsFunc(), p);
 
-        public static void FixedAttemptsSubdivide<A>(
-            int count,
-            List<A> items,
-            Action<IReadOnlyList<A>> f,
-            Func<Exception, bool> p)
-        {
-
-        }
-
-        private static int FixedAttemptsSubdivideRecur<A>(
+        public static SubdivisonResult Subdivide<A>(
             int depth,
+            int branchingFactor,
             IReadOnlyList<A> items,
             Action<IReadOnlyList<A>> f,
             Func<Exception, bool> p)
         {
             try
             {
+                if (items.Count == 0)
+                {
+                    return SubdivisonResult.Empty();
+                }
+
                 f(items);
-                return items.Count;
+                return SubdivisonResult.Success(items.Count);
             }
             catch (Exception e)
             {
-                if (!p(e))
+                if (!p(e) || depth <= 0)
                 {
-                    throw;
+                    return SubdivisonResult.Failure(0, e);
                 }
 
-                var halfLength = items.Count / 2;
-                var x = FixedAttemptsSubdivideRecur(depth - 1, items.Take(halfLength).ToList(), f, p);
-                var y = FixedAttemptsSubdivideRecur(depth - 1, items.Skip(halfLength).ToList(), f, p);
-                return x + y;
+                var batchSize = items.Count / branchingFactor;
+                var result = SubdivisonResult.Empty();
+
+                foreach (var batch in items.Batch(batchSize))
+                {
+                    var currentResult = Subdivide(
+                        depth - 1,
+                        branchingFactor,
+                        batch.ToList(),
+                        f,
+                        p);
+                    result.SuccessCount += currentResult.SuccessCount;
+
+                    if (currentResult.HasError)
+                    {
+                        result.Error = currentResult.Error;
+                        return result;
+                    }
+                }
+
+                return result;
             }
+        }
+
+        public class SubdivisonResult
+        {
+            public static SubdivisonResult Empty() => Success(0);
+
+            public static SubdivisonResult Success(int count) => Failure(count, null);
+
+            public static SubdivisonResult Failure(int count, Exception error) =>
+                new SubdivisonResult
+                {
+                    SuccessCount = count,
+                    Error = error
+                };
+
+            public int SuccessCount { get; set; }
+            public Exception Error { get; set; }
+            public bool HasError => Error != null;
         }
     }
 }
