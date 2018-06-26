@@ -15,6 +15,7 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `Void` - no value can be constructed; is always null
   * `Maybe<A>` - may or may not have a value and maps functions over missing value
   * `NewType<A>` - wraps existing types to distinguish on the type level
+  * `Monoid<A>` - appends values of a particular type into combined values of the same type
 
 ### Convenient Operators and Extensions
 
