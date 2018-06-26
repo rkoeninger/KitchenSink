@@ -65,14 +65,14 @@ namespace KitchenSink
             int branchingFactor,
             IReadOnlyList<A> items,
             Func<IReadOnlyList<A>, B> action,
-            Func<B, B, B> reducer,
+            Monoid<B> monoid,
             Func<Exception, bool> retryableError)
         {
             try
             {
                 if (items.Count == 0)
                 {
-                    return (0, default, null);
+                    return (0, monoid.Default, null);
                 }
 
                 return (items.Count, action(items), null);
@@ -81,32 +81,32 @@ namespace KitchenSink
             {
                 if (!retryableError(e) || depth <= 0)
                 {
-                    return (0, default, e);
+                    return (0, monoid.Default, e);
                 }
 
                 var batchSize = items.Count / branchingFactor;
-                var total = 0;
-                var result = default(B);
+                var totalCount = 0;
+                var totalResult = monoid.Default;
 
                 foreach (var batch in items.Batch(batchSize))
                 {
-                    var (count, r0, error) = Fractal(
+                    var (count, result, error) = Fractal(
                         depth - 1,
                         branchingFactor,
                         batch.ToList(),
                         action,
-                        reducer,
+                        monoid,
                         retryableError);
-                    total += count;
-                    result = reducer(result, r0);
+                    totalCount += count;
+                    totalResult = monoid.Append(totalResult, result);
 
                     if (error != null)
                     {
-                        return (total, result, error);
+                        return (totalCount, totalResult, error);
                     }
                 }
 
-                return (total, result, null);
+                return (totalCount, totalResult, null);
             }
         }
 
@@ -126,7 +126,7 @@ namespace KitchenSink
                 branchingFactor,
                 items,
                 action.AsFunc(),
-                (x, _) => x,
+                Monoid.UnitIgnore,
                 retryableError);
             return (count, error);
         }
