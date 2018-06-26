@@ -98,7 +98,7 @@ namespace KitchenSink
                         monoid,
                         retryableError);
                     totalCount += count;
-                    totalResult = monoid.Append(totalResult, result);
+                    totalResult = monoid.Concat(totalResult, result);
 
                     if (error != null)
                     {

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
+    /// <summary>
+    /// A null-encapsulating wrapper.
+    /// A Maybe might not have a value, but a reference to an Maybe will not itself be null.
+    /// </summary>
     public static class Maybe
     {
         public static Maybe<A> If<A>(A val, Func<A, bool> f) =>
@@ -97,19 +100,14 @@ namespace KitchenSink
 
         public Type InnerType => typeof(A);
 
-        [Pure]
         public Maybe<B> Cast<B>() => HasValue && Value is B ? Some((B) (object) Value) : None<B>();
 
-        [Pure]
         public Maybe<B> OfType<B>() => Where(Is<A, B>()).Cast<B>();
 
-        [Pure]
         public Maybe<B> Select<B>(Func<A, B> f) => HasValue ? Some(f(Value)) : None<B>();
 
-        [Pure]
         public Maybe<A> Where(Func<A, bool> f) => HasValue && f(Value) ? this : None<A>();
 
-        [Pure]
         public Maybe<C> Join<B, C, K>(
             Maybe<B> inner,
             Func<A, K> outerKeySelector,
@@ -136,48 +134,39 @@ namespace KitchenSink
             }
         }
 
-        [Pure]
         public B Branch<B>(Func<A, B> forSome, Func<B> forNone) =>
             HasValue ? forSome(Value) : forNone();
 
-        [Pure]
         public A OrElse(A other) => HasValue ? Value : other;
 
-        [Pure]
         public A OrElseDo(Func<A> f) => HasValue ? Value : f();
 
-        [Pure]
         public Maybe<A> OrDo(Func<A> f) => HasValue ? this : Some(f());
 
-        [Pure]
         public Maybe<A> OrDo(Func<Maybe<A>> f) => HasValue ? this : f();
 
-        [Pure]
         public Maybe<A> Or(Maybe<A> maybe) => HasValue ? this : maybe;
 
-        [Pure]
         public Maybe<A> OrThrow(string message) => OrThrow(() => new Exception(message));
 
-        [Pure]
         public Maybe<A> OrThrow(Exception e) => OrThrow(Const(e));
 
-        [Pure]
         public Maybe<A> OrThrow(Func<Exception> f) => HasValue ? this : throw f();
 
-        [Pure]
         public Maybe<A> OrThrow<E>() where E : Exception, new() => OrThrow(new E());
 
-        [Pure]
         public A OrElseThrow(string message) => OrElseThrow(() => new Exception(message));
 
-        [Pure]
         public A OrElseThrow(Exception e) => OrElseThrow(Const(e));
 
-        [Pure]
         public A OrElseThrow<E>() where E : Exception, new() => OrElseThrow(new E());
 
-        [Pure]
         public A OrElseThrow(Func<Exception> f) => HasValue ? Value : throw f();
+
+        public Maybe<A> AndOr(Maybe<A> maybe, Func<A, A, A> reducer) =>
+            HasValue && maybe.HasValue
+                ? Some(reducer(Value, maybe.Value))
+                : Or(maybe);
 
         public void ForEach(Action<A> f)
         {
@@ -189,7 +178,10 @@ namespace KitchenSink
 
         public IEnumerable<A> AsEnumerable()
         {
-            if (HasValue) yield return Value;
+            if (HasValue)
+            {
+                yield return Value;
+            }
         }
 
         public List<A> ToList() => HasValue ? ListOf(Value) : new List<A>();

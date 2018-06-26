@@ -3,6 +3,10 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
+    /// <summary>
+    /// A binary-posibility wrapper.
+    /// An Either might have a Left value or a Right value.
+    /// </summary>
     public static class Either
     {
         public static Either<A, B> If<A, B>(
@@ -14,6 +18,11 @@ namespace KitchenSink
             : new Either<A, B>(false, default, alternative());
 
         public static Either<C, B> Select<A, B, C>(
+            this Either<A, B> e,
+            Func<A, C> selector) =>
+            SelectLeft(e, selector);
+
+        public static Either<C, B> SelectLeft<A, B, C>(
             this Either<A, B> e,
             Func<A, C> selector) =>
             e.IsLeft
@@ -31,6 +40,10 @@ namespace KitchenSink
             e.IsLeft ? e.Left : throw new AggregateException(e.Right);
     }
 
+    /// <summary>
+    /// A binary-posibility wrapper.
+    /// An Either might have a Left value or a Right value.
+    /// </summary>
     public class Either<A, B>
     {
         public static implicit operator Either<A, B>(A val) => new Either<A, B>(true, val, default);
