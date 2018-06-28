@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using KitchenSink.Extensions;
 
-namespace KitchenSink.Purity
+namespace KitchenSink
 {
     /// <summary>
     /// A composable pair of pure getter/setter functions.

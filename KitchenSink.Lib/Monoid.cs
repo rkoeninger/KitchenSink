@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KitchenSink.Purity;
 using static KitchenSink.Operators;
 
 namespace KitchenSink
@@ -78,8 +77,8 @@ namespace KitchenSink
         /// that eval and append the results of the original <c>IO</c>s.
         /// </summary>
         public static Monoid<IO<A>> IO<A>(Monoid<A> monoid) => Of(
-            () => Purity.IO.Of(() => monoid.Default),
-            (x, y) => Purity.IO.Of(monoid.Concat(x.Eval(), y.Eval())));
+            () => KitchenSink.IO.Of(() => monoid.Default),
+            (x, y) => KitchenSink.IO.Of(monoid.Concat(x.Eval(), y.Eval())));
     }
 
     /// <summary>
