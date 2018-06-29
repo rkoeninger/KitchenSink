@@ -5,7 +5,7 @@ using System.Reflection;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
-namespace KitchenSink.Injection
+namespace KitchenSink
 {
     /// <summary>
     /// A simple IoC container. Resolves dependencies that are explicity

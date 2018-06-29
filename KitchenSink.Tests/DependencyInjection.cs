@@ -1,5 +1,4 @@
-﻿using KitchenSink.Injection;
-using KitchenSink.Testing;
+﻿using KitchenSink.Testing;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
