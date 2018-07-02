@@ -14,8 +14,10 @@ Not everything in this library is meant to be taken completely seriously. Some f
   * `Unit` - has only one meaningully unique value
   * `Void` - no value can be constructed; is always null
   * `Maybe<A>` - may or may not have a value and maps functions over missing value
+  * `Either<A, B>` - represents a distinction between two possible types of values
   * `NewType<A>` - wraps existing types to distinguish on the type level
   * `Monoid<A>` - appends values of a particular type into combined values of the same type
+  * `Functor<FA, FB, A, B>` - lifts a function `A => B` into the space of `F`
 
 ### Convenient Operators and Extensions
 
