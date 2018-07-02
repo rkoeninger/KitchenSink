@@ -73,7 +73,7 @@ namespace KitchenSink
             Of(None<A>, (x, y) => x.AndOr(y, monoid.Concat));
 
         /// <summary>
-        /// Combines <see cref="Purity.IO{A}"/>s but constructing new <c>IO</c>s
+        /// Combines <see cref="IO{A}"/>s but constructing new <c>IO</c>s
         /// that eval and append the results of the original <c>IO</c>s.
         /// </summary>
         public static Monoid<IO<A>> IO<A>(Monoid<A> monoid) => Of(

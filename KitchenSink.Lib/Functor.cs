@@ -46,7 +46,7 @@ namespace KitchenSink
             Of<Either<C, A>, Either<C, B>, A, B>(f => m => m.SelectRight(f));
 
         /// <summary>
-        /// Maps a function over an <see cref="Purity.IO{A}"/> action.
+        /// Maps a function over an <see cref="IO{A}"/> action.
         /// </summary>
         public static Functor<IO<A>, IO<B>, A, B> IO<A, B>() =>
             Of<IO<A>, IO<B>, A, B>(f => m => m.Select(f));
