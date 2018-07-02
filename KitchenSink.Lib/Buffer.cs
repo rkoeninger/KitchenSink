@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using KitchenSink.Concurrent;
 using static KitchenSink.Operators;
 
 namespace KitchenSink

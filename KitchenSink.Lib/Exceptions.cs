@@ -32,6 +32,11 @@ namespace KitchenSink
         public Type ContractType { get; }
     }
 
+    public class InvalidSubtypeException : Exception
+    {
+        public InvalidSubtypeException() : base("Class hierarchy is supposed to be closed") { }
+    }
+
     public class ImplementationUnresolvedException : Exception
     {
         public ImplementationUnresolvedException(Type contractType)

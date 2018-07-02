@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using KitchenSink.Concurrent;
 using static KitchenSink.Operators;
 using KitchenSink.Testing;
 using NUnit.Framework;

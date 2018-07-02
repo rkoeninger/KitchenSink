@@ -6,7 +6,7 @@ using KitchenSink.Control;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
-namespace KitchenSink.Concurrent
+namespace KitchenSink
 {
     public abstract class Lock
     {

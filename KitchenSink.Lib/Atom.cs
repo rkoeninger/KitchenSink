@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace KitchenSink.Concurrent
+namespace KitchenSink
 {
     public static class Atom
     {
