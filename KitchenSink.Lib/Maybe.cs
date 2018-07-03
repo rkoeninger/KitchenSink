@@ -176,6 +176,9 @@ namespace KitchenSink
             }
         }
 
+        public Maybe<Unit> Reverse() =>
+            HasValue ? None<Unit>() : Some(Unit.It);
+
         public IEnumerable<A> AsEnumerable()
         {
             if (HasValue)
