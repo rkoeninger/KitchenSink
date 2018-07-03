@@ -1,7 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
 using static KitchenSink.Operators;
-using KitchenSink.Testing;
 using System.Threading;
 
 namespace KitchenSink.Tests
@@ -32,9 +31,9 @@ namespace KitchenSink.Tests
 
         public class UserRepository : IUserRepostiory
         {
-            public string Get(int id) => Rand.AsciiString(16);
-            public string Get2(int id, string x) => Rand.AsciiString(32);
-            public string Get0() => Rand.AsciiString(8);
+            public string Get(int id) => Guid.NewGuid().ToString();
+            public string Get2(int id, string x) => Guid.NewGuid().ToString();
+            public string Get0() => Guid.NewGuid().ToString();
             public void Do(int id) => callCount++;
         }
 
