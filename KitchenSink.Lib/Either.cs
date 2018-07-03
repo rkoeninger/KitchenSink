@@ -1,4 +1,5 @@
 ﻿using System;
+using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
 namespace KitchenSink
@@ -16,6 +17,20 @@ namespace KitchenSink
             condition()
             ? new Either<A, B>(true, consequent(), default)
             : new Either<A, B>(false, default, alternative());
+
+        public static Either<A, E> Try<A, E>(Func<A> f, Func<E, E> g) where E : Exception
+        {
+            try
+            {
+                return f();
+            }
+            catch (E e)
+            {
+                return g(e);
+            }
+        }
+
+        public static Maybe<E> Try<E>(Action f) where E : Exception => Try<Unit, E>(f.AsFunc(), Id).RightMaybe;
 
         public static Either<C, B> Select<A, B, C>(
             this Either<A, B> e,
@@ -102,6 +117,8 @@ namespace KitchenSink
                 f(Right);
             }
         }
+
+        public Either<B, A> Reverse() => Branch(RightOf<B, A>, LeftOf<B, A>);
 
         public override string ToString() => IsLeft ? $"Left({Left})" : $"Right({Right})";
         public override int GetHashCode() => IsLeft ? Left.GetHashCode() : Right.GetHashCode();
