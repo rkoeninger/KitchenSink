@@ -7,34 +7,6 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
-    public class ExpectationFailedException : Exception
-    {
-        public ExpectationFailedException(string message) : base(message) { }
-    }
-
-    public class ExceptionExpectationException : ExpectationFailedException
-    {
-        public ExceptionExpectationException(Type type) : base(type.Name + " expected") { }
-    }
-
-    public class SomeExpectedException : ExpectationFailedException
-    {
-        public SomeExpectedException() : base("Maybe was supposed to have a value") { }
-
-        public SomeExpectedException(object expected, object actual)
-            : base($"{actual} is not the expected {Some(expected)}") { }
-    }
-
-    public class NoneExpectedException : ExpectationFailedException
-    {
-        public NoneExpectedException(object val) : base("Maybe was not supposed to have a value, but does: " + val) { }
-    }
-
-    public class PropertyRefutedException : ExpectationFailedException
-    {
-        public PropertyRefutedException(params object[] vals) : base($"Property refuted with ({vals.MakeString(", ")})") { }
-    }
-
     /// <summary>
     /// Expect contains methods that are used to assert failures,
     /// like exception throwing and failed compiliation/type-checking.
@@ -54,7 +26,7 @@ namespace KitchenSink
         /// Throws exception if none thrown by <code>f</code>.
         /// </summary>
         public static E Error<E>(Action f, Exception toThrow = null) where E : Exception =>
-            Either.Try<E>(f).OrElseThrow(() => new ExceptionExpectationException(typeof(E)));
+            Either.Try<E>(f).OrElseThrow(() => new ExceptionExpectedException(typeof(E)));
 
         public static ExpectationFailedException FailedAssert(Action f) => Error<ExpectationFailedException>(f);
 

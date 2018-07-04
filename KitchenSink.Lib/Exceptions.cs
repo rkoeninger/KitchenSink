@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using KitchenSink.Extensions;
+using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
@@ -78,5 +80,33 @@ namespace KitchenSink
     {
         public RetryExhaustedException(int count, IEnumerable<Exception> exceptions)
             : base($"Retry exhausted after {count} attempts", exceptions) { }
+    }
+
+    public class ExpectationFailedException : Exception
+    {
+        public ExpectationFailedException(string message) : base(message) { }
+    }
+
+    public class ExceptionExpectedException : ExpectationFailedException
+    {
+        public ExceptionExpectedException(Type type) : base(type.Name + " expected") { }
+    }
+
+    public class SomeExpectedException : ExpectationFailedException
+    {
+        public SomeExpectedException() : base("Maybe was supposed to have a value") { }
+
+        public SomeExpectedException(object expected, object actual)
+            : base($"{actual} is not the expected {Some(expected)}") { }
+    }
+
+    public class NoneExpectedException : ExpectationFailedException
+    {
+        public NoneExpectedException(object val) : base("Maybe was not supposed to have a value, but does: " + val) { }
+    }
+
+    public class PropertyRefutedException : ExpectationFailedException
+    {
+        public PropertyRefutedException(params object[] vals) : base($"Property refuted with ({vals.MakeString(", ")})") { }
     }
 }
