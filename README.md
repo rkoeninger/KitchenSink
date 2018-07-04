@@ -84,8 +84,7 @@ private const int DeclareSingleUse = 0;
 
 ### Testing and Validation
 
-  * `Expect` - testing for exceptions and invalid syntax; companion to Assert
-  * `Check` - property based testing
+  * `Expect` - testing for exceptions and property based testing; companion to Assert
   * `Rand` - produces random test data
   * `Sample` - provides common and edge-case test values
   * `All` - enumerates all values of certain types
@@ -108,7 +107,7 @@ Drive.C / "Folder1" / "Folder2" / "File.txt"
 
 Folder.AppData / "MyApp" / "Config.xml"
     "C:\\Users\\Me\\AppData\\MyApp\\Config.xml" (Windows)
-	"/users/me/.config/MyApp/Config.xml"        (Linux)
+    "/users/me/.config/MyApp/Config.xml"        (Linux)
 ```
 
 ### Crazy XML Building Facility using Operator Overloading
