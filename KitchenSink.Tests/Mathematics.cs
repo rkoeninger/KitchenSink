@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
-using KitchenSink.Testing;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -11,8 +10,8 @@ namespace KitchenSink.Tests
         [Test]
         public void Divisibility()
         {
-            Check.That(Sample.Ints, x => x.IsEven() == ((x / 2) * 2 == x));
-            Check.That(Sample.Ints, x => x.IsOdd() == ((x / 2) * 2 != x));
+            Expect.That(Sample.Ints, x => x.IsEven() == ((x / 2) * 2 == x));
+            Expect.That(Sample.Ints, x => x.IsOdd() == ((x / 2) * 2 != x));
         }
 
         [Test]

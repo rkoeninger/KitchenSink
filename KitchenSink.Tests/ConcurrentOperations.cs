@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using static KitchenSink.Operators;
-using KitchenSink.Testing;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
