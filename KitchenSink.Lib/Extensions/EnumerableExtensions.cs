@@ -417,6 +417,7 @@ namespace KitchenSink.Extensions
                     done = false;
                     var val = seq.source.Value.Current;
                     list.Add(val);
+                    index++;
                     current = Some(val);
                     return (true, list);
                 }
