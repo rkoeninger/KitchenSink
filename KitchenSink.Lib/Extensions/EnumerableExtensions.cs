@@ -168,7 +168,7 @@ namespace KitchenSink.Extensions
         /// by given <c>Either</c> function.
         /// Example: <c>[[1, [2, 3]], [[4], 5], [[6, 7], 8]] => [1, 2, 3, 4, 5, 6, 7, 8]</c>
         /// </summary>
-        public static IEnumerable<A> Flatten<A>(this IEnumerable<A> seq, Func<A, Either<A, IEnumerable<A>>> f) =>
+        public static IEnumerable<B> Flatten<A, B>(this IEnumerable<A> seq, Func<A, Either<B, IEnumerable<A>>> f) =>
             seq.SelectMany(x => f(x).Branch(y => SeqOf(y), ys => Flatten(ys, f)));
 
         /// <summary>
@@ -223,6 +223,75 @@ namespace KitchenSink.Extensions
                 {
                     yield return seperator;
                     yield return e.Current;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns a sequence with copies of <c>separators</c> between each
+        /// element of the original sequence.
+        /// Example: <c>[1, 2, 3], [4, 5, 6] => [1, 4, 5, 6, 2, 4, 5, 6, 3]</c>
+        /// </summary>
+        public static IEnumerable<A> IntersperseMany<A>(this IEnumerable<A> seq, IEnumerable<A> seperators)
+        {
+            var lazy = new Lazy<A[]>(seperators.ToArray);
+
+            using (var e = seq.GetEnumerator())
+            {
+                if (!e.MoveNext())
+                {
+                    yield break;
+                }
+
+                yield return e.Current;
+
+                while (e.MoveNext())
+                {
+                    foreach (var sep in lazy.Value)
+                    {
+                        yield return sep;
+                    }
+
+                    yield return e.Current;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns a sequence with a copy of <c>separator</c> between each
+        /// element of the original sequence.
+        /// Example: <c>[1, 2, 3], [7, 8, 9] => [1, 7, 2, 8, 3, 9]</c>
+        /// </summary>
+        public static IEnumerable<A> Interleave<A>(this IEnumerable<A> seq1, IEnumerable<A> seq2)
+        {
+            using (var e1 = seq1.GetEnumerator())
+            using (var e2 = seq2.GetEnumerator())
+            {
+                while (true)
+                {
+                    if (!e1.MoveNext())
+                    {
+                        while (e2.MoveNext())
+                        {
+                            yield return e2.Current;
+                        }
+
+                        yield break;
+                    }
+
+                    yield return e1.Current;
+
+                    if (!e2.MoveNext())
+                    {
+                        while (e1.MoveNext())
+                        {
+                            yield return e1.Current;
+                        }
+
+                        yield break;
+                    }
+
+                    yield return e2.Current;
                 }
             }
         }
@@ -321,6 +390,13 @@ namespace KitchenSink.Extensions
         public static IEnumerable<(int, A)> ZipWithIndex<A>(this IEnumerable<A> seq) => From(0).Zip(seq);
 
         /// <summary>
+        /// Returns a dictionary of element counts indexed by an arbitrary property.
+        /// Example: <c>[3, -2, 8, 0, -1, 4, -5, 6], Sign => {{-1, 3}, {0, 1}, {1, 4}}</c>
+        /// </summary>
+        public static IDictionary<B, int> CountBy<A, B>(this IEnumerable<A> seq, Func<A, B> f) =>
+            seq.GroupBy(f).ToDictionary(x => x.Key, x => x.Count());
+
+        /// <summary>
         /// Returns sequence, excluding elements at given indicies.
         /// Example: <c>[1, 2, 3, 4, 5, 6, 7, 8], 3, 5 => [1, 2, 3, 5, 7, 8]</c>
         /// </summary>
@@ -374,8 +450,8 @@ namespace KitchenSink.Extensions
         public static IReplayableEnumerable<A> Replayable<A>(this IEnumerable<A> seq) =>
             new ReplayableEnumerable<A>(seq);
     }
-
-    public interface IReplayableEnumerable<A> : IEnumerable<A> { }
+    
+    public interface IReplayableEnumerable<out A> : IEnumerable<A> { }
 
     internal class ReplayableEnumerable<A> : IReplayableEnumerable<A>
     {
@@ -383,7 +459,7 @@ namespace KitchenSink.Extensions
         private readonly Atom<(bool, List<A>)> items = Atom.Of((false, ListOf<A>()));
 
         public ReplayableEnumerable(IEnumerable<A> source) =>
-            this.source = new Lazy<IEnumerator<A>>(() => source.GetEnumerator());
+            this.source = new Lazy<IEnumerator<A>>(source.GetEnumerator);
 
         public IEnumerator<A> GetEnumerator() => new Etor(this);
 
@@ -414,7 +490,6 @@ namespace KitchenSink.Extensions
 
                 if (seq.source.Value.MoveNext())
                 {
-                    done = false;
                     var val = seq.source.Value.Current;
                     list.Add(val);
                     index++;
