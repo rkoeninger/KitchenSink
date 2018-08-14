@@ -16,13 +16,17 @@ namespace KitchenSink.Tests
             {
                 var _ = SeqOf(1).OverlappingPairs().ToArray();
             });
-            Assert.IsTrue(
-                SeqOf(
-                    (1, 2),
-                    (2, 3),
-                    (3, 4),
-                    (4, 5)).SequenceEqual(
-                    SeqOf(1, 2, 3, 4, 5).OverlappingPairs()));
+            Assert.AreEqual(
+                SeqOf((1, 2), (2, 3), (3, 4), (4, 5)),
+                SeqOf(1, 2, 3, 4, 5).OverlappingPairs());
+        }
+
+        [Test]
+        public void DealTest()
+        {
+            var seq = ListOf(1, 2, 3, 4, 5, 6, 7, 8, 9);
+            Assert.AreEqual(SeqOf(1, 4, 7, 2, 5, 8, 3, 6, 9), seq.Deal(3).Flatten());
+            Assert.AreEqual(SeqOf(2, 4, 6, 8), seq.Deal(2).ElementAt(1));
         }
     }
 }

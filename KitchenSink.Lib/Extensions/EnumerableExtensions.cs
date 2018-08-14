@@ -421,6 +421,49 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
+        /// Splits sequence into <c>n</c> sub-sequences, each containing every <c>n</c>th element.
+        /// Example: <c>[1, 2, 3, 4, 5, 6], 2 => [[1, 3, 5], [2, 4, 6]]</c>
+        /// </summary>
+        public static IEnumerable<IEnumerable<A>> Deal<A>(this IEnumerable<A> seq, int n)
+        {
+            var count = 0L;
+            var etor = new Lazy<IEnumerator<A>>(seq.GetEnumerator);
+            var queues = Enumerable.Range(0, n).Select(_ => new Queue<A>()).ToList();
+
+            IEnumerable<A> TakeEveryN(int offset)
+            {
+                var queue = queues[offset % n];
+
+                while (true)
+                {
+                    if (queue.Count > 0)
+                    {
+                        yield return queue.Dequeue();
+                    }
+                    else if (etor.Value.MoveNext())
+                    {
+                        if (count % n == offset)
+                        {
+                            count++;
+                            yield return etor.Value.Current;
+                        }
+                        else
+                        {
+                            queues[(int) (count % n)].Enqueue(etor.Value.Current);
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        yield break;
+                    }
+                }
+            }
+
+            return Enumerable.Range(0, n).Select(TakeEveryN);
+        }
+
+        /// <summary>
         /// Performs side-effecting Action on each item in sequence.
         /// </summary>
         public static void ForEach<A>(this IEnumerable<A> seq, Action<A> f)
