@@ -444,7 +444,7 @@ namespace KitchenSink.Extensions
             var etor = new Lazy<IEnumerator<A>>(seq.GetEnumerator);
             var queues = Enumerable.Range(0, n).Select(_ => new Queue<A>()).ToList();
 
-            IEnumerable<A> TakeEveryN(int offset)
+            IEnumerable<A> TakeEveryNth(int offset)
             {
                 var queue = queues[offset % n];
 
@@ -474,7 +474,19 @@ namespace KitchenSink.Extensions
                 }
             }
 
-            return Enumerable.Range(0, n).Select(TakeEveryN);
+            return Enumerable.Range(0, n).Select(TakeEveryNth);
+        }
+
+        /// <summary>
+        /// Performs side-effecting Action on each item in sequence and then yield it.
+        /// </summary>
+        public static IEnumerable<A> Tap<A>(this IEnumerable<A> seq, Action<A> f)
+        {
+            foreach (var item in seq)
+            {
+                f(item);
+                yield return item;
+            }
         }
 
         /// <summary>
