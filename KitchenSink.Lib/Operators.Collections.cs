@@ -125,6 +125,11 @@ namespace KitchenSink
         }
 
         /// <summary>
+        /// Returns sequences of values in specified enum type.
+        /// </summary>
+        public static IEnumerable<A> ValuesOf<A>() => typeof(A).GetEnumValues().OfType<A>();
+
+        /// <summary>
         /// Adds up all numeric values in sequence.
         /// </summary>
         public static int Sum(IEnumerable<int> seq) => seq.Sum();
