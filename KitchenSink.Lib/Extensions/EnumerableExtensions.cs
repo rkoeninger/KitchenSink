@@ -390,6 +390,20 @@ namespace KitchenSink.Extensions
         public static IEnumerable<(int, A)> ZipWithIndex<A>(this IEnumerable<A> seq) => From(0).Zip(seq);
 
         /// <summary>
+        /// Returns the cross product of two sequences, combining elements with the given function.
+        /// Example: <c>[1, 2, 3], [4, 5], (*) => [4, 5, 8, 10, 12, 15]</c>
+        /// </summary>
+        public static IEnumerable<C> CrossJoin<A, B, C>(this IEnumerable<A> xs, IEnumerable<B> ys, Func<A, B, C> f) =>
+            xs.SelectMany(x => ys.Select(y => f(x, y)));
+
+        /// <summary>
+        /// Returns the cross product of two sequences, combining elements into tuples.
+        /// Example: <c>[A, B, C], [1, 2] => [(A, 1), (A, 2), (B, 1), (B, 2), (C, 1), (C, 2)]</c>
+        /// </summary>
+        public static IEnumerable<(A, B)> CrossJoin<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) =>
+            xs.CrossJoin(ys, TupleOf);
+
+        /// <summary>
         /// Returns a dictionary of element counts indexed by an arbitrary property.
         /// Example: <c>[3, -2, 8, 0, -1, 4, -5, 6], Sign => {{-1, 3}, {0, 1}, {1, 4}}</c>
         /// </summary>
