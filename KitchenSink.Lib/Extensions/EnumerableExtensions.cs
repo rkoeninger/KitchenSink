@@ -384,6 +384,41 @@ namespace KitchenSink.Extensions
         public static IEnumerable<(A, B)> Zip<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) => xs.Zip(ys, TupleOf);
 
         /// <summary>
+        /// Sames as the standard <see cref="Enumerable.Zip{A, B, C}"/>, but
+        /// raises exception if sequences are not of the same length.
+        /// </summary>
+        public static IEnumerable<C> ZipExact<A, B, C>(this IEnumerable<A> xs, IEnumerable<B> ys, Func<A, B, C> f)
+        {
+            using (var ex = xs.GetEnumerator())
+            using (var ey = ys.GetEnumerator())
+            {
+                while (true)
+                {
+                    var xHasNext = ex.MoveNext();
+                    var yHasNext = ey.MoveNext();
+
+                    if (xHasNext != yHasNext)
+                    {
+                        throw new InvalidOperationException("Enumerables are of different length");
+                    }
+
+                    if (!xHasNext)
+                    {
+                        break;
+                    }
+
+                    yield return f(ex.Current, ey.Current);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sames as the standard <see cref="Zip{A, B}"/>, but
+        /// raises exception if sequences are not of the same length.
+        /// </summary>
+        public static IEnumerable<(A, B)> ZipExact<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) => xs.ZipExact(ys, TupleOf);
+
+        /// <summary>
         /// Returns a sequence of items paired with their index in the original sequence.
         /// Example: <c>[A, B, C] => [(0, A), (1, B), (2, C)]</c>
         /// </summary>
