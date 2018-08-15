@@ -137,6 +137,12 @@ namespace KitchenSink
         public B Branch<B>(Func<A, B> forSome, Func<B> forNone) =>
             HasValue ? forSome(Value) : forNone();
 
+        public bool TryGetValue(out A value)
+        {
+            value = Value;
+            return HasValue;
+        }
+
         public A OrElse(A other) => HasValue ? Value : other;
 
         public A OrElseDo(Func<A> f) => HasValue ? Value : f();
