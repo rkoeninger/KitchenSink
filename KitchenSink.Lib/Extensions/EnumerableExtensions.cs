@@ -154,14 +154,14 @@ namespace KitchenSink.Extensions
         /// Returns sequence that eagerly reads from given sequence in groups of <c>count</c>.
         /// </summary>
         public static IEnumerable<A> Buffer<A>(this IEnumerable<A> seq, int count) =>
-            seq.Batch(count).Flatten();
+            seq.Batch(count).Select(x => x.ToArray()).Flatten();
 
         /// <summary>
         /// Combines a sequence of sub-sequences into one long sequence.
         /// Example: <c>[[1, 2, 3], [4, 5], [6, 7, 8]] => [1, 2, 3, 4, 5, 6, 7, 8]</c>
         /// </summary>
         public static IEnumerable<A> Flatten<A>(this IEnumerable<IEnumerable<A>> seq) =>
-            seq.SelectMany(x => x);
+            seq.SelectMany(Id);
 
         /// <summary>
         /// Combines sub-sequences of arbitrary and varied depth, as determined
