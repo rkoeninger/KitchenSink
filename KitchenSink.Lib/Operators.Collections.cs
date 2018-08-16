@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using KitchenSink.Collections;
 
 namespace KitchenSink
 {
@@ -75,9 +76,9 @@ namespace KitchenSink
 
         /// <summary>
         /// Generates a sequence based on given function.
-        /// Functions returns None to indicate end of sequence.
+        /// Function should return None to indicate end of sequence.
         /// </summary>
-        public static IEnumerable<A> Expand<A>(Func<Maybe<A>> f)
+        public static IEnumerable<A> Separate<A>(Func<Maybe<A>> f)
         {
             var x = f();
 
@@ -85,6 +86,42 @@ namespace KitchenSink
             {
                 yield return x.Value;
                 x = f();
+            }
+        }
+
+        /// <summary>
+        /// Generates a sequence based on given function.
+        /// Function should return None to indicate end of sequence.
+        /// </summary>
+        public static IEnumerable<A> Separate<A>(A initial, Func<A, Maybe<A>> f)
+        {
+            var x = f(initial);
+
+            while (x.HasValue)
+            {
+                initial = x.Value;
+                yield return x.Value;
+                x = f(initial);
+            }
+        }
+
+        /// <summary>
+        /// Repeatedly calls function against previous return value
+        /// so long as true is also returned. Final result is returned
+        /// by this method.
+        /// </summary>
+        public static A Recur<A>(A initial, Func<A, (bool, A)> f)
+        {
+            while (true)
+            {
+                var (resume, x) = f(initial);
+
+                if (!resume)
+                {
+                    return x;
+                }
+
+                initial = x;
             }
         }
 
@@ -323,6 +360,8 @@ namespace KitchenSink
         public static ConcurrentBag<A> BagOf<A>(params A[] values) => new ConcurrentBag<A>(values);
 
         public static Queue<A> QueueOf<A>(params A[] values) => new Queue<A>(values);
+
+        public static Cons ConsOf(object car, object cdr) => new Cons(car, cdr);
 
         public static (A, B) TupleOf<A, B>(A a, B b) =>
             (a, b);
