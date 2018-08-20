@@ -25,6 +25,68 @@ namespace KitchenSink.Extensions
         public static string ToTitleCase(this string x) => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(x);
 
         /// <summary>
+        /// Converts "MultiPartName" to "multi-part-name". Also handles "camelCase".
+        /// </summary>
+        public static string ToLispCase(this string s) =>
+            EnumerateCamelPascalCaseTerms(s?.Trim()).Select(x => x.ToLower()).MakeString("-");
+
+        /// <summary>
+        /// Converts "MultiPartName" to "multi_part_name". Also handles "camelCase".
+        /// </summary>
+        public static string ToSnakeCase(this string s) =>
+            EnumerateCamelPascalCaseTerms(s?.Trim()).Select(x => x.ToLower()).MakeString("_");
+
+        /// <summary>
+        /// Converts "multi-part-name" to "MultiPartName". Also handles "snake_case" with custom sep.
+        /// </summary>
+        public static string ToPascalCase(this string s, char sep = '-') =>
+            (s ?? "").Split(ArrayOf(sep), StringSplitOptions.RemoveEmptyEntries)
+                .Select(ss => ss.ToLower().ToTitleCase())
+                .MakeString();
+
+        /// <summary>
+        /// Converts "multi-part-name" to "multiPartName". Also handles "snake_case" with custom sep.
+        /// </summary>
+        public static string ToCamelCase(this string s, char sep = '-') =>
+            (s ?? "").Split(ArrayOf(sep), StringSplitOptions.RemoveEmptyEntries)
+            .Select((ss, i) => i == 0 ? ss.ToLower() : ss.ToLower().ToTitleCase())
+            .MakeString();
+
+        private static IEnumerable<string> EnumerateCamelPascalCaseTerms(string s)
+        {
+            if (!string.IsNullOrWhiteSpace(s))
+            {
+                for (int i = 0, j = 1; j < s.Length; ++j)
+                {
+                    var hasNext = j + 1 < s.Length;
+                    var prevIsUpper = char.IsUpper(s[j - 1]);
+                    var currentIsUpper = char.IsUpper(s[j]);
+                    var nextIsUpper = hasNext && char.IsUpper(s[j + 1]);
+                    var nextIsDigit = hasNext && char.IsDigit(s[j + 1]);
+
+                    if (hasNext)
+                    {
+                        if (currentIsUpper && !prevIsUpper)
+                        {
+                            yield return s.Substring(i, j - i);
+                            i = j;
+                        }
+                        else if (prevIsUpper && currentIsUpper && !nextIsUpper && !nextIsDigit)
+                        {
+                            yield return s.Substring(i, j - i);
+                            i = j;
+                        }
+                    }
+                    else
+                    {
+                        yield return s.Substring(i, j - i + 1);
+                        i = j;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Formats decimal value as currency.
         /// </summary>
         public static string ToCurrencyString(this decimal x) => $"{x:c}";
