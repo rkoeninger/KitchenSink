@@ -29,6 +29,33 @@ namespace KitchenSink.Extensions
         public static bool IsNotIn<A>(this A val, IEnumerable<A> seq) => !IsIn(val, seq);
 
         /// <summary>
+        /// If sequence is empty, replace with sequence of given value(s).
+        /// </summary>
+        public static IEnumerable<A> IfEmpty<A>(this IEnumerable<A> seq, params A[] values) => IfEmpty(seq, values);
+
+        /// <summary>
+        /// If sequence is empty, replace with given sequence.
+        /// </summary>
+        public static IEnumerable<A> IfEmpty<A>(this IEnumerable<A> xs, IEnumerable<A> ys)
+        {
+            var any = false;
+
+            foreach (var x in xs)
+            {
+                any = true;
+                yield return x;
+            }
+
+            if (any)
+            {
+                foreach (var y in ys)
+                {
+                    yield return y;
+                }
+            }
+        }
+
+        /// <summary>
         /// Adapter for specialized collections that do not implement <see cref="IEnumerable{A}"/>.
         /// Eagerly reads enumerator results into list.
         /// Result can be enumerated multiple times.
@@ -204,35 +231,18 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
-        /// Returns a sequence with a copy of <c>separator</c> between each
-        /// element of the original sequence.
-        /// Example: <c>[1, 2, 3], 0 => [1, 0, 2, 0, 3]</c>
-        /// </summary>
-        public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, A seperator)
-        {
-            using (var e = seq.GetEnumerator())
-            {
-                if (!e.MoveNext())
-                {
-                    yield break;
-                }
-
-                yield return e.Current;
-
-                while (e.MoveNext())
-                {
-                    yield return seperator;
-                    yield return e.Current;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Returns a sequence with copies of <c>separators</c> between each
+        /// Returns a sequence with a copy of <c>separator(s)</c> between each
         /// element of the original sequence.
         /// Example: <c>[1, 2, 3], [4, 5, 6] => [1, 4, 5, 6, 2, 4, 5, 6, 3]</c>
         /// </summary>
-        public static IEnumerable<A> IntersperseMany<A>(this IEnumerable<A> seq, IEnumerable<A> seperators)
+        public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, params A[] separators) => Intersperse(seq, separators);
+
+        /// <summary>
+        /// Returns a sequence with copies of <c>separator(s)</c> between each
+        /// element of the original sequence.
+        /// Example: <c>[1, 2, 3], [4, 5, 6] => [1, 4, 5, 6, 2, 4, 5, 6, 3]</c>
+        /// </summary>
+        public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, IEnumerable<A> seperators)
         {
             var lazy = new Lazy<A[]>(seperators.ToArray);
 
