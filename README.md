@@ -100,7 +100,7 @@ private const int DeclareSingleUse = 0;
   * But looks cool
   * Uses overloaded `/` operator to build paths
   * Works on .Net/Windows and Mono/Linux
-  
+ 
 ```csharp
 Drive.C / "Folder1" / "Folder2" / "File.txt"
     "C:\\Folder1\\Folder2\\File.txt" (Windows)
