@@ -46,7 +46,7 @@ namespace KitchenSink.Extensions
                 yield return x;
             }
 
-            if (any)
+            if (!any)
             {
                 foreach (var y in ys)
                 {
@@ -235,7 +235,8 @@ namespace KitchenSink.Extensions
         /// element of the original sequence.
         /// Example: <c>[1, 2, 3], [4, 5, 6] => [1, 4, 5, 6, 2, 4, 5, 6, 3]</c>
         /// </summary>
-        public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, params A[] separators) => Intersperse(seq, separators);
+        public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, params A[] separators) =>
+            Intersperse(seq, (IEnumerable<A>)separators);
 
         /// <summary>
         /// Returns a sequence with copies of <c>separator(s)</c> between each
