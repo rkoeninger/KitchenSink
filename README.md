@@ -7,7 +7,9 @@
 
 A library for multi-paradigm programming in C#.
 
-Not everything in this library is meant to be taken completely seriously. Some facilities are almost sarcastic in their inclusion.
+> Everything *including* the kitchen sink!
+
+Below is a summary of what this repo contains. Note that not everything in this library is meant to be taken completely seriously. Some facilities are almost sarcastic in their inclusion.
 
 ### Basic Data Types
 
