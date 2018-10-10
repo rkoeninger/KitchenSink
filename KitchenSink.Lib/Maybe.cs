@@ -12,6 +12,12 @@ namespace KitchenSink
     /// </summary>
     public static class Maybe
     {
+        public static Maybe<A> If<A>(bool b, A val) =>
+            If(val, _ => b);
+
+        public static Maybe<A> If<A>(bool b, Func<A> f) =>
+            If(default(A), _ => b, _ => f());
+
         public static Maybe<A> If<A>(A val, Func<A, bool> f) =>
             If(val, f, x => x);
 
