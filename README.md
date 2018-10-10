@@ -42,6 +42,10 @@ Below is a summary of what this repo contains. Note that not everything in this 
   * `RadixDictionary<A>` - mutable dictionary optimized for string keys
   * `RoseTree<A>` - mutable tree data structure that braches arbitrarily
 
+### Multiple Dispatch Mechanism
+
+  * `MultiMethod` - group of functions that execute based on argument type or arbitrary predicate
+
 ### Powerful Concurrency Primitives
 
   * `Atom<A>` - mutually exclusive reference cell with synchronous updates that is both divisible and composable
