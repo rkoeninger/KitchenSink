@@ -41,8 +41,8 @@ namespace KitchenSink.Tests
                 .Apply;
 
             Assert.AreEqual(0, f(0));
-            Assert.AreEqual(10, f(4));
-            Assert.AreEqual(11, f(7));
+            Assert.AreEqual(4, f(5));
+            Assert.AreEqual(11, f(10));
         }
 
         [Test]
