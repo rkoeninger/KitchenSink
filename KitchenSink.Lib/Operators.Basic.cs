@@ -29,6 +29,16 @@ namespace KitchenSink
         public static Func<A, bool> Complement<A>(Func<A, bool> f) => x => !f(x);
 
         /// <summary>
+        /// Ignores argument and returns true.
+        /// </summary>
+        public static Func<A, bool> True<A>() => x => true;
+
+        /// <summary>
+        /// Ignores argument and returns false.
+        /// </summary>
+        public static Func<A, bool> False<A>() => x => false;
+
+        /// <summary>
         /// Attempts parse of string to int.
         /// </summary>
         public static readonly Func<string, Maybe<int>> ToInt = x => x.ToInt();
@@ -47,6 +57,11 @@ namespace KitchenSink
         /// Attempts parse of string to enum.
         /// </summary>
         public static A ToEnum<A>(string x) where A : struct => x.ToEnum<A>();
+
+        /// <summary>
+        /// Zero predicate.
+        /// </summary>
+        public static readonly Func<int, bool> Zero = x => x == 0;
 
         /// <summary>
         /// Positive integer predicate.
@@ -82,6 +97,11 @@ namespace KitchenSink
         /// Integer addition.
         /// </summary>
         public static readonly Func<int, int, int> Add = (x, y) => x + y;
+
+        /// <summary>
+        /// Integer multiplication.
+        /// </summary>
+        public static readonly Func<int, int, int> Mul = (x, y) => x * y;
 
         /// <summary>
         /// Integer negation.

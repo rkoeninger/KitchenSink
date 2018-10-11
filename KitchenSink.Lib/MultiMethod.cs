@@ -32,7 +32,7 @@ namespace KitchenSink
         }
 
         public MultiMethod<A, Z> Extend(Func<A, bool> p, Func<A, Z> f) =>
-            Extend(a => p(a) ? Some(f(a)) : None<Z>());
+            Extend(a => Maybe.If(p(a), () => f(a)));
 
         public MultiMethod<A, Z> Extend<A2>(Func<A2, Z> f)
             where A2 : A =>
@@ -64,7 +64,10 @@ namespace KitchenSink
         }
 
         public MultiMethod<A, B, Z> Extend(Func<A, B, bool> p, Func<A, B, Z> f) =>
-            Extend((a, b) => p(a, b) ? Some(f(a, b)) : None<Z>());
+            Extend((a, b) => Maybe.If(p(a, b), () => f(a, b)));
+
+        public MultiMethod<A, B, Z> Extend(Func<A, bool> pa, Func<B, bool> pb, Func<A, B, Z> f) =>
+            Extend((a, b) => Maybe.If(pa(a) && pb(b), () => f(a, b)));
 
         public MultiMethod<A, B, Z> Extend<A2, B2>(Func<A2, B2, Z> f)
             where A2 : A
@@ -98,6 +101,12 @@ namespace KitchenSink
             methods.Add(f);
             return this;
         }
+
+        public MultiMethod<A, B, C, Z> Extend(Func<A, B, C, bool> p, Func<A, B, C, Z> f) =>
+            Extend((a, b, c) => Maybe.If(p(a, b, c), () => f(a, b, c)));
+
+        public MultiMethod<A, B, C, Z> Extend(Func<A, bool> pa, Func<B, bool> pb, Func<C, bool> pc, Func<A, B, C, Z> f) =>
+            Extend((a, b, c) => Maybe.If(pa(a) && pb(b) && pc(c), () => f(a, b, c)));
 
         public MultiMethod<A, B, C, Z> Extend<A2, B2, C2>(Func<A2, B2, C2, Z> f)
             where A2 : A
