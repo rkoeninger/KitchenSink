@@ -41,6 +41,16 @@ namespace KitchenSink.Extensions
         public static Func<A, A> NoMoreThan<A>(this A x) where A : IComparable<A> => max => x.NoMoreThan(max);
 
         /// <summary>
+        /// Returns greater value, defaulting to the first.
+        /// </summary>
+        public static A Max<A>(this IComparer<A> comparer, A x, A y) => comparer.Compare(x, y) > 0 ? x : y;
+
+        /// <summary>
+        /// Returns lesser value, defaulting to the first.
+        /// </summary>
+        public static A Min<A>(this IComparer<A> comparer, A x, A y) => comparer.Compare(x, y) < 0 ? x : y;
+
+        /// <summary>
         /// Inclusive on start value, exclusive on end value.
         /// </summary>
         public static IReadOnlyList<int> To(this int start, int end) => new RangeList(start, end - 1);

@@ -31,7 +31,7 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// If sequence is empty, replace with sequence of given value(s).
         /// </summary>
-        public static IEnumerable<A> IfEmpty<A>(this IEnumerable<A> seq, params A[] values) => IfEmpty(seq, values);
+        public static IEnumerable<A> IfEmpty<A>(this IEnumerable<A> xs, params A[] values) => IfEmpty(xs, values);
 
         /// <summary>
         /// If sequence is empty, replace with given sequence.
@@ -54,6 +54,30 @@ namespace KitchenSink.Extensions
                 }
             }
         }
+
+        /// <summary>
+        /// Returns greatest item in sequence according to comparer, preferring earlier elements.
+        /// </summary>
+        public static A MaxBy<A>(this IEnumerable<A> xs, IComparer<A> comparer) =>
+            xs.Aggregate(comparer.Max);
+
+        /// <summary>
+        /// Returns least item in sequence according to comparer, preferring earlier elements.
+        /// </summary>
+        public static A MinBy<A>(this IEnumerable<A> xs, IComparer<A> comparer) =>
+            xs.Aggregate(comparer.Min);
+
+        /// <summary>
+        /// Returns greatest item in sequence according to comparer, preferring earlier elements.
+        /// </summary>
+        public static Maybe<A> MaxByMaybe<A>(this IEnumerable<A> xs, IComparer<A> comparer) =>
+            xs.Aggregate(None<A>(), (m, x2) => m.Select(x1 => comparer.Max(x1, x2)).Or(Some(x2)));
+
+        /// <summary>
+        /// Returns least item in sequence according to comparer, preferring earlier elements.
+        /// </summary>
+        public static Maybe<A> MinByMaybe<A>(this IEnumerable<A> xs, IComparer<A> comparer) =>
+            xs.Aggregate(None<A>(), (m, x2) => m.Select(x1 => comparer.Min(x1, x2)).Or(Some(x2)));
 
         /// <summary>
         /// Adapter for specialized collections that do not implement <see cref="IEnumerable{A}"/>.

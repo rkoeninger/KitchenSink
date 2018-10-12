@@ -127,5 +127,11 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static IEnumerable<B> SelectMany<A, B>(this IEnumerable<A> seq, Func<A, Maybe<B>> selector) =>
             seq.Select(selector).WhereSome();
+
+        /// <summary>
+        /// Aggregates without initial accumulator, returning None if no elements in sequence.
+        /// </summary>
+        public static Maybe<A> AggregateMaybe<A>(this IEnumerable<A> xs, Func<A, A, A> f) =>
+            xs.Aggregate(None<A>(), (m, y) => m.Select(x => f(x, y)).Or(Some(y)));
     }
 }

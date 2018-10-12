@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using static KitchenSink.Comparison;
 using KitchenSink.Control;
 
@@ -49,6 +50,29 @@ namespace KitchenSink
                 .When(Neg).Then(LT)
                 .When(Pos).Then(GT)
                 .Else(EQ));
+
+        /// <summary>
+        /// Builds an <see cref="IComparer{A}"/> out of given function.
+        /// </summary>
+        public static IComparer<A> Comparator<A>(Func<A, A, Comparison> f) =>
+            new ComparerDelegate<A>(f);
+
+        /// <summary>
+        /// Builds an <see cref="IComparer{A}"/> out of given function.
+        /// </summary>
+        public static IComparer<A> Comparator<A>(Func<A, A, int> f) =>
+            new ComparerDelegate<A>(f);
+
+        private class ComparerDelegate<A> : IComparer<A>
+        {
+            private readonly Func<A, A, int> f;
+
+            internal ComparerDelegate(Func<A, A, int> f) => this.f = f;
+
+            internal ComparerDelegate(Func<A, A, Comparison> f) => this.f = (x, y) => (int)f(x, y);
+
+            public int Compare(A x, A y) => f(x, y);
+        }
 
         public static class RangeComparison
         {

@@ -8,14 +8,14 @@
         /// <summary>
         /// Greater than.
         /// </summary>
-        GT,
+        GT = 1,
         /// <summary>
         /// Lesser than.
         /// </summary>
-        LT,
+        LT = -1,
         /// <summary>
         /// Equal to.
         /// </summary>
-        EQ
+        EQ = 0
     }
 }

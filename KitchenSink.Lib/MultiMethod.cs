@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
@@ -7,6 +8,64 @@ namespace KitchenSink
 {
     internal class MultiMethod
     {
+        // Throws InvalidOperationException if child is not descendant of parent
+        internal static int DegreesOfSeparation(Type child, Type parent) =>
+            child == parent
+                ? 0
+                : child.GetInterfaces()
+                    .Where(t => t.IsAssignableTo(parent))
+                    .Min(t => DegreesOfSeparation(t, parent));
+
+        // Throws InvalidOperationException if child is not descendant of parent
+        internal static int HierarchyDistance(Type child, Type parent)
+        {
+            var count = 0;
+
+            while (child != parent)
+            {
+                child = child.BaseType;
+                count++;
+            }
+
+            return count;
+        }
+
+        internal static Maybe<Type> FindBase(Type t, Type t0, Type t1)
+        {
+            for (;; t = t.BaseType)
+            {
+                if (t == t0) return Some(t0);
+                if (t == t1) return Some(t1);
+                if (t == typeof(object)) return None<Type>();
+            }
+        }
+
+        internal static Func<Type, Type, Type> NearestMatch(Type t) => (t0, t1) =>
+        {
+            // Exact match is closer
+            if (t == t0) return t0;
+            if (t == t1) return t1;
+
+            if (t.IsInterface)
+            {
+                return DegreesOfSeparation(t, t0) <= DegreesOfSeparation(t, t1) ? t0 : t1;
+            }
+            else
+            {
+                var d0 = HierarchyDistance(t, t0);
+                var d1 = HierarchyDistance(t, t1);
+                return d0 == int.MaxValue && d1 == int.MaxValue
+                    ? DegreesOfSeparation(t, t0) <= DegreesOfSeparation(t, t1) ? t0 : t1
+                    : d0 <= d1 ? t0 : t1;
+            }
+        };
+
+        internal static Maybe<Type> NearestMatch(object x, IEnumerable<Type> ts) =>
+            x == null
+                ? ts.FirstMaybe(t => t == typeof(Void))
+                : ts.Where(x.GetType().IsAssignableTo)
+                    .AggregateMaybe(NearestMatch(x.GetType()));
+
         internal static bool VoidMatch(Type t, object x) =>
             x == null && t == typeof(Void);
 
