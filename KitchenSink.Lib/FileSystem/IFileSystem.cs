@@ -1,43 +1,41 @@
-﻿namespace KitchenSink.FileSystem
+﻿using System.Collections.Generic;
+using System.IO;
+
+namespace KitchenSink.FileSystem
 {
     public interface IFileSystem
     {
-        IFileOperations File { get; }
-        IDirectoryOperations Directory { get; }
-        IPathOperations Path { get; }
-    }
-
-    public interface IFileOperations
-    {
+        bool Exists(string path);
+        bool DirectoryExists(string path);
+        bool FileExists(string path);
+        void Copy(string source, string destination);
+        Stream CreateFile(string path);
+        void CreateDirectory(string path);
         void Delete(string path);
-        void Move(string sourceFileName, string destFileName);
+        void Move(string source, string destination);
+        IEnumerable<EntryInfo> ReadDirectory(string path);
+        Stream ReadFile(string path);
+        Stream WriteFile(string path);
+        Stream AppendFile(string path);
     }
 
-    public interface IDirectoryOperations
+    public class EntryInfo
     {
-        void Delete(string path);
+        public EntryInfo(string name, string path, EntryType type)
+        {
+            Name = name;
+            Path = path;
+            Type = type;
+        }
+
+        public string Name { get; }
+        public string Path { get; }
+        public EntryType Type { get; }
     }
 
-    public interface IPathOperations
+    public enum EntryType
     {
-        char DirectorySeparatorChar { get; }
-        char AltDirectorySeparatorChar { get; }
-        char VolumeSeparatorChar { get; }
-        char PathSeparator { get; }
-        char[] InvalidFileNameChars { get; }
-        char[] InvalidPathChars { get; }
-        string ChangeExtension(string path, string extension);
-        string Combine(params string[] paths);
-        string GetDirectoryName(string path);
-        string GetExtension(string path);
-        string GetFileName(string path);
-        string GetFileNameWithoutExtension(string path);
-        string GetFullPath(string path);
-        string GetPathRoot(string path);
-        string GetRandomFileName();
-        string GetTempFileName();
-        string GetTempPath();
-        bool HasExtension(string path);
-        bool IsPathRooted(string path);
+        Directory,
+        File
     }
 }

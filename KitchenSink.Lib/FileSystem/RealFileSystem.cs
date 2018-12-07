@@ -1,47 +1,79 @@
-﻿using SystemFile = System.IO.File;
-using SystemDirectory = System.IO.Directory;
-using SystemPath = System.IO.Path;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace KitchenSink.FileSystem
 {
     public class RealFileSystem : IFileSystem
     {
-        public IFileOperations File { get; } = new RealFileOperations();
-        public IDirectoryOperations Directory { get; } = new RealDirectoryOperations();
-        public IPathOperations Path { get; } = new RealPathOperations();
+        public bool Exists(string path) => File.Exists(path) || Directory.Exists(path);
+        public bool DirectoryExists(string path) => Directory.Exists(path);
+        public bool FileExists(string path) => File.Exists(path);
+        public void CreateDirectory(string path) => Directory.CreateDirectory(path);
 
-        private class RealFileOperations : IFileOperations
+        public Stream CreateFile(string path)
         {
-            public void Delete(string path) => SystemFile.Delete(path);
-            public void Move(string sourceFileName, string destFileName) => SystemFile.Move(sourceFileName, destFileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            return File.Create(path);
         }
 
-        private class RealDirectoryOperations : IDirectoryOperations
+        public void Delete(string path)
         {
-            public void Delete(string path) => SystemDirectory.Delete(path);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            else if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
         }
 
-        private class RealPathOperations : IPathOperations
+        public void Copy(string source, string destination)
         {
-            public char DirectorySeparatorChar => SystemPath.DirectorySeparatorChar;
-            public char AltDirectorySeparatorChar => SystemPath.AltDirectorySeparatorChar;
-            public char VolumeSeparatorChar => SystemPath.VolumeSeparatorChar;
-            public char PathSeparator => SystemPath.PathSeparator;
-            public char[] InvalidFileNameChars => SystemPath.GetInvalidFileNameChars();
-            public char[] InvalidPathChars => SystemPath.GetInvalidPathChars();
-            public string ChangeExtension(string path, string extension) => SystemPath.ChangeExtension(path, extension);
-            public string Combine(params string[] paths) => SystemPath.Combine(paths);
-            public string GetDirectoryName(string path) => SystemPath.GetDirectoryName(path);
-            public string GetExtension(string path) => SystemPath.GetExtension(path);
-            public string GetFileName(string path) => SystemPath.GetFileName(path);
-            public string GetFileNameWithoutExtension(string path) => SystemPath.GetFileNameWithoutExtension(path);
-            public string GetFullPath(string path) => SystemPath.GetFullPath(path);
-            public string GetPathRoot(string path) => SystemPath.GetPathRoot(path);
-            public string GetRandomFileName() => SystemPath.GetRandomFileName();
-            public string GetTempFileName() => SystemPath.GetTempFileName();
-            public string GetTempPath() => SystemPath.GetTempPath();
-            public bool HasExtension(string path) => SystemPath.HasExtension(path);
-            public bool IsPathRooted(string path) => SystemPath.IsPathRooted(path);
+            if (File.Exists(source))
+            {
+                File.Copy(source, destination, true);
+            }
+            else if (Directory.Exists(source))
+            {
+                CreateDirectory(destination);
+
+                foreach (var entry in Directory.GetFileSystemEntries(source, "*", SearchOption.AllDirectories))
+                {
+                    Copy(entry, Path.Combine(destination, entry.Substring(source.Length)));
+                }
+            }
+            else
+            {
+                throw new PathNotFoundException(source);
+            }
         }
+
+        public void Move(string source, string destination)
+        {
+            if (File.Exists(source))
+            {
+                File.Move(source, destination);
+            }
+            else if (Directory.Exists(source))
+            {
+                Directory.Move(source, destination);
+            }
+            else
+            {
+                throw new PathNotFoundException(source);
+            }
+        }
+
+        public IEnumerable<EntryInfo> ReadDirectory(string path) =>
+            Directory.GetFiles(path, "*", SearchOption.AllDirectories)
+                .Select(p => new EntryInfo(Path.GetFileName(p), p, EntryType.File))
+                .Concat(Directory.GetDirectories(path, "*", SearchOption.AllDirectories)
+                    .Select(p => new EntryInfo(Path.GetFileName(p), p, EntryType.Directory)));
+
+        public Stream ReadFile(string path) => File.OpenRead(path);
+        public Stream WriteFile(string path) => File.OpenWrite(path);
+        public Stream AppendFile(string path) => File.Open(path, File.Exists(path) ? FileMode.Append : FileMode.Create);
     }
 }
