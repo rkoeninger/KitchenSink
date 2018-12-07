@@ -39,7 +39,7 @@ namespace KitchenSink.FileSystem
             {
                 CreateDirectory(destination);
 
-                foreach (var entry in Directory.GetFileSystemEntries(source, "*", SearchOption.AllDirectories))
+                foreach (var entry in Directory.GetFileSystemEntries(source, "*", SearchOption.TopDirectoryOnly))
                 {
                     Copy(entry, Path.Combine(destination, entry.Substring(source.Length)));
                 }
@@ -66,11 +66,24 @@ namespace KitchenSink.FileSystem
             }
         }
 
+        public EntryInfo GetInfo(string path)
+        {
+            if (File.Exists(path))
+            {
+                return new EntryInfo(Path.GetFileName(path), path, EntryType.File);
+            }
+            else if (Directory.Exists(path))
+            {
+                return new EntryInfo(Path.GetFileName(path), path, EntryType.Directory);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public IEnumerable<EntryInfo> ReadDirectory(string path) =>
-            Directory.GetFiles(path, "*", SearchOption.AllDirectories)
-                .Select(p => new EntryInfo(Path.GetFileName(p), p, EntryType.File))
-                .Concat(Directory.GetDirectories(path, "*", SearchOption.AllDirectories)
-                    .Select(p => new EntryInfo(Path.GetFileName(p), p, EntryType.Directory)));
+            Directory.GetFileSystemEntries(path, "*", SearchOption.AllDirectories).Select(GetInfo);
 
         public Stream ReadFile(string path) => File.OpenRead(path);
         public Stream WriteFile(string path) => File.OpenWrite(path);

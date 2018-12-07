@@ -13,6 +13,7 @@ namespace KitchenSink.FileSystem
         void CreateDirectory(string path);
         void Delete(string path);
         void Move(string source, string destination);
+        EntryInfo GetInfo(string path);
         IEnumerable<EntryInfo> ReadDirectory(string path);
         Stream ReadFile(string path);
         Stream WriteFile(string path);
