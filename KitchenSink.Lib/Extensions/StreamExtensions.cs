@@ -8,19 +8,55 @@ namespace KitchenSink.Extensions
 {
     public static class StreamExtensions
     {
-        public static IEnumerable<byte> AsEnumerable(this Stream stream)
+        public static byte[] ReadToEnd(this Stream source)
         {
-            for (int b; (b = stream.ReadByte()) >= 0;)
+            using (var memory = new MemoryStream())
             {
-                yield return (byte)b;
+                source.CopyTo(memory);
+                memory.Position = 0;
+                return memory.ToArray();
             }
         }
 
-        public static IEnumerable<string> AsEnumerable(this TextReader reader)
+        public static string ReadTextToEnd(this Stream source, Encoding encoding = null) =>
+            source.AsReader().ReadToEnd();
+
+        public static StreamReader AsReader(this Stream stream, Encoding encoding = null) =>
+            new StreamReader(stream, encoding ?? Encoding.UTF8);
+
+        public static StreamWriter AsWriter(this Stream stream, Encoding encoding = null) =>
+            new StreamWriter(stream, encoding ?? Encoding.UTF8);
+
+        public static IEnumerable<byte> AsEnumerable(this Stream stream)
         {
-            for (string line; (line = reader.ReadLine()) != null;)
+            using (stream)
             {
-                yield return line;
+                for (int b; (b = stream.ReadByte()) >= 0;)
+                {
+                    yield return (byte)b;
+                }
+            }
+        }
+
+        public static IEnumerable<char> AsEnumerableChars(this TextReader reader)
+        {
+            using (reader)
+            {
+                for (int ch; (ch = reader.Read()) >= 0;)
+                {
+                    yield return Convert.ToChar(ch);
+                }
+            }
+        }
+
+        public static IEnumerable<string> AsEnumerableLines(this TextReader reader)
+        {
+            using (reader)
+            {
+                for (string line; (line = reader.ReadLine()) != null;)
+                {
+                    yield return line;
+                }
             }
         }
 

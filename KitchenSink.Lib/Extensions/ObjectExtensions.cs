@@ -17,6 +17,22 @@ namespace KitchenSink.Extensions
 
         public static A Copy<A>(this A x, Action<A> f) => Clone(x).With(f);
 
+        public static B Use<A, B>(this A resource, Func<A, B> f) where A : IDisposable
+        {
+            using (resource)
+            {
+                return f(resource);
+            }
+        }
+
+        public static void Use<A>(this A resource, Action<A> f) where A : IDisposable
+        {
+            using (resource)
+            {
+                f(resource);
+            }
+        }
+
         // TODO: use System.Runtime.CompilerServices.ITuple here
 
         public static IEnumerable<object> AsEnumerable<A, B>(
