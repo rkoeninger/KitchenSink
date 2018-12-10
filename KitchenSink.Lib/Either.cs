@@ -52,7 +52,7 @@ namespace KitchenSink
             : new Either<A, C>(false, default, selector(e.Right));
 
         public static A OrElseThrow<A, E>(this Either<A, E> e) where E : Exception =>
-            e.IsLeft ? e.Left : throw new AggregateException(e.Right);
+            e.IsLeft ? e.Left : throw e.Right;
     }
 
     /// <summary>

@@ -14,8 +14,7 @@ namespace KitchenSink.FileSystem
         EntryInfo GetInfo(string path);
         IEnumerable<EntryInfo> ReadDirectory(string path);
         Stream ReadFile(string path);
-        Stream WriteFile(string path);
-        Stream AppendFile(string path);
+        Stream WriteFile(string path, bool append = false);
     }
 
     public class EntryInfo
@@ -51,15 +50,32 @@ namespace KitchenSink.FileSystem
         public static bool FileExists(this IFileSystem fs, string path) =>
             fs.GetInfo(path)?.Type == EntryType.File;
 
+        public static void Clear(this IFileSystem fs, string path)
+        {
+            var entry = fs.GetInfo(path);
+
+            if (entry?.IsFile ?? false)
+            {
+                fs.WriteFile(path).Close();
+            }
+            else if (entry?.IsDirectory ?? false)
+            {
+                foreach (var child in fs.ReadDirectory(path))
+                {
+                    fs.Delete(child.Path);
+                }
+            }
+        }
+
         public static void Copy(this IFileSystem fs, string source, string destination)
         {
             var entry = fs.GetInfo(source);
 
-            if (entry.IsFile)
+            if (entry?.IsFile ?? false)
             {
                 fs.ReadFile(source).Use(s => fs.WriteFile(destination).Use(s.CopyTo));
             }
-            else if (entry.IsDirectory)
+            else if (entry?.IsDirectory ?? false)
             {
                 fs.Create(EntryType.Directory, destination);
 

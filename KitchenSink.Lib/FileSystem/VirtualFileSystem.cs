@@ -37,8 +37,7 @@ namespace KitchenSink.FileSystem
         }
 
         public Stream ReadFile(string path) => throw new NotImplementedException();
-        public Stream WriteFile(string path) => throw new NotImplementedException();
-        public Stream AppendFile(string path) => throw new NotImplementedException();
+        public Stream WriteFile(string path, bool append = false) => throw new NotImplementedException();
 
         private readonly Node root = new DirectoryNode();
 

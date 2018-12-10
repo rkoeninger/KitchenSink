@@ -54,35 +54,24 @@ namespace KitchenSink.FileSystem
 
         public EntryInfo GetInfo(string path)
         {
-            if (File.Exists(path))
-            {
-                return new EntryInfo(Path.GetFileName(path), path, EntryType.File);
-            }
-            else if (Directory.Exists(path))
-            {
-                return new EntryInfo(Path.GetFileName(path), path, EntryType.Directory);
-            }
-            else
-            {
-                return null;
-            }
+            var fileName = Path.GetFileName(path);
+            var fullPath = Path.GetFullPath(path);
+            return
+                File.Exists(path) ? new EntryInfo(fileName, fullPath, EntryType.File) :
+                Directory.Exists(path) ? new EntryInfo(fileName, fullPath, EntryType.Directory) :
+                null;
         }
 
         public IEnumerable<EntryInfo> ReadDirectory(string path) =>
             Directory.GetFileSystemEntries(path, "*", SearchOption.TopDirectoryOnly).Select(GetInfo);
 
-        public Stream ReadFile(string path) => File.OpenRead(path);
+        public Stream ReadFile(string path) => File.Exists(path) ? (Stream)File.OpenRead(path) : new MemoryStream();
 
-        public Stream WriteFile(string path)
+        public Stream WriteFile(string path, bool append = false)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path));
-            return File.OpenWrite(path);
-        }
-
-        public Stream AppendFile(string path)
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
-            return File.Open(path, File.Exists(path) ? FileMode.Append : FileMode.Create);
+            var mode = append && File.Exists(path) ? FileMode.Append : FileMode.Create;
+            return File.Open(path, mode, FileAccess.Write);
         }
     }
 }
