@@ -57,7 +57,7 @@ namespace KitchenSink.FileSystem
 
             if (entry.IsFile)
             {
-                fs.ReadFile(source).Use(s => fs.WriteFile(destination).Use(t => s.CopyTo(t)));
+                fs.ReadFile(source).Use(s => fs.WriteFile(destination).Use(s.CopyTo));
             }
             else if (entry.IsDirectory)
             {
@@ -90,22 +90,28 @@ namespace KitchenSink.FileSystem
             }
         }
 
+        public static IEnumerable<byte> ReadBytes(this IFileSystem fs, string path) =>
+            fs.ReadFile(path).AsEnumerable();
+
         public static IEnumerable<char> ReadChars(this IFileSystem fs, string path, Encoding encoding = null) =>
             fs.ReadFile(path).AsReader().AsEnumerableChars();
 
         public static IEnumerable<string> ReadLines(this IFileSystem fs, string path, Encoding encoding = null) =>
             fs.ReadFile(path).AsReader().AsEnumerableLines();
 
-        public static string ReadAllText(this IFileSystem fs, string path, Encoding encoding = null) =>
+        public static string ReadText(this IFileSystem fs, string path, Encoding encoding = null) =>
             fs.ReadFile(path).Use(s => s.ReadTextToEnd(encoding));
 
-        public static string[] ReadAllLines(this IFileSystem fs, string path, Encoding encoding = null) =>
-            fs.ReadLines(path, encoding).ToArray();
+        public static void WriteBytes(this IFileSystem fs, string path, IEnumerable<byte> bytes) =>
+            fs.WriteFile(path).Use(bytes.ToStream().CopyTo);
 
-        public static byte[] ReadAllBytes(this IFileSystem fs, string path) =>
-            fs.ReadFile(path).Use(s => s.ReadToEnd());
+        public static void WriteChars(this IFileSystem fs, string path, IEnumerable<char> chars, Encoding encoding = null) =>
+            fs.WriteFile(path).AsWriter(encoding).Use(s => chars.ForEach(s.Write));
 
-        public static void WriteAllText(this IFileSystem fs, string path, string text, Encoding encoding = null) =>
+        public static void WriteLines(this IFileSystem fs, string path, IEnumerable<string> lines, Encoding encoding = null) =>
+            fs.WriteFile(path).Use(s => lines.ForEach(s.AsWriter(encoding).WriteLine));
+
+        public static void WriteText(this IFileSystem fs, string path, string text, Encoding encoding = null) =>
             fs.WriteFile(path).Use(s => s.AsWriter(encoding).Write(text));
     }
 }
