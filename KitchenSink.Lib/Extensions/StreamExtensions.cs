@@ -73,6 +73,8 @@ namespace KitchenSink.Extensions
             return new EnumerableStream(seq.Intersperse(separator).SelectMany(encoding.GetBytes));
         }
 
+        public static Stream ToStream(this ICollection<byte> bytes) => new MemoryStream(bytes.ToArray());
+
         public static Stream ToStream(this IEnumerable<byte> bytes) => new EnumerableStream(bytes);
 
         public static Stream ToStream<A>(this IEnumerable<A> seq, Func<A, IEnumerable<byte>> f) => new EnumerableStream(seq.SelectMany(f));
