@@ -28,13 +28,13 @@ namespace KitchenSink.Extensions
         /// Converts "MultiPartName" to "multi-part-name". Also handles "camelCase".
         /// </summary>
         public static string ToLispCase(this string s) =>
-            EnumerateCamelPascalCaseTerms(s?.Trim()).Select(x => x.ToLower()).MakeString("-");
+            EnumerateCamelPascalCaseTerms(s?.Trim()).Select(x => x.ToLower()).MkStr("-");
 
         /// <summary>
         /// Converts "MultiPartName" to "multi_part_name". Also handles "camelCase".
         /// </summary>
         public static string ToSnakeCase(this string s) =>
-            EnumerateCamelPascalCaseTerms(s?.Trim()).Select(x => x.ToLower()).MakeString("_");
+            EnumerateCamelPascalCaseTerms(s?.Trim()).Select(x => x.ToLower()).MkStr("_");
 
         /// <summary>
         /// Converts "multi-part-name" to "MultiPartName". Also handles "snake_case" with custom sep.
@@ -42,7 +42,7 @@ namespace KitchenSink.Extensions
         public static string ToPascalCase(this string s, char sep = '-') =>
             (s ?? "").Split(ArrayOf(sep), StringSplitOptions.RemoveEmptyEntries)
                 .Select(ss => ss.ToLower().ToTitleCase())
-                .MakeString();
+                .MkStr();
 
         /// <summary>
         /// Converts "multi-part-name" to "multiPartName". Also handles "snake_case" with custom sep.
@@ -50,7 +50,7 @@ namespace KitchenSink.Extensions
         public static string ToCamelCase(this string s, char sep = '-') =>
             (s ?? "").Split(ArrayOf(sep), StringSplitOptions.RemoveEmptyEntries)
             .Select((ss, i) => i == 0 ? ss.ToLower() : ss.ToLower().ToTitleCase())
-            .MakeString();
+            .MkStr();
 
         private static IEnumerable<string> EnumerateCamelPascalCaseTerms(string s)
         {
@@ -115,20 +115,52 @@ namespace KitchenSink.Extensions
         /// Converts items in sequence to string and concats them
         /// separated by <c>sep</c>, which defaults to empty string.
         /// </summary>
-        public static string MakeString<A>(this IEnumerable<A> seq, string sep = "") => string.Join(sep, seq);
+        public static string MkStr<A>(this IEnumerable<A> seq, string sep = "") => string.Join(sep, seq);
+
+        /// <summary>
+        /// Transforms each item in sequence, converts it to a string,
+        /// and concats them separated by <c>sep</c>, which defaults
+        /// to empty string.
+        /// </summary>
+        public static string MkStr<A, B>(this IEnumerable<A> seq, string sep, Func<A, B> f) =>
+            seq.Select(f).MkStr(sep);
+
+        /// <summary>
+        /// Transforms each item in sequence, converts it to a string,
+        /// and concats them separated by <c>sep</c>, which defaults
+        /// to empty string.
+        /// </summary>
+        public static string MkStr<A, B>(this IEnumerable<A> seq, Func<A, B> f) =>
+            seq.Select(f).MkStr();
+
+        /// <summary>
+        /// Transforms each item in sequence, converts it to a string,
+        /// and concats them separated by <c>sep</c>, which defaults
+        /// to empty string.
+        /// </summary>
+        public static string MkStr<A>(this IEnumerable<A> seq, string sep, Func<A, object> f) =>
+            seq.Select(f).MkStr(sep);
+
+        /// <summary>
+        /// Transforms each item in sequence, converts it to a string,
+        /// and concats them separated by <c>sep</c>, which defaults
+        /// to empty string.
+        /// </summary>
+        public static string MkStr<A>(this IEnumerable<A> seq, Func<A, object> f) =>
+            seq.Select(f).MkStr();
 
         /// <summary>
         /// Converts sequence to character-separated string, using quotes
         /// to escape values containing the separator (comma by default).
         /// </summary>
-        public static string ToCsv(this IEnumerable<object> seq, string sep = ",") =>
+        public static string ToCsv<A>(this IEnumerable<A> seq, string sep = ",") =>
             seq
                 .Select(x =>
                 {
                     var s = Str(x);
                     return s.Contains(sep) ? $"\"{s.Replace("\"", "\"\"")}\"" : s;
                 })
-                .MakeString(sep);
+                .MkStr(sep);
 
         /// <summary>
         /// Converts string from Windows-style CRLF to Unix-style LF.

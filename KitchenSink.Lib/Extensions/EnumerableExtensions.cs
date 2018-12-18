@@ -488,6 +488,18 @@ namespace KitchenSink.Extensions
             seq.Where((_, i) => i.IsNotIn(indicies));
 
         /// <summary>
+        /// Filters out <c>null</c> values.
+        /// </summary>
+        public static IEnumerable<A> Sift<A>(this IEnumerable<A> seq) =>
+            seq.Where(x => x != null);
+
+        /// <summary>
+        /// Filters out elements for which the given selector returns <c>null</c>.
+        /// </summary>
+        public static IEnumerable<A> Sift<A, B>(this IEnumerable<A> seq, Func<A, B> f) =>
+            seq.Where(x => f(x) != null);
+
+        /// <summary>
         /// Randomizes elements in sequence. This will enumerate the entire sequence.
         /// Example: <c>[1, 2, 3, 4, 5] => [3, 5, 2, 1, 4]</c>
         /// </summary>

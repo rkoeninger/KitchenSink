@@ -72,7 +72,7 @@ namespace KitchenSink.FileSystem
                 .ToList();
 
         private string Print(IEnumerable<string> pathParts) =>
-            pathParts.Select(p => "/" + p).MakeString();
+            pathParts.Select(p => "/" + p).MkStr();
 
         private Node Lookup(List<string> path) =>
             path.Aggregate(root, (current, name) => (current as DirectoryNode)?.Child(name));

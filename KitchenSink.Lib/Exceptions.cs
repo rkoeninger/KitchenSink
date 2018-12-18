@@ -107,6 +107,6 @@ namespace KitchenSink
 
     public class PropertyRefutedException : ExpectationFailedException
     {
-        public PropertyRefutedException(params object[] vals) : base($"Property refuted with ({vals.MakeString(", ")})") { }
+        public PropertyRefutedException(params object[] vals) : base($"Property refuted with ({vals.MkStr(", ")})") { }
     }
 }

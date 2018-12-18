@@ -43,9 +43,9 @@ namespace KitchenSink
 
         public static IEnumerable<char> Chars() => Forever(Char);
 
-        public static string UnicodeString() => Chars().Take(Int(256)).MakeString();
+        public static string UnicodeString() => Chars().Take(Int(256)).MkStr();
 
-        public static string UnicodeString(int length) => Chars().Take(Int(length)).MakeString();
+        public static string UnicodeString(int length) => Chars().Take(Int(length)).MkStr();
 
         public static IEnumerable<string> UnicodeStrings() => Forever(UnicodeString);
 
@@ -53,12 +53,12 @@ namespace KitchenSink
 
         public static IEnumerable<char> AsciiChars() => Forever(AsciiChar);
 
-        public static string AsciiString() => AsciiChars().Take(Int(256)).MakeString();
+        public static string AsciiString() => AsciiChars().Take(Int(256)).MkStr();
 
-        public static string AsciiString(int length) => AsciiChars().Take(Int(length)).MakeString();
+        public static string AsciiString(int length) => AsciiChars().Take(Int(length)).MkStr();
 
         public static string AsciiStringNoWhiteSpace(int minLength, int maxLength) =>
-            Chars().Where(x => !char.IsWhiteSpace(x)).Take(Int(minLength, maxLength)).MakeString();
+            Chars().Where(x => !char.IsWhiteSpace(x)).Take(Int(minLength, maxLength)).MkStr();
 
         public static IEnumerable<string> AsciiStrings() => Forever(AsciiString);
 

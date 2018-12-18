@@ -24,29 +24,16 @@ namespace KitchenSink.FileSystem
             }
         }
 
-        public void Delete(string path)
-        {
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
-            else if (Directory.Exists(path))
-            {
-                Directory.Delete(path, true);
-            }
-        }
+        public void Delete(string path) =>
+            Branch(path,
+                () => File.Delete(path),
+                () => Directory.Delete(path, true));
 
         public void Move(string source, string destination)
         {
-            if (File.Exists(source))
-            {
-                File.Move(source, destination);
-            }
-            else if (Directory.Exists(source))
-            {
-                Directory.Move(source, destination);
-            }
-            else
+            if (!Branch(source,
+                () => File.Move(source, destination),
+                () => Directory.Move(source, destination)))
             {
                 throw new PathNotFoundException(source);
             }
@@ -54,12 +41,31 @@ namespace KitchenSink.FileSystem
 
         public EntryInfo GetInfo(string path)
         {
-            var fileName = Path.GetFileName(path);
-            var fullPath = Path.GetFullPath(path);
-            return
-                File.Exists(path) ? new EntryInfo(fileName, fullPath, EntryType.File) :
-                Directory.Exists(path) ? new EntryInfo(fileName, fullPath, EntryType.Directory) :
-                null;
+            EntryInfo Entry(EntryType type) => new EntryInfo(Path.GetFileName(path), Path.GetFullPath(path), type);
+            return Branch(path,
+                () => Entry(EntryType.File),
+                () => Entry(EntryType.Directory));
+        }
+
+        private A Branch<A>(string path, Func<A> fileAction, Func<A> directoryAction) =>
+            File.Exists(path) ? fileAction() : Directory.Exists(path) ? directoryAction() : default;
+
+        private bool Branch(string path, Action fileAction, Action directoryAction)
+        {
+            if (File.Exists(path))
+            {
+                fileAction();
+                return true;
+            }
+            else if (Directory.Exists(path))
+            {
+                directoryAction();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public IEnumerable<EntryInfo> ReadDirectory(string path) =>
