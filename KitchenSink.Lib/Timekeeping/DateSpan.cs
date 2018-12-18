@@ -7,7 +7,7 @@ namespace KitchenSink.Timekeeping
     /// Represents a region of time between two instants, each
     /// represented as a <see cref="DateTime"/>.
     /// </summary>
-    public struct DateSpan : IEquatable<DateSpan>, IComparable<DateSpan>
+    public readonly struct DateSpan : IEquatable<DateSpan>, IComparable<DateSpan>
     {
         /// <summary>
         /// Returns <see cref="DateSpan"/> of entire day containing

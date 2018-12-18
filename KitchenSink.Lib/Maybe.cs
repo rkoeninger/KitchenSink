@@ -81,7 +81,7 @@ namespace KitchenSink
     /// A null-encapsulating wrapper.
     /// A Maybe might not have a value, but a reference to an Maybe will not itself be null.
     /// </summary>
-    public struct Maybe<A> : IEquatable<Maybe<A>>
+    public readonly struct Maybe<A> : IEquatable<Maybe<A>>
     {
         internal static readonly Maybe<A> None = default;
 

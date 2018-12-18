@@ -123,7 +123,7 @@ namespace KitchenSink
         }
     }
 
-    public struct XmlStart
+    public readonly struct XmlStart
     {
         /// <summary>Opens root tag.</summary>
         public static Xml operator <(XmlStart start, string rootTagName) =>

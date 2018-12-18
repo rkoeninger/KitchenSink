@@ -7,7 +7,7 @@ namespace KitchenSink.Timekeeping
     /// Represents a region of time that covers an entire day
     /// from 00:00 up to 00:00 the next day.
     /// </summary>
-    public struct ExactDay : IEquatable<ExactDay>, IComparable<ExactDay>
+    public readonly struct ExactDay : IEquatable<ExactDay>, IComparable<ExactDay>
     {
         public static ExactDay On(int year, int month, int day) => new ExactDay(year, month, day);
 

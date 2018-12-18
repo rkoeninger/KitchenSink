@@ -7,7 +7,7 @@ namespace KitchenSink.Timekeeping
     /// Represents a region of time that covers an entire month
     /// from 00:00 of the 1st up to 00:00 of the 1st of the next month.
     /// </summary>
-    public struct ExactMonth : IEquatable<ExactMonth>, IComparable<ExactMonth>
+    public readonly struct ExactMonth : IEquatable<ExactMonth>, IComparable<ExactMonth>
     {
         public static ExactDay On(int year, int month, int day) => new ExactDay(year, month, day);
 

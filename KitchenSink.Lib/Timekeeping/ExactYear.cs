@@ -7,7 +7,7 @@ namespace KitchenSink.Timekeeping
     /// Represents a region of time that covers an entire year
     /// from 00:00 of the 1st of January up to 00:00 of the 1st of January of the next year.
     /// </summary>
-    public struct ExactYear : IEquatable<ExactYear>, IComparable<ExactYear>
+    public readonly struct ExactYear : IEquatable<ExactYear>, IComparable<ExactYear>
     {
         public static ExactYear On(int year) => new ExactYear(year);
         public static ExactYear Containing(DateTime dateTime) => new ExactYear(dateTime.Year);

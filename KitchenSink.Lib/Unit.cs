@@ -7,7 +7,7 @@ namespace KitchenSink
     /// A meaningfully different instance of Unit cannot be created.
     /// All Unit values are equal.
     /// </summary>
-    public struct Unit : IEquatable<Unit>, IComparable<Unit>
+    public readonly struct Unit : IEquatable<Unit>, IComparable<Unit>
     {
         /// <summary>
         /// The singleton instance of Unit.
