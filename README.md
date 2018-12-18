@@ -42,6 +42,13 @@ Below is a summary of what this repo contains. Note that not everything in this 
   * `RadixDictionary<A>` - mutable dictionary optimized for string keys
   * `RoseTree<A>` - mutable tree data structure that braches arbitrarily
 
+### Abstracted File System
+
+  * `IFileSystem` - interface representing minimal set of file system operations
+  * `RealFileSystem` - forwards operations to `System.IO` classes
+  * `VirtualFileSystem` - in-memory file system data structure
+  * `ResilientFileSystem` - `IFileSystem` decorator that adds retry logic to all operations
+
 ### Multiple Dispatch Mechanism
 
   * `MultiMethod` - group of functions that execute based on argument type or arbitrary predicate
