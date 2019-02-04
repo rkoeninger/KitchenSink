@@ -561,26 +561,18 @@ namespace KitchenSink.Extensions
 
         /// <summary>
         /// Performs side-effecting Action on each item in sequence and then yield it.
+        /// Like <see cref="ForEach"/>, but lazy and yields values.
+        /// Example: <c>...Where(Filter).Tap(LogValue).Select(Transform)...</c>
         /// </summary>
-        public static IEnumerable<A> Tap<A>(this IEnumerable<A> seq, Action<A> f)
-        {
-            foreach (var item in seq)
-            {
-                f(item);
-                yield return item;
-            }
-        }
+        public static IEnumerable<A> Tap<A>(this IEnumerable<A> seq, Action<A> f) =>
+            seq.Select(x => { f(x); return x; });
 
         /// <summary>
         /// Performs side-effecting Action on each item in sequence.
+        /// Like <see cref="Tap"/>, but eager and returns void.
         /// </summary>
-        public static void ForEach<A>(this IEnumerable<A> seq, Action<A> f)
-        {
-            foreach (var item in seq)
-            {
-                f(item);
-            }
-        }
+        public static void ForEach<A>(this IEnumerable<A> seq, Action<A> f) =>
+            seq.Tap(f).Force();
 
         /// <summary>
         /// Sets every value in array to a particular value.
