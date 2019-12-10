@@ -118,13 +118,14 @@ namespace KitchenSink
         public static void Comparable<A>(IEnumerable<A> data) where A : IComparable<A> =>
             data.ToList().With(xs => That(xs, xs, (x, y) => x.CompareTo(y) == -(y.CompareTo(x))));
 
-        public static void CompareOperators<A>(IEnumerable<A> data) =>
-            data.ToList().With(xs => That(xs, xs, (x, y) =>
-            {
-                dynamic dx = x;
-                dynamic dy = y;
-                return dx > dy == !(dx <= dy) && dx < dy == !(dx >= dy);
-            }));
+        // TODO: missing required member Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create
+        //public static void CompareOperators<A>(IEnumerable<A> data) =>
+        //    data.ToList().With(xs => That(xs, xs, (x, y) =>
+        //    {
+        //        dynamic dx = x;
+        //        dynamic dy = y;
+        //        return dx > dy == !(dx <= dy) && dx < dy == !(dx >= dy);
+        //    }));
 
         public static void EqualsAndHashCode<A>(IEnumerable<A> data) =>
             data.ToList().With(xs => That(xs, xs, (x, y) => Implies(Equals(x, y), Hash(x) == Hash(y))));

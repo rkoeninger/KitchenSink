@@ -267,9 +267,7 @@ namespace KitchenSink.Extensions
         private static readonly IEnumerable<bool> OneFalse = SeqOf(false);
         private static readonly IEnumerable<bool> EmptyBoolSeq = SeqOf<bool>();
 
-        private static Func<IEnumerable<bool>, IEnumerable<A>> ZipWhere<A>(IEnumerable<A> seq)
-        {
-            return selectors => seq.Zip(selectors).Where(x => x.Item2).Select(x => x.Item1);
-        }
+        private static Func<IEnumerable<bool>, IEnumerable<A>> ZipWhere<A>(IEnumerable<A> seq) =>
+            selectors => seq.ZipTuples(selectors).Where(x => x.Item2).Select(x => x.Item1);
     }
 }

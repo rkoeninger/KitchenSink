@@ -416,7 +416,7 @@ namespace KitchenSink.Extensions
         /// Combines two sequences by pairing off their elements into tuples.
         /// Example: <c>[1, 2, 3], [A, B, C] => [(1, A), (2, B), (3, C)]</c>
         /// </summary>
-        public static IEnumerable<(A, B)> Zip<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) => xs.Zip(ys, TupleOf);
+        public static IEnumerable<(A, B)> ZipTuples<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) => xs.Zip(ys, TupleOf);
 
         /// <summary>
         /// Sames as the standard <see cref="Enumerable.Zip{A, B, C}"/>, but
@@ -457,7 +457,7 @@ namespace KitchenSink.Extensions
         /// Returns a sequence of items paired with their index in the original sequence.
         /// Example: <c>[A, B, C] => [(0, A), (1, B), (2, C)]</c>
         /// </summary>
-        public static IEnumerable<(int, A)> ZipWithIndex<A>(this IEnumerable<A> seq) => From(0).Zip(seq);
+        public static IEnumerable<(int, A)> ZipWithIndex<A>(this IEnumerable<A> seq) => From(0).ZipTuples(seq);
 
         /// <summary>
         /// Returns the cross product of two sequences, combining elements with the given function.
