@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net47</TargetFramework>
+    <LangVersion>7.2</LangVersion>
+    <Authors>Robert Koeninger</Authors>
+    <PackageId>KitchenSink</PackageId>
+    <Description>A library for multi-paradigm programming in C#.</Description>
+    <Copyright>Copyright © 2014-2018 Robert Koeninger</Copyright>
+    <PackageProjectUrl>https://github.com/rkoeninger/KitchenSink</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rkoeninger/KitchenSink</RepositoryUrl>
+    <RootNamespace>KitchenSink</RootNamespace>
+    <AssemblyName>KitchenSink</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+</Project>
