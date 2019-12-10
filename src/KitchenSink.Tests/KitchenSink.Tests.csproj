@@ -21,6 +21,6 @@
     <PackageReference Include="System.ValueTuple" Version="4.4.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\KitchenSink.Lib\KitchenSink.Lib.csproj" />
+    <ProjectReference Include="..\KitchenSink.Lib\KitchenSink.csproj" />
   </ItemGroup>
 </Project>

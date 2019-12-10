@@ -1,4 +1,4 @@
-[![Mono Build Status](https://img.shields.io/travis/rkoeninger/KitchenSink/master.svg?label=mono)](https://travis-ci.org/rkoeninger/KitchenSink)
+[![Build Status](https://travis-ci.org/rkoeninger/KitchenSink.svg?branch=master)](https://travis-ci.org/rkoeninger/KitchenSink)
 
 # KitchenSink
 
