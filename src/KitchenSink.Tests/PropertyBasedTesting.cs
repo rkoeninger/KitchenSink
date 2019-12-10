@@ -36,8 +36,7 @@ namespace KitchenSink.Tests
         public void CheckComparableAndOperators()
         {
             Expect.Comparable(Sample.Ints);
-            // TODO: Expect.CompareOperators can't be built in .net standard
-            //Expect.CompareOperators(Sample.Ints);
+            Expect.CompareOperators(Sample.Ints);
         }
 
         [Test]

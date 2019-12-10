@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
@@ -118,14 +119,18 @@ namespace KitchenSink
         public static void Comparable<A>(IEnumerable<A> data) where A : IComparable<A> =>
             data.ToList().With(xs => That(xs, xs, (x, y) => x.CompareTo(y) == -(y.CompareTo(x))));
 
-        // TODO: missing required member Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create
-        //public static void CompareOperators<A>(IEnumerable<A> data) =>
-        //    data.ToList().With(xs => That(xs, xs, (x, y) =>
-        //    {
-        //        dynamic dx = x;
-        //        dynamic dy = y;
-        //        return dx > dy == !(dx <= dy) && dx < dy == !(dx >= dy);
-        //    }));
+        public static void CompareOperators<A>(IEnumerable<A> data) =>
+            data.ToList().With(xs => That(xs, xs, (x, y) =>
+            {
+                var px = Expression.Parameter(typeof(A));
+                var py = Expression.Parameter(typeof(A));
+                var gt = Expression.Lambda(Expression.GreaterThan(px, py), px, py).Compile();
+                var ge = Expression.Lambda(Expression.GreaterThanOrEqual(px, py), px, py).Compile();
+                var lt = Expression.Lambda(Expression.LessThan(px, py), px, py).Compile();
+                var le = Expression.Lambda(Expression.LessThanOrEqual(px, py), px, py).Compile();
+                bool TruthOf(Delegate f) => (bool) f.DynamicInvoke(x, y);
+                return TruthOf(gt) == !TruthOf(le) && TruthOf(lt) == !TruthOf(ge);
+            }));
 
         public static void EqualsAndHashCode<A>(IEnumerable<A> data) =>
             data.ToList().With(xs => That(xs, xs, (x, y) => Implies(Equals(x, y), Hash(x) == Hash(y))));
