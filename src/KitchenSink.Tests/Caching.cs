@@ -37,7 +37,7 @@ namespace KitchenSink.Tests
             public void Do(int id) => _callCount++;
         }
 
-        [Test, Ignore("Cache() not working, see AutoCache.cs")]
+        [Test]
         public void AutoCaching()
         {
             IUserRepostiory repo = new UserRepository();
@@ -59,7 +59,7 @@ namespace KitchenSink.Tests
             Assert.AreEqual(cachedRepo.Get2(3, "ghi"), cachedRepo.Get2(3, "ghi"));
         }
 
-        [Test, Ignore("Cache() not working, see AutoCache.cs")]
+        [Test]
         public void SelectiveExclusion()
         {
             IUserRepostiory repo = new UserRepository();
@@ -74,7 +74,7 @@ namespace KitchenSink.Tests
             Assert.AreNotEqual(cachedRepo.Get2(3, "ghi"), cachedRepo.Get2(3, "ghi"));
         }
 
-        [Test, Ignore("Cache() not working, see AutoCache.cs")]
+        [Test]
         public void ConfigSpecificCachiingOfGeneratedTypes()
         {
             // Run other tests again to confirm caching works as it should
@@ -82,7 +82,7 @@ namespace KitchenSink.Tests
             AutoCaching();
         }
 
-        [Test, Ignore("Cache() not working, see AutoCache.cs")]
+        [Test]
         public void ExpirableValuesAreRegenerated()
         {
             IUserRepostiory repo = new UserRepository();
