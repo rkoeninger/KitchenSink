@@ -5,23 +5,23 @@ using System.Linq;
 
 namespace KitchenSink
 {
-    public static class IO
+    public static class Io
     {
-        public static IO<A> Of<A>(A val) => new IO<A>(() => val);
+        public static Io<A> Of<A>(A val) => new Io<A>(() => val);
 
-        public static IO<A> Of<A>(Func<A> cont) => new IO<A>(cont);
+        public static Io<A> Of<A>(Func<A> cont) => new Io<A>(cont);
 
-        public static IO<Unit> Of_(Action cont) =>
-            new IO<Unit>(() => { cont(); return Unit.It; });
+        public static Io<Unit> Of_(Action cont) =>
+            new Io<Unit>(() => { cont(); return Unit.It; });
 
-        public static IO<A> Flatten<A>(this IO<IO<A>> io) => Of(() => io.Eval().Eval());
+        public static Io<A> Flatten<A>(this Io<Io<A>> io) => Of(() => io.Eval().Eval());
 
-        public static IO<A> Sum<A>(this IEnumerable<IO<A>> seq) => seq.Aggregate(Then);
+        public static Io<A> Sum<A>(this IEnumerable<Io<A>> seq) => seq.Aggregate(Then);
 
-        public static IO<IEnumerable<A>> Sequence<A>(this IEnumerable<IO<A>> seq) =>
+        public static Io<IEnumerable<A>> Sequence<A>(this IEnumerable<Io<A>> seq) =>
             Of(() => seq.Select(Eval));
 
-        public static IO<Unit> Sequence(this IEnumerable<IO<Unit>> seq) =>
+        public static Io<Unit> Sequence(this IEnumerable<Io<Unit>> seq) =>
             Of(() =>
             {
                 foreach (var io in seq)
@@ -32,116 +32,116 @@ namespace KitchenSink
                 return Unit.It;
             });
 
-        public static Func<A, IO<C>> Compose<A, B, C>(this Func<A, IO<B>> f, Func<B, IO<C>> g) =>
+        public static Func<A, Io<C>> Compose<A, B, C>(this Func<A, Io<B>> f, Func<B, Io<C>> g) =>
             a => f(a).SelectMany(g);
 
-        public static IO<Func<A, B>> Promote<A, B>(Func<A, IO<B>> f) =>
+        public static Io<Func<A, B>> Promote<A, B>(Func<A, Io<B>> f) =>
             Of<Func<A, B>>(() => a => f(a).Eval());
 
-        public static Func<A, IO<B>> Demote<A, B>(IO<Func<A, B>> f) =>
+        public static Func<A, Io<B>> Demote<A, B>(Io<Func<A, B>> f) =>
             x => Of(() => f.Eval().Invoke(x));
 
-        public static readonly IO<DateTime> Now = Of(() => DateTime.Now);
-        public static readonly IO<DateTime> UtcNow = Of(() => DateTime.UtcNow);
+        public static readonly Io<DateTime> Now = Of(() => DateTime.Now);
+        public static readonly Io<DateTime> UtcNow = Of(() => DateTime.UtcNow);
 
-        private static A Eval<A>(IO<A> io) => io.Eval();
+        private static A Eval<A>(Io<A> io) => io.Eval();
 
-        public static IO<B> Then<A, B>(IO<A> a, IO<B> b) => a.Then(b);
+        public static Io<B> Then<A, B>(Io<A> a, Io<B> b) => a.Then(b);
 
-        public static IO<A> Also<A, B>(IO<A> a, IO<B> b) => a.Also(b);
+        public static Io<A> Also<A, B>(Io<A> a, Io<B> b) => a.Also(b);
     }
 
-    public struct IO<A>
+    public struct Io<A>
     {
-        internal IO(Func<A> cont) : this() => Cont = cont;
+        internal Io(Func<A> cont) : this() => Cont = cont;
 
         internal Func<A> Cont { get; }
 
         public A Eval() => Cont();
 
-        public IO<B> Select<B>(Func<A, B> f)
+        public Io<B> Select<B>(Func<A, B> f)
         {
             var me = this;
-            return IO.Of(() => f(me.Eval()));
+            return Io.Of(() => f(me.Eval()));
         }
 
-        public IO<B> SelectMany<B>(Func<A, IO<B>> f)
+        public Io<B> SelectMany<B>(Func<A, Io<B>> f)
         {
             var me = this;
-            return IO.Of(() => f(me.Eval()).Eval());
+            return Io.Of(() => f(me.Eval()).Eval());
         }
 
-        public IO<B> Then<B>(IO<B> io)
+        public Io<B> Then<B>(Io<B> io)
         {
             var me = this;
-            return IO.Of(() =>
+            return Io.Of(() =>
             {
                 me.Eval();
                 return io.Eval();
             });
         }
 
-        public IO<A> Also<B>(IO<B> io) => io.Then(this);
+        public Io<A> Also<B>(Io<B> io) => io.Then(this);
 
-        public IO<C> Join<B, C>(IO<B> other, Func<A, B, C> f)
+        public Io<C> Join<B, C>(Io<B> other, Func<A, B, C> f)
         {
             var me = this;
-            return IO.Of(() => f(me.Eval(), other.Eval()));
+            return Io.Of(() => f(me.Eval(), other.Eval()));
         }
 
-        public IO<Unit> Forever() => Forever<Unit>();
+        public Io<Unit> Forever() => Forever<Unit>();
 
-        public IO<B> Forever<B>()
+        public Io<B> Forever<B>()
         {
             var me = this;
 
             // ReSharper disable once FunctionNeverReturns
-            return IO.Of<B>(() => { while (true) me.Eval(); });
+            return Io.Of<B>(() => { while (true) me.Eval(); });
         }
 
-        public IO<Unit> Ignore()
+        public Io<Unit> Ignore()
         {
             var me = this;
-            return IO.Of_(() => me.Eval());
+            return Io.Of_(() => me.Eval());
         }
     }
 
-    public static class ConsoleIO
+    public static class ConsoleIo
     {
-        public static readonly IO<string> ReadLine = IO.Of(Console.ReadLine);
-        public static readonly IO<int> ReadChar = IO.Of(Console.Read);
-        public static readonly IO<ConsoleKeyInfo> ReadKey = IO.Of(Console.ReadKey);
+        public static readonly Io<string> ReadLine = Io.Of(Console.ReadLine);
+        public static readonly Io<int> ReadChar = Io.Of(Console.Read);
+        public static readonly Io<ConsoleKeyInfo> ReadKey = Io.Of(Console.ReadKey);
 
-        public static IO<Unit> Write(object s) => IO.Of_(() => Console.Write(s));
+        public static Io<Unit> Write(object s) => Io.Of_(() => Console.Write(s));
 
-        public static IO<Unit> Write(string format, params object[] args) =>
-            IO.Of_(() => Console.Write(format, args));
+        public static Io<Unit> Write(string format, params object[] args) =>
+            Io.Of_(() => Console.Write(format, args));
 
-        public static IO<Unit> WriteLine(object s) =>
-            IO.Of_(() => Console.WriteLine(s));
+        public static Io<Unit> WriteLine(object s) =>
+            Io.Of_(() => Console.WriteLine(s));
 
-        public static IO<Unit> WriteLine(string format, params object[] args) =>
-            IO.Of_(() => Console.WriteLine(format, args));
+        public static Io<Unit> WriteLine(string format, params object[] args) =>
+            Io.Of_(() => Console.WriteLine(format, args));
     }
 
-    public static class FileIO
+    public static class FileIo
     {
-        public static IO<string> ReadAllText(string path) =>
-            IO.Of(() => File.ReadAllText(path));
+        public static Io<string> ReadAllText(string path) =>
+            Io.Of(() => File.ReadAllText(path));
 
-        public static IO<string[]> ReadAllLines(string path) =>
-            IO.Of(() => File.ReadAllLines(path));
+        public static Io<string[]> ReadAllLines(string path) =>
+            Io.Of(() => File.ReadAllLines(path));
 
-        public static IO<byte[]> ReadAllBytes(string path) =>
-            IO.Of(() => File.ReadAllBytes(path));
+        public static Io<byte[]> ReadAllBytes(string path) =>
+            Io.Of(() => File.ReadAllBytes(path));
 
-        public static IO<Unit> WriteAllText(string path, string contents) =>
-            IO.Of_(() => File.WriteAllText(path, contents));
+        public static Io<Unit> WriteAllText(string path, string contents) =>
+            Io.Of_(() => File.WriteAllText(path, contents));
 
-        public static IO<Unit> WriteAllLines(string path, string[] contents) =>
-            IO.Of_(() => File.WriteAllLines(path, contents));
+        public static Io<Unit> WriteAllLines(string path, string[] contents) =>
+            Io.Of_(() => File.WriteAllLines(path, contents));
 
-        public static IO<Unit> WriteAllBytes(string path, byte[] bytes) =>
-            IO.Of_(() => File.WriteAllBytes(path, bytes));
+        public static Io<Unit> WriteAllBytes(string path, byte[] bytes) =>
+            Io.Of_(() => File.WriteAllBytes(path, bytes));
     }
 }

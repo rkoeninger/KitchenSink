@@ -29,18 +29,10 @@ namespace KitchenSink.Collections
 
         public (BankersQueue<A>, Maybe<A>) Dequeue()
         {
-            if (outgoing.IsEmpty)
-            {
-                if (incoming.IsEmpty)
-                {
-                    return (this, None<A>());
-                }
-
-                var newIncoming = incoming.InReverse();
-                return (new BankersQueue<A>(ConsList.Empty<A>(), newIncoming.Tail), newIncoming.Head);
-            }
-
-            return (new BankersQueue<A>(incoming, outgoing.Tail), outgoing.Head);
+            if (!outgoing.IsEmpty) return (new BankersQueue<A>(incoming, outgoing.Tail), outgoing.Head);
+            if (incoming.IsEmpty) return (this, None<A>());
+            var newIncoming = incoming.InReverse();
+            return (new BankersQueue<A>(ConsList.Empty<A>(), newIncoming.Tail), newIncoming.Head);
         }
     }
 }

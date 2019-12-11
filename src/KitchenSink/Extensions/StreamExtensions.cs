@@ -10,16 +10,17 @@ namespace KitchenSink.Extensions
     {
         public static byte[] ReadToEnd(this Stream source)
         {
-            using (var memory = new MemoryStream())
-            {
-                source.CopyTo(memory);
-                memory.Position = 0;
-                return memory.ToArray();
-            }
+            using var memory = new MemoryStream();
+            source.CopyTo(memory);
+            memory.Position = 0;
+            return memory.ToArray();
         }
 
-        public static string ReadTextToEnd(this Stream source, Encoding encoding = null) =>
-            source.AsReader().ReadToEnd();
+        public static string ReadTextToEnd(this Stream source, Encoding encoding = null)
+        {
+            using var reader = source.AsReader(encoding);
+            return reader.ReadToEnd();
+        }
 
         public static StreamReader AsReader(this Stream stream, Encoding encoding = null) =>
             new StreamReader(stream, encoding ?? Encoding.UTF8);
@@ -62,14 +63,14 @@ namespace KitchenSink.Extensions
 
         public static Stream ToStream(this string str, Encoding encoding = null)
         {
-            encoding = encoding ?? Encoding.UTF8;
+            encoding ??= Encoding.UTF8;
             var bytes = encoding.GetBytes(str);
             return new MemoryStream(bytes);
         }
 
         public static Stream ToStream(this IEnumerable<string> seq, Encoding encoding = null, string separator = "")
         {
-            encoding = encoding ?? Encoding.UTF8;
+            encoding ??= Encoding.UTF8;
             return new EnumerableStream(seq.Intersperse(separator).SelectMany(encoding.GetBytes));
         }
 
@@ -81,20 +82,17 @@ namespace KitchenSink.Extensions
 
         private class EnumerableStream : Stream
         {
-            private readonly IEnumerator<byte> Bytes;
+            private readonly IEnumerator<byte> bytes;
 
-            public EnumerableStream(IEnumerable<byte> bytes)
-            {
-                Bytes = bytes.GetEnumerator();
-            }
+            public EnumerableStream(IEnumerable<byte> bytes) => this.bytes = bytes.GetEnumerator();
 
             public override int Read(byte[] buffer, int offset, int count)
             {
                 var bytesRead = 0;
 
-                for (var i = offset; i < offset + count && Bytes.MoveNext(); ++i)
+                for (var i = offset; i < offset + count && bytes.MoveNext(); ++i)
                 {
-                    buffer[i] = Bytes.Current;
+                    buffer[i] = bytes.Current;
                     bytesRead++;
                 }
 

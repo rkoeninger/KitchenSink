@@ -14,19 +14,14 @@ namespace KitchenSink.Collections
 
         private readonly Maybe<Contents> contents;
 
-        public PairingHeap()
-        {
-            contents = None<Contents>();
-        }
+        public PairingHeap() => contents = None<Contents>();
 
-        public PairingHeap(A value, IConsList<PairingHeap<A>> heaps)
-        {
+        public PairingHeap(A value, IConsList<PairingHeap<A>> heaps) =>
             contents = Some(new Contents
             {
                 Value = value,
                 Heaps = heaps
             });
-        }
 
         public A FindMin() => FindMinMaybe().OrElseThrow("Heap is empty");
         public Maybe<A> FindMinMaybe() => contents.Select(x => x.Value);

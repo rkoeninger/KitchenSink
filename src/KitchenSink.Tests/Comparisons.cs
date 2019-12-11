@@ -9,9 +9,9 @@ namespace KitchenSink.Tests
         [Test]
         public void CompareOperator()
         {
-            Assert.AreEqual(GT, Compare(6, -1));
-            Assert.AreEqual(LT, Compare(-6, -1));
-            Assert.AreEqual(EQ, Compare(6, 6));
+            Assert.AreEqual(Gt, Compare(6, -1));
+            Assert.AreEqual(Lt, Compare(-6, -1));
+            Assert.AreEqual(Comparison.Eq, Compare(6, 6));
         }
 
         [Test]

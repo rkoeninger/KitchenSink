@@ -117,7 +117,7 @@ namespace KitchenSink
             ((IEnumerable<A>)DefaultInputs[typeof(A)]).With(ReflexiveEquality);
 
         public static void Comparable<A>(IEnumerable<A> data) where A : IComparable<A> =>
-            data.ToList().With(xs => That(xs, xs, (x, y) => x.CompareTo(y) == -(y.CompareTo(x))));
+            data.ToList().With(xs => That(xs, xs, (x, y) => x.CompareTo(y) == -y.CompareTo(x)));
 
         public static void CompareOperators<A>(IEnumerable<A> data) =>
             data.ToList().With(xs => That(xs, xs, (x, y) =>

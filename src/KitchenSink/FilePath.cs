@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using static System.Environment;
-using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
@@ -12,15 +11,10 @@ namespace KitchenSink
         /// <summary>
         /// Starts a path at the root of the given drive letter.
         /// </summary>
-        public static FilePath Letter(char letter)
-        {
-            if (Not(char.IsLetter(letter)))
-            {
-                throw new InvalidDriveLetterException(letter);
-            }
-
-            return new FilePath(letter + @":\");
-        }
+        public static FilePath Letter(char letter) =>
+            char.IsLetter(letter)
+                ? new FilePath(letter + @":\")
+                : throw new InvalidDriveLetterException(letter);
 
         /// <summary>Starts a path at A:\</summary>
         public static readonly FilePath A = Letter('A');
@@ -129,26 +123,26 @@ namespace KitchenSink
     /// <summary>
     /// Starts a UNC network path. Example: \\hostname\sharename
     /// </summary>
-    public static class UNC
+    public static class Unc
     {
         public static FilePath Path(string host, string share) => Host(host).Share(share);
 
-        public static UNCHost Host(string host) => new UNCHost(host);
+        public static UncHost Host(string host) => new UncHost(host);
     }
 
     /// <summary>
     /// Represents a host machine on the network that UNC paths can be built from.
     /// </summary>
-    public sealed class UNCHost : NewType<string>
+    public sealed class UncHost : NewType<string>
     {
-        internal UNCHost(string host) : base(host) {}
+        internal UncHost(string host) : base(host) {}
 
         public FilePath Share(string share) =>
             new FilePath(Path.Combine(Value.StartsWith(@"\\") ? Value : @"\\" + Value, share));
 
-        public static FilePath operator /(UNCHost host, FilePath end) => host.Share(end.Value);
+        public static FilePath operator /(UncHost host, FilePath end) => host.Share(end.Value);
 
-        public static FilePath operator /(UNCHost host, string end) => host.Share(end);
+        public static FilePath operator /(UncHost host, string end) => host.Share(end);
     }
 
     public sealed class FilePath : NewType<string>

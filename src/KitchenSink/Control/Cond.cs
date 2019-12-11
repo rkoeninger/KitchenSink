@@ -97,18 +97,12 @@ namespace KitchenSink.Control
         /// <summary>
         /// Starts a new Cond with a new clause with given condition.
         /// </summary>
-        public static ICondIf<TResult> If(Func<bool> condition)
-        {
-            return Cond.If<TResult>(condition);
-        }
+        public static ICondIf<TResult> If(Func<bool> condition) => Cond.If<TResult>(condition);
 
         /// <summary>
         /// Starts a new Cond with a new clause with given condition.
         /// </summary>
-        public static ICondIf<TResult> If(bool condition)
-        {
-            return If(() => condition);
-        }
+        public static ICondIf<TResult> If(bool condition) => If(() => condition);
     }
 
     /// <summary>
@@ -120,37 +114,26 @@ namespace KitchenSink.Control
         /// Starts a new Cond with a new clause with given condition
         /// and yet unknown return type.
         /// </summary>
-        public static ICondInitial If(Func<bool> condition)
-        {
-            return new CondBuilderInitial(condition);
-        }
+        public static ICondInitial If(Func<bool> condition) => new CondBuilderInitial(condition);
 
         /// <summary>
         /// Starts a new Cond with a new clause with given condition
         /// and yet unknown return type.
         /// </summary>
-        public static ICondInitial If(bool condition)
-        {
-            return If(() => condition);
-        }
+        public static ICondInitial If(bool condition) => If(() => condition);
 
         /// <summary>
         /// Starts a new Cond with a new clause with given condition
         /// and explicit return type.
         /// </summary>
-        public static ICondIf<TResult> If<TResult>(Func<bool> condition)
-        {
-            return new CondBuilder<TResult>().If(condition);
-        }
+        public static ICondIf<TResult> If<TResult>(Func<bool> condition) =>
+            new CondBuilder<TResult>().If(condition);
 
         /// <summary>
         /// Starts a new Cond with a new clause with given condition
         /// and explicit return type.
         /// </summary>
-        public static ICondIf<TResult> If<TResult>(bool condition)
-        {
-            return If<TResult>(() => condition);
-        }
+        public static ICondIf<TResult> If<TResult>(bool condition) => If<TResult>(() => condition);
 
         private interface IClause
         {
@@ -169,13 +152,10 @@ namespace KitchenSink.Control
 
             public bool Eval()
             {
-                if (Condition())
-                {
-                    Consequent();
-                    return true;
-                }
+                if (!Condition()) return false;
+                Consequent();
+                return true;
 
-                return false;
             }
         }
 
@@ -183,10 +163,7 @@ namespace KitchenSink.Control
         {
             public ICondThen Builder { private get; set; }
 
-            public bool Eval()
-            {
-                return Builder.End();
-            }
+            public bool Eval() => Builder.End();
         }
 
         private class ScalarClause<TResult> : IClause<TResult>
@@ -194,40 +171,26 @@ namespace KitchenSink.Control
             public Func<bool> Condition { private get;  set; }
             public Func<TResult> Consequent { private get; set; }
 
-            public Maybe<TResult> Eval()
-            {
-                return Condition() ? Some(Consequent()) : None<TResult>();
-            }
+            public Maybe<TResult> Eval() => Condition() ? Some(Consequent()) : None<TResult>();
         }
 
         private class NestedClause<TResult> : IClause<TResult>
         {
             public ICondThen<TResult> Builder { private get; set; }
 
-            public Maybe<TResult> Eval()
-            {
-                return Builder.End();
-            }
+            public Maybe<TResult> Eval() => Builder.End();
         }
 
         private class CondBuilderInitial : ICondInitial
         {
             private readonly Func<bool> pending;
 
-            public CondBuilderInitial(Func<bool> initial)
-            {
-                pending = initial;
-            }
+            public CondBuilderInitial(Func<bool> initial) => pending = initial;
 
-            public ICondThen<TResult> Then<TResult>(Func<TResult> consequent)
-            {
-                return new CondBuilder<TResult>().If(pending).Then(consequent);
-            }
+            public ICondThen<TResult> Then<TResult>(Func<TResult> consequent) =>
+                new CondBuilder<TResult>().If(pending).Then(consequent);
 
-            public ICondThen Then(Action consequent)
-            {
-                return new CondBuilder().If(pending).Then(consequent);
-            }
+            public ICondThen Then(Action consequent) => new CondBuilder().If(pending).Then(consequent);
         }
 
         private class CondBuilder : ICondIf, ICondThen
@@ -252,10 +215,7 @@ namespace KitchenSink.Control
                 return this;
             }
 
-            public bool End()
-            {
-                return clauses.Any(x => x.Eval());
-            }
+            public bool End() => clauses.Any(x => x.Eval());
 
             public ICondThen Absorb(ICondThen builder)
             {
@@ -286,10 +246,7 @@ namespace KitchenSink.Control
                 return this;
             }
 
-            public Maybe<TResult> End()
-            {
-                return clauses.FirstSome(x => x.Eval());
-            }
+            public Maybe<TResult> End() => clauses.FirstSome(x => x.Eval());
 
             public ICondThen<TResult> Absorb(ICondThen<TResult> builder)
             {
@@ -301,34 +258,23 @@ namespace KitchenSink.Control
         /// <summary>
         /// Provides a result for previous condition.
         /// </summary>
-        public static ICondThen<TResult> Then<TResult>(this ICondInitial builder, TResult result)
-        {
-            return builder.Then(() => result);
-        }
+        public static ICondThen<TResult> Then<TResult>(this ICondInitial builder, TResult result) =>
+            builder.Then(() => result);
 
         /// <summary>
         /// Does nothing for previous condition.
         /// </summary>
-        public static ICondThen Then(this ICondInitial builder)
-        {
-            return builder.Then(() => { });
-        }
+        public static ICondThen Then(this ICondInitial builder) => builder.Then(() => { });
 
         /// <summary>
         /// Does nothing for previous condition.
         /// </summary>
-        public static ICondThen Then(this ICondIf builder)
-        {
-            return builder.Then(() => { });
-        }
+        public static ICondThen Then(this ICondIf builder) => builder.Then(() => { });
 
         /// <summary>
         /// Starts a new clause with given condition.
         /// </summary>
-        public static ICondIf If(this ICondThen builder, bool condition)
-        {
-            return builder.If(() => condition);
-        }
+        public static ICondIf If(this ICondThen builder, bool condition) => builder.If(() => condition);
 
         /// <summary>
         /// Evaluates Cond, invoking the given alternative if
@@ -343,42 +289,32 @@ namespace KitchenSink.Control
         /// <summary>
         /// Evaluates Cond, doing nothing if no conditions were true.
         /// </summary>
-        public static void Else(this ICondThen builder)
-        {
+        public static void Else(this ICondThen builder) =>
             builder.Else(() => { });
-        }
 
         /// <summary>
         /// Provides a result for previous condition.
         /// </summary>
-        public static ICondThen<TResult> Then<TResult>(this ICondIf<TResult> builder, TResult result)
-        {
-            return builder.Then(() => result);
-        }
+        public static ICondThen<TResult> Then<TResult>(this ICondIf<TResult> builder, TResult result) =>
+            builder.Then(() => result);
 
         /// <summary>
         /// Starts a new clause with given condition.
         /// </summary>
-        public static ICondIf<TResult> If<TResult>(this ICondThen<TResult> builder, bool condition)
-        {
-            return builder.If(() => condition);
-        }
+        public static ICondIf<TResult> If<TResult>(this ICondThen<TResult> builder, bool condition) =>
+            builder.If(() => condition);
 
         /// <summary>
         /// Evaluates Cond, invoking the given alternative if
         /// no conditions were true.
         /// </summary>
-        public static TResult Else<TResult>(this ICondThen<TResult> builder, Func<TResult> alternative)
-        {
-            return builder.End().OrElseDo(alternative);
-        }
+        public static TResult Else<TResult>(this ICondThen<TResult> builder, Func<TResult> alternative) =>
+            builder.End().OrElseDo(alternative);
 
         /// <summary>
         /// Provides a result for previous condition.
         /// </summary>
-        public static TResult Else<TResult>(this ICondThen<TResult> builder, TResult alternative)
-        {
-            return builder.Else(() => alternative);
-        }
+        public static TResult Else<TResult>(this ICondThen<TResult> builder, TResult alternative) =>
+            builder.Else(() => alternative);
     }
 }

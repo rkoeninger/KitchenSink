@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using KitchenSink.Extensions;
 
@@ -96,12 +95,11 @@ namespace KitchenSink.FileSystem
             {
                 yield return entry;
 
-                if (entry.Type == EntryType.Directory)
+                if (entry.Type != EntryType.Directory) continue;
+
+                foreach (var child in fs.ReadDirectoryRecursive(entry.Path))
                 {
-                    foreach (var child in fs.ReadDirectoryRecursive(entry.Path))
-                    {
-                        yield return child;
-                    }
+                    yield return child;
                 }
             }
         }
@@ -110,16 +108,19 @@ namespace KitchenSink.FileSystem
             fs.ReadFile(path).AsEnumerable();
 
         public static IEnumerable<char> ReadChars(this IFileSystem fs, string path, Encoding encoding = null) =>
-            fs.ReadFile(path).AsReader().AsEnumerableChars();
+            fs.ReadFile(path).AsReader(encoding).AsEnumerableChars();
 
         public static IEnumerable<string> ReadLines(this IFileSystem fs, string path, Encoding encoding = null) =>
-            fs.ReadFile(path).AsReader().AsEnumerableLines();
+            fs.ReadFile(path).AsReader(encoding).AsEnumerableLines();
 
         public static string ReadText(this IFileSystem fs, string path, Encoding encoding = null) =>
             fs.ReadFile(path).Use(s => s.ReadTextToEnd(encoding));
 
-        public static void WriteBytes(this IFileSystem fs, string path, IEnumerable<byte> bytes) =>
-            fs.WriteFile(path).Use(bytes.ToStream().CopyTo);
+        public static void WriteBytes(this IFileSystem fs, string path, IEnumerable<byte> bytes)
+        {
+            using var stream = bytes.ToStream();
+            fs.WriteFile(path).Use(stream.CopyTo);
+        }
 
         public static void WriteChars(this IFileSystem fs, string path, IEnumerable<char> chars, Encoding encoding = null) =>
             fs.WriteFile(path).AsWriter(encoding).Use(s => chars.ForEach(s.Write));

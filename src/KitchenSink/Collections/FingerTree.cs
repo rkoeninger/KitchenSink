@@ -18,8 +18,8 @@ namespace KitchenSink.Collections
     public interface IFingerTree<A> : IEnumerable<A>
     {
         bool IsEmpty { get; }
-        IFingerTree<A> EnqueuePrefix(A value);
-        IFingerTree<A> EnqueueSuffix(A value);
+        IFingerTree<A> EnqueuePrefix(A element);
+        IFingerTree<A> EnqueueSuffix(A element);
         (IFingerTree<A>, Maybe<A>) DequeuePrefix();
         (IFingerTree<A>, Maybe<A>) DequeueSuffix();
         Maybe<A> CurrentPrefix { get; }
@@ -40,25 +40,25 @@ namespace KitchenSink.Collections
         }
 
         public bool IsEmpty => false;
-        public IFingerTree<A> EnqueuePrefix(A value) =>
+        public IFingerTree<A> EnqueuePrefix(A element) =>
             prefix.Length < 4
                 ? new DeepFingerTree<A>(
-                    ArrayOf(value).Concat(prefix),
+                    ArrayOf(element).Concat(prefix),
                     suffix,
                     tree)
                 : new DeepFingerTree<A>(
-                    ArrayOf(value, prefix.First()),
+                    ArrayOf(element, prefix.First()),
                     suffix,
                     tree.EnqueuePrefix(prefix.Skip(1).ToArray()));
-        public IFingerTree<A> EnqueueSuffix(A value) =>
+        public IFingerTree<A> EnqueueSuffix(A element) =>
             suffix.Length < 4
                 ? new DeepFingerTree<A>(
                     prefix,
-                    suffix.Concat(ArrayOf(value)),
+                    suffix.Concat(ArrayOf(element)),
                     tree)
                 : new DeepFingerTree<A>(
                     prefix,
-                    ArrayOf(suffix.Last(), value),
+                    ArrayOf(suffix.Last(), element),
                     tree.EnqueueSuffix(suffix.Take(suffix.Length - 1).ToArray()));
         public (IFingerTree<A>, Maybe<A>) DequeuePrefix() =>
             (prefix.Length > 1
@@ -115,21 +115,18 @@ namespace KitchenSink.Collections
     {
         private readonly A value;
 
-        internal SingleFingerTree(A value)
-        {
-            this.value = value;
-        }
+        internal SingleFingerTree(A value) => this.value = value;
 
         public bool IsEmpty => false;
-        public IFingerTree<A> EnqueuePrefix(A value) =>
+        public IFingerTree<A> EnqueuePrefix(A element) =>
             new DeepFingerTree<A>(
+                ArrayOf(element),
                 ArrayOf(value),
-                ArrayOf(this.value),
                 FingerTree.Empty<A[]>());
-        public IFingerTree<A> EnqueueSuffix(A value) =>
+        public IFingerTree<A> EnqueueSuffix(A element) =>
             new DeepFingerTree<A>(
-                ArrayOf(this.value),
                 ArrayOf(value),
+                ArrayOf(element),
                 FingerTree.Empty<A[]>());
         public (IFingerTree<A>, Maybe<A>) DequeuePrefix() => (FingerTree.Empty<A>(), value);
         public (IFingerTree<A>, Maybe<A>) DequeueSuffix() => (FingerTree.Empty<A>(), value);
@@ -146,13 +143,9 @@ namespace KitchenSink.Collections
 
     internal class EmptyFingerTree<A> : IFingerTree<A>
     {
-        internal EmptyFingerTree()
-        {
-        }
-
         public bool IsEmpty => true;
-        public IFingerTree<A> EnqueuePrefix(A value) => new SingleFingerTree<A>(value);
-        public IFingerTree<A> EnqueueSuffix(A value) => new SingleFingerTree<A>(value);
+        public IFingerTree<A> EnqueuePrefix(A element) => new SingleFingerTree<A>(element);
+        public IFingerTree<A> EnqueueSuffix(A element) => new SingleFingerTree<A>(element);
         public (IFingerTree<A>, Maybe<A>) DequeuePrefix() => (this, None<A>());
         public (IFingerTree<A>, Maybe<A>) DequeueSuffix() => (this, None<A>());
         public Maybe<A> CurrentPrefix => None<A>();

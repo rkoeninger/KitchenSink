@@ -7,6 +7,8 @@ namespace KitchenSink
     /// An instance of Void can never be created.
     /// References will always be null.
     /// </summary>
+    // ReSharper disable once ConvertToStaticClass
+    // must be non-static so it can be used as a type parameter.
     public sealed class Void
     {
         /// <summary>

@@ -300,13 +300,10 @@ namespace KitchenSink
             }
 
             var formatter = new BinaryFormatter();
-
-            using (var stream = new MemoryStream())
-            {
-                formatter.Serialize(stream, source);
-                stream.Seek(0, SeekOrigin.Begin);
-                return (T) formatter.Deserialize(stream);
-            }
+            using var stream = new MemoryStream();
+            formatter.Serialize(stream, source);
+            stream.Seek(0, SeekOrigin.Begin);
+            return (T) formatter.Deserialize(stream);
         }
 
         /// <summary>

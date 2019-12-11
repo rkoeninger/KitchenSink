@@ -14,7 +14,7 @@ namespace KitchenSink.Tests
 
             Assert.AreEqual(
                 @"\\somemachine\someshare\subpath\file.txt",
-                (UNC.Host("somemachine").Share("someshare") / "subpath" / "file.txt").Value);
+                (Unc.Host("somemachine").Share("someshare") / "subpath" / "file.txt").Value);
         }
 
         [Test, Category("WindowsOnly")]

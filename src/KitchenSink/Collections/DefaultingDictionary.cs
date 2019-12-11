@@ -45,45 +45,24 @@ namespace KitchenSink.Collections
 
         public bool IsReadOnly => Primary.IsReadOnly;
 
-        public void Add(KeyValuePair<TKey, TValue> item)
-        {
-            Primary.Add(item);
-        }
+        public void Add(KeyValuePair<TKey, TValue> item) => Primary.Add(item);
 
-        public void Add(TKey key, TValue value)
-        {
-            Primary.Add(key, value);
-        }
+        public void Add(TKey key, TValue value) => Primary.Add(key, value);
 
-        public bool Contains(KeyValuePair<TKey, TValue> item)
-        {
-            return Primary.Contains(item) || Secondary.Contains(item);
-        }
+        public bool Contains(KeyValuePair<TKey, TValue> item) =>
+            Primary.Contains(item) || Secondary.Contains(item);
 
-        public bool ContainsKey(TKey key)
-        {
-            return Primary.ContainsKey(key) || Secondary.ContainsKey(key);
-        }
+        public bool ContainsKey(TKey key) => Primary.ContainsKey(key) || Secondary.ContainsKey(key);
 
-        public bool TryGetValue(TKey key, out TValue value)
-        {
-            return Primary.TryGetValue(key, out value) || Secondary.TryGetValue(key, out value);
-        }
+        public bool TryGetValue(TKey key, out TValue value) =>
+            Primary.TryGetValue(key, out value) || Secondary.TryGetValue(key, out value);
 
-        private IEnumerable<KeyValuePair<TKey, TValue>> Enumerate()
-        {
-            return Keys.Select(k => new KeyValuePair<TKey, TValue>(k, this[k]));
-        }
+        private IEnumerable<KeyValuePair<TKey, TValue>> Enumerate() =>
+            Keys.Select(k => new KeyValuePair<TKey, TValue>(k, this[k]));
 
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-        {
-            return Enumerate().GetEnumerator();
-        }
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => Enumerate().GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
@@ -93,24 +72,13 @@ namespace KitchenSink.Collections
             }
         }
 
-        private static T RemovalError<T>()
-        {
+        private static T RemovalError<T>() =>
             throw new NotSupportedException("Removal operations not supported on DefaultingDictionary");
-        }
 
-        public bool Remove(KeyValuePair<TKey, TValue> item)
-        {
-            return RemovalError<bool>();
-        }
+        public bool Remove(KeyValuePair<TKey, TValue> item) => RemovalError<bool>();
 
-        public bool Remove(TKey key)
-        {
-            return RemovalError<bool>();
-        }
+        public bool Remove(TKey key) => RemovalError<bool>();
 
-        public void Clear()
-        {
-            RemovalError<Void>();
-        }
+        public void Clear() => RemovalError<Void>();
     }
 }

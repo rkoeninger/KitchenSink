@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>KitchenSink</AssemblyName>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>KitchenSink</RootNamespace>
     <Description>A library for multi-paradigm programming in C#.</Description>
     <Copyright>Copyright © Robert Koeninger 2014-2020</Copyright>

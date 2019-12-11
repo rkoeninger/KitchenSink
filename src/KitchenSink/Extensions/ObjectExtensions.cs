@@ -33,8 +33,6 @@ namespace KitchenSink.Extensions
             }
         }
 
-        // TODO: use System.Runtime.CompilerServices.ITuple here
-
         public static IEnumerable<object> AsEnumerable<A, B>(
             this (A, B) t) => SeqOf<object>(
             t.Item1,

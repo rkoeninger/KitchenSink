@@ -47,12 +47,9 @@ namespace KitchenSink.Collections
             AddNew(key, value, result);
         }
 
-        public void Add(KeyValuePair<string, A> pair)
-        {
-            Add(pair.Key, pair.Value);
-        }
+        public void Add(KeyValuePair<string, A> pair) => Add(pair.Key, pair.Value);
 
-        private void AddNew(string key, A value, SearchResults result)
+        private static void AddNew(string key, A value, SearchResults result)
         {
             var edge = result.Parent.Edges
                 .FirstOrDefault(e => e.KeySegment.StartsWith(result.RemainingKey));
@@ -74,18 +71,12 @@ namespace KitchenSink.Collections
         {
             var result = Search(key);
 
-            if (result.Target == null)
-            {
-                return false;
-            }
+            if (result.Target == null) return false;
 
             var edgeIndex = result.Parent.Edges
                 .FindIndex(e => key.EndsWith(e.KeySegment));
 
-            if (edgeIndex < 0)
-            {
-                return false;
-            }
+            if (edgeIndex < 0) return false;
 
             // TODO: remove parent if last edge removed
             result.Parent.Edges.RemoveAt(edgeIndex);
@@ -96,35 +87,23 @@ namespace KitchenSink.Collections
         {
             var result = Search(pair.Key);
 
-            if (result.Target == null)
-            {
-                return false;
-            }
+            if (result.Target == null) return false;
 
             var edgeIndex = result.Parent.Edges
                 .FindIndex(e => pair.Key.EndsWith(e.KeySegment));
 
-            if (edgeIndex < 0)
-            {
-                return false;
-            }
+            if (edgeIndex < 0) return false;
 
             var edge = result.Parent.Edges[edgeIndex];
 
-            if (!Equals(pair.Value, edge.Target.Value))
-            {
-                return false;
-            }
+            if (!Equals(pair.Value, edge.Target.Value)) return false;
 
             // TODO: remove parent if last edge removed
             result.Parent.Edges.RemoveAt(edgeIndex);
             return true;
         }
 
-        public void Clear()
-        {
-            root.Edges.Clear();
-        }
+        public void Clear() => root.Edges.Clear();
 
         public ICollection<string> Keys => Enumerate().Select(x => x.Key).ToList();
 
@@ -170,12 +149,9 @@ namespace KitchenSink.Collections
 
         private SearchResults Search(string key)
         {
-            if (root == null)
-            {
-                return new SearchResults(null, null, key);
-            }
+            if (root == null) return new SearchResults(null, null, key);
 
-            Node parent = root;
+            var parent = root;
             var current = root;
             var remainingKey = key;
 
@@ -184,10 +160,7 @@ namespace KitchenSink.Collections
                 var edge = current.Edges
                     .FirstOrDefault(e => remainingKey.StartsWith(e.KeySegment));
 
-                if (edge == null)
-                {
-                    return new SearchResults(parent, null, remainingKey);
-                }
+                if (edge == null) return new SearchResults(parent, null, remainingKey);
 
                 parent = current;
                 current = edge.Target;
@@ -200,27 +173,16 @@ namespace KitchenSink.Collections
                 remainingKey);
         }
 
-        private IEnumerable<KeyValuePair<string, A>> Enumerate()
-        {
-            foreach (var edge in root.Edges)
-            {
-                foreach (var pair in Enumerate(edge))
-                {
-                    yield return pair;
-                }
-            }
-        }
+        private IEnumerable<KeyValuePair<string, A>> Enumerate() =>
+            root.Edges.SelectMany(Enumerate);
 
-        private IEnumerable<KeyValuePair<string, A>> Enumerate(Edge rootEdge)
+        private static IEnumerable<KeyValuePair<string, A>> Enumerate(Edge rootEdge)
         {
             yield return new KeyValuePair<string, A>(rootEdge.Target.Key, rootEdge.Target.Value);
 
-            foreach (var edge in rootEdge.Target.Edges)
+            foreach (var pair in rootEdge.Target.Edges.SelectMany(Enumerate))
             {
-                foreach (var pair in Enumerate(edge))
-                {
-                    yield return pair;
-                }
+                yield return pair;
             }
         }
 

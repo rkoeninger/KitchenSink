@@ -6,7 +6,7 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
-    internal class MultiMethod
+    internal static class MultiMethod
     {
         // Throws InvalidOperationException if child is not descendant of parent
         internal static int DegreesOfSeparation(Type child, Type parent) =>
@@ -23,7 +23,7 @@ namespace KitchenSink
 
             while (child != parent)
             {
-                child = child.BaseType;
+                child = child?.BaseType;
                 count++;
             }
 
@@ -32,7 +32,7 @@ namespace KitchenSink
 
         internal static Maybe<Type> FindBase(Type t, Type t0, Type t1)
         {
-            for (;; t = t.BaseType)
+            for (;; t = t?.BaseType)
             {
                 if (t == t0) return Some(t0);
                 if (t == t1) return Some(t1);
@@ -50,14 +50,12 @@ namespace KitchenSink
             {
                 return DegreesOfSeparation(t, t0) <= DegreesOfSeparation(t, t1) ? t0 : t1;
             }
-            else
-            {
-                var d0 = HierarchyDistance(t, t0);
-                var d1 = HierarchyDistance(t, t1);
-                return d0 == int.MaxValue && d1 == int.MaxValue
-                    ? DegreesOfSeparation(t, t0) <= DegreesOfSeparation(t, t1) ? t0 : t1
-                    : d0 <= d1 ? t0 : t1;
-            }
+
+            var d0 = HierarchyDistance(t, t0);
+            var d1 = HierarchyDistance(t, t1);
+            return d0 == int.MaxValue && d1 == int.MaxValue
+                ? DegreesOfSeparation(t, t0) <= DegreesOfSeparation(t, t1) ? t0 : t1
+                : d0 <= d1 ? t0 : t1;
         };
 
         internal static Maybe<Type> NearestMatch(object x, IEnumerable<Type> ts) =>

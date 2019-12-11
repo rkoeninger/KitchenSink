@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
@@ -89,7 +90,7 @@ namespace KitchenSink
 
     public class ExceptionExpectedException : ExpectationFailedException
     {
-        public ExceptionExpectedException(Type type) : base(type.Name + " expected") { }
+        public ExceptionExpectedException(MemberInfo member) : base(member.Name + " expected") { }
     }
 
     public class SomeExpectedException : ExpectationFailedException

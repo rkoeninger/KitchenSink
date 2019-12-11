@@ -31,7 +31,7 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// If sequence is empty, replace with sequence of given value(s).
         /// </summary>
-        public static IEnumerable<A> IfEmpty<A>(this IEnumerable<A> xs, params A[] values) => IfEmpty(xs, values);
+        public static IEnumerable<A> IfEmpty<A>(this IEnumerable<A> xs, params A[] values) => IfEmpty(xs, (IEnumerable<A>)values);
 
         /// <summary>
         /// If sequence is empty, replace with given sequence.
@@ -156,21 +156,16 @@ namespace KitchenSink.Extensions
         {
             private readonly Func<A, A, Comparison> f;
 
-            public ComparisonComparer(Func<A, A, Comparison> f)
-            {
-                this.f = f;
-            }
+            public ComparisonComparer(Func<A, A, Comparison> f) => this.f = f;
 
-            public int Compare(A x, A y)
-            {
-                switch (f(x, y))
+            public int Compare(A x, A y) =>
+                f(x, y) switch
                 {
-                    case Comparison.GT: return 1;
-                    case Comparison.LT: return -1;
-                    case Comparison.EQ: return 0;
-                    default: throw new ArgumentOutOfRangeException();
-                }
-            }
+                    Comparison.Gt => 1,
+                    Comparison.Lt => -1,
+                    Comparison.Eq => 0,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
         }
 
         /// <summary>
@@ -228,30 +223,25 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static IEnumerable<(A, A)> OverlappingPairs<A>(this IEnumerable<A> seq)
         {
-            using (var e = seq.GetEnumerator())
+            using var e = seq.GetEnumerator();
+
+            if (!e.MoveNext()) yield break;
+
+            var previous = e.Current;
+
+            if (!e.MoveNext()) throw new ArgumentException("too few elements");
+
+            var current = e.Current;
+            yield return (previous, current);
+
+            while (e.MoveNext())
             {
-                if (!e.MoveNext())
-                {
-                    yield break;
-                }
-
-                var previous = e.Current;
-
-                if (!e.MoveNext())
-                {
-                    throw new ArgumentException("too few elements");
-                }
-
-                var current = e.Current;
+                previous = current;
+                current = e.Current;
                 yield return (previous, current);
-
-                while (e.MoveNext())
-                {
-                    previous = current;
-                    current = e.Current;
-                    yield return (previous, current);
-                }
             }
+
+            e.Dispose();
         }
 
         /// <summary>
@@ -270,26 +260,23 @@ namespace KitchenSink.Extensions
         public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, IEnumerable<A> seperators)
         {
             var lazy = new Lazy<A[]>(seperators.ToArray);
+            using var e = seq.GetEnumerator();
 
-            using (var e = seq.GetEnumerator())
+            if (!e.MoveNext()) yield break;
+
+            yield return e.Current;
+
+            while (e.MoveNext())
             {
-                if (!e.MoveNext())
+                foreach (var sep in lazy.Value)
                 {
-                    yield break;
+                    yield return sep;
                 }
 
                 yield return e.Current;
-
-                while (e.MoveNext())
-                {
-                    foreach (var sep in lazy.Value)
-                    {
-                        yield return sep;
-                    }
-
-                    yield return e.Current;
-                }
             }
+
+            e.Dispose();
         }
 
         /// <summary>
@@ -299,35 +286,38 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static IEnumerable<A> Interleave<A>(this IEnumerable<A> seq1, IEnumerable<A> seq2)
         {
-            using (var e1 = seq1.GetEnumerator())
-            using (var e2 = seq2.GetEnumerator())
+            using var e1 = seq1.GetEnumerator();
+            using var e2 = seq2.GetEnumerator();
+
+            while (true)
             {
-                while (true)
+                if (!e1.MoveNext())
                 {
-                    if (!e1.MoveNext())
+                    while (e2.MoveNext())
                     {
-                        while (e2.MoveNext())
-                        {
-                            yield return e2.Current;
-                        }
-
-                        yield break;
+                        yield return e2.Current;
                     }
 
-                    yield return e1.Current;
-
-                    if (!e2.MoveNext())
-                    {
-                        while (e1.MoveNext())
-                        {
-                            yield return e1.Current;
-                        }
-
-                        yield break;
-                    }
-
-                    yield return e2.Current;
+                    e1.Dispose();
+                    e2.Dispose();
+                    yield break;
                 }
+
+                yield return e1.Current;
+
+                if (!e2.MoveNext())
+                {
+                    while (e1.MoveNext())
+                    {
+                        yield return e1.Current;
+                    }
+
+                    e1.Dispose();
+                    e2.Dispose();
+                    yield break;
+                }
+
+                yield return e2.Current;
             }
         }
 
@@ -370,17 +360,11 @@ namespace KitchenSink.Extensions
             var done = false;
             return () =>
             {
-                if (e.MoveNext())
-                {
-                    return Some(e.Current);
-                }
+                if (e.MoveNext()) return Some(e.Current);
+                if (done) return None<A>();
 
-                if (!done)
-                {
-                    e.Dispose();
-                    done = true;
-                }
-
+                e.Dispose();
+                done = true;
                 return None<A>();
             };
         }
@@ -424,31 +408,27 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static IEnumerable<C> ZipExact<A, B, C>(this IEnumerable<A> xs, IEnumerable<B> ys, Func<A, B, C> f)
         {
-            using (var ex = xs.GetEnumerator())
-            using (var ey = ys.GetEnumerator())
+            using var ex = xs.GetEnumerator();
+            using var ey = ys.GetEnumerator();
+            bool xHasNext;
+            bool yHasNext;
+
+            while ((xHasNext = ex.MoveNext()) | (yHasNext = ey.MoveNext()))
             {
-                while (true)
+                if (xHasNext != yHasNext)
                 {
-                    var xHasNext = ex.MoveNext();
-                    var yHasNext = ey.MoveNext();
-
-                    if (xHasNext != yHasNext)
-                    {
-                        throw new InvalidOperationException("Enumerables are of different length");
-                    }
-
-                    if (!xHasNext)
-                    {
-                        break;
-                    }
-
-                    yield return f(ex.Current, ey.Current);
+                    throw new InvalidOperationException("Enumerables are of different length");
                 }
+
+                yield return f(ex.Current, ey.Current);
             }
+
+            ex.Dispose();
+            ey.Dispose();
         }
 
         /// <summary>
-        /// Sames as the standard <see cref="Zip{A, B}"/>, but
+        /// Sames as the standard <see cref="ZipTuples{A, B}"/>, but
         /// raises exception if sequences are not of the same length.
         /// </summary>
         public static IEnumerable<(A, B)> ZipExact<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) => xs.ZipExact(ys, TupleOf);
@@ -505,7 +485,7 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static IEnumerable<A> Shuffle<A>(this IEnumerable<A> seq, Random rand = null)
         {
-            rand = rand ?? new Random();
+            rand ??= new Random();
             var values = seq.ToArray();
 
             for (var i = 0; i < values.Length; ++i)
@@ -561,15 +541,15 @@ namespace KitchenSink.Extensions
 
         /// <summary>
         /// Performs side-effecting Action on each item in sequence and then yield it.
-        /// Like <see cref="ForEach"/>, but lazy and yields values.
-        /// Example: <c>...Where(Filter).Tap(LogValue).Select(Transform)...</c>
+        /// Like <see cref="ForEach{A}"/>, but lazy and yields the values of the input sequence.
+        /// Example: <c>...Where(Filter).Tap(LogValue).Select(Transform).</c>
         /// </summary>
         public static IEnumerable<A> Tap<A>(this IEnumerable<A> seq, Action<A> f) =>
             seq.Select(x => { f(x); return x; });
 
         /// <summary>
         /// Performs side-effecting Action on each item in sequence.
-        /// Like <see cref="Tap"/>, but eager and returns void.
+        /// Like <see cref="Tap{A}"/>, but eager and returns void.
         /// </summary>
         public static void ForEach<A>(this IEnumerable<A> seq, Action<A> f) =>
             seq.Tap(f).Force();
@@ -631,16 +611,13 @@ namespace KitchenSink.Extensions
                     return (true, list);
                 }
 
-                if (seq.source.Value.MoveNext())
-                {
-                    var val = seq.source.Value.Current;
-                    list.Add(val);
-                    index++;
-                    current = Some(val);
-                    return (true, list);
-                }
+                if (!seq.source.Value.MoveNext()) return (false, list);
 
-                return (false, list);
+                var val = seq.source.Value.Current;
+                list.Add(val);
+                index++;
+                current = Some(val);
+                return (true, list);
             }).Item1;
 
             public void Reset() => index = 0;

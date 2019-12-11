@@ -7,13 +7,13 @@ namespace KitchenSink.Tests
 {
     public class Caching
     {
-        private static readonly Random rand = new Random();
-        private static readonly Func<string, int> g = _ => rand.Next();
+        private static readonly Random Rand = new Random();
+        private static readonly Func<string, int> G = _ => Rand.Next();
 
         [Test]
         public void FunctionMemoization()
         {
-            var f = Memo(g);
+            var f = Memo(G);
             Assert.AreEqual(f("a"), f("a"));
             Assert.AreEqual(f("b"), f("b"));
             Assert.AreEqual(f("c"), f("c"));
@@ -27,14 +27,14 @@ namespace KitchenSink.Tests
             void Do(int id);
         }
 
-        private static int callCount;
+        private static int _callCount;
 
         public class UserRepository : IUserRepostiory
         {
             public string Get(int id) => Guid.NewGuid().ToString();
             public string Get2(int id, string x) => Guid.NewGuid().ToString();
             public string Get0() => Guid.NewGuid().ToString();
-            public void Do(int id) => callCount++;
+            public void Do(int id) => _callCount++;
         }
 
         [Test, Ignore("Cache() not working, see AutoCache.cs")]
@@ -46,9 +46,9 @@ namespace KitchenSink.Tests
             Assert.AreEqual(cachedRepo.Get(2), cachedRepo.Get(2));
             Assert.AreEqual(cachedRepo.Get(3), cachedRepo.Get(3));
 
-            var prevCallCount = callCount;
+            var prevCallCount = _callCount;
             cachedRepo.Do(0);
-            Assert.AreEqual(prevCallCount + 1, callCount);
+            Assert.AreEqual(prevCallCount + 1, _callCount);
 
             Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());
             Assert.AreEqual(cachedRepo.Get0(), cachedRepo.Get0());

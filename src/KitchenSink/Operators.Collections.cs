@@ -26,15 +26,12 @@ namespace KitchenSink
 
             var e = x.GetEnumerator();
 
-            if (e is IDisposable d)
-            {
-                using (d)
-                {
-                    return e.MoveNext();
-                }
-            }
+            if (!(e is IDisposable d)) return e.MoveNext();
 
-            return e.MoveNext();
+            using (d)
+            {
+                return e.MoveNext();
+            }
         }
 
         /// <summary>
@@ -49,15 +46,13 @@ namespace KitchenSink
 
             var e = x.GetEnumerator();
 
-            if (e is IDisposable d)
+            if (!(e is IDisposable d)) return e.MoveNext() && !e.MoveNext();
+
+            using (d)
             {
-                using (d)
-                {
-                    return e.MoveNext() && !e.MoveNext();
-                }
+                return e.MoveNext() && !e.MoveNext();
             }
 
-            return e.MoveNext() && !e.MoveNext();
         }
 
         /// <summary>

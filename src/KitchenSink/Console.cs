@@ -15,7 +15,7 @@ namespace KitchenSink
 
     public class VirtualConsole : IConsole
     {
-        private StringBuilder buffer = new StringBuilder();
+        private readonly StringBuilder buffer = new StringBuilder();
 
         public void WriteLine(string line) => buffer.Append(line);
     }

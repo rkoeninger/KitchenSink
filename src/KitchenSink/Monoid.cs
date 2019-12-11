@@ -88,9 +88,9 @@ namespace KitchenSink
         /// Combines <see cref="IO{A}"/>s but constructing new <c>IO</c>s
         /// that eval and append the results of the original <c>IO</c>s.
         /// </summary>
-        public static Monoid<IO<A>> IO<A>(Monoid<A> monoid) => Of(
-            () => KitchenSink.IO.Of(() => monoid.Default),
-            (x, y) => KitchenSink.IO.Of(monoid.Concat(x.Eval(), y.Eval())));
+        public static Monoid<Io<A>> IO<A>(Monoid<A> monoid) => Of(
+            () => KitchenSink.Io.Of(() => monoid.Default),
+            (x, y) => KitchenSink.Io.Of(monoid.Concat(x.Eval(), y.Eval())));
 
         /// <summary>
         /// Composes endomorphic functions left to right.

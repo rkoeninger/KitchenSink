@@ -27,7 +27,7 @@ namespace KitchenSink
         public static Xml operator <(Xml xml, string tagName)
         {
             xml.Writer.WriteStartElement(tagName);
-            xml.CurrentDepth++;
+            xml.currentDepth++;
             return xml;
         }
 
@@ -35,7 +35,7 @@ namespace KitchenSink
         public static Xml operator >(Xml xml, string tagName)
         {
             xml.Writer.WriteEndElement();
-            xml.CurrentDepth--;
+            xml.currentDepth--;
             return xml;
         }
         
@@ -52,18 +52,18 @@ namespace KitchenSink
 
             if (depth == -1)
             {
-                while (xml.CurrentDepth > 0)
+                while (xml.currentDepth > 0)
                 {
                     xml.Writer.WriteEndElement();
-                    xml.CurrentDepth--;
+                    xml.currentDepth--;
                 }
             }
             else if (depth > 1)
             {
-                while (xml.CurrentDepth > 0 || depth > 0)
+                while (xml.currentDepth > 0 || depth > 0)
                 {
                     xml.Writer.WriteEndElement();
-                    xml.CurrentDepth--;
+                    xml.currentDepth--;
                     depth--;
                 }
             }
@@ -80,12 +80,12 @@ namespace KitchenSink
             case WriteState.Attribute:
                 xml.Writer.WriteValue(tagValue);
                 xml.Writer.WriteEndAttribute();
-                xml.CurrentDepth--;
+                xml.currentDepth--;
                 break;
             case WriteState.Element:
                 xml.Writer.WriteValue(tagValue);
                 xml.Writer.WriteEndElement();
-                xml.CurrentDepth--;
+                xml.currentDepth--;
                 break;
             default:
                 throw new InvalidOperationException();
@@ -98,7 +98,7 @@ namespace KitchenSink
         public static Xml operator >=(Xml xml, string attrName)
         {
             xml.Writer.WriteStartAttribute(attrName);
-            xml.CurrentDepth++;
+            xml.currentDepth++;
             return xml;
         }
 
@@ -106,20 +106,20 @@ namespace KitchenSink
 
         internal Xml(string rootTagName, XmlWriterSettings settings)
         {
-            CurrentDepth = 1;
-            Output = new StringBuilder();
-            Writer = XmlWriter.Create(Output, settings);
+            currentDepth = 1;
+            output = new StringBuilder();
+            Writer = XmlWriter.Create(output, settings);
             Writer.WriteStartElement(rootTagName);
         }
 
         internal readonly XmlWriter Writer;
-        private readonly StringBuilder Output;
-        private int CurrentDepth;
+        private readonly StringBuilder output;
+        private int currentDepth;
 
         public override string ToString()
         {
             Writer.Flush();
-            return Output.ToString();
+            return output.ToString();
         }
     }
 
@@ -127,7 +127,7 @@ namespace KitchenSink
     {
         /// <summary>Opens root tag.</summary>
         public static Xml operator <(XmlStart start, string rootTagName) =>
-            new Xml(rootTagName, start.Settings);
+            new Xml(rootTagName, start.settings);
 
         /// <summary>
         /// Undefined. Throws InvalidOperationException.
@@ -138,8 +138,8 @@ namespace KitchenSink
         public static Xml operator >(XmlStart start, string rootTagName) =>
             throw new InvalidOperationException();
 
-        internal XmlStart(XmlWriterSettings settings) : this() => Settings = settings;
+        internal XmlStart(XmlWriterSettings settings) : this() => this.settings = settings;
 
-        private readonly XmlWriterSettings Settings;
+        private readonly XmlWriterSettings settings;
     }
 }

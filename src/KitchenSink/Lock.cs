@@ -35,7 +35,7 @@ namespace KitchenSink
 
     internal sealed class SimpleLock : Lock
     {
-        internal readonly Guid id = Guid.NewGuid();
+        internal readonly Guid Id = Guid.NewGuid();
         private readonly object handle = new object();
 
         public override void Enter() => Monitor.Enter(handle);
@@ -63,7 +63,7 @@ namespace KitchenSink
                     .OrElseThrow<InvalidSubtypeException>())
                 .Cast<SimpleLock>()
                 .Distinct()
-                .OrderBy(x => x.id)
+                .OrderBy(x => x.Id)
                 .ToArray();
         }
 

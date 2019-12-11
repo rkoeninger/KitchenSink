@@ -54,34 +54,33 @@ namespace KitchenSink.Extensions
 
         private static IEnumerable<string> EnumerateCamelPascalCaseTerms(string s)
         {
-            if (!string.IsNullOrWhiteSpace(s))
-            {
-                for (int i = 0, j = 1; j < s.Length; ++j)
-                {
-                    var hasNext = j + 1 < s.Length;
-                    var prevIsUpper = char.IsUpper(s[j - 1]);
-                    var currentIsUpper = char.IsUpper(s[j]);
-                    var nextIsUpper = hasNext && char.IsUpper(s[j + 1]);
-                    var nextIsDigit = hasNext && char.IsDigit(s[j + 1]);
+            if (string.IsNullOrWhiteSpace(s)) yield break;
 
-                    if (hasNext)
+            for (int i = 0, j = 1; j < s.Length; ++j)
+            {
+                var hasNext = j + 1 < s.Length;
+                var prevIsUpper = char.IsUpper(s[j - 1]);
+                var currentIsUpper = char.IsUpper(s[j]);
+                var nextIsUpper = hasNext && char.IsUpper(s[j + 1]);
+                var nextIsDigit = hasNext && char.IsDigit(s[j + 1]);
+
+                if (hasNext)
+                {
+                    if (currentIsUpper && !prevIsUpper)
                     {
-                        if (currentIsUpper && !prevIsUpper)
-                        {
-                            yield return s.Substring(i, j - i);
-                            i = j;
-                        }
-                        else if (prevIsUpper && currentIsUpper && !nextIsUpper && !nextIsDigit)
-                        {
-                            yield return s.Substring(i, j - i);
-                            i = j;
-                        }
-                    }
-                    else
-                    {
-                        yield return s.Substring(i, j - i + 1);
+                        yield return s.Substring(i, j - i);
                         i = j;
                     }
+                    else if (prevIsUpper && currentIsUpper && !nextIsUpper && !nextIsDigit)
+                    {
+                        yield return s.Substring(i, j - i);
+                        i = j;
+                    }
+                }
+                else
+                {
+                    yield return s.Substring(i, j - i + 1);
+                    i = j;
                 }
             }
         }
@@ -165,12 +164,12 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Converts string from Windows-style CRLF to Unix-style LF.
         /// </summary>
-        public static string ToLF(this string s) => s.Replace("\r\n", "\n");
+        public static string ToLf(this string s) => s.Replace("\r\n", "\n");
 
         /// <summary>
         /// Converts string from Unix-style LF to Windows-style CRLF.
         /// </summary>
-        public static string ToCRLF(this string s) => s.Replace("\r\n", "\n").Replace("\n", "\r\n");
+        public static string ToCrLf(this string s) => s.Replace("\r\n", "\n").Replace("\n", "\r\n");
 
         /// <summary>
         /// Returns true if two strings are equal ignoring case.

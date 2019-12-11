@@ -42,14 +42,14 @@ namespace KitchenSink
         /// Null values are always less than non-null values.
         /// </summary>
         public static Comparison Compare<A>(A x, A y) where A : IComparable<A> =>
-            If(Null(x) && Null(y)).Then(EQ)
-            .If(Null(x)).Then(LT)
-            .If(Null(y)).Then(GT)
+            If(Null(x) && Null(y)).Then(Comparison.Eq)
+            .If(Null(x)).Then(Lt)
+            .If(Null(y)).Then(Gt)
             .Else(() =>
                 Switch(x?.CompareTo(y) ?? 0)
-                .When(Neg).Then(LT)
-                .When(Pos).Then(GT)
-                .Else(EQ));
+                .When(Neg).Then(Lt)
+                .When(Pos).Then(Gt)
+                .Else(Comparison.Eq));
 
         /// <summary>
         /// Builds an <see cref="IComparer{A}"/> out of given function.
@@ -144,14 +144,14 @@ namespace KitchenSink
             {
                 var z = left.CompareTo(right);
 
-                switch (op)
+                return op switch
                 {
-                    case Op.LessThan: return z < 0;
-                    case Op.LessThanEqual: return z <= 0;
-                    case Op.GreaterThan: return z > 0;
-                    case Op.GreaterThanEqual: return z >= 0;
-                    default: throw new ArgumentException("Invalid comparison operator");
-                }
+                    Op.LessThan => (z < 0),
+                    Op.LessThanEqual => (z <= 0),
+                    Op.GreaterThan => (z > 0),
+                    Op.GreaterThanEqual => (z >= 0),
+                    _ => throw new ArgumentException("Invalid comparison operator")
+                };
             }
         }
     }
