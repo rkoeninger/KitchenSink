@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>KitchenSink</AssemblyName>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>KitchenSink</RootNamespace>
+    <Description>A library for multi-paradigm programming in C#.</Description>
+    <Copyright>Copyright © Robert Koeninger 2014-2020</Copyright>
+    <Authors>Robert Koeninger</Authors>
+    <PackageId>KitchenSink</PackageId>
+    <Product>KitchenSink</Product>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.1.0</Version>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE.txt" Visible="false">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

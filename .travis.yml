@@ -1,15 +1,9 @@
 notifications:
   email: false
 language: csharp
-solution: KitchenSink.sln
-env:
-  global:
-    - NUnitVer=3.8.0
-    - NUnitExe=./testrunner/NUnit.ConsoleRunner.$NUnitVer/tools/nunit3-console.exe
-    - TestDll=./KitchenSink.Tests/bin/Release/net47/KitchenSink.Tests.dll
-install:
-  - nuget restore KitchenSink.sln
-  - nuget install NUnit.ConsoleRunner -Version $NUnitVer -OutputDirectory testrunner
+mono: none
+dotnet: 3.0
 script:
-  - msbuild /p:Configuration=Release KitchenSink.sln
-  - mono $NUnitExe $TestDll --where "cat != WindowsOnly"
+  - cd src
+  - dotnet build
+  - dotnet test --filter TestCategory!=WindowsOnly
