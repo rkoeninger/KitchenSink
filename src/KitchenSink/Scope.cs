@@ -9,15 +9,12 @@ namespace KitchenSink
 {
     public static class Scope
     {
-        private static readonly ThreadLocal<DynamicScope> Scopes = new ThreadLocal<DynamicScope>();
+        private static readonly AsyncLocal<DynamicScope> Scopes = new AsyncLocal<DynamicScope>();
 
         /// <summary>
         /// Gets the current dynamic scope for this thread.
         /// </summary>
-        public static DynamicScope Me =>
-            Scopes.IsValueCreated
-                ? Scopes.Value
-                : (Scopes.Value = new DynamicScope());
+        public static DynamicScope Me => Scopes.Value ?? (Scopes.Value = new DynamicScope());
 
         /// <summary>
         /// Pushes value onto this thread's dynamic stack.
