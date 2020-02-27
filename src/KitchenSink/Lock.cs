@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using KitchenSink.Control;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
@@ -23,6 +24,19 @@ namespace KitchenSink
             {
                 Enter();
                 return f();
+            }
+            finally
+            {
+                Exit();
+            }
+        }
+
+        public async Task<A> DoAsync<A>(Func<Task<A>> f)
+        {
+            try
+            {
+                Enter();
+                return await f();
             }
             finally
             {

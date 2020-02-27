@@ -37,6 +37,7 @@ namespace KitchenSink
         internal abstract Lock Lock { get; }
 
         public abstract A Update(Func<A, A> f);
+        public abstract Task<A> UpdateAsync(Func<A, Task<A>> f);
 
         public A Value
         {
@@ -44,7 +45,7 @@ namespace KitchenSink
             set => Update(_ => value);
         }
 
-        public Task<A> UpdateAsync(Func<A, A> f) => Task.Run(() => Update(f));
+        public Task<A> UpdateAsync(Func<A, A> f) => UpdateAsync(x => Task.FromResult(f(x)));
         public Task<A> ResetAsync(A value) => UpdateAsync(_ => value);
         public Atom<B> Focus<B>(Expression<Func<A, B>> expr) => Focus(Lens.Of(expr));
         public Atom<B> Focus<B>(Func<A, B> get, Func<A, B, A> set) => Focus(Lens.Of(get, set));
@@ -60,6 +61,7 @@ namespace KitchenSink
         internal override Lock Lock { get; } = Lock.New();
 
         public override A Update(Func<A, A> f) => Lock.Do(() => value = f(value));
+        public override Task<A> UpdateAsync(Func<A, Task<A>> f) => Lock.DoAsync(async () => value = await f(value));
     }
 
     internal sealed class FocusedAtom<A, B> : Atom<B>
@@ -77,6 +79,8 @@ namespace KitchenSink
 
         public override B Update(Func<B, B> f) =>
             lens.Get(target.Update(x => lens.Set(x, f(lens.Get(x)))));
+        public override async Task<B> UpdateAsync(Func<B, Task<B>> f) =>
+            lens.Get(await target.UpdateAsync(async x => lens.Set(x, await f(lens.Get(x)))));
     }
 
     internal sealed class ZippedAtom<A, B, Z> : Atom<Z>
@@ -105,6 +109,14 @@ namespace KitchenSink
             Lock.Do(() =>
             {
                 var z = f(combine(atomA.Value, atomB.Value));
+                (atomA.Value, atomB.Value) = split(z);
+                return z;
+            });
+
+        public override Task<Z> UpdateAsync(Func<Z, Task<Z>> f) =>
+            Lock.DoAsync(async () =>
+            {
+                var z = await f(combine(atomA.Value, atomB.Value));
                 (atomA.Value, atomB.Value) = split(z);
                 return z;
             });
@@ -142,6 +154,14 @@ namespace KitchenSink
                 (atomA.Value, atomB.Value, atomC.Value) = split(z);
                 return z;
             });
+
+        public override Task<Z> UpdateAsync(Func<Z, Task<Z>> f) =>
+            Lock.DoAsync(async () =>
+            {
+                var z = await f(combine(atomA.Value, atomB.Value, atomC.Value));
+                (atomA.Value, atomB.Value, atomC.Value) = split(z);
+                return z;
+            });
     }
 
     internal sealed class ZippedAtom<A, B, C, D, Z> : Atom<Z>
@@ -176,6 +196,14 @@ namespace KitchenSink
             Lock.Do(() =>
             {
                 var z = f(combine(atomA.Value, atomB.Value, atomC.Value, atomD.Value));
+                (atomA.Value, atomB.Value, atomC.Value, atomD.Value) = split(z);
+                return z;
+            });
+
+        public override Task<Z> UpdateAsync(Func<Z, Task<Z>> f) =>
+            Lock.DoAsync(async () =>
+            {
+                var z = await f(combine(atomA.Value, atomB.Value, atomC.Value, atomD.Value));
                 (atomA.Value, atomB.Value, atomC.Value, atomD.Value) = split(z);
                 return z;
             });
