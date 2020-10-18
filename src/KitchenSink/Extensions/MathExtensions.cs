@@ -147,9 +147,17 @@ namespace KitchenSink.Extensions
             return result;
         }
 
-        public static IEnumerable<IEnumerable<A>> Permutations<A>(this IEnumerable<A> seq, int r)
+        public static IEnumerable<IEnumerable<A>> Permutations<A>(this IEnumerable<A> seq)
         {
             var array = seq.ToArray();
+            return RenderPermutations(array, array.Length);
+        }
+
+        public static IEnumerable<IEnumerable<A>> Permutations<A>(this IEnumerable<A> seq, int r) =>
+            RenderPermutations(seq.ToArray(), r);
+
+        private static IEnumerable<IEnumerable<A>> RenderPermutations<A>(A[] array, int r)
+        {
             var len = array.Length;
 
             if (r > len)
