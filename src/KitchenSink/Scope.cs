@@ -14,7 +14,7 @@ namespace KitchenSink
         /// <summary>
         /// Gets the current dynamic scope for this thread.
         /// </summary>
-        public static DynamicScope Me => Scopes.Value ?? (Scopes.Value = new DynamicScope());
+        public static DynamicScope Me => Scopes.Value ??= new DynamicScope();
 
         /// <summary>
         /// Pushes value onto this thread's dynamic stack.

@@ -36,7 +36,7 @@ namespace KitchenSink
 
                     exceptions.Add(e);
                     Thread.Sleep(delay);
-                    delay = delay + delay;
+                    delay += delay;
                 }
 
                 n--;

@@ -29,27 +29,27 @@ namespace KitchenSink.Tests
         [Test]
         public void Permutations()
         {
-            Assert.AreEqual(1, 0.Permutations(0));
-            Assert.AreEqual(1, 1.Permutations(1));
-            Assert.AreEqual(2, 2.Permutations(1));
-            Assert.AreEqual(12, 4.Permutations(2));
-            Assert.AreEqual(10 * 9 * 8 * 7, 10.Permutations(4));
-            Expect.Error(() => (-1).Permutations(1));
-            Expect.Error(() => 2.Permutations(3));
-            Expect.Error(() => 4.Permutations(-1));
+            Assert.AreEqual(1, 0.PermutationCount(0));
+            Assert.AreEqual(1, 1.PermutationCount(1));
+            Assert.AreEqual(2, 2.PermutationCount(1));
+            Assert.AreEqual(12, 4.PermutationCount(2));
+            Assert.AreEqual(10 * 9 * 8 * 7, 10.PermutationCount(4));
+            Expect.Error(() => (-1).PermutationCount(1));
+            Expect.Error(() => 2.PermutationCount(3));
+            Expect.Error(() => 4.PermutationCount(-1));
         }
 
         [Test]
         public void Combinations()
         {
-            Assert.AreEqual(1, 0.Combinations(0));
-            Assert.AreEqual(1, 1.Combinations(1));
-            Assert.AreEqual(2, 2.Combinations(1));
-            Assert.AreEqual(6, 4.Combinations(2));
-            Assert.AreEqual((10 * 9 * 8 * 7) / (4 * 3 * 2), 10.Combinations(4));
-            Expect.Error(() => (-1).Combinations(1));
-            Expect.Error(() => 2.Combinations(3));
-            Expect.Error(() => 4.Combinations(-1));
+            Assert.AreEqual(1, 0.CombinationCount(0));
+            Assert.AreEqual(1, 1.CombinationCount(1));
+            Assert.AreEqual(2, 2.CombinationCount(1));
+            Assert.AreEqual(6, 4.CombinationCount(2));
+            Assert.AreEqual((10 * 9 * 8 * 7) / (4 * 3 * 2), 10.CombinationCount(4));
+            Expect.Error(() => (-1).CombinationCount(1));
+            Expect.Error(() => 2.CombinationCount(3));
+            Expect.Error(() => 4.CombinationCount(-1));
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace KitchenSink.Tests
                 SeqOf(7, 8, 9)
             );
 
-            Assert.AreEqual(seq1.Count.Combinations(subsetSize), combinations.Count);
+            Assert.AreEqual(seq1.Count.CombinationCount(subsetSize), combinations.Count);
             Assert.AreEqual(expectedCombinations.Count, combinations.Count);
 
             foreach (var expected in expectedCombinations)
@@ -109,7 +109,7 @@ namespace KitchenSink.Tests
                 SeqOf(9, 8)
             );
 
-            Assert.AreEqual(seq1.Count.Permutations(subsetSize), permutations.Count);
+            Assert.AreEqual(seq1.Count.PermutationCount(subsetSize), permutations.Count);
             Assert.AreEqual(expectedPermutations.Count, permutations.Count);
 
             foreach (var expected in expectedPermutations)

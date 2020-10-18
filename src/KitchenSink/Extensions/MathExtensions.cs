@@ -1,23 +1,41 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using KitchenSink.Collections;
 using static KitchenSink.Operators;
 
 namespace KitchenSink.Extensions
 {
     public static class MathExtensions
     {
+        /// <summary>
+        /// Returns true if argument is a finite number.
+        /// </summary>
         public static bool IsReal(this double x) => Not(x.IsNotReal());
 
+        /// <summary>
+        /// Returns true if argument is NaN or infinite.
+        /// </summary>
         public static bool IsNotReal(this double x) => double.IsInfinity(x) || double.IsNaN(x);
 
+        /// <summary>
+        /// Returns true if argument is evenly divisible by 2.
+        /// </summary>
         public static bool IsEven(this int x) => (x & 1) == 0;
 
+        /// <summary>
+        /// Returns true if argument is not evenly divisible by 2.
+        /// </summary>
         public static bool IsOdd(this int x) => (x & 1) != 0;
 
+        /// <summary>
+        /// Returns true if <c>(x / y) * y</c> would equal <c>x</c>.
+        /// </summary>
         public static bool IsDivisibleBy(this int x, int y) => x % y == 0;
 
+        /// <summary>
+        /// Returns true if <c>(x / y) * y</c> would not equal <c>x</c>.
+        /// </summary>
         public static bool IsNotDivisibleBy(this int x, int y) => x % y != 0;
 
         /// <summary>
@@ -53,41 +71,21 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Inclusive on start value, exclusive on end value.
         /// </summary>
-        public static IReadOnlyList<int> To(this int start, int end) => new RangeList(start, end - 1);
+        public static IReadOnlyList<int> To(this int start, int end) =>
+            new ComputedList<int>(i => i + start, end - start);
 
         /// <summary>
         /// Inclusive on start and end value.
         /// </summary>
-        public static IReadOnlyList<int> ToIncluding(this int start, int end) => new RangeList(start, end);
+        public static IReadOnlyList<int> ToIncluding(this int start, int end) =>
+            new ComputedList<int>(i => i + start, end - start + 1);
 
-        private class RangeList : IReadOnlyList<int>
-        {
-            private readonly int start;
-            private readonly int endInclusive;
-
-            public RangeList(int start, int endInclusive)
-            {
-                this.start = start;
-                this.endInclusive = endInclusive;
-            }
-
-            public int this[int index] => start + index;
-
-            public int Count => endInclusive - start + 1;
-
-            public IEnumerator<int> GetEnumerator()
-            {
-                var i = start;
-
-                while (start <= Cmp(i) <= endInclusive)
-                {
-                    yield return i++;
-                }
-            }
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        }
-
+        /// <summary>
+        /// Computes the factorial of n.
+        /// <code>
+        ///     n! = n * (n - 1) * (n - 2) * ... * 2 * 1
+        /// </code>
+        /// </summary>
         public static int Factorial(this int n)
         {
             if (n < 0)
@@ -110,16 +108,23 @@ namespace KitchenSink.Extensions
             return result;
         }
 
-        public static int Permutations(this int n, int r)
+        /// <summary>
+        /// Computes the number of permutations of r elements from a set of n elements.
+        /// Equivalent to Factorial when <c>n = r</c>.
+        /// <code>
+        ///     nPr = n! / (n - r)!
+        /// </code>
+        /// </summary>
+        public static int PermutationCount(this int n, int r)
         {
             if (n < 0)
             {
-                throw new ArgumentException("Permutations not valid on negative set sizes (n)");
+                throw new ArgumentException("PermutationCount not valid on negative set sizes (n)");
             }
 
             if (r < 0)
             {
-                throw new ArgumentException("Permutations not valid on negative set sizes (r)");
+                throw new ArgumentException("PermutationCount not valid on negative set sizes (r)");
             }
 
             if (r > n)
@@ -147,18 +152,68 @@ namespace KitchenSink.Extensions
             return result;
         }
 
-        public static IEnumerable<IEnumerable<A>> Permutations<A>(this IEnumerable<A> seq)
+        /// <summary>
+        /// Computes the number of combinations of r elements from a set of n elements.
+        /// <code>
+        ///     nCr = n! / (r! * (n - r)!)
+        /// </code>
+        /// </summary>
+        public static int CombinationCount(this int n, int r)
         {
-            var array = seq.ToArray();
-            return RenderPermutations(array, array.Length);
+            if (n < 0)
+            {
+                throw new ArgumentException("CombinationCount not valid on negative set sizes (n)");
+            }
+
+            if (r < 0)
+            {
+                throw new ArgumentException("CombinationCount not valid on negative set sizes (r)");
+            }
+
+            if (r > n)
+            {
+                throw new ArgumentException("CombinationCount not valid on take sizes greater than set sizes");
+            }
+
+            if (r == 0 || n == r)
+            {
+                return 1;
+            }
+
+            var result = 1;
+
+            for (var i = n - r + 1; i <= n; ++i)
+            {
+                result *= i;
+            }
+
+            for (var i = 2; i <= r; ++i)
+            {
+                result /= i;
+            }
+
+            return result;
         }
 
-        public static IEnumerable<IEnumerable<A>> Permutations<A>(this IEnumerable<A> seq, int r) =>
-            RenderPermutations(seq.ToArray(), r);
+        /// <summary>
+        /// Returns a sequence of all permutations of the input sequence.
+        /// Length of returned sequence is equal to <c>seq.Count().Factorial()</c>.
+        /// </summary>
+        public static IEnumerable<IEnumerable<A>> Permutations<A>(this IEnumerable<A> seq) =>
+            RenderPermutations(seq, null);
 
-        private static IEnumerable<IEnumerable<A>> RenderPermutations<A>(A[] array, int r)
+        /// <summary>
+        /// Returns a sequence of all permutations of given length subsets of the input sequence.
+        /// Length of returned sequence is equal to <c>seq.Count().PermutationCount(r)</c>.
+        /// </summary>
+        public static IEnumerable<IEnumerable<A>> Permutations<A>(this IEnumerable<A> seq, int r) =>
+            RenderPermutations(seq, r);
+
+        private static IEnumerable<IEnumerable<A>> RenderPermutations<A>(IEnumerable<A> seq, int? rd)
         {
+            var array = seq.ToArray();
             var len = array.Length;
+            var r = rd ?? array.Length;
 
             if (r > len)
             {
@@ -191,64 +246,38 @@ namespace KitchenSink.Extensions
             }
         }
 
-        public static int Combinations(this int n, int r)
-        {
-            if (n < 0)
-            {
-                throw new ArgumentException("Combinations not valid on negative set sizes (n)");
-            }
-
-            if (r < 0)
-            {
-                throw new ArgumentException("Combinations not valid on negative set sizes (r)");
-            }
-
-            if (r > n)
-            {
-                throw new ArgumentException("Combinations not valid on take sizes greater than set sizes");
-            }
-
-            if (r == 0 || n == r)
-            {
-                return 1;
-            }
-
-            var result = 1;
-
-            for (var i = n - r + 1; i <= n; ++i)
-            {
-                result *= i;
-            }
-
-            for (var i = 2; i <= r; ++i)
-            {
-                result /= i;
-            }
-
-            return result;
-        }
-
+        /// <summary>
+        /// Returns a sequence of all combinations of given length subsets of the input sequence.
+        /// Length of returned sequence is equal to <c>seq.Count().CombinationCount(r)</c>.
+        /// </summary>
         public static IEnumerable<IEnumerable<A>> Combinations<A>(this IEnumerable<A> seq, int r)
         {
-            if (seq == null)
-            {
-                throw new ArgumentNullException();
-            }
-
             if (r < 0)
             {
                 throw new ArgumentException();
             }
 
             var array = seq.ToArray();
-            return CombHelper(array.Length, r).Select(ZipWhere(array));
+
+            if (array.Length == r)
+            {
+                yield return array;
+                yield break;
+            }
+
+            foreach (var flags in RenderFlagSequences(array.Length, r))
+            {
+                yield return array.ZipTuples(flags).Where(x => x.Item2).Select(x => x.Item1);
+            }
         }
 
-        private static IEnumerable<IEnumerable<bool>> CombHelper(int n, int r)
+        // TODO: we could probably make a version of this that iterates off long integers
+        //       whose bits represent the bool value seqs returned by this function.
+        private static IEnumerable<IConsList<bool>> RenderFlagSequences(int n, int r)
         {
             if (n == 0 && r == 0)
             {
-                yield return EmptyBoolSeq;
+                yield return ConsList.Empty<bool>();
                 yield break;
             }
 
@@ -259,23 +288,16 @@ namespace KitchenSink.Extensions
 
             if (r > 0)
             {
-                foreach (var subGroup in CombHelper(n - 1, r - 1))
+                foreach (var subGroup in RenderFlagSequences(n - 1, r - 1))
                 {
-                    yield return OneTrue.Concat(subGroup);
+                    yield return subGroup.Cons(true);
                 }
             }
 
-            foreach (var subGroup in CombHelper(n - 1, r))
+            foreach (var subGroup in RenderFlagSequences(n - 1, r))
             {
-                yield return OneFalse.Concat(subGroup);
+                yield return subGroup.Cons(false);
             }
         }
-
-        private static readonly IEnumerable<bool> OneTrue = SeqOf(true);
-        private static readonly IEnumerable<bool> OneFalse = SeqOf(false);
-        private static readonly IEnumerable<bool> EmptyBoolSeq = SeqOf<bool>();
-
-        private static Func<IEnumerable<bool>, IEnumerable<A>> ZipWhere<A>(IEnumerable<A> seq) =>
-            selectors => seq.ZipTuples(selectors).Where(x => x.Item2).Select(x => x.Item1);
     }
 }
