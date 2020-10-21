@@ -209,7 +209,7 @@ namespace KitchenSink.Extensions
         public static IEnumerable<IEnumerable<A>> Permutations<A>(this IEnumerable<A> seq, int r) =>
             RenderPermutations(seq, r);
 
-        private static IEnumerable<IEnumerable<A>> RenderPermutations<A>(IEnumerable<A> seq, int? rd)
+        private static IEnumerable<IConsList<A>> RenderPermutations<A>(IEnumerable<A> seq, int? rd)
         {
             var array = seq.ToArray();
             var len = array.Length;
@@ -229,7 +229,7 @@ namespace KitchenSink.Extensions
             {
                 foreach (var item in array)
                 {
-                    yield return SeqOf(item);
+                    yield return ConsList.Empty<A>().Cons(item);
                 }
 
                 yield break;
@@ -239,9 +239,9 @@ namespace KitchenSink.Extensions
             {
                 var sublist = array.ExceptAt(i);
 
-                foreach (var subseq in Permutations(sublist, r - 1))
+                foreach (var subseq in RenderPermutations(sublist, r - 1))
                 {
-                    yield return SeqOf(array[i]).Concat(subseq);
+                    yield return subseq.Cons(array[i]);
                 }
             }
         }
