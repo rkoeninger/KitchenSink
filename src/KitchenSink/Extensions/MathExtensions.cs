@@ -1,7 +1,7 @@
-﻿using System;
+﻿using KitchenSink.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using KitchenSink.Collections;
 using static KitchenSink.Operators;
 
 namespace KitchenSink.Extensions
@@ -72,13 +72,13 @@ namespace KitchenSink.Extensions
         /// Inclusive on start value, exclusive on end value.
         /// </summary>
         public static IReadOnlyList<int> To(this int start, int end) =>
-            new ComputedList<int>(i => i + start, end - start);
+            new ComputedList<int>(end - start, i => i + start);
 
         /// <summary>
         /// Inclusive on start and end value.
         /// </summary>
         public static IReadOnlyList<int> ToIncluding(this int start, int end) =>
-            new ComputedList<int>(i => i + start, end - start + 1);
+            new ComputedList<int>(end - start + 1, i => i + start);
 
         /// <summary>
         /// Computes the factorial of n.
@@ -265,15 +265,50 @@ namespace KitchenSink.Extensions
                 yield break;
             }
 
-            foreach (var flags in RenderFlagSequences(array.Length, r))
+            if (array.Length <= 64)
             {
-                yield return array.ZipTuples(flags).Where(x => x.Item2).Select(x => x.Item1);
+                foreach (var flags in RenderFlags64(array.Length, r))
+                {
+                    yield return array.Where((_, i) => ((flags >> i) & 1ul) != 0);
+                }
+            }
+            else
+            {
+                foreach (var flags in RenderFlagsN(array.Length, r))
+                {
+                    yield return array.ZipTuples(flags).Where(x => x.Item2).Select(x => x.Item1);
+                }
             }
         }
 
-        // TODO: we could probably make a version of this that iterates off long integers
-        //       whose bits represent the bool value seqs returned by this function.
-        private static IEnumerable<IConsList<bool>> RenderFlagSequences(int n, int r)
+        private static IEnumerable<ulong> RenderFlags64(int n, int r)
+        {
+            if (n == 0 && r == 0)
+            {
+                yield return 0;
+                yield break;
+            }
+
+            if (n < r)
+            {
+                yield break;
+            }
+
+            if (r > 0)
+            {
+                foreach (var flags in RenderFlags64(n - 1, r - 1))
+                {
+                    yield return flags | (1ul << (n - 1));
+                }
+            }
+
+            foreach (var flags in RenderFlags64(n - 1, r))
+            {
+                yield return flags;
+            }
+        }
+
+        private static IEnumerable<IConsList<bool>> RenderFlagsN(int n, int r)
         {
             if (n == 0 && r == 0)
             {
@@ -288,15 +323,15 @@ namespace KitchenSink.Extensions
 
             if (r > 0)
             {
-                foreach (var subGroup in RenderFlagSequences(n - 1, r - 1))
+                foreach (var flags in RenderFlagsN(n - 1, r - 1))
                 {
-                    yield return subGroup.Cons(true);
+                    yield return flags.Cons(true);
                 }
             }
 
-            foreach (var subGroup in RenderFlagSequences(n - 1, r))
+            foreach (var flags in RenderFlagsN(n - 1, r))
             {
-                yield return subGroup.Cons(false);
+                yield return flags.Cons(false);
             }
         }
     }

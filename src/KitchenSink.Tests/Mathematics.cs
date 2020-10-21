@@ -27,7 +27,7 @@ namespace KitchenSink.Tests
         }
 
         [Test]
-        public void Permutations()
+        public void PermutationCount()
         {
             Assert.AreEqual(1, 0.PermutationCount(0));
             Assert.AreEqual(1, 1.PermutationCount(1));
@@ -40,7 +40,7 @@ namespace KitchenSink.Tests
         }
 
         [Test]
-        public void Combinations()
+        public void CombinationCount()
         {
             Assert.AreEqual(1, 0.CombinationCount(0));
             Assert.AreEqual(1, 1.CombinationCount(1));
@@ -53,35 +53,37 @@ namespace KitchenSink.Tests
         }
 
         [Test]
-        public void CombinationsOfSet()
+        public void Combinations()
         {
             var seq1 = ListOf(5, 6, 7, 8, 9);
             const int subsetSize = 3;
-            var combinations = seq1.Combinations(subsetSize).ToList();
+            var combinations = seq1.Combinations(subsetSize)
+                .Select(xs => xs.ToList())
+                .ToList();
             var expectedCombinations = ListOf(
-                SeqOf(5, 6, 7),
-                SeqOf(5, 6, 8),
-                SeqOf(5, 6, 9),
-                SeqOf(5, 7, 8),
-                SeqOf(5, 7, 9),
-                SeqOf(5, 8, 9),
-                SeqOf(6, 7, 8),
-                SeqOf(6, 7, 9),
-                SeqOf(6, 8, 9),
-                SeqOf(7, 8, 9)
-            );
+                ListOf(5, 6, 7),
+                ListOf(5, 6, 8),
+                ListOf(5, 6, 9),
+                ListOf(5, 7, 8),
+                ListOf(5, 7, 9),
+                ListOf(5, 8, 9),
+                ListOf(6, 7, 8),
+                ListOf(6, 7, 9),
+                ListOf(6, 8, 9),
+                ListOf(7, 8, 9));
 
             Assert.AreEqual(seq1.Count.CombinationCount(subsetSize), combinations.Count);
+            Assert.IsTrue(combinations.All(xs => xs.Count == subsetSize));
             Assert.AreEqual(expectedCombinations.Count, combinations.Count);
 
             foreach (var expected in expectedCombinations)
             {
-                Assert.IsTrue(combinations.Any(x => x.SequenceEqual(expected)));
+                Assert.IsTrue(combinations.Any(xs => expected.All(y => xs.Contains(y))));
             }
         }
 
         [Test]
-        public void PermutationsOfSet()
+        public void Permutations()
         {
             var seq1 = ListOf(5, 6, 7, 8, 9);
             const int subsetSize = 2;
