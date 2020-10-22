@@ -68,12 +68,12 @@ namespace KitchenSink.Extensions
                 {
                     if (currentIsUpper && !prevIsUpper)
                     {
-                        yield return s.Substring(i, j - i);
+                        yield return s[i..j];
                         i = j;
                     }
                     else if (prevIsUpper && currentIsUpper && !nextIsUpper && !nextIsDigit)
                     {
-                        yield return s.Substring(i, j - i);
+                        yield return s[i..j];
                         i = j;
                     }
                 }
@@ -203,10 +203,10 @@ namespace KitchenSink.Extensions
 
             for (int j; (j = s.IndexOf(sep, i, comparison)) >= 0; i = j + sep.Length)
             {
-                yield return s.Substring(i, j - i);
+                yield return s[i..j];
             }
 
-            yield return s.Substring(i, s.Length - i);
+            yield return s[i..];
         }
     }
 }

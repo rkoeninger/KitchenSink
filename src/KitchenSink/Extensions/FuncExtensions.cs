@@ -3,9 +3,6 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink.Extensions
 {
-    /// <summary>
-    /// Extension methods on functions.
-    /// </summary>
     public static class FuncExtensions
     {
         /// <summary>

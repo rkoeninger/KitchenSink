@@ -138,7 +138,7 @@ namespace KitchenSink.Timekeeping
                 || Begin < that.End && End > that.Begin;
 
         public override int GetHashCode() => Begin.GetHashCode() ^ End.GetHashCode();
-        public override bool Equals(object obj) => obj is DateSpan && Equals((DateSpan)obj);
+        public override bool Equals(object obj) => obj is DateSpan span && Equals(span);
 
         public bool Equals(DateSpan that) => Begin == that.Begin && End == that.End;
 
@@ -148,7 +148,7 @@ namespace KitchenSink.Timekeeping
         public override string ToString() =>
             ToString(CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern);
 
-        public string ToString(string format) => $"{Begin:format}{DateTimeSeparator}{End:format}";
+        public string ToString(string format) => $"{Begin.ToString(format)}{DateTimeSeparator}{End.ToString(format)}";
 
         public static bool operator ==(DateSpan x, DateSpan y) => x.Equals(y);
         public static bool operator !=(DateSpan x, DateSpan y) => !x.Equals(y);

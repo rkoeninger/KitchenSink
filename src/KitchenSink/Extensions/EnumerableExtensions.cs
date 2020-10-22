@@ -545,7 +545,7 @@ namespace KitchenSink.Extensions
         /// Example: <c>...Where(Filter).Tap(LogValue).Select(Transform).</c>
         /// </summary>
         public static IEnumerable<A> Tap<A>(this IEnumerable<A> seq, Action<A> f) =>
-            seq.Select(x => { f(x); return x; });
+            seq.Select(x => x.With(f));
 
         /// <summary>
         /// Performs side-effecting Action on each item in sequence.

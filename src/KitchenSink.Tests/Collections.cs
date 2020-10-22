@@ -141,7 +141,7 @@ namespace KitchenSink.Tests
                 SeqOf(1, 2, 3),
                 SeqOf(4, 5, 6),
                 SeqOf(7, 8));
-            Assert.IsTrue(actual.Zip(expected).All(t => t.Item1.SequenceEqual(t.Item2)));
+            Assert.IsTrue(actual.Zip(expected).All(t => t.First.SequenceEqual(t.Second)));
         }
 
         public class RadixDictionaryTests
