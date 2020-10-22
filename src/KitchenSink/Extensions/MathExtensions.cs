@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using static KitchenSink.Operators;
 
 namespace KitchenSink.Extensions
@@ -67,6 +68,16 @@ namespace KitchenSink.Extensions
         /// Returns lesser value, defaulting to the first.
         /// </summary>
         public static A Min<A>(this IComparer<A> comparer, A x, A y) => comparer.Compare(x, y) < 0 ? x : y;
+
+        /// <summary>
+        /// Returns greater value, defaulting to the first.
+        /// </summary>
+        public static A Max<A>(this A x, A y) where A : IComparable<A> => Comparer<A>.Default.Max(x, y);
+
+        /// <summary>
+        /// Returns lesser value, defaulting to the first.
+        /// </summary>
+        public static A Min<A>(this A x, A y) where A : IComparable<A> => Comparer<A>.Default.Min(x, y);
 
         /// <summary>
         /// Inclusive on start value, exclusive on end value.
