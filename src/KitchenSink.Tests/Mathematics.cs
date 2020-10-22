@@ -53,6 +53,15 @@ namespace KitchenSink.Tests
         }
 
         [Test]
+        public void CombinationCountMirrors([Range(4, 12)] int n)
+        {
+            foreach (var r in Enumerable.Range(0, n / 2))
+            {
+                Assert.AreEqual(n.CombinationCount(r), n.CombinationCount(n - r));
+            }
+        }
+
+        [Test]
         public void Combinations()
         {
             var seq1 = ListOf(5, 6, 7, 8, 9);
@@ -89,27 +98,26 @@ namespace KitchenSink.Tests
             const int subsetSize = 2;
             var permutations = seq1.Permutations(subsetSize).ToList();
             var expectedPermutations = ListOf(
-                SeqOf(5, 6),
-                SeqOf(5, 7),
-                SeqOf(5, 8),
-                SeqOf(5, 9),
-                SeqOf(6, 5),
-                SeqOf(6, 7),
-                SeqOf(6, 8),
-                SeqOf(6, 9),
-                SeqOf(7, 5),
-                SeqOf(7, 6),
-                SeqOf(7, 8),
-                SeqOf(7, 9),
-                SeqOf(8, 5),
-                SeqOf(8, 6),
-                SeqOf(8, 7),
-                SeqOf(8, 9),
-                SeqOf(9, 5),
-                SeqOf(9, 6),
-                SeqOf(9, 7),
-                SeqOf(9, 8)
-            );
+                ListOf(5, 6),
+                ListOf(5, 7),
+                ListOf(5, 8),
+                ListOf(5, 9),
+                ListOf(6, 5),
+                ListOf(6, 7),
+                ListOf(6, 8),
+                ListOf(6, 9),
+                ListOf(7, 5),
+                ListOf(7, 6),
+                ListOf(7, 8),
+                ListOf(7, 9),
+                ListOf(8, 5),
+                ListOf(8, 6),
+                ListOf(8, 7),
+                ListOf(8, 9),
+                ListOf(9, 5),
+                ListOf(9, 6),
+                ListOf(9, 7),
+                ListOf(9, 8));
 
             Assert.AreEqual(seq1.Count.PermutationCount(subsetSize), permutations.Count);
             Assert.AreEqual(expectedPermutations.Count, permutations.Count);

@@ -144,7 +144,7 @@ namespace KitchenSink.Extensions
 
             var result = 1;
 
-            for (var i = n - r + 1; i <= n; ++i)
+            for (var i = n; i > n - r; --i)
             {
                 result *= i;
             }
@@ -175,19 +175,26 @@ namespace KitchenSink.Extensions
                 throw new ArgumentException("CombinationCount not valid on take sizes greater than set sizes");
             }
 
-            if (r == 0 || n == r)
+            if (r == 0 || n == 0 || n == r)
             {
                 return 1;
             }
 
+            r = Math.Min(r, n - r);
+
+            if (r == 1)
+            {
+                return n;
+            }
+
             var result = 1;
 
-            for (var i = n - r + 1; i <= n; ++i)
+            for (var i = n; i > n - r; --i)
             {
                 result *= i;
             }
 
-            for (var i = 2; i <= r; ++i)
+            for (var i = r; i > 1; --i)
             {
                 result /= i;
             }
