@@ -92,9 +92,7 @@ namespace KitchenSink
                 throw new ArgumentException("Invalid DateTimeRange string");
             }
 
-            var beginString = s[0..i];
-            var endString = s[..(i + sep.Length)];
-            return new DateSpan(DateTime.Parse(beginString), DateTime.Parse(endString));
+            return new DateSpan(DateTime.Parse(s[0..i]), DateTime.Parse(s[(i + sep.Length)..]));
         }
 
         /// <summary>
@@ -115,11 +113,9 @@ namespace KitchenSink
                 throw new ArgumentException("Invalid DateTimeRange string");
             }
 
-            var beginString = s.Substring(0, i);
-            var endString = s.Substring(i + sep.Length);
             return new DateSpan(
-                DateTime.ParseExact(beginString, format, CultureInfo.InvariantCulture),
-                DateTime.ParseExact(endString, format, CultureInfo.InvariantCulture));
+                DateTime.ParseExact(s[0..i], format, CultureInfo.InvariantCulture),
+                DateTime.ParseExact(s[(i + sep.Length)..], format, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
