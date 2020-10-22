@@ -1,6 +1,5 @@
 ﻿using System;
 using NUnit.Framework;
-using KitchenSink.Timekeeping;
 
 namespace KitchenSink.Tests
 {

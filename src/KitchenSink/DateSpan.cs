@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq;
 using KitchenSink.Extensions;
 
-namespace KitchenSink.Timekeeping
+namespace KitchenSink
 {
     /// <summary>
     /// Represents a region of time between two instants, each

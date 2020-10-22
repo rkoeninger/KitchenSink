@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using static KitchenSink.Operators;
-using KitchenSink.Timekeeping;
 using NUnit.Framework;
 
 namespace KitchenSink.Tests
@@ -23,11 +22,11 @@ namespace KitchenSink.Tests
                 x => Math.Abs(x) >= 0);
 
             Expect.EqualsAndHashCode(SeqOf(
-                ExactDay.On(2001, 4, 13),
-                ExactDay.On(1947, 1, 20),
-                ExactDay.On(2030, 11, 9),
-                ExactDay.On(1994, 9, 16),
-                ExactDay.On(2023, 8, 27)));
+                new DateTime(2001, 4, 13),
+                new DateTime(1947, 1, 20),
+                new DateTime(2030, 11, 9),
+                new DateTime(1994, 9, 16),
+                new DateTime(2023, 8, 27)));
 
             Expect.EqualsAndHashCode(Forever(() => Rand.Ints().Take(Rand.Int(64))).Take(16));
         }

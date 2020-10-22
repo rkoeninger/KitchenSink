@@ -1,5 +1,4 @@
 ﻿using System;
-using KitchenSink.Timekeeping;
 
 namespace KitchenSink.Extensions
 {

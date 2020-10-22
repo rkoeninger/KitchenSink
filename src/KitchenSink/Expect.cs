@@ -27,7 +27,7 @@ namespace KitchenSink
         /// Throws exception if none thrown by <code>f</code>.
         /// </summary>
         public static E Error<E>(Action f, Exception toThrow = null) where E : Exception =>
-            Either.Try<E>(f).OrElseThrow(() => new ExceptionExpectedException(typeof(E)));
+            Either.Try<E>(f).OrElseThrow(() => toThrow ?? new ExceptionExpectedException(typeof(E)));
 
         public static ExpectationFailedException FailedAssert(Action f) => Error<ExpectationFailedException>(f);
 
