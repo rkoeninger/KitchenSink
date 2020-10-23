@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using static KitchenSink.Operators;
+using IoMonad = KitchenSink.Io;
 
 namespace KitchenSink
 {
@@ -85,12 +86,12 @@ namespace KitchenSink
             Of(None<A>, (x, y) => x.AndOr(y, monoid.Concat));
 
         /// <summary>
-        /// Combines <see cref="IO{A}"/>s but constructing new <c>IO</c>s
+        /// Combines <c>Io</c>'s but constructing new <c>IO</c>s
         /// that eval and append the results of the original <c>IO</c>s.
         /// </summary>
-        public static Monoid<Io<A>> IO<A>(Monoid<A> monoid) => Of(
-            () => Io.Of(() => monoid.Default),
-            (x, y) => Io.Of(monoid.Concat(x.Eval(), y.Eval())));
+        public static Monoid<Io<A>> Io<A>(Monoid<A> monoid) => Of(
+            () => IoMonad.Of(() => monoid.Default),
+            (x, y) => IoMonad.Of(() => monoid.Concat(x.Eval(), y.Eval())));
 
         /// <summary>
         /// Composes endomorphic functions left to right.

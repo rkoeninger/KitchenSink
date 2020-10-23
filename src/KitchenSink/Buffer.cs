@@ -4,15 +4,6 @@ using static KitchenSink.Operators;
 
 namespace KitchenSink
 {
-    /// <summary>
-    /// Generic buffer that passes accumulated values to given handler
-    /// when size limit is reached and can auto-flush after a given timeout.
-    /// </summary>
-    /// <example>
-    /// var b = Buffer.Of(1000, lines => File.AppendAllLines(path, lines));
-    /// foreach (var x in xs) { b.Write(x); } // Buffer will occassionally flush
-    /// b.Flush(); // Flush anything that's left at the end
-    /// </example>
     public static class Buffer
     {
         public static Buffer<A> Of<A>(long limit, Action<IReadOnlyList<A>> handler) =>
@@ -25,6 +16,15 @@ namespace KitchenSink
             new Buffer<A>(limit, timeout, handler);
     }
 
+    /// <summary>
+    /// Generic buffer that passes accumulated values to given handler
+    /// when size limit is reached and can auto-flush after a given timeout.
+    /// </summary>
+    /// <example>
+    /// using var b = Buffer.Of(1000, lines => File.AppendAllLines(path, lines));
+    /// foreach (var x in xs) { b.Write(x); } // buffer will occassionally flush
+    /// // buffer will dispose and flush remaining lines at end of scope
+    /// </example>
     public class Buffer<A> : IDisposable
     {
         private readonly long limit;

@@ -169,6 +169,11 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
+        /// Aggregates enumerable sequence using given monoid.
+        /// </summary>
+        public static A Aggregate<A>(this IEnumerable<A> seq, Monoid<A> m) => m.Aggregate(seq);
+
+        /// <summary>
         /// Returns elements in given sequence as sub-sequences of given size.
         /// Example: <c>[1, 2, 3, 4, 5, 6, 7, 8], 3 => [[1, 2, 3], [4, 5, 6], [7, 8]]</c>
         /// </summary>
