@@ -2,9 +2,7 @@
 
 # KitchenSink
 
-A library for multi-paradigm programming in C#.
-
-> Everything *including* the kitchen sink!
+Dumping ground for multi-paradigm programming ideas in C#.
 
 Below is a summary of what this repo contains. Note that not everything in this library is meant to be taken completely seriously. Some facilities are almost sarcastic in their inclusion.
 
