@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using static KitchenSink.Comparison;
+using KitchenSink.Collections;
 using KitchenSink.Control;
 
 namespace KitchenSink
@@ -41,38 +40,15 @@ namespace KitchenSink
         /// Comparison that returns a symbolic result.
         /// Null values are always less than non-null values.
         /// </summary>
-        public static Comparison Compare<A>(A x, A y) where A : IComparable<A> =>
-            If(Null(x) && Null(y)).Then(Comparison.Eq)
-            .If(Null(x)).Then(Lt)
-            .If(Null(y)).Then(Gt)
+        public static Ordering Compare<A>(A x, A y) where A : IComparable<A> =>
+            If(Null(x) && Null(y)).Then(Ordering.Eq)
+            .If(Null(x)).Then(Ordering.Lt)
+            .If(Null(y)).Then(Ordering.Gt)
             .Else(() =>
                 Switch(x?.CompareTo(y) ?? 0)
-                .When(Neg).Then(Lt)
-                .When(Pos).Then(Gt)
-                .Else(Comparison.Eq));
-
-        /// <summary>
-        /// Builds an <see cref="IComparer{A}"/> out of given function.
-        /// </summary>
-        public static IComparer<A> Comparator<A>(Func<A, A, Comparison> f) =>
-            new ComparerDelegate<A>(f);
-
-        /// <summary>
-        /// Builds an <see cref="IComparer{A}"/> out of given function.
-        /// </summary>
-        public static IComparer<A> Comparator<A>(Func<A, A, int> f) =>
-            new ComparerDelegate<A>(f);
-
-        private class ComparerDelegate<A> : IComparer<A>
-        {
-            private readonly Func<A, A, int> f;
-
-            internal ComparerDelegate(Func<A, A, int> f) => this.f = f;
-
-            internal ComparerDelegate(Func<A, A, Comparison> f) => this.f = (x, y) => (int)f(x, y);
-
-            public int Compare(A x, A y) => f(x, y);
-        }
+                .When(Neg).Then(Ordering.Lt)
+                .When(Pos).Then(Ordering.Gt)
+                .Else(Ordering.Eq));
 
         public static class RangeComparison
         {

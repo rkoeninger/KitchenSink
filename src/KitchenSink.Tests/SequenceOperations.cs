@@ -33,6 +33,17 @@ namespace KitchenSink.Tests
         }
 
         [Test]
+        public void InterleavingSeveralSequences()
+        {
+            var xs = SeqOf(1, 2, 3, 4);
+            var ys = SeqOf(5, 6, 7, 8);
+            var zs = SeqOf(9, 10, 11, 12);
+            var ws = SeqOf(13, 14, 15, 16);
+            var expected = SeqOf(1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 16);
+            Assert.IsTrue(expected.SequenceEqual(xs.Interleave(ys, zs, ws)));
+        }
+
+        [Test]
         public void IntersperseShortSequence()
         {
             var xs = SeqOf(1, 2, 3);

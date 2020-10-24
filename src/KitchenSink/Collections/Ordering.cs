@@ -1,9 +1,9 @@
-﻿namespace KitchenSink
+﻿namespace KitchenSink.Collections
 {
     /// <summary>
     /// Result of comparing two values.
     /// </summary>
-    public enum Comparison
+    public enum Ordering
     {
         /// <summary>
         /// Greater than.

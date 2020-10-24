@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using static KitchenSink.Comparison;
+using KitchenSink.Collections;
 using static KitchenSink.Operators;
 
 namespace KitchenSink.Tests
@@ -9,9 +9,9 @@ namespace KitchenSink.Tests
         [Test]
         public void CompareOperator()
         {
-            Assert.AreEqual(Gt, Compare(6, -1));
-            Assert.AreEqual(Lt, Compare(-6, -1));
-            Assert.AreEqual(Comparison.Eq, Compare(6, 6));
+            Assert.AreEqual(Ordering.Gt, Compare(6, -1));
+            Assert.AreEqual(Ordering.Lt, Compare(-6, -1));
+            Assert.AreEqual(Ordering.Eq, Compare(6, 6));
         }
 
         [Test]

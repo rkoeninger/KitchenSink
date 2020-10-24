@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using static KitchenSink.Operators;
 
 namespace KitchenSink.Extensions
@@ -229,7 +228,7 @@ namespace KitchenSink.Extensions
 
         private static IEnumerable<IConsList<A>> RenderPermutations<A>(IEnumerable<A> seq, int? rd)
         {
-            var array = seq.ToArray();
+            var array = seq.AsArray();
             var len = array.Length;
             var r = rd ?? array.Length;
 
@@ -275,7 +274,7 @@ namespace KitchenSink.Extensions
                 throw new ArgumentException();
             }
 
-            var array = seq.ToArray();
+            var array = seq.AsArray();
 
             if (array.Length == r)
             {
@@ -350,6 +349,40 @@ namespace KitchenSink.Extensions
             foreach (var flags in RenderFlagsN(n - 1, r))
             {
                 yield return flags.Cons(false);
+            }
+        }
+
+        /// <summary>
+        /// Returns a sequence of all permutations of each possible subset length.
+        /// Length of returned sequence is equal to <c>0.ToIncluding(n).Sum(r => n.CombinationCount(r))</c>.
+        /// </summary>
+        public static IEnumerable<IEnumerable<A>> AllPermutations<A>(this IEnumerable<A> seq)
+        {
+            var array = seq.AsArray();
+
+            foreach (var r in 0.ToIncluding(array.Length))
+            {
+                foreach (var permutation in Permutations(array, r))
+                {
+                    yield return permutation;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns a sequence of all combinations of each possible subset length.
+        /// Length of returned sequence is equal to <c>0.ToIncluding(n).Sum(r => n.PermutationCount(r))</c>.
+        /// </summary>
+        public static IEnumerable<IEnumerable<A>> AllCombinations<A>(this IEnumerable<A> seq)
+        {
+            var array = seq.AsArray();
+
+            foreach (var r in 0.ToIncluding(array.Length))
+            {
+                foreach (var combination in Combinations(array, r))
+                {
+                    yield return combination;
+                }
             }
         }
     }

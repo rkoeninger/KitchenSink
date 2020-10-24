@@ -27,6 +27,18 @@ Below is a summary of what this repo contains. Note that not everything in this 
   * `Split` - splits strings by `Regex`
   * `A.IsIn(IEnumerable<A>)`, `A.IsIn(params A[])` - reversed contains check
   * `IEnumerable.AsStream`, `Stream.AsEnumerable` - converts `IEnumerable`s to/from `Stream`s
+  * `Batch` - split sequence into subsequences of consecutive values
+  * `Buffer` - eagerly evaluate sequence ahead of time in arbitrary sized groups
+  * `CrossJoin` - zip every element in sequence with every element in another sequence
+  * `Cycle` - repeat elements of a sequence infinitely
+  * `Deal` - split sequence into subsequences of every nth value
+  * `Flatten` - combine values of subsequences into one long sequence
+  * `Forever` - create lazy sequence by repeatedly calling an impure function
+  * `Interleave` - create a sequence of the values of multiple sequences round-robin
+  * `Intersperse` - create a sequence of elements from one sequence with all the elements of another between each one
+  * `OverlappingPairs` - creates a sequence of tuple pairs of overlapping adjacent pairs in a sequence
+  * `Shuffle` - randomize ordering of a sequence
+  * `ZipExact` - zip two sequences, raising an error if one runs out before the other
 
 ### Optimally Specialized Collections
 
@@ -34,12 +46,22 @@ Below is a summary of what this repo contains. Note that not everything in this 
   * `BitmappedTrie<A>` - persistent vector with tree structure
   * `ComputedList<A>` - list that generates values based on index instead of storing in memory
   * `ConsList<A>` - an immutable, singly-linked list
-  * `DefaultingDictionary<K, V>` - dictionary that defers to another dictionary when key is missing
-  * `Dictionary<K1, K2, V>` - `Dictionary`s that use `Tuple` for aggregate keys
+  * `DefaultingDictionary<A, Z>` - dictionary that defers to another dictionary when key is missing
+  * `Dictionary<A, B, Z>` - `Dictionary`s that use `Tuple` for aggregate keys
   * `FingerTree<A>` - a persistent dequeue implemented as 2,3-finger tree
   * `PairingHeap<A>` - a self-balancing, persistent, ordered heap
   * `RadixDictionary<A>` - mutable dictionary optimized for string keys
   * `RoseTree<A>` - mutable tree data structure that braches arbitrarily
+
+### Neat Math Operations
+
+  * `Factorial` - factorial as an extension method on `int`
+  * `PermutationCount` - computes number of permutations for given collection size and subsequence size
+  * `Permutations` - creates sequence of permutations of given size
+  * `AllPermutations` - creates sequence of permutations of all sizes
+  * `CombinationCount` - computes number of combinations for given collection size and subset size
+  * `Combinations` - creates sequence of combinations of elements of given size
+  * `AllCombinations` - creates sequence of combinations of all sizes
 
 ### Abstracted File System
 

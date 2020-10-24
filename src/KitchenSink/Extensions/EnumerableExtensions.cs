@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using KitchenSink.Collections;
 using static KitchenSink.Operators;
 
 namespace KitchenSink.Extensions
@@ -104,17 +105,14 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
-        /// Adapter for specialized collections that do not implement <see cref="IEnumerable{A}"/>.
-        /// Lazily reads enumerator results and returns them.
-        /// Result can be enumerated only once.
+        /// Returns sequence casted as array if it's an array, otherwise collects to an array.
         /// </summary>
-        public static IEnumerable<A> AsEnumerableNonRepeatable<A>(this IEnumerator e)
-        {
-            while (e.MoveNext())
-            {
-                yield return (A) e.Current;
-            }
-        }
+        public static A[] AsArray<A>(this IEnumerable<A> seq) => seq is A[] arr ? arr : seq.ToArray();
+
+        /// <summary>
+        /// Returns sequence casted as list if it's a list, otherwise collects to a list.
+        /// </summary>
+        public static A[] AsList<A>(this IEnumerable<A> seq) => seq is A[] arr ? arr : seq.ToArray();
 
         /// <summary>
         /// Sorts elements by their natural order.
@@ -143,30 +141,14 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Sorts elements according to given comparer.
         /// </summary>
-        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, Func<A, A, Comparison> f) =>
+        public static IEnumerable<A> Sort<A>(this IEnumerable<A> seq, Func<A, A, Ordering> f) =>
             seq.OrderBy(x => x, new ComparisonComparer<A>(f));
 
         /// <summary>
         /// Sorts elements descending according to given comparer.
         /// </summary>
-        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq, Func<A, A, Comparison> f) =>
+        public static IEnumerable<A> SortDescending<A>(this IEnumerable<A> seq, Func<A, A, Ordering> f) =>
             seq.OrderByDescending(x => x, new ComparisonComparer<A>(f));
-
-        private class ComparisonComparer<A> : IComparer<A>
-        {
-            private readonly Func<A, A, Comparison> f;
-
-            public ComparisonComparer(Func<A, A, Comparison> f) => this.f = f;
-
-            public int Compare(A x, A y) =>
-                f(x, y) switch
-                {
-                    Comparison.Gt => 1,
-                    Comparison.Lt => -1,
-                    Comparison.Eq => 0,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-        }
 
         /// <summary>
         /// Aggregates enumerable sequence using given monoid.
@@ -252,7 +234,7 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Returns a sequence with a copy of <c>separator(s)</c> between each
         /// element of the original sequence.
-        /// Example: <c>[1, 2, 3], [4, 5, 6] => [1, 4, 5, 6, 2, 4, 5, 6, 3]</c>
+        /// Example: <c>[1, 2, 3], [A, B, C] => [1, A, B, C, 2, A, B, C, 3]</c>
         /// </summary>
         public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, params A[] separators) =>
             Intersperse(seq, (IEnumerable<A>)separators);
@@ -260,7 +242,7 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Returns a sequence with copies of <c>separator(s)</c> between each
         /// element of the original sequence.
-        /// Example: <c>[1, 2, 3], [4, 5, 6] => [1, 4, 5, 6, 2, 4, 5, 6, 3]</c>
+        /// Example: <c>[1, 2, 3], [A, B, C] => [1, A, B, C, 2, A, B, C, 3]</c>
         /// </summary>
         public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, IEnumerable<A> seperators)
         {
@@ -285,44 +267,38 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
-        /// Returns a sequence with a copy of <c>separator</c> between each
-        /// element of the original sequence.
-        /// Example: <c>[1, 2, 3], [7, 8, 9] => [1, 7, 2, 8, 3, 9]</c>
+        /// Returns a sequence of the elements of given sequences in round-robin order.
+        /// Example: <c>[1, 2], [3, 4], [5, 6] => [1, 3, 5, 2, 4, 6]</c>
         /// </summary>
-        public static IEnumerable<A> Interleave<A>(this IEnumerable<A> seq1, IEnumerable<A> seq2)
+        public static IEnumerable<A> Interleave<A>(this IEnumerable<A> seq, params IEnumerable<A>[] seqs) =>
+            Interleave(SeqOf(seq).Concat(seqs));
+
+        /// <summary>
+        /// Returns a sequence of the elements of given sequences in round-robin order.
+        /// Example: <c>[1, 2], [3, 4], [5, 6] => [1, 3, 5, 2, 4, 6]</c>
+        /// </summary>
+        public static IEnumerable<A> Interleave<A>(this IEnumerable<IEnumerable<A>> seqs)
         {
-            using var e1 = seq1.GetEnumerator();
-            using var e2 = seq2.GetEnumerator();
+            var enumerators = seqs.Select(x => x.GetEnumerator()).ToArray();
+            var running = true;
 
-            while (true)
+            while (running)
             {
-                if (!e1.MoveNext())
+                running = false;
+
+                foreach (var enumerator in enumerators)
                 {
-                    while (e2.MoveNext())
+                    if (enumerator.MoveNext())
                     {
-                        yield return e2.Current;
+                        running = true;
+                        yield return enumerator.Current;
                     }
-
-                    e1.Dispose();
-                    e2.Dispose();
-                    yield break;
                 }
+            }
 
-                yield return e1.Current;
-
-                if (!e2.MoveNext())
-                {
-                    while (e1.MoveNext())
-                    {
-                        yield return e1.Current;
-                    }
-
-                    e1.Dispose();
-                    e2.Dispose();
-                    yield break;
-                }
-
-                yield return e2.Current;
+            foreach (var enumerator in enumerators)
+            {
+                enumerator.Dispose();
             }
         }
 
@@ -558,80 +534,5 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static void ForEach<A>(this IEnumerable<A> seq, Action<A> f) =>
             seq.Tap(f).Force();
-
-        /// <summary>
-        /// Sets every value in array to a particular value.
-        /// </summary>
-        public static A[] Fill<A>(this A[] array, A value)
-        {
-            for (var i = 0; i < array.Length; ++i)
-            {
-                array[i] = value;
-            }
-
-            return array;
-        }
-
-        /// <summary>
-        /// Returns enumerable that can be re-enumerated even if given enumerable can't be.
-        /// </summary>
-        public static IReplayableEnumerable<A> Replayable<A>(this IEnumerable<A> seq) =>
-            new ReplayableEnumerable<A>(seq);
-    }
-    
-    public interface IReplayableEnumerable<out A> : IEnumerable<A> { }
-
-    internal class ReplayableEnumerable<A> : IReplayableEnumerable<A>
-    {
-        private readonly Lazy<IEnumerator<A>> source;
-        private readonly Atom<(bool, List<A>)> items = Atom.Of((false, ListOf<A>()));
-
-        public ReplayableEnumerable(IEnumerable<A> source) =>
-            this.source = new Lazy<IEnumerator<A>>(source.GetEnumerator);
-
-        public IEnumerator<A> GetEnumerator() => new Etor(this);
-
-        private class Etor : IEnumerator<A>
-        {
-            private readonly ReplayableEnumerable<A> seq;
-            private int index;
-            private Maybe<A> current = None<A>();
-
-            public Etor(ReplayableEnumerable<A> seq) => this.seq = seq;
-
-            public A Current => current.OrElseThrow(new InvalidOperationException());
-
-            public bool MoveNext() => seq.items.Update(t =>
-            {
-                var (done, list) = t;
-
-                if (done)
-                {
-                    return (false, list);
-                }
-
-                if (index < list.Count)
-                {
-                    current = Some(list[index++]);
-                    return (true, list);
-                }
-
-                if (!seq.source.Value.MoveNext()) return (false, list);
-
-                var val = seq.source.Value.Current;
-                list.Add(val);
-                index++;
-                current = Some(val);
-                return (true, list);
-            }).Item1;
-
-            public void Reset() => index = 0;
-
-            public void Dispose() { }
-
-            object IEnumerator.Current => Current;
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

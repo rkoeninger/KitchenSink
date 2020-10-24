@@ -32,7 +32,7 @@ namespace KitchenSink
         }
 
         /// <summary>Closes current tag.</summary>
-        public static Xml operator >(Xml xml, string tagName)
+        public static Xml operator >(Xml xml, string _)
         {
             xml.Writer.WriteEndElement();
             xml.currentDepth--;
@@ -40,7 +40,7 @@ namespace KitchenSink
         }
         
         /// <summary>Undefined. Throws InvalidOperationException.</summary>
-        public static Xml operator <(Xml xml, int depth) => throw new InvalidOperationException();
+        public static Xml operator <(Xml _0, int _1) => throw new InvalidOperationException();
 
         /// <summary>Closes <code>depth</code> number of preceding open tags. <code>-1</code> closes all previous tags.</summary>
         public static Xml operator >(Xml xml, int depth)
@@ -135,7 +135,7 @@ namespace KitchenSink
         /// This operator is completely unnecessary but the compiler requires
         /// a matching &gt; operator for the defined &lt; operator.
         /// </summary>
-        public static Xml operator >(XmlStart start, string rootTagName) =>
+        public static Xml operator >(XmlStart _0, string _1) =>
             throw new InvalidOperationException();
 
         internal XmlStart(XmlWriterSettings settings) : this() => this.settings = settings;
