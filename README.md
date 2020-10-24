@@ -104,11 +104,6 @@ Below is a summary of what this repo contains. Note that not everything in this 
 
   * `Needs` - a minimal-configuration IoC container that can search assemblies and parent types and failover to other IoC containers
   * `SingleUse` - an attribute indicating that a dependency implementation is not threadsafe or can only be used once
-  * An implementation can also be marked Single-Use by adding a private member named `"DeclareSingleUse"`. This way, your assembly containing implementations does not itself have to be dependent on the KitchenSink assembly.
-
-```csharp
-private const int DeclareSingleUse = 0;
-```
 
 ### Precise Timekeeping Representations
 

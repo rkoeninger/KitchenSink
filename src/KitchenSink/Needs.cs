@@ -319,9 +319,7 @@ namespace KitchenSink
             }
         }
 
-        private static bool IsSingleUse(Type type) =>
-            type.HasAttribute<SingleUse>()
-            || type.GetMembers(BindingFlags.NonPublic).Any(m => m.Name.IsSimilar("DeclareSingleUse"));
+        private static bool IsSingleUse(Type type) => type.HasAttribute<SingleUse>();
 
         private static bool IsDecoratorOf(Type decoratorType, Type contractType) =>
             decoratorType.GetConstructors().Any(c => c.GetParameters().Any(p => p.ParameterType == contractType));
