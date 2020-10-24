@@ -32,7 +32,9 @@ Below is a summary of what this repo contains. Note that not everything in this 
 
   * `BankersQueue<A>` - persistent queue made from two `ConsList`s
   * `BitmappedTrie<A>` - persistent vector with tree structure
+  * `ComputedList<A>` - list that generates values based on index instead of storing in memory
   * `ConsList<A>` - an immutable, singly-linked list
+  * `DefaultingDictionary<K, V>` - dictionary that defers to another dictionary when key is missing
   * `Dictionary<K1, K2, V>` - `Dictionary`s that use `Tuple` for aggregate keys
   * `FingerTree<A>` - a persistent dequeue implemented as 2,3-finger tree
   * `PairingHeap<A>` - a self-balancing, persistent, ordered heap
@@ -68,10 +70,11 @@ Below is a summary of what this repo contains. Note that not everything in this 
 
 ### Easy Cache Implementation
 
-  * `Buffer` - accumulates arguments to `Write` method until limit is reached or `Flush` is called
+  * `Batcher` - accumulates arguments to `Push` method until limit is reached or `Flush` is called
   * `Cache` - uses code generation to build wrapper class around interface implementation that caches all methods
   * `Debounce` - returns new version of an action that only passes through call after a time has passed since last call
   * `Memo` - returns new version of a function that caches return value for inputs, with optional expiration time
+  * `Sprinkler` - splits items from batches passed to `Push` spread out by time delay
 
 ### Dynamic Scoping Emulation
 
@@ -90,7 +93,6 @@ private const int DeclareSingleUse = 0;
 ### Precise Timekeeping Representations
 
   * `DateSpan` - region of time between two dates
-  * `ExactDay` - a region of time covering an entire calendar day
 
 ### Testing and Validation
 
@@ -101,7 +103,7 @@ private const int DeclareSingleUse = 0;
 
 ### Pure Functional Programming Facilities
 
-  * `IO` - a type for modeling and composing I/O operations and side effects
+  * `Io` - a type for modeling and composing I/O operations and side effects
   * `Lens` - composable get and set pair for immutable types
 
 ### Questionable File Path Building Facility using Operator Overloading
