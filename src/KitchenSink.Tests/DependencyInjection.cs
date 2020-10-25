@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using KitchenSink.Testing;
+using NUnit.Framework;
 
 namespace KitchenSink.Tests
 {
@@ -22,14 +23,14 @@ namespace KitchenSink.Tests
         public interface IAnotherInterface { }
         public class DependentImplementation : IAnotherInterface
         {
-            public DependentImplementation(IWhateverInterface whatever) { }
+            public DependentImplementation(IWhateverInterface _whatever) { }
         }
 
         public interface IBlahInterface { }
         public class BlahImplementation : IBlahInterface
         {
             public BlahImplementation() { }
-            public BlahImplementation(ISomeInterface some) { }
+            public BlahImplementation(ISomeInterface _some) { }
         }
 
         [Test]
@@ -132,7 +133,7 @@ namespace KitchenSink.Tests
             public class VariantDependent
             {
                 // ReSharper disable UnusedParameter.Local
-                public VariantDependent(PlumVariant plum, PearVariant pear)
+                public VariantDependent(PlumVariant _plum, PearVariant _pear)
                 {
                 }
                 // ReSharper restore UnusedParameter.Local

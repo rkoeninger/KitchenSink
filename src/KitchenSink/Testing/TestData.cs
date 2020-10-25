@@ -4,7 +4,7 @@ using System.Linq;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
-namespace KitchenSink
+namespace KitchenSink.Testing
 {
     public static class All
     {

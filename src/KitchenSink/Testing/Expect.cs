@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using KitchenSink.Extensions;
 using static KitchenSink.Operators;
 
-namespace KitchenSink
+namespace KitchenSink.Testing
 {
     /// <summary>
     /// Expect contains methods that are used to assert failures,
