@@ -93,7 +93,10 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Computes the factorial of n.
         /// <code>
-        ///     n! = n * (n - 1) * (n - 2) * ... * 2 * 1
+        ///     0! = 1
+        /// </code>
+        /// <code>
+        ///     n! = n * (n - 1)!
         /// </code>
         /// </summary>
         public static int Factorial(this int n)
@@ -119,10 +122,50 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
+        /// Computes the subfactorial of n.
+        /// <code>
+        ///     !0 = 1
+        /// </code>
+        /// <code>
+        ///     !n = n * !(n - 1) + (-1) ^ n
+        /// </code>
+        /// </summary>
+        public static int Subfactorial(this int n)
+        {
+            if (n < 0)
+            {
+                throw new ArgumentException("Subfactorial not valid on integers less than 0");
+            }
+
+            if (n == 0 || n == 2)
+            {
+                return 1;
+            }
+
+            if (n == 1)
+            {
+                return 0;
+            }
+
+            var result = 2;
+
+            for (var i = 4; i <= n; ++i)
+            {
+                result *= i;
+                result += n % 2 == 0 ? 1 : -1;
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Computes the number of permutations of r elements from a set of n elements.
         /// Equivalent to Factorial when <c>n = r</c>.
         /// <code>
         ///     nPr = n! / (n - r)!
+        /// </code>
+        /// <code>
+        ///     nPn = n!
         /// </code>
         /// </summary>
         public static int PermutationCount(this int n, int r)
@@ -161,6 +204,12 @@ namespace KitchenSink.Extensions
 
             return result;
         }
+
+        /// <summary>
+        /// Computes the number of derangements of a set of n elements.
+        /// Equivalent to Subfactorial of <c>n</c>.
+        /// </summary>
+        public static int DerangementCount(this int n) => n.Subfactorial();
 
         /// <summary>
         /// Computes the number of combinations of r elements from a set of n elements.
@@ -239,6 +288,7 @@ namespace KitchenSink.Extensions
 
             if (r == 0 || len == 0)
             {
+                yield return ConsList.Empty<A>();
                 yield break;
             }
 
@@ -259,6 +309,39 @@ namespace KitchenSink.Extensions
                 foreach (var subseq in RenderPermutations(sublist, r - 1))
                 {
                     yield return subseq.Cons(array[i]);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns a sequence of all permutations of the input sequence
+        /// with no element in its original place.
+        /// Length of returned sequence is equal to <c>seq.Count().Subfactorial()</c>.
+        /// </summary>
+        public static IEnumerable<IEnumerable<A>> Derangements<A>(this IEnumerable<A> seq) =>
+            RenderDerangements(seq.ZipWithIndex(), 0);
+
+        private static IEnumerable<IConsList<A>> RenderDerangements<A>(IEnumerable<(int, A)> seq, int k)
+        {
+            var array = seq.AsArray();
+            var len = array.Length;
+
+            if (len == 0)
+            {
+                yield return ConsList.Empty<A>();
+                yield break;
+            }
+
+            foreach (var i in Enumerable.Range(0, array.Length))
+            {
+                if (array[i].Item1 != k)
+                {
+                    var sublist = array.ExceptAt(i);
+
+                    foreach (var subseq in RenderDerangements(sublist, k + 1))
+                    {
+                        yield return subseq.Cons(array[i].Item2);
+                    }
                 }
             }
         }

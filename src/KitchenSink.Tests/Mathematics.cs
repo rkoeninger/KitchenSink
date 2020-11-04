@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using KitchenSink.Extensions;
 using KitchenSink.Testing;
 using static KitchenSink.Operators;
@@ -25,6 +26,18 @@ namespace KitchenSink.Tests
             Assert.AreEqual(24, 4.Factorial());
             Expect.Error(() => (-1).Factorial());
             Expect.Error(() => (-2).Factorial());
+        }
+
+        [Test]
+        public void Subfactorial()
+        {
+            Assert.AreEqual(1, 0.Subfactorial());
+            Assert.AreEqual(0, 1.Subfactorial());
+            Assert.AreEqual(1, 2.Subfactorial());
+            Assert.AreEqual(2, 3.Subfactorial());
+            Assert.AreEqual(9, 4.Subfactorial());
+            Expect.Error(() => (-1).Subfactorial());
+            Expect.Error(() => (-2).Subfactorial());
         }
 
         [Test]
@@ -128,5 +141,49 @@ namespace KitchenSink.Tests
                 Assert.IsTrue(permutations.Any(x => x.SequenceEqual(expected)));
             }
         }
+
+        [Test]
+        [TestCaseSource(nameof(DerangementCases))]
+        public void List(List<int> list, List<List<int>> expectedDerangements)
+        {
+            var derangements = list.Derangements().ToList();
+            Assert.AreEqual(list.Count.DerangementCount(), derangements.Count);
+            Assert.AreEqual(expectedDerangements.Count, derangements.Count);
+
+            foreach (var expected in expectedDerangements)
+            {
+                Assert.IsTrue(derangements.Any(x => x.SequenceEqual(expected)));
+            }
+        }
+
+        private static IEnumerable<TestCaseData> DerangementCases => SeqOf(
+            new TestCaseData(
+                ListOf<int>(),
+                ListOf(
+                    ListOf<int>())),
+            new TestCaseData(
+                ListOf(1),
+                ListOf<List<int>>()),
+            new TestCaseData(
+                ListOf(1, 2),
+                ListOf(
+                    ListOf(2, 1))),
+            new TestCaseData(
+                ListOf(1, 2, 3),
+                ListOf(
+                    ListOf(2, 3, 1),
+                    ListOf(3, 1, 2))),
+            new TestCaseData(
+                ListOf(1, 2, 3, 4),
+                ListOf(
+                    ListOf(2, 1, 4, 3),
+                    ListOf(2, 3, 4, 1),
+                    ListOf(2, 4, 1, 3),
+                    ListOf(3, 1, 4, 2),
+                    ListOf(3, 4, 1, 2),
+                    ListOf(3, 4, 2, 1),
+                    ListOf(4, 1, 2, 3),
+                    ListOf(4, 3, 1, 2),
+                    ListOf(4, 3, 2, 1))));
     }
 }
