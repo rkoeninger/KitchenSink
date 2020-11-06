@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
@@ -330,6 +331,21 @@ namespace KitchenSink
             }, cancel.Token);
 
             return Disposable(cancel.Cancel);
+        }
+
+        /// <summary>
+        /// Lazy sequence of fibonacci numbers.
+        /// </summary>
+        public static IEnumerable<int> Fibonacci()
+        {
+            var i = 0;
+            var j = 1;
+
+            while (j > 0)
+            {
+                yield return j;
+                (i, j) = (j, i + j);
+            }
         }
     }
 }

@@ -90,6 +90,14 @@ namespace KitchenSink.Extensions
         public static IReadOnlyList<int> ToIncluding(this int start, int end) =>
             new ComputedList<int>(end - start + 1, i => i + start);
 
+        private static readonly double Sqrt5 = Math.Sqrt(5);
+        private static readonly double Gold = (Sqrt5 + 1.0) / 2.0;
+
+        /// <summary>
+        /// Computes the nth fibonacci number in constant time.
+        /// </summary>
+        public static int Fibonacci(this int n) => (int) Math.Round(Math.Pow(Gold, n) / Sqrt5);
+
         /// <summary>
         /// Computes the factorial of n.
         /// <code>

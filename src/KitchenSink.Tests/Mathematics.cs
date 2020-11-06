@@ -17,6 +17,17 @@ namespace KitchenSink.Tests
         }
 
         [Test]
+        public void FibonacciSeries()
+        {
+            Assert.IsTrue(SeqOf(1, 1, 2, 3, 5, 8, 13, 21).SequenceEqual(Fibonacci().Take(8)));
+
+            foreach (var (i, n) in Fibonacci().ZipWithIndex())
+            {
+                Assert.AreEqual(n, (i + 1).Fibonacci());
+            }
+        }
+
+        [Test]
         public void Factorial()
         {
             Assert.AreEqual(1, 0.Factorial());
