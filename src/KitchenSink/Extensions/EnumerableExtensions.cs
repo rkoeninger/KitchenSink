@@ -351,9 +351,17 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
-        /// Forces entire sequence to be enumerated immediately.
+        /// Forces entire sequence to be enumerated immediately, returning sequence.
         /// </summary>
         public static IEnumerable<A> Force<A>(this IEnumerable<A> seq) => seq.ToArray();
+
+        /// <summary>
+        /// Forces entire sequence to be enumerated immediately, returning nothing.
+        /// </summary>
+        public static void DoAll<A>(this IEnumerable<A> seq)
+        {
+            foreach (var _ in seq) { }
+        }
 
         /// <summary>
         /// Optimized version of Concat for Arrays.
@@ -533,6 +541,6 @@ namespace KitchenSink.Extensions
         /// Like <see cref="Tap{A}"/>, but eager and returns void.
         /// </summary>
         public static void ForEach<A>(this IEnumerable<A> seq, Action<A> f) =>
-            seq.Tap(f).Force();
+            seq.Tap(f).DoAll();
     }
 }

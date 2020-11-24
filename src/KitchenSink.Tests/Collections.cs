@@ -106,7 +106,7 @@ namespace KitchenSink.Tests
         }
 
         [Test]
-        public void EnumerableForce()
+        public void EnumerableDoAll()
         {
             // Enumerable methods like Where() and Select() make use of
             // deferred execution so side-effects in functions will not
@@ -125,8 +125,8 @@ namespace KitchenSink.Tests
             Assert.IsFalse(y == 2);
             Assert.IsFalse(z == 3);
 
-            // Force() causes an IEnumerable to be evaluated and side-effects to occur.
-            e.Force();
+            // DoAll() causes an IEnumerable to be evaluated and side-effects to occur.
+            e.DoAll();
 
             Assert.IsTrue(x == 1);
             Assert.IsTrue(y == 2);
