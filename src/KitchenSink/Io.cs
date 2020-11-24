@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using KitchenSink.Extensions;
 
 namespace KitchenSink
 {
@@ -22,15 +23,7 @@ namespace KitchenSink
             Of(() => seq.Select(Eval));
 
         public static Io<Unit> Sequence(this IEnumerable<Io<Unit>> seq) =>
-            Of(() =>
-            {
-                foreach (var io in seq)
-                {
-                    io.Eval();
-                }
-
-                return Unit.It;
-            });
+            Of(() => { seq.ForEach(io => io.Eval()); return Unit.It; });
 
         public static Func<A, Io<C>> Compose<A, B, C>(this Func<A, Io<B>> f, Func<B, Io<C>> g) =>
             a => f(a).SelectMany(g);
@@ -51,59 +44,34 @@ namespace KitchenSink
         public static Io<A> Also<A, B>(Io<A> a, Io<B> b) => a.Also(b);
     }
 
-    public struct Io<A>
+    public class Io<A>
     {
-        internal Io(Func<A> cont) : this() => Cont = cont;
+        internal Io(Func<A> cont) => Cont = cont;
 
         internal Func<A> Cont { get; }
 
         public A Eval() => Cont();
 
-        public Io<B> Select<B>(Func<A, B> f)
-        {
-            var me = this;
-            return Io.Of(() => f(me.Eval()));
-        }
+        public Io<B> Select<B>(Func<A, B> f) =>
+            Io.Of(() => f(Eval()));
 
-        public Io<B> SelectMany<B>(Func<A, Io<B>> f)
-        {
-            var me = this;
-            return Io.Of(() => f(me.Eval()).Eval());
-        }
+        public Io<B> SelectMany<B>(Func<A, Io<B>> f) =>
+            Io.Of(() => f(Eval()).Eval());
 
-        public Io<B> Then<B>(Io<B> io)
-        {
-            var me = this;
-            return Io.Of(() =>
-            {
-                me.Eval();
-                return io.Eval();
-            });
-        }
+        public Io<B> Then<B>(Io<B> io) =>
+            Io.Of(() => { Eval(); return io.Eval(); });
 
         public Io<A> Also<B>(Io<B> io) => io.Then(this);
 
-        public Io<C> Join<B, C>(Io<B> other, Func<A, B, C> f)
-        {
-            var me = this;
-            return Io.Of(() => f(me.Eval(), other.Eval()));
-        }
+        public Io<C> Join<B, C>(Io<B> other, Func<A, B, C> f) =>
+            Io.Of(() => f(Eval(), other.Eval()));
 
         public Io<Unit> Forever() => Forever<Unit>();
 
-        public Io<B> Forever<B>()
-        {
-            var me = this;
+        public Io<B> Forever<B>() =>
+            Io.Of<B>(() => { while (true) Eval(); });
 
-            // ReSharper disable once FunctionNeverReturns
-            return Io.Of<B>(() => { while (true) me.Eval(); });
-        }
-
-        public Io<Unit> Ignore()
-        {
-            var me = this;
-            return Io.Of_(() => me.Eval());
-        }
+        public Io<Unit> Ignore() => Io.Of_(() => Eval());
     }
 
     public static class ConsoleIo

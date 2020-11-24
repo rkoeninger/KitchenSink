@@ -54,23 +54,16 @@ namespace KitchenSink
     /// </summary>
     public sealed class Lens<A, B>
     {
-        public Lens(Func<A, B> get, Func<A, B, A> set)
-        {
-            Get = get;
-            Set = set;
-        }
+        public Lens(Func<A, B> get, Func<A, B, A> set) => (Get, Set) = (get, set);
 
         public Func<A, B> Get { get; }
         public Func<A, B, A> Set { get; }
 
         public Lens<C, B> Compose<C>(Lens<C, A> other) => other.Then(this);
 
-        public Lens<A, C> Then<C>(Lens<B, C> other)
-        {
-            var me = this;
-            return new Lens<A, C>(
-                a => other.Get(me.Get(a)),
-                (a, c) => me.Set(a, other.Set(me.Get(a), c)));
-        }
+        public Lens<A, C> Then<C>(Lens<B, C> other) =>
+            new Lens<A, C>(
+                a => other.Get(Get(a)),
+                (a, c) => Set(a, other.Set(Get(a), c)));
     }
 }
