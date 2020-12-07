@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using KitchenSink.Extensions;
@@ -281,9 +281,9 @@ namespace KitchenSink
         public static bool IsNot<A>(object val) => !Is<A>(val);
 
         /// <summary>
-        /// Deep-clones given object.
+        /// Deep-clones given object. Must be simple, JSON-serializable data.
         /// </summary>
-        public static T Clone<T>(T source)
+        public static T Clone<T>(T source) where T : class
         {
             if (source == null)
             {
@@ -300,11 +300,7 @@ namespace KitchenSink
                 throw new CloneNotSupportedException(typeof(T));
             }
 
-            var formatter = new BinaryFormatter();
-            using var stream = new MemoryStream();
-            formatter.Serialize(stream, source);
-            stream.Seek(0, SeekOrigin.Begin);
-            return (T) formatter.Deserialize(stream);
+            return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(source));
         }
 
         /// <summary>

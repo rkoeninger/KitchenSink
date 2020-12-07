@@ -15,7 +15,7 @@ namespace KitchenSink.Extensions
             return x;
         }
 
-        public static A Copy<A>(this A x, Action<A> f) => Clone(x).With(f);
+        public static A Copy<A>(this A x, Action<A> f) where A : class => Clone(x).With(f);
 
         public static B Use<A, B>(this A resource, Func<A, B> f) where A : IDisposable
         {
