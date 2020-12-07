@@ -4,6 +4,4 @@ language: csharp
 mono: none
 dotnet: 5.0
 script:
-  - cd src
-  - dotnet build
   - dotnet test --filter TestCategory!=WindowsOnly
