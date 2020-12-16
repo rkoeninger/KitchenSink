@@ -234,6 +234,15 @@ namespace KitchenSink
         /// <summary>
         /// Wrap function with memoizing cache.
         /// </summary>
+        public static Func<Z> Memo<Z>(Func<Z> f)
+        {
+            var cache = new Lazy<Z>(f);
+            return () => cache.Value;
+        }
+
+        /// <summary>
+        /// Wrap function with memoizing cache.
+        /// </summary>
         public static Func<A, Z> Memo<A, Z>(Func<A, Z> f)
         {
             var cache = new ConcurrentDictionary<A, Z>();
