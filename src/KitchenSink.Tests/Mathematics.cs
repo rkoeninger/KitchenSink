@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using KitchenSink.Extensions;
 using KitchenSink.Testing;
@@ -14,6 +15,15 @@ namespace KitchenSink.Tests
         {
             Expect.That(Sample.Ints, x => x.IsEven() == ((x / 2) * 2 == x));
             Expect.That(Sample.Ints, x => x.IsOdd() == ((x / 2) * 2 != x));
+        }
+
+        [Test]
+        public void SquareRoot()
+        {
+            Assert.AreEqual(Math.Sqrt(13f), 13f.FastSqrt(), 0.001f);
+            Assert.AreEqual(1.0f / Math.Sqrt(13f), 13f.FastInverseSqrt(), 0.001f);
+            Assert.AreEqual(Math.Sqrt(13), 13.0.FastSqrt(), 0.001);
+            Assert.AreEqual(1.0 / Math.Sqrt(13.0), 13.0.FastInverseSqrt(), 0.001);
         }
 
         [Test]

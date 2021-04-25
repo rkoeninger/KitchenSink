@@ -85,6 +85,38 @@ namespace KitchenSink.Extensions
             new ComputedList<int>(end - start, i => i + start);
 
         /// <summary>
+        /// Fast inverse square root function based on the Q_rqsrt function from Quake III Arena.
+        /// </summary>
+        public static float FastInverseSqrt(this float x)
+        {
+            var bits = BitConverter.SingleToInt32Bits(x);
+            var y = BitConverter.Int32BitsToSingle(0x5f3759df - (bits >> 1));
+            return y * (1.5f - x / 2 * y * y);
+        }
+
+        /// <summary>
+        /// Fast square root function based on the Q_rqsrt function from Quake III Arena.
+        /// </summary>
+        public static float FastSqrt(this float x) =>
+            x * FastInverseSqrt(x);
+
+        /// <summary>
+        /// Fast inverse square root function based on the Q_rqsrt function from Quake III Arena.
+        /// </summary>
+        public static double FastInverseSqrt(this double x)
+        {
+            var bits = BitConverter.DoubleToInt64Bits(x);
+            var y = BitConverter.Int64BitsToDouble(0x5fe6eb50c7b537a9L - (bits >> 1));
+            return y * (1.5 - x / 2 * y * y);
+        }
+
+        /// <summary>
+        /// Fast square root function based on the Q_rqsrt function from Quake III Arena.
+        /// </summary>
+        public static double FastSqrt(this double x) =>
+            x * FastInverseSqrt(x);
+
+        /// <summary>
         /// Inclusive on start and end value.
         /// </summary>
         public static IReadOnlyList<int> ToIncluding(this int start, int end) =>
