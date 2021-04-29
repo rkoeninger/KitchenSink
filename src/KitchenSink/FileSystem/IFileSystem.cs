@@ -8,12 +8,93 @@ namespace KitchenSink.FileSystem
     public interface IFileSystem
     {
         void Create(EntryType type, string path);
+
         void Delete(string path);
+
+        void DeleteRecursive(string path)
+        {
+            var entry = GetInfo(path);
+
+            if (entry?.IsFile ?? false)
+            {
+                WriteFile(path).Close();
+            }
+            else if (entry?.IsDirectory ?? false)
+            {
+                foreach (var child in ReadDirectory(path))
+                {
+                    Delete(child.Path);
+                }
+            }
+        }
+
         void Move(string source, string destination);
+
+        void Copy(string source, string destination)
+        {
+            var entry = GetInfo(source);
+
+            if (entry?.IsFile ?? false)
+            {
+                WriteBytes(destination, ReadBytes(source));
+            }
+            else if (entry?.IsDirectory ?? false)
+            {
+                Create(EntryType.Directory, destination);
+
+                foreach (var child in ReadDirectory(source))
+                {
+                    Copy(child.Path, Path.Combine(destination, child.Path.Substring(source.Length)));
+                }
+            }
+            else
+            {
+                throw new PathNotFoundException(source);
+            }
+        }
+
         EntryInfo GetInfo(string path);
+        bool Exists(string path) => GetInfo(path) != null;
+        bool DirectoryExists(string path) => GetInfo(path)?.Type == EntryType.Directory;
+        bool FileExists(string path) => GetInfo(path)?.Type == EntryType.File;
+
         IEnumerable<EntryInfo> ReadDirectory(string path);
+
+        IEnumerable<EntryInfo> ReadDirectoryRecursive(string path)
+        {
+            foreach (var entry in ReadDirectory(path))
+            {
+                yield return entry;
+
+                if (entry.Type != EntryType.Directory) continue;
+
+                foreach (var child in ReadDirectoryRecursive(entry.Path))
+                {
+                    yield return child;
+                }
+            }
+        }
+
         Stream ReadFile(string path);
+
+        IEnumerable<byte> ReadBytes(string path) => ReadFile(path).AsEnumerable();
+        IEnumerable<char> ReadChars(string path, Encoding encoding = null) =>
+            ReadFile(path).AsReader(encoding).AsEnumerableChars();
+        IEnumerable<string> ReadLines(string path, Encoding encoding = null) =>
+            ReadFile(path).AsReader(encoding).AsEnumerableLines();
+        string ReadText(string path, Encoding encoding = null) =>
+            ReadFile(path).Use(s => s.ReadTextToEnd(encoding));
+
         Stream WriteFile(string path, bool append = false);
+
+        void WriteBytes(string path, IEnumerable<byte> bytes) =>
+            bytes.ToStream().Use(s => WriteFile(path).Use(s.CopyTo));
+        void WriteChars(string path, IEnumerable<char> chars, Encoding encoding = null) =>
+            WriteFile(path).AsWriter(encoding).Use(s => chars.ForEach(s.Write));
+        void WriteLines(string path, IEnumerable<string> lines, Encoding encoding = null) =>
+            WriteFile(path).Use(s => lines.ForEach(s.AsWriter(encoding).WriteLine));
+        void WriteText(string path, string text, Encoding encoding = null) =>
+            WriteFile(path).Use(s => s.AsWriter(encoding).Write(text));
     }
 
     public class EntryInfo
@@ -36,99 +117,5 @@ namespace KitchenSink.FileSystem
     {
         Directory,
         File
-    }
-
-    public static class FileSystemOperations
-    {
-        public static bool Exists(this IFileSystem fs, string path) =>
-            fs.GetInfo(path) != null;
-
-        public static bool DirectoryExists(this IFileSystem fs, string path) =>
-            fs.GetInfo(path)?.Type == EntryType.Directory;
-
-        public static bool FileExists(this IFileSystem fs, string path) =>
-            fs.GetInfo(path)?.Type == EntryType.File;
-
-        public static void Clear(this IFileSystem fs, string path)
-        {
-            var entry = fs.GetInfo(path);
-
-            if (entry?.IsFile ?? false)
-            {
-                fs.WriteFile(path).Close();
-            }
-            else if (entry?.IsDirectory ?? false)
-            {
-                foreach (var child in fs.ReadDirectory(path))
-                {
-                    fs.Delete(child.Path);
-                }
-            }
-        }
-
-        public static void Copy(this IFileSystem fs, string source, string destination)
-        {
-            var entry = fs.GetInfo(source);
-
-            if (entry?.IsFile ?? false)
-            {
-                fs.ReadFile(source).Use(s => fs.WriteFile(destination).Use(s.CopyTo));
-            }
-            else if (entry?.IsDirectory ?? false)
-            {
-                fs.Create(EntryType.Directory, destination);
-
-                foreach (var child in fs.ReadDirectory(source))
-                {
-                    fs.Copy(child.Path, Path.Combine(destination, child.Path.Substring(source.Length)));
-                }
-            }
-            else
-            {
-                throw new PathNotFoundException(source);
-            }
-        }
-
-        public static IEnumerable<EntryInfo> ReadDirectoryRecursive(this IFileSystem fs, string path)
-        {
-            foreach (var entry in fs.ReadDirectory(path))
-            {
-                yield return entry;
-
-                if (entry.Type != EntryType.Directory) continue;
-
-                foreach (var child in fs.ReadDirectoryRecursive(entry.Path))
-                {
-                    yield return child;
-                }
-            }
-        }
-
-        public static IEnumerable<byte> ReadBytes(this IFileSystem fs, string path) =>
-            fs.ReadFile(path).AsEnumerable();
-
-        public static IEnumerable<char> ReadChars(this IFileSystem fs, string path, Encoding encoding = null) =>
-            fs.ReadFile(path).AsReader(encoding).AsEnumerableChars();
-
-        public static IEnumerable<string> ReadLines(this IFileSystem fs, string path, Encoding encoding = null) =>
-            fs.ReadFile(path).AsReader(encoding).AsEnumerableLines();
-
-        public static string ReadText(this IFileSystem fs, string path, Encoding encoding = null) =>
-            fs.ReadFile(path).Use(s => s.ReadTextToEnd(encoding));
-
-        public static void WriteBytes(this IFileSystem fs, string path, IEnumerable<byte> bytes)
-        {
-            using var stream = bytes.ToStream();
-            fs.WriteFile(path).Use(stream.CopyTo);
-        }
-
-        public static void WriteChars(this IFileSystem fs, string path, IEnumerable<char> chars, Encoding encoding = null) =>
-            fs.WriteFile(path).AsWriter(encoding).Use(s => chars.ForEach(s.Write));
-
-        public static void WriteLines(this IFileSystem fs, string path, IEnumerable<string> lines, Encoding encoding = null) =>
-            fs.WriteFile(path).Use(s => lines.ForEach(s.AsWriter(encoding).WriteLine));
-
-        public static void WriteText(this IFileSystem fs, string path, string text, Encoding encoding = null) =>
-            fs.WriteFile(path).Use(s => s.AsWriter(encoding).Write(text));
     }
 }
