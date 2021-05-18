@@ -40,6 +40,7 @@ Below is a summary of what this repo contains. Note that not everything in this 
 
 ### Optimally Specialized Collections
 
+  * `AsyncQueue<A>` - asynchronous queue that allows awaiting on value inserted into empty queue
   * `BankersQueue<A>` - persistent queue made from two `ConsList`s
   * `BitmappedTrie<A>` - persistent vector with tree structure
   * `ComputedList<A>` - list that generates values based on index instead of storing in memory
