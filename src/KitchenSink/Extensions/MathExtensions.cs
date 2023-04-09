@@ -416,7 +416,7 @@ namespace KitchenSink.Extensions
             {
                 foreach (var flags in RenderFlagsN(array.Length, r))
                 {
-                    yield return array.ZipTuples(flags).Where(x => x.Item2).Select(x => x.Item1);
+                    yield return array.Zip(flags).Where(x => x.Second).Select(x => x.First);
                 }
             }
         }

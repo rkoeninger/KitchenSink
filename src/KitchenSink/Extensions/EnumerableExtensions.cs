@@ -12,7 +12,7 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Returns true if item is in sequence.
         /// </summary>
-        public static bool IsIn<A>(this A val, params A[] vals) => IsIn(val, (IEnumerable<A>) vals);
+        public static bool IsIn<A>(this A val, params A[] vals) => IsIn(val, vals.AsEnumerable());
 
         /// <summary>
         /// Returns true if item is in sequence.
@@ -22,7 +22,7 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Returns true if item is not in sequence.
         /// </summary>
-        public static bool IsNotIn<A>(this A val, params A[] vals) => !IsIn(val, (IEnumerable<A>) vals);
+        public static bool IsNotIn<A>(this A val, params A[] vals) => !IsIn(val, vals.AsEnumerable());
 
         /// <summary>
         /// Returns true if item is not in sequence.
@@ -32,7 +32,7 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// If sequence is empty, replace with sequence of given value(s).
         /// </summary>
-        public static IEnumerable<A> IfEmpty<A>(this IEnumerable<A> xs, params A[] values) => IfEmpty(xs, (IEnumerable<A>)values);
+        public static IEnumerable<A> IfEmpty<A>(this IEnumerable<A> xs, params A[] vals) => IfEmpty(xs, vals.AsEnumerable());
 
         /// <summary>
         /// If sequence is empty, replace with given sequence.
@@ -55,6 +55,102 @@ namespace KitchenSink.Extensions
                 }
             }
         }
+
+        /// <summary>
+        /// Finds exactly 2 items in sequence that match predicate and returns them as a tuple.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// If sequence does not contain exactly 2 items matching predicate.
+        /// </exception>
+        public static (A, A) Couple<A>(this IEnumerable<A> xs, Func<A, bool> predicate)
+        {
+            A x0 = default;
+            A x1 = default;
+            var count = 0;
+
+            foreach (var x in xs)
+            {
+                if (predicate(x))
+                {
+                    switch (count++)
+                    {
+                        case 0:
+                            x0 = x;
+                            break;
+                        case 1:
+                            x1 = x;
+                            break;
+                        default:
+                            throw new InvalidOperationException("Sequence contains more than 2 items");
+                    }
+                }
+            }
+
+            if (count < 2)
+            {
+                throw new InvalidOperationException("Sequence contains less than 2 items");
+            }
+
+            return (x0, x1);
+        }
+
+        /// <summary>
+        /// Finds exactly 2 items in sequence and returns them as a tuple.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// If sequence does not contain exactly 2 items.
+        /// </exception>
+        public static (A, A) Couple<A>(this IEnumerable<A> xs) => Couple(xs, _ => true);
+
+        /// <summary>
+        /// Finds exactly 3 items in sequence that match predicate and returns them as a tuple.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// If sequence does not contain exactly 3 items matching predicate.
+        /// </exception>
+        public static (A, A, A) Triple<A>(this IEnumerable<A> xs, Func<A, bool> predicate)
+        {
+            A x0 = default;
+            A x1 = default;
+            A x2 = default;
+            var count = 0;
+
+            foreach (var x in xs)
+            {
+                if (predicate(x))
+                {
+                    switch (count++)
+                    {
+                        case 0:
+                            x0 = x;
+                            break;
+                        case 1:
+                            x1 = x;
+                            break;
+                        case 2:
+                            x2 = x;
+                            break;
+                        default:
+                            throw new InvalidOperationException("Sequence contains more than 3 items");
+                    }
+                }
+            }
+
+            if (count < 3)
+            {
+                throw new InvalidOperationException("Sequence contains less than 3 items");
+            }
+
+            return (x0, x1, x2);
+        }
+
+        /// <summary>
+        /// Finds exactly 3 items in sequence and returns them as a tuple.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// If sequence does not contain exactly 3 items.
+        /// </exception>
+        public static (A, A, A) Triple<A>(this IEnumerable<A> xs) => Triple(xs, _ => true);
 
         /// <summary>
         /// Returns greatest item in sequence according to comparer, preferring earlier elements.
@@ -205,30 +301,25 @@ namespace KitchenSink.Extensions
             seq.SelectMany(x => f(x).Branch(y => SeqOf(y), ys => Flatten(ys, f)));
 
         /// <summary>
-        /// Returns sequence of overlapping pairs of elements in given sequence.
-        /// Example: <c>[1, 2, 3, 4, 5] => [[1, 2], [2, 3], [3, 4], [4, 5]]</c>
+        /// Returns sequence of overlapping subsequences of given size.
+        /// Example: <c>[1, 2, 3, 4, 5], 3 => [[1, 2, 3], [2, 3, 4], [3, 4, 5]]</c>
         /// </summary>
-        public static IEnumerable<(A, A)> OverlappingPairs<A>(this IEnumerable<A> seq)
+        public static IEnumerable<IEnumerable<A>> Clump<A>(this IEnumerable<A> seq, int size)
         {
-            using var e = seq.GetEnumerator();
+            var buffer = new A[size];
 
-            if (!e.MoveNext()) yield break;
-
-            var previous = e.Current;
-
-            if (!e.MoveNext()) throw new ArgumentException("too few elements");
-
-            var current = e.Current;
-            yield return (previous, current);
-
-            while (e.MoveNext())
+            foreach (var (i, x) in seq.ZipWithIndex())
             {
-                previous = current;
-                current = e.Current;
-                yield return (previous, current);
-            }
+                buffer[i % size] = x;
 
-            e.Dispose();
+                if (i >= size - 1)
+                {
+                    var offset = (i + 1) % size;
+                    yield return 0.To(size)
+                        .Select(j => buffer[(j + offset) % size])
+                        .ToArray();
+                }
+            }
         }
 
         /// <summary>
@@ -237,7 +328,7 @@ namespace KitchenSink.Extensions
         /// Example: <c>[1, 2, 3], [A, B, C] => [1, A, B, C, 2, A, B, C, 3]</c>
         /// </summary>
         public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, params A[] separators) =>
-            Intersperse(seq, (IEnumerable<A>)separators);
+            Intersperse(seq, separators.AsEnumerable());
 
         /// <summary>
         /// Returns a sequence with copies of <c>separator(s)</c> between each
@@ -280,6 +371,7 @@ namespace KitchenSink.Extensions
         public static IEnumerable<A> Interleave<A>(this IEnumerable<IEnumerable<A>> seqs)
         {
             var enumerators = seqs.Select(x => x.GetEnumerator()).ToArray();
+            using var _ = new AggregateDisposable(enumerators);
             var running = true;
 
             while (running)
@@ -295,10 +387,20 @@ namespace KitchenSink.Extensions
                     }
                 }
             }
+        }
 
-            foreach (var enumerator in enumerators)
+        /// <summary>
+        /// Returns a sequence of the elements of given sequences in round-robin order.
+        /// Example: <c>[1, 2], [3, 4], [5, 6] => [[1, 3], [5, 2], [4, 6]]</c>
+        /// </summary>
+        public static IEnumerable<IEnumerable<A>> Transpose<A>(this IEnumerable<IEnumerable<A>> seqs)
+        {
+            var enumerators = seqs.Select(x => x.GetEnumerator()).ToArray();
+            using var _ = new AggregateDisposable(enumerators);
+
+            while (enumerators.All(e => e.MoveNext()))
             {
-                enumerator.Dispose();
+                yield return enumerators.Select(e => e.Current);
             }
         }
 
@@ -386,12 +488,6 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
-        /// Combines two sequences by pairing off their elements into tuples.
-        /// Example: <c>[1, 2, 3], [A, B, C] => [(1, A), (2, B), (3, C)]</c>
-        /// </summary>
-        public static IEnumerable<(A, B)> ZipTuples<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) => xs.Zip(ys, TupleOf);
-
-        /// <summary>
         /// Sames as the standard <see cref="Enumerable.Zip{A, B, C}"/>, but
         /// raises exception if sequences are not of the same length.
         /// </summary>
@@ -426,7 +522,7 @@ namespace KitchenSink.Extensions
         /// Returns a sequence of items paired with their index in the original sequence.
         /// Example: <c>[A, B, C] => [(0, A), (1, B), (2, C)]</c>
         /// </summary>
-        public static IEnumerable<(int, A)> ZipWithIndex<A>(this IEnumerable<A> seq) => From(0).ZipTuples(seq);
+        public static IEnumerable<(int, A)> ZipWithIndex<A>(this IEnumerable<A> seq) => seq.Select((x, i) => (i, x));
 
         /// <summary>
         /// Returns the cross product of two sequences, combining elements with the given function.

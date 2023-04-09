@@ -32,12 +32,12 @@ namespace KitchenSink
         /// <summary>
         /// Ignores argument and returns true.
         /// </summary>
-        public static Func<A, bool> True<A>() => x => true;
+        public static Func<A, bool> True<A>() => _ => true;
 
         /// <summary>
         /// Ignores argument and returns false.
         /// </summary>
-        public static Func<A, bool> False<A>() => x => false;
+        public static Func<A, bool> False<A>() => _ => false;
 
         /// <summary>
         /// Attempts parse of string to int.
