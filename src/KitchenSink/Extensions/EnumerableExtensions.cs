@@ -17,17 +17,58 @@ namespace KitchenSink.Extensions
         /// <summary>
         /// Returns true if item is in sequence.
         /// </summary>
-        public static bool IsIn<A>(this A val, IEnumerable<A> seq) => seq.Any(Apply<A, A, bool>(Eq, val));
+        public static bool IsIn<A>(this A val, IEnumerable<A> seq) => seq.Contains(val);
 
         /// <summary>
-        /// Returns true if item is not in sequence.
+        /// Returns true if any <paramref name="vals"/> are in sequence.
         /// </summary>
-        public static bool IsNotIn<A>(this A val, params A[] vals) => !IsIn(val, vals.AsEnumerable());
+        public static bool ContainsAny<A>(this IEnumerable<A> seq, params A[] vals) => ContainsAny(seq, vals.AsEnumerable());
 
         /// <summary>
-        /// Returns true if item is not in sequence.
+        /// Returns true if any <paramref name="vals"/> are in sequence.
         /// </summary>
-        public static bool IsNotIn<A>(this A val, IEnumerable<A> seq) => !IsIn(val, seq);
+        public static bool ContainsAny<A>(this IEnumerable<A> seq, IEnumerable<A> vals) => ContainsAny(seq, vals.ToHashSet());
+
+        /// <summary>
+        /// Returns true if any <paramref name="vals"/> are in sequence.
+        /// </summary>
+        public static bool ContainsAny<A>(this IEnumerable<A> seq, ISet<A> vals) => seq.Any(vals.Contains);
+
+        /// <summary>
+        /// Returns true if no <paramref name="vals"/> are missing from sequence.
+        /// </summary>
+        public static bool ContainsAll<A>(this IEnumerable<A> seq, params A[] vals) => ContainsAllInternal(seq, vals.ToHashSet());
+
+        /// <summary>
+        /// Returns true if no <paramref name="vals"/> are missing from sequence.
+        /// </summary>
+        public static bool ContainsAll<A>(this IEnumerable<A> seq, IEnumerable<A> vals) => ContainsAllInternal(seq, vals.ToHashSet());
+
+        /// <summary>
+        /// Returns true if no <paramref name="vals"/> are missing from sequence.
+        /// </summary>
+        public static bool ContainsAll<A>(this IEnumerable<A> seq, ISet<A> vals) => ContainsAllInternal(seq, vals.ToHashSet());
+
+        // Modifies passed-in set so it needs to be given a fresh copy
+        private static bool ContainsAllInternal<A>(this IEnumerable<A> xs, ISet<A> vals)
+        {
+            if (vals.Count == 0)
+            {
+                return true;
+            }
+
+            foreach (var x in xs)
+            {
+                vals.Remove(x);
+
+                if (vals.Count == 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// If sequence is empty, replace with sequence of given value(s).
@@ -55,6 +96,84 @@ namespace KitchenSink.Extensions
                 }
             }
         }
+
+        /// <summary>
+        /// Finds first 2 items in sequence that match predicate and returns them as a tuple.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// If sequence does not contain at least 2 items matching predicate.
+        /// </exception>
+        public static (A, A) First2<A>(this IEnumerable<A> xs, Func<A, bool> predicate)
+        {
+            A x0 = default;
+            var count = 0;
+
+            foreach (var x in xs)
+            {
+                if (predicate(x))
+                {
+                    switch (count++)
+                    {
+                        case 0:
+                            x0 = x;
+                            break;
+                        default:
+                            return (x0, x);
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("Sequence contains less than 2 items");
+        }
+
+        /// <summary>
+        /// Finds first 2 items in sequence and returns them as a tuple.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// If sequence does not contain at least 2 items.
+        /// </exception>
+        public static (A, A) First2<A>(this IEnumerable<A> xs) => First2(xs, _ => true);
+
+        /// <summary>
+        /// Finds first 3 items in sequence that match predicate and returns them as a tuple.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// If sequence does not contain at least 3 items matching predicate.
+        /// </exception>
+        public static (A, A, A) First3<A>(this IEnumerable<A> xs, Func<A, bool> predicate)
+        {
+            A x0 = default;
+            A x1 = default;
+            var count = 0;
+
+            foreach (var x in xs)
+            {
+                if (predicate(x))
+                {
+                    switch (count++)
+                    {
+                        case 0:
+                            x0 = x;
+                            break;
+                        case 1:
+                            x1 = x;
+                            break;
+                        default:
+                            return (x0, x1, x);
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("Sequence contains less than 3 items");
+        }
+
+        /// <summary>
+        /// Finds first 3 items in sequence and returns them as a tuple.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// If sequence does not contain at least 3 items.
+        /// </exception>
+        public static (A, A, A) First3<A>(this IEnumerable<A> xs) => First3(xs, _ => true);
 
         /// <summary>
         /// Finds exactly 2 items in sequence that match predicate and returns them as a tuple.
