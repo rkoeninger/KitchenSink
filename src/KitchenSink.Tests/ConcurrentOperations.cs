@@ -23,7 +23,7 @@ namespace KitchenSink.Tests
                     .Take(ListLength)
                     .ToList()
                 ).ToList();
-            var total = lists.Sum(Sum);
+            var total = lists.Sum(xs => xs.Sum());
             var tasks = lists.Select(xs =>
                 Task.Run(() =>
                     xs.ForEach(x => atom.Update(y => y + x))
@@ -42,7 +42,7 @@ namespace KitchenSink.Tests
                     .Take(ListLength)
                     .ToList()
                 ).ToList();
-            var total = lists.Sum(Sum);
+            var total = lists.Sum(xs => xs.Sum());
             var tasks = lists.Select(xs =>
                 Task.Run(() =>
                     Task.WaitAll(xs
@@ -93,7 +93,7 @@ namespace KitchenSink.Tests
                     .Take(ListLength)
                     .ToList()
             ).ToList();
-            var total = lists.Sum(Sum);
+            var total = lists.Sum(xs => xs.Sum());
             var tasks = lists.Select(xs =>
                 Task.Run(() =>
                     xs.ForEach(x =>

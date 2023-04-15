@@ -162,16 +162,6 @@ namespace KitchenSink
         public static IEnumerable<A> ValuesOf<A>() => typeof(A).GetEnumValues().OfType<A>();
 
         /// <summary>
-        /// Adds up all numeric values in sequence.
-        /// </summary>
-        public static int Sum(IEnumerable<int> seq) => seq.Sum();
-
-        /// <summary>
-        /// Adds up all numeric values in sequence.
-        /// </summary>
-        public static long Sum(IEnumerable<long> seq) => seq.Sum();
-
-        /// <summary>
         /// Creates an Either with the given Left value.
         /// </summary>
         public static Either<A, B> LeftOf<A, B>(A value) => new Either<A, B>(true, value, default);
