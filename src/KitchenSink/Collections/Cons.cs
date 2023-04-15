@@ -7,14 +7,12 @@ namespace KitchenSink.Collections
     /// </summary>
     public class Cons : IEquatable<Cons>
     {
-        public Cons(object car, object cdr)
-        {
-            Car = car;
-            Cdr = cdr;
-        }
+        public Cons(object car, object cdr) => (Car, Cdr) = (car, cdr);
 
         public object Car { get; }
         public object Cdr { get; }
+
+        public void Deconstruct(out object car, out object cdr) => (car, cdr) = (Car, Cdr);
 
         public static bool operator ==(Cons x, Cons y) => Equals(x, y);
         public static bool operator !=(Cons x, Cons y) => !Equals(x, y);
