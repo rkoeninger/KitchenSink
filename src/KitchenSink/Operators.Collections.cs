@@ -10,52 +10,6 @@ namespace KitchenSink
     public static partial class Operators
     {
         /// <summary>
-        /// Check if collection is empty.
-        /// </summary>
-        public static bool Empty(IEnumerable x) => !NonEmpty(x);
-
-        /// <summary>
-        /// Check if collection is non-empty.
-        /// </summary>
-        public static bool NonEmpty(IEnumerable x)
-        {
-            if (x is ICollection c)
-            {
-                return c.Count > 0;
-            }
-
-            var e = x.GetEnumerator();
-
-            if (!(e is IDisposable d)) return e.MoveNext();
-
-            using (d)
-            {
-                return e.MoveNext();
-            }
-        }
-
-        /// <summary>
-        /// Check if collection contains exactly 1 element.
-        /// </summary>
-        public static bool One(IEnumerable x)
-        {
-            if (x is ICollection c)
-            {
-                return c.Count == 1;
-            }
-
-            var e = x.GetEnumerator();
-
-            if (!(e is IDisposable d)) return e.MoveNext() && !e.MoveNext();
-
-            using (d)
-            {
-                return e.MoveNext() && !e.MoveNext();
-            }
-
-        }
-
-        /// <summary>
         /// Infinitely enumerates items returned from provided function.
         /// Example: <c>f => [f(), f(), f(), ...]</c>
         /// </summary>

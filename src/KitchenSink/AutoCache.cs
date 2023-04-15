@@ -58,7 +58,7 @@ namespace KitchenSink
                 throw new ArgumentException($"Given type {typeof(A).FullName} is not an interface type");
             }
 
-            if (NonEmpty(typeof(A).GetProperties()))
+            if (typeof(A).GetProperties().Length > 0)
             {
                 throw new ArgumentException($"Given type {typeof(A).FullName} should not have properties");
             }
@@ -211,7 +211,7 @@ namespace KitchenSink
         private static CustomAttributeBuilder MakeCompilerGeneratedAttribute() =>
             new CustomAttributeBuilder(
                 typeof(CompilerGeneratedAttribute)
-                    .GetConstructors().Single(x => Empty(x.GetParameters())),
+                    .GetConstructors().Single(x => x.GetParameters().Length == 0),
                 ArrayOf<object>());
 
         private static Type KeyType(IReadOnlyCollection<Type> parameterTypes) =>
