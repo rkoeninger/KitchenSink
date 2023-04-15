@@ -106,6 +106,12 @@ namespace KitchenSink
 
         public Type InnerType => typeof(A);
 
+        public void Deconstruct(out A value, out bool hasValue)
+        {
+            value = Value;
+            hasValue = HasValue;
+        }
+
         public Maybe<B> Cast<B>() => HasValue && Value is B ? Some((B) (object) Value) : None<B>();
 
         public Maybe<B> OfType<B>() => Where(Is<A, B>()).Cast<B>();
