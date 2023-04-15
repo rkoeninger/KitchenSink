@@ -98,6 +98,33 @@ namespace KitchenSink.Extensions
         }
 
         /// <summary>
+        /// If <paramref name="xs"/> is non-empty, append with sequence of <paramref name="vals"/>.
+        /// </summary>
+        public static IEnumerable<A> IfNonEmpty<A>(this IEnumerable<A> xs, params A[] vals) => IfNonEmpty(xs, vals.AsEnumerable());
+
+        /// <summary>
+        /// If <paramref name="xs"/> is non-empty, append with <paramref name="ys"/>.
+        /// </summary>
+        public static IEnumerable<A> IfNonEmpty<A>(this IEnumerable<A> xs, IEnumerable<A> ys)
+        {
+            var any = false;
+
+            foreach (var x in xs)
+            {
+                any = true;
+                yield return x;
+            }
+
+            if (any)
+            {
+                foreach (var y in ys)
+                {
+                    yield return y;
+                }
+            }
+        }
+
+        /// <summary>
         /// Finds first 2 items in sequence that match predicate and returns them as a tuple.
         /// </summary>
         /// <exception cref="InvalidOperationException">
@@ -456,24 +483,24 @@ namespace KitchenSink.Extensions
         /// </summary>
         public static IEnumerable<A> Intersperse<A>(this IEnumerable<A> seq, IEnumerable<A> seperators)
         {
-            var lazy = new Lazy<A[]>(seperators.ToArray);
-            using var e = seq.GetEnumerator();
+            A[] seps = null;
+            var first = true;
 
-            if (!e.MoveNext()) yield break;
-
-            yield return e.Current;
-
-            while (e.MoveNext())
+            foreach (var item in seq)
             {
-                foreach (var sep in lazy.Value)
+                if (!first)
                 {
-                    yield return sep;
+                    seps ??= seperators.ToArray();
+
+                    foreach (var sep in seps)
+                    {
+                        yield return sep;
+                    }
                 }
 
-                yield return e.Current;
+                yield return item;
+                first = false;
             }
-
-            e.Dispose();
         }
 
         /// <summary>
@@ -481,7 +508,7 @@ namespace KitchenSink.Extensions
         /// Example: <c>[1, 2], [3, 4], [5, 6] => [1, 3, 5, 2, 4, 6]</c>
         /// </summary>
         public static IEnumerable<A> Interleave<A>(this IEnumerable<A> seq, params IEnumerable<A>[] seqs) =>
-            Interleave(SeqOf(seq).Concat(seqs));
+            Interleave(seqs.Prepend(seq));
 
         /// <summary>
         /// Returns a sequence of the elements of given sequences in round-robin order.
@@ -571,6 +598,17 @@ namespace KitchenSink.Extensions
             };
         }
 
+        public static IEnumerable<A> AsEnumerable<A>(this Func<Maybe<A>> f)
+        {
+            var x = f();
+
+            while (x.HasValue)
+            {
+                yield return x.Value;
+                x = f();
+            }
+        }
+
         /// <summary>
         /// Forces entire sequence to be enumerated immediately, returning sequence.
         /// </summary>
@@ -626,13 +664,10 @@ namespace KitchenSink.Extensions
 
                 yield return f(ex.Current, ey.Current);
             }
-
-            ex.Dispose();
-            ey.Dispose();
         }
 
         /// <summary>
-        /// Sames as the standard <see cref="ZipTuples{A, B}"/>, but
+        /// Sames as the standard <see cref="Zip{A, B}"/>, but
         /// raises exception if sequences are not of the same length.
         /// </summary>
         public static IEnumerable<(A, B)> ZipExact<A, B>(this IEnumerable<A> xs, IEnumerable<B> ys) => xs.ZipExact(ys, TupleOf);
@@ -669,7 +704,7 @@ namespace KitchenSink.Extensions
         /// Example: <c>[1, 2, 3, 4, 5, 6, 7, 8], 3, 5 => [1, 2, 3, 5, 7, 8]</c>
         /// </summary>
         public static IEnumerable<A> ExceptAt<A>(this IEnumerable<A> seq, params int[] indicies) =>
-            seq.Where((_, i) => i.IsNotIn(indicies));
+            seq.Where((_, i) => !i.IsIn(indicies));
 
         /// <summary>
         /// Filters out <c>null</c> values.

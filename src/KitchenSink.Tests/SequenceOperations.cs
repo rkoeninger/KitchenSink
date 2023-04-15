@@ -69,7 +69,7 @@ namespace KitchenSink.Tests
         public void IntersperseManyShortSequence()
         {
             var xs = SeqOf(1, 2, 3);
-            Assert.IsTrue(SeqOf(1, 8, 9, 2, 8, 9, 3).SequenceEqual(xs.Intersperse(SeqOf(8, 9))));
+            Assert.AreEqual(SeqOf(1, 8, 9, 2, 8, 9, 3), xs.Intersperse(SeqOf(8, 9)));
         }
 
         [Test]

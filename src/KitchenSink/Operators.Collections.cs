@@ -75,12 +75,12 @@ namespace KitchenSink
         /// </summary>
         public static IEnumerable<A> Separate<A>(Func<Maybe<A>> f)
         {
-            var x = f();
+            var (value, hasValue) = f();
 
-            while (x.HasValue)
+            while (hasValue)
             {
-                yield return x.Value;
-                x = f();
+                yield return value;
+                (value, hasValue) = f();
             }
         }
 
@@ -90,13 +90,12 @@ namespace KitchenSink
         /// </summary>
         public static IEnumerable<A> Separate<A>(A initial, Func<A, Maybe<A>> f)
         {
-            var x = f(initial);
+            var (value, hasValue) = f(initial);
 
-            while (x.HasValue)
+            while (hasValue)
             {
-                initial = x.Value;
-                yield return x.Value;
-                x = f(initial);
+                yield return value;
+                (value, hasValue) = f(value);
             }
         }
 
@@ -164,22 +163,22 @@ namespace KitchenSink
         /// <summary>
         /// Creates an Either with the given Left value.
         /// </summary>
-        public static Either<A, B> LeftOf<A, B>(A value) => new Either<A, B>(true, value, default);
+        public static Either<A, B> LeftOf<A, B>(A value) => new(true, value, default);
 
         /// <summary>
         /// Creates an Either with the given Right value.
         /// </summary>
-        public static Either<A, B> RightOf<A, B>(B value) => new Either<A, B>(false, default, value);
+        public static Either<A, B> RightOf<A, B>(B value) => new(false, default, value);
 
         /// <summary>
         /// Creates a Maybe that has the given value if it is not null.
         /// </summary>
-        public static Maybe<A> MaybeOf<A>(A value) => new Maybe<A>(value);
+        public static Maybe<A> MaybeOf<A>(A value) => new(value);
 
         /// <summary>
         /// Creates a Maybe with the given value.
         /// </summary>
-        public static Maybe<A> Some<A>(A value) => new Maybe<A>(value, true);
+        public static Maybe<A> Some<A>(A value) => new(value, true);
 
         /// <summary>
         /// Creates a Maybe without a value.
@@ -338,15 +337,19 @@ namespace KitchenSink
 
         public static A[] ArrayOf<A>(params A[] values) => values;
 
-        public static List<A> ListOf<A>(params A[] values) => new List<A>(values);
+        public static List<A> ListOf<A>(params A[] values) => new(values);
 
-        public static HashSet<A> SetOf<A>(params A[] values) => new HashSet<A>(values);
+        public static HashSet<A> SetOf<A>(params A[] values) => new(values);
 
-        public static ConcurrentBag<A> BagOf<A>(params A[] values) => new ConcurrentBag<A>(values);
+        public static ConcurrentBag<A> BagOf<A>(params A[] values) => new(values);
 
-        public static Queue<A> QueueOf<A>(params A[] values) => new Queue<A>(values);
+        public static Queue<A> QueueOf<A>(params A[] values) => new(values);
 
-        public static Cons ConsOf(object car, object cdr) => new Cons(car, cdr);
+        public static Stack<A> StackOf<A>(params A[] values) => new(values);
+
+        public static Cons ConsOf(object car, object cdr) => new(car, cdr);
+
+        public static Dictionary<A, V> DictOf<A, V>(params (A, V)[] pairs) => pairs.ToDictionary();
 
         public static (A, B) TupleOf<A, B>(A a, B b) =>
             (a, b);
@@ -385,509 +388,5 @@ namespace KitchenSink
 
         public static Dictionary<A, V> ToDictionary<A, V>(this (A, V)[] pairs) =>
             pairs.ToDictionary(x => x.Item1, x => x.Item2);
-
-        public static Dictionary<A, V> DictOf<A, V>(params (A, V)[] pairs) => pairs.ToDictionary();
-
-        public static Dictionary<A, V> DictOf<A, V>() => new Dictionary<A, V>();
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0) => new Dictionary<A, V>
-        {
-            {k0, v0}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8,
-            A k9, V v9) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8},
-            {k9, v9}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8,
-            A k9, V v9,
-            A k10, V v10) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8},
-            {k9, v9},
-            {k10, v10}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8,
-            A k9, V v9,
-            A k10, V v10,
-            A k11, V v11) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8},
-            {k9, v9},
-            {k10, v10},
-            {k11, v11}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8,
-            A k9, V v9,
-            A k10, V v10,
-            A k11, V v11,
-            A k12, V v12) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8},
-            {k9, v9},
-            {k10, v10},
-            {k11, v11},
-            {k12, v12}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8,
-            A k9, V v9,
-            A k10, V v10,
-            A k11, V v11,
-            A k12, V v12,
-            A k13, V v13) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8},
-            {k9, v9},
-            {k10, v10},
-            {k11, v11},
-            {k12, v12},
-            {k13, v13}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8,
-            A k9, V v9,
-            A k10, V v10,
-            A k11, V v11,
-            A k12, V v12,
-            A k13, V v13,
-            A k14, V v14) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8},
-            {k9, v9},
-            {k10, v10},
-            {k11, v11},
-            {k12, v12},
-            {k13, v13},
-            {k14, v14}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8,
-            A k9, V v9,
-            A k10, V v10,
-            A k11, V v11,
-            A k12, V v12,
-            A k13, V v13,
-            A k14, V v14,
-            A k15, V v15) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8},
-            {k9, v9},
-            {k10, v10},
-            {k11, v11},
-            {k12, v12},
-            {k13, v13},
-            {k14, v14},
-            {k15, v15}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8,
-            A k9, V v9,
-            A k10, V v10,
-            A k11, V v11,
-            A k12, V v12,
-            A k13, V v13,
-            A k14, V v14,
-            A k15, V v15,
-            A k16, V v16) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8},
-            {k9, v9},
-            {k10, v10},
-            {k11, v11},
-            {k12, v12},
-            {k13, v13},
-            {k14, v14},
-            {k15, v15},
-            {k16, v16}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8,
-            A k9, V v9,
-            A k10, V v10,
-            A k11, V v11,
-            A k12, V v12,
-            A k13, V v13,
-            A k14, V v14,
-            A k15, V v15,
-            A k16, V v16,
-            A k17, V v17) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8},
-            {k9, v9},
-            {k10, v10},
-            {k11, v11},
-            {k12, v12},
-            {k13, v13},
-            {k14, v14},
-            {k15, v15},
-            {k16, v16},
-            {k17, v17}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8,
-            A k9, V v9,
-            A k10, V v10,
-            A k11, V v11,
-            A k12, V v12,
-            A k13, V v13,
-            A k14, V v14,
-            A k15, V v15,
-            A k16, V v16,
-            A k17, V v17,
-            A k18, V v18) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8},
-            {k9, v9},
-            {k10, v10},
-            {k11, v11},
-            {k12, v12},
-            {k13, v13},
-            {k14, v14},
-            {k15, v15},
-            {k16, v16},
-            {k17, v17},
-            {k18, v18}
-        };
-
-        public static Dictionary<A, V> DictOf<A, V>(
-            A k0, V v0,
-            A k1, V v1,
-            A k2, V v2,
-            A k3, V v3,
-            A k4, V v4,
-            A k5, V v5,
-            A k6, V v6,
-            A k7, V v7,
-            A k8, V v8,
-            A k9, V v9,
-            A k10, V v10,
-            A k11, V v11,
-            A k12, V v12,
-            A k13, V v13,
-            A k14, V v14,
-            A k15, V v15,
-            A k16, V v16,
-            A k17, V v17,
-            A k18, V v18,
-            A k19, V v19) => new Dictionary<A, V>
-        {
-            {k0, v0},
-            {k1, v1},
-            {k2, v2},
-            {k3, v3},
-            {k4, v4},
-            {k5, v5},
-            {k6, v6},
-            {k7, v7},
-            {k8, v8},
-            {k9, v9},
-            {k10, v10},
-            {k11, v11},
-            {k12, v12},
-            {k13, v13},
-            {k14, v14},
-            {k15, v15},
-            {k16, v16},
-            {k17, v17},
-            {k18, v18},
-            {k19, v19}
-        };
     }
 }

@@ -97,8 +97,8 @@ namespace KitchenSink.Testing
                 .ForEach(t => throw new PropertyRefutedException(t.AsEnumerable().ToArray()));
 
         private static readonly Dictionary<Type, IEnumerable> DefaultInputs = DictOf<Type, IEnumerable>(
-            typeof(int), Sample.Ints,
-            typeof(IEnumerable<int>), Rand.Lists(Rand.Ints()));
+            (typeof(int), Sample.Ints),
+            (typeof(IEnumerable<int>), Rand.Lists(Rand.Ints())));
 
         public static void That<A>(Func<A, bool> f) =>
             ((IEnumerable<A>)DefaultInputs[typeof(A)]).With(xs => That(xs, f));
