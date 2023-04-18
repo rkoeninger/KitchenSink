@@ -89,7 +89,7 @@ namespace KitchenSink.FileSystem
         private class FileNode : Node
         {
             public override EntryType Type => EntryType.File;
-            public byte[] Data { get; set; } = new byte[0];
+            public byte[] Data { get; set; } = Array.Empty<byte>();
         }
 
         private class DirectoryNode : Node

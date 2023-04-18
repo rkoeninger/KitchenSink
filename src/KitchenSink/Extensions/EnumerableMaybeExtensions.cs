@@ -94,27 +94,15 @@ namespace KitchenSink.Extensions
         /// applying a selector function to each one first,
         /// returning None if no elements do.
         /// </summary>
-        public static Maybe<B> FirstSome<A, B>(this IEnumerable<A> seq, Func<A, Maybe<B>> selector)
-        {
-            return FirstSome(seq.Select(selector));
-        }
+        public static Maybe<B> FirstSome<A, B>(this IEnumerable<A> seq, Func<A, Maybe<B>> selector) =>
+            FirstSome(seq.Select(selector));
 
         /// <summary>
         /// Attempts to get first element in sequence with Some value
         /// which also satisfies predicate, returning None if no elements do.
         /// </summary>
-        public static Maybe<A> FirstSome<A>(this IEnumerable<Maybe<A>> seq, Func<A, bool> predicate)
-        {
-            foreach (var item in seq)
-            {
-                if (item.HasValue && predicate(item.Value))
-                {
-                    return item;
-                }
-            }
-
-            return None<A>();
-        }
+        public static Maybe<A> FirstSome<A>(this IEnumerable<Maybe<A>> seq, Func<A, bool> predicate) =>
+            WhereSome(seq).FirstMaybe(predicate);
 
         /// <summary>
         /// Filters elements that have Some value and return those values.

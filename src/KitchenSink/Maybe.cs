@@ -206,7 +206,7 @@ namespace KitchenSink
         }
 
         public List<A> ToList() => HasValue ? ListOf(Value) : new List<A>();
-        public A[] ToArray() => HasValue ? ArrayOf(Value) : new A[0];
+        public A[] ToArray() => HasValue ? ArrayOf(Value) : Array.Empty<A>();
         public override string ToString() => HasValue ? Str(Value) : "None";
 
         public override int GetHashCode()

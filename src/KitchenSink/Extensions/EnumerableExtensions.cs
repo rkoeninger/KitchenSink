@@ -600,12 +600,12 @@ namespace KitchenSink.Extensions
 
         public static IEnumerable<A> AsEnumerable<A>(this Func<Maybe<A>> f)
         {
-            var x = f();
+            var (value, hasValue) = f();
 
-            while (x.HasValue)
+            while (hasValue)
             {
-                yield return x.Value;
-                x = f();
+                yield return value;
+                (value, hasValue) = f();
             }
         }
 

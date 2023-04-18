@@ -441,10 +441,10 @@ namespace KitchenSink.Control
             public ICaseThen<TKey, TResult> Returns<TResult>() => new CaseBuilder<TKey, TResult>(key);
 
             public ICaseDefaultThen<TKey> Default(Action<TKey> alternative) =>
-                new CaseBuilderDefault<TKey>(key, new IClause<TKey>[0], alternative);
+                new CaseBuilderDefault<TKey>(key, Array.Empty<IClause<TKey>>(), alternative);
 
             public ICaseDefaultThen<TKey, TResult> Default<TResult>(Func<TKey, TResult> alternative) =>
-                new CaseBuilderDefault<TKey, TResult>(key, new IClause<TKey, TResult>[0], alternative);
+                new CaseBuilderDefault<TKey, TResult>(key, Array.Empty<IClause<TKey, TResult>>(), alternative);
         }
 
         private class CaseBuilder<TKey> : ICaseThen<TKey>, ICaseWhen<TKey>
